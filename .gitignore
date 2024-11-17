@@ -1,6 +1,6 @@
-.vscode/               # Ignore VS Code folder
-**/.env                   # Environment variable file
-**/env/   # Virtual environment in backend folder
+.vscode/
+**/.env
+**/env/
 
 *.log                  # Log files
 *.pyc                  # Compiled Python files
