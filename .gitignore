@@ -1,17 +1,12 @@
-# General
+.vscode/               # Ignore VS Code folder
+**/.env                   # Environment variable file
+**/env/   # Virtual environment in backend folder
+
 *.log                  # Log files
 *.pyc                  # Compiled Python files
 __pycache__/           # Python cache directory
 *.DS_Store             # macOS system files
 Thumbs.db              # Windows system files
-
-# Visual Studio Code
-*.vscode/               # Ignore VS Code folder
-
-# Python Environments
-**/.env                   # Environment variable file
-backend/env/           # Virtual environment in backend folder
-**/env/                   # Common virtual environment names
 venv/                  
 ENV/                   
 
