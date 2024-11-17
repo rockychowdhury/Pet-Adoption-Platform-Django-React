@@ -6,12 +6,12 @@ __pycache__/           # Python cache directory
 Thumbs.db              # Windows system files
 
 # Visual Studio Code
-.vscode/               # Ignore VS Code folder
+*.vscode/               # Ignore VS Code folder
 
 # Python Environments
-.env                   # Environment variable file
+**/.env                   # Environment variable file
 backend/env/           # Virtual environment in backend folder
-env/                   # Common virtual environment names
+**/env/                   # Common virtual environment names
 venv/                  
 ENV/                   
 
