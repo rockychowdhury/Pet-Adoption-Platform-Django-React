@@ -36,9 +36,9 @@ The project includes a custom user model that supports role-based functionality,
 
 #### Configuration
 To use the custom user model, ensure the following setting is added in your **settings.py** file:
-
+```
 AUTH_USER_MODEL = 'apps.users.User'
-
+```
 
 ---
 
@@ -51,8 +51,9 @@ The custom user model is thoroughly tested with the following cases:
 - Creating superusers with appropriate permissions.
 
 To run the tests:
-
+```
 python manage.py test apps.users
+```
 
 ---
 
@@ -61,3 +62,5 @@ python manage.py test apps.users
 - Role-based functionality ensures a clean separation of responsibilities across the platform.
 
 ---
+
+Feel free to reach out if you encounter any issues or have suggestions for improvements!
