@@ -1,27 +1,27 @@
-# Visual Studio Code #
-.vscode/               # Ignore the entire .vscode folder
-!.vscode/settings.json # Except these specific settings files
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
-.history               # Ignore local history files
+# General
+*.log                  # Log files
+*.pyc                  # Compiled Python files
+__pycache__/           # Python cache directory
+*.DS_Store             # macOS system files
+Thumbs.db              # Windows system files
 
-# Python Environments #
-.env                   # Ignore .env files (sensitive environment variables)
-.venv/                 # Virtual environment folder
+# Visual Studio Code
+.vscode/               # Ignore VS Code folder
+
+# Python Environments
+.env                   # Environment variable file
+backend/env/           # Virtual environment in backend folder
 env/                   # Common virtual environment names
 venv/                  
 ENV/                   
-env.bak/               
-venv.bak/              
 
-# Mypy #
+# Mypy
 .mypy_cache/           # Ignore mypy cache folder
 
-# Pyenv #
+# Pyenv
 .python-version        # Ignore Pyenv version file
 
-# Unit Test / Coverage Reports #
+# Unit Test / Coverage Reports
 htmlcov/               # Coverage HTML report
 .tox/                  # Tox environment
 .coverage              # Coverage data file
@@ -33,46 +33,36 @@ coverage.xml           # Coverage XML report
 *.cover                
 .hypothesis/           # Hypothesis state files
 
-# Distribution / Packaging #
+# Distribution / Packaging
 .Python                # Environment marker file
 build/                 # Build directory
 develop-eggs/          # Development eggs
 dist/                  # Distribution directory
-downloads/             
-eggs/                  # Egg files
 .eggs/                 
-lib/                   
-lib64/                 
-parts/                 
-sdist/                 
-var/                   
-wheels/                
-*.whl                  # Wheel files
 *.egg-info/            # Egg-info directories
 .installed.cfg         
-*.egg                  # Egg files
 *.manifest             
 *.spec                 # Spec files for PyInstaller
+wheels/                # Wheel files
+downloads/             
+parts/                 
+lib/                   
+lib64/                 
+sdist/                 
+*.whl                  # Wheel files
+*.egg                  # Egg files
 
-# Django #
-*.log                  # Log files
-*.pot                  # Translation template files
-*.pyc                  # Compiled Python files
-__pycache__/           # Python cache directory
+# Django
 db.sqlite3             # SQLite database
 media/                 # Media files (uploaded by users)
 
-# Node.js (for React frontend) #
+# Node.js (for React frontend)
 node_modules/          # Dependencies folder
 npm-debug.log*         # NPM debug logs
 yarn-debug.log*        # Yarn debug logs
 yarn-error.log*
 
-# Docker #
-*.env                  # Docker environment variables
-docker-compose.override.yml # Ignore override files
-
-# Miscellaneous #
+# Miscellaneous
 .idea/                 # IntelliJ IDEA project files
-*.DS_Store             # macOS files
-Thumbs.db              # Windows file
+.history               # Local history files
+*.bak                  # Backup files
