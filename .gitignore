@@ -1,63 +1,49 @@
+*.log
+*.pyc
+__pycache__/
+*.DS_Store
+Thumbs.db
 .vscode/
-**/.env
-**/env/
-
-*.log                  # Log files
-*.pyc                  # Compiled Python files
-__pycache__/           # Python cache directory
-*.DS_Store             # macOS system files
-Thumbs.db              # Windows system files
-venv/                  
-ENV/                   
-
-# Mypy
-.mypy_cache/           # Ignore mypy cache folder
-
-# Pyenv
-.python-version        # Ignore Pyenv version file
-
-# Unit Test / Coverage Reports
-htmlcov/               # Coverage HTML report
-.tox/                  # Tox environment
-.coverage              # Coverage data file
-.coverage.*            
-.cache                 
-.pytest_cache/         # Pytest cache
-nosetests.xml          # Nose test report
-coverage.xml           # Coverage XML report
-*.cover                
-.hypothesis/           # Hypothesis state files
-
-# Distribution / Packaging
-.Python                # Environment marker file
-build/                 # Build directory
-develop-eggs/          # Development eggs
-dist/                  # Distribution directory
-.eggs/                 
-*.egg-info/            # Egg-info directories
-.installed.cfg         
-*.manifest             
-*.spec                 # Spec files for PyInstaller
-wheels/                # Wheel files
-downloads/             
-parts/                 
-lib/                   
-lib64/                 
-sdist/                 
-*.whl                  # Wheel files
-*.egg                  # Egg files
-
-# Django
-db.sqlite3             # SQLite database
-media/                 # Media files (uploaded by users)
-
-# Node.js (for React frontend)
-node_modules/          # Dependencies folder
-npm-debug.log*         # NPM debug logs
-yarn-debug.log*        # Yarn debug logs
+.env
+backend/env/
+env/
+venv/
+ENV/
+.mypy_cache/
+.python-version
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+.pytest_cache/
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.Python
+build/
+develop-eggs/
+dist/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.manifest
+*.spec
+wheels/
+downloads/
+parts/
+lib/
+lib64/
+sdist/
+*.whl
+*.egg
+db.sqlite3
+media/
+node_modules/
+npm-debug.log*
+yarn-debug.log*
 yarn-error.log*
-
-# Miscellaneous
-.idea/                 # IntelliJ IDEA project files
-.history               # Local history files
-*.bak                  # Backup files
+.idea/
+.history
+*.bak
