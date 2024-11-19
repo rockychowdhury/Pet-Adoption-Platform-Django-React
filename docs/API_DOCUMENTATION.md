@@ -86,16 +86,10 @@
 
 ---
 
-## 7. **Deactivate User**
+## 7. **Deactivate User (Soft Delete)**
 - **Endpoint:** `/user/deactivate/`
-- **Method:** `PATCH`
+- **Method:** `DELETE`
 - **Permissions:** `IsAuthenticated`
-- **Required Data:**
-  ```json
-  {
-    "is_active": false
-  }
-  ```
 - **Description:** Deactivates the user's account. After deactivation, the user will no longer be able to authenticate using their access token.
 
 ---
@@ -104,12 +98,6 @@
 - **Endpoint:** `/user/activate/`
 - **Method:** `PATCH`
 - **Permissions:** `IsAuthenticated`
-- **Required Data:**
-  ```json
-  {
-    "is_active": true
-  }
-  ```
 - **Description:** Reactivates the user's account if it was deactivated. The user will be able to authenticate again with their access token.
 
 ---

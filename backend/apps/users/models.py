@@ -3,14 +3,12 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 # from utils.RoleValidity import is_valid_role
 
 class UserManager(BaseUserManager):
-    def create_user(self,role, email, password = None, **kwargs):
+    def create_user(self, email, password = None, **kwargs):
         if not email:
             raise ValueError('Email is Required')
-        if role not in User.UserRole.values:
-            raise ValueError('Invalid Role')
 
         email = self.normalize_email(email)
-        user = self.model(email=email,role=role, **kwargs)
+        user = self.model(email=email,**kwargs)
         user.set_password(password)
         user.save(using=self.db)
 
@@ -21,8 +19,10 @@ class UserManager(BaseUserManager):
         kwargs.setdefault('is_superuser',True)
         if not kwargs.get('is_staff') or not kwargs.get('is_superuser'):
             raise ValueError("Superuser must have is_staff=True and is_superuser=True.")
-        
-        return self.create_user(role=User.UserRole.ADMIN, email=email,password=password,**kwargs)
+        user = self.create_user(email=email,password=password,**kwargs)
+        user.role = User.UserRole.ADMIN
+        user.save()
+        return 
 
 
 

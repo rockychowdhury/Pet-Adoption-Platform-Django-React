@@ -42,10 +42,9 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email','password','role','first_name','last_name']
+        fields = ['email','password','first_name','last_name']
         extra_kwargs = {
             "password":{"write_only":True},
-            'role': {'required': True},
             }
     def create(self, validated_data):
         return User.objects.create_user(**validated_data)

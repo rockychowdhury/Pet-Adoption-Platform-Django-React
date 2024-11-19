@@ -31,7 +31,6 @@ class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
     def post(self, request, *args, **kwargs):
         serializer = UserRegistrationSerializer(data=request.data)
-        
         if serializer.is_valid():
             user = serializer.save()
             response_data = {
@@ -69,7 +68,7 @@ class LogoutView(APIView):
             return Response({"error": "Invalid token"}, status=400)
         
 class UserDeactivateView(APIView):
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     def delete(self,request):
         user = request.user
         user.is_active = False
@@ -78,7 +77,7 @@ class UserDeactivateView(APIView):
 
 class UserActivateView(APIView):
     permission_classes = [AllowAny]
-    def post(self,request):
+    def patch(self,request):
         email = request.data.get('email')
         password = request.data.get('password')
 
@@ -87,7 +86,7 @@ class UserActivateView(APIView):
         if not user.check_password(password):
             return Response(
                 {"error": "password is incorrect."},
-                status=status.HTTP_400_BAD_REQUEST
+                status=status.HTTP_401_UNAUTHORIZED
             )
         user.is_active = True
         user.save()
@@ -100,7 +99,7 @@ class UserActivateView(APIView):
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def post(self, request):
+    def patch(self, request):
         user = request.user
         old_password = request.data.get('old_password')
         new_password = request.data.get('new_password')
