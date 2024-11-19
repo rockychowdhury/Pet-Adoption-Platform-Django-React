@@ -21,6 +21,7 @@ class UserManager(BaseUserManager):
         kwargs.setdefault('is_superuser',True)
         if not kwargs.get('is_staff') or not kwargs.get('is_superuser'):
             raise ValueError("Superuser must have is_staff=True and is_superuser=True.")
+        
         return self.create_user(role=User.UserRole.ADMIN, email=email,password=password,**kwargs)
 
 
