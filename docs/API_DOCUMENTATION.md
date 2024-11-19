@@ -88,7 +88,7 @@
 
 ## 7. **Deactivate User (Soft Delete)**
 - **Endpoint:** `/user/deactivate/`
-- **Method:** `DELETE`
+- **Method:** `PATCH`
 - **Permissions:** `IsAuthenticated`
 - **Description:** Deactivates the user's account. After deactivation, the user will no longer be able to authenticate using their access token.
 

@@ -69,7 +69,7 @@ class LogoutView(APIView):
         
 class UserDeactivateView(APIView):
     permission_classes = [IsAuthenticated]
-    def delete(self,request):
+    def patch(self,request):
         user = request.user
         user.is_active = False
         user.save()
