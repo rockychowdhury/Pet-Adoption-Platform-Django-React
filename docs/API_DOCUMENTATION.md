@@ -121,7 +121,12 @@
 - **Endpoint:** `/user/logout/`
 - **Method:** `POST`
 - **Permissions:** `IsAuthenticated`
-- **Required Data:** None
+- **Required Data:**
+  ```json
+  {
+    "refresh": "refreshToken"
+  }
+  ```
 - **Description:** Logs out the authenticated user by blacklisting the refresh token.
 
 ---

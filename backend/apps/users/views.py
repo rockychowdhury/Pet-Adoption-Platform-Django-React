@@ -62,6 +62,7 @@ class LogoutView(APIView):
         try:
             refresh_token = request.data.get('refresh')
             token = RefreshToken(refresh_token)
+            # print(refresh_token)
             token.blacklist()
             return Response({"message":"Logout successful"},status=200)
         except Exception as e:
