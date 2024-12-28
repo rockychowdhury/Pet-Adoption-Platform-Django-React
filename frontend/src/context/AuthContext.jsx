@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { AuthContext } from "./Contexts";
 import PropTypes from "prop-types";
-import api from "../axios/api";
+import api from "../utils/api";
 import { setData } from "../utils/localstorage";
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState();
@@ -47,14 +47,16 @@ const AuthProvider = ({ children }) => {
     }
     const refreshToken = async () => {
         const res = await api.post('/user/token/refresh/', { refresh: localStorage.getItem('refresh') });
-        // console.log(res);
+        console.log(res);
         setData(res.data);
     }
     useEffect(() => {
         setLoading(true);
         const loadUser = async () => {
             const res = await getUser();
+            console.log(res);
             if (res.status === 401) {
+                console.log('here');
                 refreshToken();
             }
             if (res.status === 200) {

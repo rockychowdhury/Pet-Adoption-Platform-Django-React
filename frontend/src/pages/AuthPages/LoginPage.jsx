@@ -1,6 +1,5 @@
 import { Link } from "react-router";
-import { useAuth } from "../hooks/useAuth";
-
+import { useAuth } from "../../hooks/useAuth";
 const LoginPage = () => {
     const { login} = useAuth();
     const handleLogin = async (e) => {
