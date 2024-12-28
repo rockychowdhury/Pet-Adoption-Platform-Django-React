@@ -1,14 +1,48 @@
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework import status
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.exceptions import InvalidToken
 from .serializers import UserRegistrationSerializer, UserUpdateSerializer
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
+from decouple import config
+
 
 User = get_user_model()
+
+class CustomTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        refresh_token = response.data.get("refresh")
+        # access_token = response.data.get('access')
+
+        response.set_cookie(
+            key="refresh_token",
+            value=refresh_token,
+            httponly=True,
+            secure= config('DJANGO_ENV')=='production',
+            max_age=7*24*60*60, #7days
+        )
+        response.data.pop("refresh",None)
+        return response
+
+
+class CustomTokenRefreshView(TokenRefreshView):
+    def post (self,request, *args, **kwargs):
+        refresh_token = request.COOKIES.get('refresh_token')
+        if not refresh_token:
+            return Response({"message":"Refresh token not provided"}, status=401)
+        try:
+            token = RefreshToken(refresh_token)
+            access_token = str(token.access_token)
+            return Response({"access":access_token})
+        except InvalidToken:
+            return Response({"message":"Invalid refresh token"},status=401)
+
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
