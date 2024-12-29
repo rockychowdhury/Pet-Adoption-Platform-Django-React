@@ -1,6 +1,6 @@
 
 import PropTypes from "prop-types";
-import { useAuth } from "../hooks/useAuth";
+import useAuth from "../hooks/useAuth";
 import Spinner from "../components/common/Spinner";
 import { Navigate, useLocation } from "react-router";
 

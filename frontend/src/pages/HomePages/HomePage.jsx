@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router';
-import { useAuth } from '../../hooks/useAuth';
+import useAuth from '../../hooks/useAuth';
 const HomePage = () => {
     const {logout}= useAuth();
     return (
