@@ -24,7 +24,8 @@ class CustomTokenObtainPairView(TokenObtainPairView):
             key="refresh_token",
             value=refresh_token,
             httponly=True,
-            secure= config('DJANGO_ENV')=='production',
+            samesite="None",
+            secure= True,
             max_age=7*24*60*60, #7days
         )
         response.data.pop("refresh",None)
@@ -35,13 +36,15 @@ class CustomTokenRefreshView(TokenRefreshView):
     def post (self,request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')
         if not refresh_token:
-            return Response({"message":"Refresh token not provided"}, status=401)
+            response = Response({"message":"Refresh token not provided",'code':'invalid-refresh-token'}, status=401)
+            print(response)
+            return response
         try:
             token = RefreshToken(refresh_token)
             access_token = str(token.access_token)
             return Response({"access":access_token})
         except InvalidToken:
-            return Response({"message":"Invalid refresh token"},status=401)
+            return Response({"message":"Invalid refresh token",'code':'invalid-refresh-token'},status=401)
 
 
 class UserProfileView(APIView):
@@ -92,13 +95,18 @@ class UserProfileUpdateView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 class LogoutView(APIView):
+    permission_classes = [AllowAny]
     def post(self, request):
         try:
-            refresh_token = request.data.get('refresh')
-            token = RefreshToken(refresh_token)
-            # print(refresh_token)
-            token.blacklist()
-            return Response({"message":"Logout successful"},status=200)
+            refresh_token = request.COOKIES.get('refresh_token')
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
+            else:
+                return Response({"error":"Refresh token is missing"},status=400)
+            response =  Response({"message":"Logout successful"},status=200)
+            response.delete_cookie('refresh_token')
+            return response
         except Exception as e:
             return Response({"error": "Invalid token"}, status=400)
         
