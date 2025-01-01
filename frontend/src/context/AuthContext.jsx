@@ -37,12 +37,12 @@ const AuthProvider = ({ children }) => {
         }
         return
     }
-    console.log(token);
-    const getUser =async () => {
+    const getUser = async () => {
         setLoading(true);
         const response = await api.get('/user/');
-        if(response.status ===200){
+        if (response.status === 200) {
             setUser(response.data);
+            setLoading(false);
         }
     }
     const logout = async () => {
@@ -53,7 +53,7 @@ const AuthProvider = ({ children }) => {
             setLoading(false);
         }
     }
-    const refreshToken =  () => {
+    const refreshToken = () => {
         setLoading(true);
         return api.post('/user/token/refresh/');
     }
@@ -71,7 +71,7 @@ const AuthProvider = ({ children }) => {
             }
         };
         loadUser();
-    }, []);
+    }, [token]);
 
 
     useLayoutEffect(() => {
@@ -83,24 +83,26 @@ const AuthProvider = ({ children }) => {
                         : config.headers.Authorization;
                 return config;
             });
-            return () =>{
-                api.interceptors.request.eject(authInterceptor);
-            };
-    },[token])
+        return () => {
+            api.interceptors.request.eject(authInterceptor);
+        };
+    }, [token])
 
 
-    useLayoutEffect(()=>{
-        const refreshInterceptor  = api.interceptors.response.use(
-            (response)=>response,
-            async (error)=>{
-                const originalRequest =error.config;
-                if(error.response.status ===403 || error.response.status ===401){
-                    if(error.response.data.code ==='invalid-refresh-token'){
+
+    useLayoutEffect(() => {
+        const refreshInterceptor = api.interceptors.response.use(
+            (response) => response,
+            async (error) => {
+                const originalRequest = error.config;
+                console.log(error);
+                if (error.response.status === 401 || error.response.status === 403) {
+                    if (error.response.data.code === 'invalid-refresh-token') {
                         return Promise.reject(error);
                     }
-                    try{
+                    try {
                         const response = await refreshToken();
-                        if(response.status===401){
+                        if (response.status === 401) {
                             setToken(null);
                             setUser(null);
                             setLoading(false);
@@ -108,9 +110,9 @@ const AuthProvider = ({ children }) => {
                         }
                         setToken(response.data.access);
                         originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
-                        originalRequest._retry =true;
+                        originalRequest._retry = true;
                         return api(originalRequest);
-                    }catch{
+                    } catch {
                         setToken(null);
                         setUser(null);
                         setLoading(false);
@@ -121,10 +123,10 @@ const AuthProvider = ({ children }) => {
                 return Promise.reject(error);
             },
         );
-        return ()=>{
+        return () => {
             api.interceptors.response.eject(refreshInterceptor);
         }
-    },[])
+    }, [])
 
 
     console.log(loading, user);
