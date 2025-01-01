@@ -1,7 +1,5 @@
 import { RouterProvider, createBrowserRouter } from "react-router";
-import AuthLayout from "../layouts/AuthLayout";
 import PrivateRoute from './PrivateRoute';
-import CommonLayout from "../layouts/CommonLayout";
 import ProfileLayout from "../layouts/ProfileLayout";
 import ProfilePage from "../pages/ProfilePages/ProfilePage";
 import HomePage from "../pages/HomePages/HomePage";
@@ -10,17 +8,7 @@ import RegisterPage from "../pages/AuthPages/RegisterPage";
 const router = createBrowserRouter([
     {
         path:'/',
-        element: <CommonLayout/>,
-        children:[
-            {
-                path:'/',
-                element: <HomePage/>
-            }
-        ]
-    },
-    {
-        path:'auth',
-        element: <AuthLayout/>,
+        element:<HomePage/>,
         children:[
             {
                 path:'login',

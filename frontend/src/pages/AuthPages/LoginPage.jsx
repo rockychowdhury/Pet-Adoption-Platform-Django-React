@@ -1,24 +1,88 @@
-import { Link } from "react-router";
-import  useAuth  from "../../hooks/useAuth";
+import { Link, useNavigate } from "react-router";
+import { useEffect } from "react";
+import { useState } from "react";
+import { IoEyeOffOutline, IoEyeOutline } from "react-icons/io5";
+import { FaArrowLeft } from "react-icons/fa6";
+import useAuth from "../../hooks/useAuth";
+import useUIContext from "../../hooks/useUIContext";
+import ButtonFillGradient from '../../components/buttons/ButtonFillGradient';
 const LoginPage = () => {
-    const { login} = useAuth();
+    const [view, setView] = useState(true);
+    const { login, error } = useAuth();
+    const { setOpenModal } = useUIContext();
+    useEffect(() => {
+        setOpenModal(true);
+    }, []);
     const handleLogin = async (e) => {
         e.preventDefault();
         const form = new FormData(e.target);
         const email = form.get("email");
         const password = form.get("password");
-        login({email,password});
-        // console.log({ email, password });
-        
+        login({ email, password });
+
     }
     return (
-        <div>
-            <Link to="/">home</Link>
-            <form onSubmit={handleLogin} className="border p-5 flex flex-col gap-5" action="">
-                <input className="border" name="email" type="email" />
-                <input className="border" name="password" type="password" />
-                <button type="submit"> Login</button>
+        <div className="space-y-6  border-action p-10 rounded-2xl">
+            <div className="text-center ">
+                <div className="space-y-3  relative">
+                    <Link to={-1}><FaArrowLeft className="text-2xl absolute top-1 left-0"></FaArrowLeft></Link>
+                    <h2 className="font-bold text-3xl font-poppins">Login</h2>
+                    <p className="opacity-70">Welcome back! Please enter your details</p>
+                </div>
+                <div className="h-7 text-red-500 text-center">{error}</div>
+            </div>
+            <form onSubmit={handleLogin} className="space-y-6 font-medium " action="">
+                <label htmlFor="Email" className="relative block rounded-md border bg-transparent border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark">
+                    <input
+                        type="email"
+                        id="Email"
+                        name='email'
+                        required
+                        className="peer bg-secondary w-full border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                        placeholder="Email" />
+
+                    <span
+                        className="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-secondary p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+                    >
+                        Email
+                    </span>
+                </label>
+                <label
+                    htmlFor="Password"
+                    className="relative items-center flex rounded-md border border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark"
+                >
+                    <input
+                        name="password"
+                        required
+                        type={view ? "password" : 'text'}
+                        id="Password"
+                        className="peer w-full border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
+                        placeholder="Password"
+                    />
+                    <span
+                        className="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-secondary p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
+                    >
+                        Password
+                    </span>
+                    <button type="button" onClick={() => setView(!view)} className="pe-3 absolute right-0">
+                        {
+                            view ? <IoEyeOffOutline></IoEyeOffOutline> :
+                                <IoEyeOutline></IoEyeOutline>
+                        }
+                    </button>
+                </label>
+                <div className="flex items-center justify-between">
+                    <button type="submit"><ButtonFillGradient>Login</ButtonFillGradient></button>
+                    <Link className="hover:text-highlight transition font-medium font-poppins opacity-70 hover:opacity-100">Forget Password?</Link>
+                </div>
             </form>
+            <span className="relative flex justify-center">
+                <div
+                    className="absolute inset-x-0 top-1/2 h-px -translate-y-1/2 bg-transparent bg-gradient-to-r from-transparent via-action to-transparent opacity-75"
+                ></div>
+                <span className="relative z-10 bg-secondary px-6">or</span>
+            </span>
+            <div className="text-center">Don&apos;t have an account? <Link to='/register' className="text-highlight transition font-medium font-poppins opacity-70 hover:opacity-100">Register</Link></div>
         </div>
     );
 };

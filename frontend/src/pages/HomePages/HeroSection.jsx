@@ -9,7 +9,7 @@ const HeroSection = () => {
     return (
         <div className='relative overflow-x-hidden '>
             <div className='w-16 top-32 left-[43%] absolute'><StarCouple></StarCouple></div>
-            <div className='w-16 top-80 left-[55%] absolute'><Star></Star></div>
+            <div className='w-24 top-80 left-[55%] absolute'><Star></Star></div>
             <div className='w-12 right-128 top-20  absolute'><Star></Star></div>
             <div className="max-w-screen-2xl mx-auto space-y-8 flex items-end justify-between">
                 <div className='space-y-8'>
@@ -21,7 +21,7 @@ const HeroSection = () => {
                     <img className='w-full h-full object-cover object-center' src={banner} alt="" />
                 </figure>
             </div>
-            <div>
+            <div  className=''>
                 <Caution></Caution>
             </div>
             <div className='w-full h-32'></div>

@@ -1,10 +1,21 @@
-import { Outlet } from "react-router";
-const AuthLayout = () => {
+import { Outlet, useNavigate } from "react-router";
+import Modal from "../components/common/Modal";
+import { useEffect } from "react";
+import useUIContext from "../hooks/useUIContext";
+const AuthLayout = ({children}) => {
+    const { setOpenModal } = useUIContext();
+    const navigate = useNavigate();
+    useEffect(() => {
+        setOpenModal(true);
+    }, []);
+    const callBack = () =>{
+        navigate('/');
+        setOpenModal(false);
+    }
     return (
-        <div className="h-screen flex items-center justify-center">
-            <h1>auth HomePage</h1>
-            <Outlet />
-        </div>
+        <Modal callBack={()=>callBack()}>
+            {children}
+        </Modal>
     );
 };
 

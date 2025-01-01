@@ -9,6 +9,7 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState();
     const [token, setToken] = useState();
     const [loading, setLoading] = useState(true);
+    const [error,setError] = useState();
     const api = useAPI();
 
 
@@ -131,17 +132,15 @@ const AuthProvider = ({ children }) => {
 
     console.log(loading, user);
     const authInfo = {
-        user,
-        setUser,
-        loading,
-        setLoading,
+        user,setUser,
+        loading,setLoading,
         register,
         login,
         getUser,
         logout,
         refreshToken,
-        token,
-        setToken
+        token,setToken,
+        error,setError
     };
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
 }

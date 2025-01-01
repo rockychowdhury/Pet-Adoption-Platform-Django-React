@@ -9,11 +9,12 @@ export default {
       colors: {
         marble: '#F2F8FC',
         action: '#896442',
-        newBg: '#f3f6f8',
+        action_dark:'#70503E',
         primary: '#FCEED2',
         secondary: '#FFE2B8',
-        dark: '#1C1C1E',
         natural: '#333333',
+        highlight:'#70503E',
+        newBg: '#f3f6f8',
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
