@@ -36,7 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name              = models.CharField(max_length=50)
     last_name               = models.CharField(max_length=50)
     phone_number            = models.CharField(max_length=15, blank=True, null=True)
-    profile_picture         = models.URLField(max_length=200, blank=True, null=True)
+    photoURL         = models.URLField(max_length=200, blank=True, null=True,default='https://i.ibb.co.com/hWK4ZpT/petDP.jpg')
     bio                     = models.TextField(max_length=200, blank=True, null=True)
     role                    = models.CharField(max_length=10, choices=UserRole.choices, default=UserRole.GUEST)
     

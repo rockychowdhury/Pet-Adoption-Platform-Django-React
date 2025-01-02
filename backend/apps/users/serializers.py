@@ -52,11 +52,11 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name','last_name','phone_number','profile_picture','bio']
+        fields = ['first_name','last_name','phone_number','photoURL','bio']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
             'phone_number': {'required': False},
-            'profile_picture': {'required': False},
+            'photoURL': {'required': False},
             'bio': {'required': False},
         }
