@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 # from utils.RoleValidity import is_valid_role
 
 class UserManager(BaseUserManager):
@@ -25,7 +25,7 @@ class UserManager(BaseUserManager):
 
 
 
-class User(AbstractBaseUser):
+class User(AbstractBaseUser, PermissionsMixin):
     class UserRole(models.TextChoices):
         ADMIN                   = 'admin', 'Admin'
         PET_OWNER               = 'pet_owner','Pet Owner'
