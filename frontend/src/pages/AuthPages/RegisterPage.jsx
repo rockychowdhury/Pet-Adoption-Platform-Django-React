@@ -24,7 +24,6 @@ const RegisterPage = () => {
         const data = { email, password, first_name, last_name };
         await register(data);
         console.log(data);
-
     }
     return (
         // <div>

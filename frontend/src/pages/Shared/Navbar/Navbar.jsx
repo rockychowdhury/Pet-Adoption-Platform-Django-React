@@ -3,21 +3,42 @@ import Logo from '../../../components/common/Logo';
 import NavLinks from './NavLinks';
 import ButtonOutline from '../../../components/buttons/ButtonOutline';
 import ButtonFillGradient from '../../../components/buttons/ButtonFillGradient';
+import { LogOut } from 'lucide-react';
 import { Link } from 'react-router';
+import useAuth from '../../../hooks/useAuth';
+import TooltipRight from '../../../components/common/TooltipRight';
+
+
 const Navbar = () => {
+    const { user, logout } = useAuth();
     return (
         <div className='flex  items-center justify-between py-5 sticky top-0'>
             <Logo></Logo>
             <NavLinks></NavLinks>
-            <div className='flex gap-6'>
-                <Link to="/login">
-                    <ButtonOutline>Sign In</ButtonOutline>
-                </Link>
-                <Link to="/register">
-                    <ButtonFillGradient>
-                        Join Now <span className="hidden  md:inline-block"> - It&apos;s free</span>
-                    </ButtonFillGradient>
-                </Link>
+            <div>
+                {
+                    (user && user)?.email ?
+                        <div className='flex items-center gap-2 xxl:gap-6'>
+                            <figure className='w-14 h-14'>
+                                <img className='w-full h-full rounded-full border-action' src={user?.photoURL} alt={user?.name} />
+                            </figure>
+                            <button className='hidden lg:block' onClick={logout}>
+                                <TooltipRight content={"Logout"}>
+                                    <ButtonOutline> <span className='text-rose-500 group-hover:text-white'><LogOut size={16} strokeWidth={1.5} absoluteStrokeWidth /></span> </ButtonOutline>
+                                </TooltipRight>
+                            </button>
+                        </div> :
+                        <div className='flex gap-6'>
+                            <Link to="/login">
+                                <ButtonOutline>Sign In</ButtonOutline>
+                            </Link>
+                            <Link to="/register">
+                                <ButtonFillGradient>
+                                    Join Now <span className="hidden  md:inline-block"> - It&apos;s free</span>
+                                </ButtonFillGradient>
+                            </Link>
+                        </div>
+                }
             </div>
         </div>
     );
