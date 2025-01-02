@@ -9,7 +9,7 @@ const AuthProvider = ({ children }) => {
     const [user, setUser] = useState();
     const [token, setToken] = useState();
     const [loading, setLoading] = useState(true);
-    const [error,setError] = useState();
+    const [error, setError] = useState();
     const api = useAPI();
 
 
@@ -28,16 +28,17 @@ const AuthProvider = ({ children }) => {
             const response = await api.post('/user/token/', credentials);
             if (response.status === 200) {
                 setToken(response.data.access);
-                await getUser();
                 setLoading(false);
             }
         } catch (err) {
             setLoading(false);
             setUser(null);
+            setToken(null);
             console.log(err);
         }
         return
     }
+
     const getUser = async () => {
         setLoading(true);
         const response = await api.get('/user/');
@@ -58,8 +59,6 @@ const AuthProvider = ({ children }) => {
         setLoading(true);
         return api.post('/user/token/refresh/');
     }
-
-
 
     useEffect(() => {
         setLoading(true);
@@ -97,31 +96,31 @@ const AuthProvider = ({ children }) => {
             async (error) => {
                 const originalRequest = error.config;
                 console.log(error);
-                if (error.response.status === 401 || error.response.status === 403) {
-                    if (error.response.data.code === 'invalid-refresh-token') {
-                        return Promise.reject(error);
-                    }
+                console.log(error.status);
+                console.log(originalRequest);
+                if (error.status === 401 && originalRequest.url !== "/user/token/refresh/") {
+                    console.log("pakar liya tuje jane nehi dungaa");
                     try {
+                        console.log("inside try");
                         const response = await refreshToken();
-                        if (response.status === 401) {
-                            setToken(null);
-                            setUser(null);
-                            setLoading(false);
+                        setToken(response.data.access);
+                        if(originalRequest.url==='/user/'){
                             return Promise.reject(response);
                         }
-                        setToken(response.data.access);
                         originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
                         originalRequest._retry = true;
                         return api(originalRequest);
-                    } catch {
-                        setToken(null);
+                    }
+                    catch (error) {
                         setUser(null);
+                        setToken(null);
                         setLoading(false);
-                        console.log("inside catch");
+                        console.log("inside catch", error);
+                        return Promise.reject(error)
                     }
                 }
-                console.log("rejecting");
-                return Promise.reject(error);
+                    console.log("rejecting");
+                    return Promise.reject(error);
             },
         );
         return () => {
@@ -129,18 +128,18 @@ const AuthProvider = ({ children }) => {
         }
     }, [])
 
-
+// logout()
     console.log(loading, user);
     const authInfo = {
-        user,setUser,
-        loading,setLoading,
+        user, setUser,
+        loading, setLoading,
         register,
         login,
         getUser,
         logout,
         refreshToken,
-        token,setToken,
-        error,setError
+        token, setToken,
+        error, setError
     };
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
 }

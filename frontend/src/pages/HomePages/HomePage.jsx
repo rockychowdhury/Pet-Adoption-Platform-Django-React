@@ -10,7 +10,6 @@ const HomePage = () => {
     const {setOpenModal} = useUIContext();
     const navigate = useNavigate();
     const location = useLocation();
-    console.log(location);
     if(location.pathname ==='/'){
         setOpenModal(false);
     }

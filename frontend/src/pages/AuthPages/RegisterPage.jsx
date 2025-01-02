@@ -7,7 +7,7 @@ import { FaArrowLeft } from "react-icons/fa6";
 import useUIContext from "../../hooks/useUIContext";
 import ButtonFillGradient from '../../components/buttons/ButtonFillGradient';
 const RegisterPage = () => {
-    const { register,error } = useAuth();
+    const { register, error } = useAuth();
     const [view, setView] = useState(false);
     const { setOpenModal } = useUIContext();
     useEffect(() => {
@@ -22,7 +22,8 @@ const RegisterPage = () => {
         const first_name = form.get("first_name");
         const last_name = form.get("last_name");
         const data = { email, password, first_name, last_name };
-        register(data);
+        await register(data);
+        console.log(data);
 
     }
     return (
@@ -40,39 +41,39 @@ const RegisterPage = () => {
                 <div className="space-y-3  relative">
                     <Link to={-1}><FaArrowLeft className="text-2xl absolute top-1 left-0"></FaArrowLeft></Link>
                     <h2 className="font-bold text-3xl font-poppins">Register</h2>
-                    <p className="opacity-70">Welcome back! Please enter your details</p>
+                    <p className="opacity-70">Welcome to FurEver Home.</p>
                 </div>
                 <div className="h-7 text-red-500 text-center">{error}</div>
             </div>
             <form onSubmit={handleRegister} className="space-y-4 font-medium " action="">
-                <label htmlFor="Email" className="relative block rounded-md border bg-transparent border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark">
+                <label htmlFor="name" className="relative block rounded-md border bg-transparent border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark">
                     <input
-                        type="email"
-                        id="Email"
-                        name='email'
+                        type="text"
+                        id="name"
+                        name='first_name'
                         required
                         className="peer bg-secondary w-full border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
-                        placeholder="Email" />
+                        placeholder="First Name" />
 
                     <span
                         className="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-secondary p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
                     >
-                        Email
+                        First Name
                     </span>
                 </label>
-                <label htmlFor="Email" className="relative block rounded-md border bg-transparent border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark">
+                <label htmlFor="last_name" className="relative block rounded-md border bg-transparent border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark">
                     <input
-                        type="email"
-                        id="Email"
-                        name='email'
+                        type="text"
+                        id="last_name"
+                        name='last_name'
                         required
                         className="peer bg-secondary w-full border-none bg-transparent placeholder-transparent focus:border-transparent focus:outline-none focus:ring-0"
-                        placeholder="Email" />
+                        placeholder="Last Name" />
 
                     <span
                         className="pointer-events-none absolute start-2.5 top-0 -translate-y-1/2 bg-secondary p-0.5 text-xs text-gray-700 transition-all peer-placeholder-shown:top-1/2 peer-placeholder-shown:text-sm peer-focus:top-0 peer-focus:text-xs"
                     >
-                        Email
+                        Last Name
                     </span>
                 </label>
                 <label htmlFor="Email" className="relative block rounded-md border bg-transparent border-action shadow-sm focus-within:border-action_dark focus-within:ring-1 focus-within:ring-action_dark">

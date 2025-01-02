@@ -19,7 +19,6 @@ const LoginPage = () => {
         const email = form.get("email");
         const password = form.get("password");
         login({ email, password });
-
     }
     return (
         <div className="space-y-6  border-action p-10 rounded-2xl">
