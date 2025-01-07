@@ -28,7 +28,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     class UserRole(models.TextChoices):
         ADMIN                   = 'admin', 'Admin'
-        PET_OWNER               = 'pet_owner','Pet Owner'
+        SHELTER               = 'shelter','Shelter'
         ADOPTER                 = 'adopter', 'Adopter'
         GUEST                   = 'guest', 'Guest'
 
@@ -36,7 +36,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     first_name              = models.CharField(max_length=50)
     last_name               = models.CharField(max_length=50)
     phone_number            = models.CharField(max_length=15, blank=True, null=True)
-    photoURL         = models.URLField(max_length=200, blank=True, null=True,default='https://i.ibb.co.com/hWK4ZpT/petDP.jpg')
+    photoURL                = models.URLField(max_length=200, blank=True, null=True,default='https://i.ibb.co.com/hWK4ZpT/petDP.jpg')
     bio                     = models.TextField(max_length=200, blank=True, null=True)
     role                    = models.CharField(max_length=10, choices=UserRole.choices, default=UserRole.GUEST)
     
@@ -57,3 +57,15 @@ class User(AbstractBaseUser, PermissionsMixin):
     
     def __str__(self) -> str:
         return f"{self.email} ({self.role})"
+    
+    @property
+    def is_shelter(self):
+        return self.role == 'shelter'
+    
+    @property
+    def is_adopter(self):
+        return self.role == 'adopter'
+
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
