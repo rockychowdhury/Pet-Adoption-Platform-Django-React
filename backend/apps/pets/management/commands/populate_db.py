@@ -1,7 +1,12 @@
 import random
 from django.core.management.base import BaseCommand
 from django.contrib.auth import get_user_model
+from django.utils import timezone
+from datetime import timedelta
 from apps.pets.models import Pet
+from apps.community.models import Post, Comment, Reaction, Event
+from apps.reviews.models import Review
+from apps.adoption.models import AdoptionApplication
 
 User = get_user_model()
 
@@ -43,8 +48,8 @@ class Command(BaseCommand):
             shelter.save()
             self.stdout.write(self.style.SUCCESS('Created Shelter user'))
         
-        # Adopter
-        adopter, created = User.objects.get_or_create(
+        # Adopter 1
+        adopter1, created = User.objects.get_or_create(
             email='adopter@example.com',
             defaults={
                 'first_name': 'John',
@@ -54,9 +59,24 @@ class Command(BaseCommand):
             }
         )
         if created:
-            adopter.set_password('password123')
-            adopter.save()
-            self.stdout.write(self.style.SUCCESS('Created Adopter user'))
+            adopter1.set_password('password123')
+            adopter1.save()
+            self.stdout.write(self.style.SUCCESS('Created Adopter 1'))
+
+        # Adopter 2
+        adopter2, created = User.objects.get_or_create(
+            email='jane@example.com',
+            defaults={
+                'first_name': 'Jane',
+                'last_name': 'Smith',
+                'role': 'adopter',
+                'bio': 'Animal lover and volunteer.'
+            }
+        )
+        if created:
+            adopter2.set_password('password123')
+            adopter2.save()
+            self.stdout.write(self.style.SUCCESS('Created Adopter 2'))
 
         # 2. Create Pets
         pet_images = [
@@ -76,33 +96,105 @@ class Command(BaseCommand):
 
         names = ['Bella', 'Max', 'Charlie', 'Luna', 'Lucy', 'Cooper', 'Bailey', 'Daisy', 'Sadie', 'Molly', 'Buddy', 'Rocky']
         breeds = ['Golden Retriever', 'Siamese', 'Beagle', 'Husky', 'Persian', 'Labrador', 'Poodle', 'Bulldog', 'Tabby', 'German Shepherd']
-        species_list = ['Dog', 'Cat', 'Dog', 'Dog', 'Cat', 'Dog', 'Dog', 'Dog', 'Dog', 'Cat', 'Cat', 'Dog'] # Roughly matching images if possible, but random is fine for dummy
-
-        # Clear existing pets to avoid duplicates if running multiple times (optional, but good for "10 dummy data")
+        
+        # Clear existing pets if you want to start fresh, or just add more
         # Pet.objects.all().delete() 
-        # Actually, let's just add them.
 
+        created_pets = []
         for i, image_url in enumerate(pet_images):
             name = names[i] if i < len(names) else f"Pet {i+1}"
-            species = 'Dog' if 'cat' not in image_url.lower() and 'ai-generated' not in image_url.lower() else 'Cat' # Simple heuristic
-            if i == 1: species = 'Dog' # sergey-semin looks like a dog
+            species = 'Dog' if 'cat' not in image_url.lower() and 'ai-generated' not in image_url.lower() else 'Cat'
+            if i == 1: species = 'Dog' # sergey-semin
             if i == 9 or i == 10: species = 'Cat'
 
-            Pet.objects.create(
+            pet, created = Pet.objects.get_or_create(
                 name=name,
-                species=species,
-                breed=random.choice(breeds),
-                age=random.randint(2, 60),
-                gender=random.choice(['male', 'female']),
-                size=random.choice(['Small', 'Medium', 'Large']),
-                color=random.choice(['Brown', 'Black', 'White', 'Spotted', 'Golden']),
-                weight=random.uniform(3.0, 30.0),
-                description=f"A lovely {species.lower()} looking for a home. Very friendly and playful.",
-                photo_url=image_url,
-                is_vaccinated=random.choice([True, False]),
-                status='available',
-                shelter=shelter
+                shelter=shelter,
+                defaults={
+                    'species': species,
+                    'breed': random.choice(breeds),
+                    'age': random.randint(2, 60),
+                    'gender': random.choice(['male', 'female']),
+                    'weight': random.uniform(3.0, 30.0),
+                    'description': f"A lovely {species.lower()} looking for a home. Very friendly and playful.",
+                    'photo_url': image_url,
+                    'is_vaccinated': random.choice([True, False]),
+                    'status': 'available',
+                    'color': random.choice(['Brown', 'Black', 'White', 'Spotted', 'Golden']),
+                }
             )
-            self.stdout.write(f"Created pet: {name}")
+            created_pets.append(pet)
+            if created:
+                self.stdout.write(f"Created pet: {name}")
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated database with dummy data!'))
+        # 3. Create Community Posts
+        posts_content = [
+            "Just adopted a new puppy! So excited.",
+            "Does anyone know a good vet in the downtown area?",
+            "Happy Paws Shelter is doing an amazing job!",
+            "Found a stray cat near the park, looking for owner.",
+            "Tips for training a stubborn husky?"
+        ]
+        
+        for content in posts_content:
+            Post.objects.get_or_create(
+                user=random.choice([adopter1, adopter2, shelter]),
+                content=content,
+                defaults={'image': random.choice(pet_images) if random.random() > 0.7 else None}
+            )
+        self.stdout.write(self.style.SUCCESS('Created Community Posts'))
+
+        # 4. Create Reviews
+        Review.objects.get_or_create(
+            reviewer=adopter1,
+            target_user=shelter,
+            defaults={
+                'rating': 5,
+                'comment': "Amazing shelter! The staff is so helpful and the pets are well cared for."
+            }
+        )
+        Review.objects.get_or_create(
+            reviewer=adopter2,
+            target_user=shelter,
+            defaults={
+                'rating': 4,
+                'comment': "Great experience adopting my cat here."
+            }
+        )
+        self.stdout.write(self.style.SUCCESS('Created Reviews'))
+
+        # 5. Create Adoption Applications
+        if created_pets:
+            AdoptionApplication.objects.get_or_create(
+                applicant=adopter1,
+                pet=created_pets[0],
+                defaults={
+                    'message': "I have a large backyard and love dogs!",
+                    'status': 'pending'
+                }
+            )
+            AdoptionApplication.objects.get_or_create(
+                applicant=adopter2,
+                pet=created_pets[1],
+                defaults={
+                    'message': "I've always wanted a Siamese cat.",
+                    'status': 'approved'
+                }
+            )
+        self.stdout.write(self.style.SUCCESS('Created Adoption Applications'))
+
+        # 6. Create Events
+        Event.objects.get_or_create(
+            title="Weekend Adoption Fair",
+            organizer=shelter,
+            defaults={
+                'description': "Come meet our lovely pets this weekend at the city park!",
+                'location': "City Park, Main St.",
+                'start_time': timezone.now() + timedelta(days=5),
+                'end_time': timezone.now() + timedelta(days=5, hours=4),
+                'image': "https://images.unsplash.com/photo-1513360371669-4adf3dd7dff8?auto=format&fit=crop&w=1000&q=80"
+            }
+        )
+        self.stdout.write(self.style.SUCCESS('Created Events'))
+
+        self.stdout.write(self.style.SUCCESS('Successfully populated database with realistic dummy data!'))
