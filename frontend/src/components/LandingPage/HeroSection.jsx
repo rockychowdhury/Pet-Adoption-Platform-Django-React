@@ -78,20 +78,8 @@ const HeroSection = () => {
                     {/* Main Image Container with Layering */}
                     <div className="relative z-20 w-full max-w-2xl px-4 flex justify-center items-center">
 
-                        {/* Layer 1: Main Banner Image */}
-                        <img
-                            src={bannerImg}
-                            alt="Happy Pets"
-                            className="w-full h-auto object-contain drop-shadow-2xl max-h-[75vh] relative z-10"
-                        />
-
-                        {/* Layer 2: Secondary Pet Image (Peeking) */}
-                        <div className="absolute -bottom-4 -left-4 w-32 md:w-48 z-20 transform -rotate-6 transition hover:rotate-0 duration-300">
-                            <img src={catImg} alt="Curious Cat" className="w-full drop-shadow-lg" />
-                        </div>
-
-                        {/* Layer 3: Floating Glass Card 1 (Top Right) */}
-                        <div className="absolute top-10 right-4 md:right-10 bg-white/60 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/50 animate-float z-30 max-w-[160px]">
+                        {/* Layer 3: Floating Glass Card 1 (Top Right) - BEHIND Image */}
+                        <div className="absolute top-10 right-4 md:right-0 bg-white/60 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/50 animate-float z-0 max-w-[160px] transform translate-x-1/2">
                             <div className="flex items-center gap-3 mb-2">
                                 <div className="p-2 bg-green-100 rounded-full text-green-600">
                                     <ShieldCheck size={20} />
@@ -101,8 +89,15 @@ const HeroSection = () => {
                             <p className="text-[10px] text-gray-600 leading-tight">All pets are vaccinated and health checked.</p>
                         </div>
 
-                        {/* Layer 4: Floating Glass Card 2 (Bottom Right) */}
-                        <div className="absolute bottom-20 right-0 md:right-8 bg-white/60 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-white/50 animate-float-delayed z-30 flex items-center gap-3">
+                        {/* Layer 1: Main Banner Image */}
+                        <img
+                            src={bannerImg}
+                            alt="Happy Pets"
+                            className="w-full h-auto object-contain drop-shadow-2xl max-h-[75vh] relative z-10"
+                        />
+
+                        {/* Layer 4: Floating Glass Card 2 (Bottom Right) - IN FRONT OF Image */}
+                        <div className="absolute bottom-20 right-0 md:-right-8 bg-white/60 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-white/50 animate-float-delayed z-30 flex items-center gap-3">
                             <div className="p-2 bg-red-100 rounded-full text-red-500">
                                 <Heart size={20} fill="currentColor" />
                             </div>
@@ -110,11 +105,6 @@ const HeroSection = () => {
                                 <p className="text-sm font-bold text-gray-800">100% Love</p>
                                 <p className="text-[10px] text-gray-500">Guaranteed happiness</p>
                             </div>
-                        </div>
-
-                        {/* Layer 5: Floating Badge (Top Left) */}
-                        <div className="absolute top-20 left-0 md:left-10 bg-[#2D2D2D] text-white px-4 py-2 rounded-full shadow-xl z-20 transform -rotate-12 hover:rotate-0 transition duration-300 cursor-default">
-                            <span className="text-xs font-bold tracking-wider">NEW ARRIVALS</span>
                         </div>
 
                     </div>
