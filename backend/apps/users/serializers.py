@@ -59,4 +59,10 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'phone_number': {'required': False},
             'photoURL': {'required': False},
             'bio': {'required': False},
+            'bio': {'required': False},
         }
+
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'email', 'first_name', 'last_name', 'role', 'photoURL', 'bio', 'is_shelter', 'is_adopter', 'is_admin']
