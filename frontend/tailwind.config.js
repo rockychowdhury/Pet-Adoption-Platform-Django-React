@@ -7,25 +7,29 @@ export default {
   theme: {
     extend: {
       colors: {
-        marble: '#F2F8FC',
-        action: '#896442',
-        action_dark:'#70503E',
-        primary: '#FCEED2',
-        secondary: '#FFE2B8',
-        natural: '#333333',
-        highlight:'#70503E',
-        newBg: '#f3f6f8',
+        marble: 'var(--color-marble)',
+        action: 'var(--color-action)',
+        action_dark: 'var(--color-action-dark)',
+        primary: 'var(--color-primary)',
+        secondary: 'var(--color-secondary)',
+        natural: 'var(--color-natural)',
+        highlight: 'var(--color-highlight)',
+        newBg: 'var(--color-new-bg)',
+        'hero-left': '#FFF8E7',
+        'hero-right': '#FDE4C3',
+        'hero-brown': '#8B5E3C',
+        'hero-text': '#2D2D2D',
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         logo: ['Concert One', 'sans-serif'],
-        roboto: ['Roboto', 'sans-serif'], 
+        roboto: ['Roboto', 'sans-serif'],
       },
       container: {
         center: true,
         padding: {
-          DEFAULT: '1rem', 
+          DEFAULT: '1rem',
           sm: '2rem',
           lg: '4rem',
         },
@@ -36,7 +40,7 @@ export default {
           xl: '1280px',
           '2xl': '1440px',
         },
-        
+
       },
       boxShadow: {
         'custom-light': '0 4px 6px rgba(0, 0, 0, 0.1)', // Light shadow
