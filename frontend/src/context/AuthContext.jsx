@@ -1,4 +1,5 @@
 import { useEffect, useLayoutEffect, useState } from "react";
+import { toast } from "react-toastify";
 import { AuthContext } from "./Contexts";
 import PropTypes from "prop-types";
 import useAPI from "../hooks/useAPI";
@@ -6,19 +7,26 @@ import useAPI from "../hooks/useAPI";
 
 
 const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState();
-    const [token, setToken] = useState();
+    const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [error, setError] = useState();
+    const [error, setError] = useState(null);
     const api = useAPI();
-
 
     const register = async (data) => {
         setLoading(true);
-        const response = await api.post('/user/register/', data);
-        if (response.status === 201) {
-            const { email, password } = data;
-            login({ email, password });
+        try {
+            const response = await api.post('/user/register/', data);
+            if (response.status === 201) {
+                toast.success("Registration successful! Logging you in...");
+                const { email, password } = data;
+                await login({ email, password });
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.detail || "Registration failed. Please try again.");
+            setError(err.response?.data?.detail || "Registration failed.");
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -27,100 +35,73 @@ const AuthProvider = ({ children }) => {
         try {
             const response = await api.post('/user/token/', credentials);
             if (response.status === 200) {
-                setToken(response.data.access);
-                setLoading(false);
+                toast.success("Welcome back!");
+                await getUser(); // Fetch user details after successful login
             }
         } catch (err) {
             setLoading(false);
             setUser(null);
-            setToken(null);
             console.log(err);
+            const errorMessage = err.response?.data?.detail || "Login failed. Please check your credentials.";
+            toast.error(errorMessage);
+            setError(errorMessage);
         }
-        return
     }
 
     const getUser = async () => {
         setLoading(true);
-        const response = await api.get('/user/');
-        if (response.status === 200) {
-            setUser(response.data);
-            setLoading(false);
-        }
-    }
-    const logout = async () => {
-        const res = await api.post('/user/logout/');
-        if (res.status === 200) {
-            setToken(null);
+        try {
+            const response = await api.get('/user/');
+            if (response.status === 200) {
+                setUser(response.data);
+            }
+        } catch (error) {
+            console.log("Failed to fetch user:", error);
             setUser(null);
+        } finally {
             setLoading(false);
         }
     }
+
+    const logout = async () => {
+        try {
+            const res = await api.post('/user/logout/');
+            if (res.status === 200) {
+                setUser(null);
+                toast.info("Logged out successfully.");
+            }
+        } catch (err) {
+            console.error(err);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const refreshToken = () => {
-        setLoading(true);
         return api.post('/user/token/refresh/');
     }
 
     useEffect(() => {
-        setLoading(true);
-        const loadUser = async () => {
-            try {
-                await getUser();
-                setLoading(false);
-            } catch {
-                setUser(null);
-            }
-        };
-        loadUser();
-    }, [token]);
-
-
-    useLayoutEffect(() => {
-        const authInterceptor = api.interceptors.request.use(
-            (config) => {
-                config.headers.Authorization =
-                    !config._retry && token
-                        ? `Bearer ${token}`
-                        : config.headers.Authorization;
-                return config;
-            });
-        return () => {
-            api.interceptors.request.eject(authInterceptor);
-        };
-    }, [token])
-
-
+        getUser();
+    }, []);
 
     useLayoutEffect(() => {
         const refreshInterceptor = api.interceptors.response.use(
             (response) => response,
             async (error) => {
                 const originalRequest = error.config;
-                console.log(error);
-                console.log(error.status);
-                console.log(originalRequest);
-                if (error.status === 401 && originalRequest.url !== "/user/token/refresh/") {
-                    console.log("pakar liya tuje jane nehi dungaa");
+                if (error.response?.status === 401 && originalRequest.url !== "/user/token/refresh/") {
                     try {
-                        console.log("inside try");
-                        const response = await refreshToken();
-                        setToken(response.data.access);
-                        if(originalRequest.url==='/user/'){
-                            return Promise.reject(response);
-                        }
-                        originalRequest.headers.Authorization = `Bearer ${response.data.access}`;
-                        originalRequest._retry = true;
+                        await refreshToken();
+                        // Retry the original request; cookies will be sent automatically
                         return api(originalRequest);
-                    }
-                    catch (error) {
+                    } catch (refreshError) {
                         setUser(null);
-                        setToken(null);
-                        setLoading(false);
-                        console.log("inside catch", error);
-                        return Promise.reject(error)
+                        return Promise.reject(refreshError);
                     }
                 }
-                    console.log("rejecting");
-                    return Promise.reject(error);
+                return Promise.reject(error);
             },
         );
         return () => {
@@ -128,8 +109,6 @@ const AuthProvider = ({ children }) => {
         }
     }, [])
 
-// logout()
-    console.log(loading, user);
     const authInfo = {
         user, setUser,
         loading, setLoading,
@@ -137,8 +116,6 @@ const AuthProvider = ({ children }) => {
         login,
         getUser,
         logout,
-        refreshToken,
-        token, setToken,
         error, setError
     };
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>

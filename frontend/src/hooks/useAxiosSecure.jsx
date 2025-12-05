@@ -13,43 +13,25 @@ const axiosInstance = axios.create({
 
 
 const useAxiosSecure = () => {
-    const { showToast } = useUIContext();
-    const { token, setToken, logout } = useAuth();
-// const token = null
-console.log(token,"here");
+    const { logout } = useAuth();
+
     useEffect(() => {
-        const requestInterceptor = axiosInstance.interceptors.request.use(
-            (config) => {
-                if (token)
-                    config.headers['Authorization'] = `Bearer ${token}`;
-                console.log("from here");
-                return config;
-            },
-            (error) => {
-                return Promise.reject(error);
-            }
-        );
-
         const responseInterceptor = axiosInstance.interceptors.response.use(
-            (response) =>{
-                console.log(response);
-                return response; 
-            },
-            (error)=>{
-                console.log(error);
+            (response) => response,
+            async (error) => {
+                if (error.response?.status === 401 || error.response?.status === 403) {
+                    await logout();
+                }
                 return Promise.reject(error);
             }
         );
 
-        return ()=>{
-            axiosInstance.interceptors.request.eject(requestInterceptor);
+        return () => {
             axiosInstance.interceptors.response.eject(responseInterceptor);
         };
+    }, [logout]);
 
-
-    }, [token])
-
-    return axiosInstance
+    return axiosInstance;
 };
 
 export default useAxiosSecure;

@@ -1,29 +1,35 @@
-import PropTypes from 'prop-types';
-import useUIContext from '../../hooks/useUIContext';
-import { IoClose } from "react-icons/io5";
-const Modal = ({color, children,callBack }) => {
-    const { openModal } = useUIContext();
+import React, { useEffect } from 'react';
+import { X } from 'lucide-react';
+
+const Modal = ({ isOpen, onClose, title, children }) => {
+    useEffect(() => {
+        if (isOpen) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [isOpen]);
+
+    if (!isOpen) return null;
+
     return (
-        // NavigateUI Modal
-        
-        <div className="mx-auto w-fit">
-            <div onClick={() => callBack()} className={`fixed z-[100] w-screen ${openModal ? 'visible opacity-100' : 'invisible opacity-0'} inset-0 grid place-items-center bg-black/20 backdrop-blur-md duration-100 `}>
-                <div onClick={(e_) => e_.stopPropagation()} className={`absolute w-fit rounded-lg bg-${color} p-6 drop-shadow-lg ${openModal ? 'opacity-1 duration-300' : 'scale-110 opacity-0 duration-150'}`}>
-                    <button onClick={() => callBack()} className="absolute text-2xl right-3 top-3 p-2  text-action border border-action_dark shadow-sm rounded-full">
-                        <IoClose></IoClose>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300">
+            <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden animate-fade-in-up">
+                <div className="flex justify-between items-center p-6 border-b border-gray-100">
+                    <h3 className="text-2xl font-bold text-natural font-logo">{title}</h3>
+                    <button onClick={onClose} className="text-gray-400 hover:text-action transition">
+                        <X size={24} />
                     </button>
-                    <div className='lg:pe-10 '>
-                        {
-                            children
-                        }
-                    </div>
+                </div>
+                <div className="p-6">
+                    {children}
                 </div>
             </div>
         </div>
     );
-}
-Modal.propTypes = {
-    children: PropTypes.any,
-    callBack: PropTypes.func
-}
+};
+
 export default Modal;
