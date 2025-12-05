@@ -3,36 +3,39 @@ import PrivateRoute from './PrivateRoute';
 import ProfileLayout from "../layouts/ProfileLayout";
 import ProfilePage from "../pages/ProfilePages/ProfilePage";
 import HomePage from "../pages/HomePages/HomePage";
-import LoginPage from "../pages/AuthPages/LoginPage";
 import RegisterPage from "../pages/AuthPages/RegisterPage";
+import ErrorComponent from "../components/common/ErrorComponent";
+import PetListingPage from "../pages/PetPages/PetListingPage";
+import PetDetailsPage from "../pages/PetPages/PetDetailsPage";
+import Navbar from "../components/common/Navbar";
+
 const router = createBrowserRouter([
     {
-        path:'/',
-        element:<HomePage/>,
-        children:[
+        path: '/',
+        element: <HomePage />,
+        children: []
+    },
+    {
+        path: '/pets',
+        element: <><Navbar /><PetListingPage /></>
+    },
+    {
+        path: '/pets/:id',
+        element: <><Navbar /><PetDetailsPage /></>
+    },
+    {
+        path: 'user',
+        element: <PrivateRoute><ProfileLayout /></PrivateRoute>,
+        children: [
             {
-                path:'login',
-                element: <LoginPage/>
-            },
-            {
-                path:'register',
-                element: <RegisterPage/>
+                path: 'profile',
+                element: <ProfilePage />
             }
         ]
     },
     {
-        path:'user',
-        element: <PrivateRoute><ProfileLayout/></PrivateRoute>,
-        children:[
-            {
-                path:'profile',
-                element: <ProfilePage/>
-            }
-        ]
-    },
-    {
-        path:"*",
-        element: <div>Error page</div>
+        path: "*",
+        element: <ErrorComponent />
     }
 ])
 
