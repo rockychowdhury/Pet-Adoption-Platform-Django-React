@@ -3,10 +3,17 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import AdoptionApplication
 from .serializers import AdoptionApplicationSerializer
+from apps.users.permissions import IsAdopter, IsShelter, IsAdmin
 
 class AdoptionApplicationViewSet(viewsets.ModelViewSet):
     serializer_class = AdoptionApplicationSerializer
-    permission_classes = [permissions.IsAuthenticated]
+    
+    def get_permissions(self):
+        if self.action == 'create':
+            return [permissions.IsAuthenticated(), IsAdopter()]
+        if self.action == 'update_status':
+            return [permissions.IsAuthenticated(), IsShelter() | IsAdmin()]
+        return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
         user = self.request.user

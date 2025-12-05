@@ -3,11 +3,18 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from .models import Post, Comment, Reaction, Event
 from .serializers import PostSerializer, CommentSerializer, ReactionSerializer, EventSerializer
+from apps.users.permissions import IsOwnerOrReadOnly, IsAdmin
 
 class PostViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all().order_by('-created_at')
     serializer_class = PostSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        if self.action in ['create', 'comment', 'react']:
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsOwnerOrReadOnly() | IsAdmin()]
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
@@ -38,7 +45,13 @@ class PostViewSet(viewsets.ModelViewSet):
 class EventViewSet(viewsets.ModelViewSet):
     queryset = Event.objects.all().order_by('-start_time')
     serializer_class = EventSerializer
-    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+    
+    def get_permissions(self):
+        if self.action in ['list', 'retrieve']:
+            return [permissions.AllowAny()]
+        if self.action == 'attend':
+            return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsOwnerOrReadOnly() | IsAdmin()]
 
     def perform_create(self, serializer):
         serializer.save(organizer=self.request.user)

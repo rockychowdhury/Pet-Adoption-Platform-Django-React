@@ -5,14 +5,15 @@ from .serializers import (
     PetDetailSerializer,
     PetCreateUpdateSerializer
 )
+from apps.users.permissions import IsShelter, IsShelterOwnerOrReadOnly, IsAdmin
+
 class PetListCreateView(generics.ListCreateAPIView):
     queryset = Pet.objects.all()
     serializer_class = PetListSerializer
-    permission_classes = [permissions.AllowAny] # Default to allow any for list
-
+    
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [permissions.IsAuthenticated()]
+            return [permissions.IsAuthenticated(), IsShelter() | IsAdmin()]
         return [permissions.AllowAny()]
 
     def get_serializer_class(self):
@@ -21,12 +22,15 @@ class PetListCreateView(generics.ListCreateAPIView):
         return PetListSerializer
 
     def get_queryset(self):
-        queryset = Pet.objects.all().order_by('-created_at')
+        queryset = Pet.objects.all()
+        
+        # Filtering
         species = self.request.query_params.get('species')
         breed = self.request.query_params.get('breed')
         age_min = self.request.query_params.get('age_min')
         age_max = self.request.query_params.get('age_max')
         gender = self.request.query_params.get('gender')
+        search_query = self.request.query_params.get('search')
         
         if species:
             queryset = queryset.filter(species__iexact=species)
@@ -38,6 +42,23 @@ class PetListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(age__gte=age_min)
         if age_max:
             queryset = queryset.filter(age__lte=age_max)
+            
+        # Search (Name, Breed, Description)
+        if search_query:
+            from django.db.models import Q
+            queryset = queryset.filter(
+                Q(name__icontains=search_query) | 
+                Q(breed__icontains=search_query) | 
+                Q(description__icontains=search_query)
+            )
+
+        # Sorting
+        ordering = self.request.query_params.get('ordering', '-created_at')
+        allowed_ordering = ['age', '-age', 'created_at', '-created_at', 'name', '-name']
+        if ordering in allowed_ordering:
+            queryset = queryset.order_by(ordering)
+        else:
+            queryset = queryset.order_by('-created_at')
             
         return queryset
 
@@ -52,7 +73,7 @@ class PetRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated()]
+        return [permissions.IsAuthenticated(), IsShelterOwnerOrReadOnly() | IsAdmin()]
     serializer_class = PetDetailSerializer
 
     def get_serializer_class(self):
