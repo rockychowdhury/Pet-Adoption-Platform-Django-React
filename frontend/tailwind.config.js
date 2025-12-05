@@ -4,21 +4,30 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
-        marble: 'var(--color-marble)',
-        action: 'var(--color-action)',
-        action_dark: 'var(--color-action-dark)',
-        primary: 'var(--color-primary)',
-        secondary: 'var(--color-secondary)',
-        natural: 'var(--color-natural)',
-        highlight: 'var(--color-highlight)',
-        newBg: 'var(--color-new-bg)',
-        'hero-left': '#FFF8E7',
-        'hero-right': '#FDE4C3',
-        'hero-brown': '#8B5E3C',
-        'hero-text': '#2D2D2D',
+        // Semantic System
+        bg: {
+          primary: 'var(--color-bg-primary)',
+          secondary: 'var(--color-bg-secondary)',
+          surface: 'var(--color-bg-surface)',
+        },
+        text: {
+          primary: 'var(--color-text-primary)',
+          secondary: 'var(--color-text-secondary)',
+          inverted: 'var(--color-text-inverted)',
+        },
+        brand: {
+          primary: 'var(--color-brand-primary)',
+          secondary: 'var(--color-brand-secondary)',
+        },
+        border: 'var(--color-border)',
+
+        // Legacy/Direct mappings (keeping some for safety but mapping to new system)
+        action: 'var(--color-brand-primary)',
+        secondary: 'var(--color-brand-secondary)',
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],

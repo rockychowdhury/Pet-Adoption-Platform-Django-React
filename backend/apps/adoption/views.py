@@ -12,7 +12,7 @@ class AdoptionApplicationViewSet(viewsets.ModelViewSet):
         if self.action == 'create':
             return [permissions.IsAuthenticated(), IsAdopter()]
         if self.action == 'update_status':
-            return [permissions.IsAuthenticated(), IsShelter() | IsAdmin()]
+            return [permissions.IsAuthenticated(), (IsShelter | IsAdmin)()]
         return [permissions.IsAuthenticated()]
 
     def get_queryset(self):
@@ -33,9 +33,29 @@ class AdoptionApplicationViewSet(viewsets.ModelViewSet):
             return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
         
         new_status = request.data.get('status')
+        rejection_reason = request.data.get('rejection_reason')
+        shelter_notes = request.data.get('shelter_notes')
+
         if new_status not in dict(AdoptionApplication.STATUS_CHOICES):
             return Response({'error': 'Invalid status'}, status=status.HTTP_400_BAD_REQUEST)
         
+        # Update fields
         application.status = new_status
+        if rejection_reason:
+            application.rejection_reason = rejection_reason
+        if shelter_notes:
+            application.shelter_notes = shelter_notes
         application.save()
-        return Response({'status': 'updated', 'new_status': new_status}, status=status.HTTP_200_OK)
+
+        # Business Logic: If Adopted
+        if new_status == 'adopted':
+            # 1. Update Pet Status
+            pet = application.pet
+            pet.status = 'adopted'
+            pet.save()
+
+            # 2. Reject all other pending/under_review/approved applications for this pet
+            other_apps = AdoptionApplication.objects.filter(pet=pet).exclude(id=application.id).exclude(status__in=['rejected', 'withdrawn'])
+            count = other_apps.update(status='rejected', rejection_reason="Pet has been adopted by another applicant.")
+            
+        return Response({'status': 'updated', 'new_status': new_status, 'auto_rejected_others': count if new_status == 'adopted' else 0}, status=status.HTTP_200_OK)

@@ -40,9 +40,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     
     
 class UserRegistrationSerializer(serializers.ModelSerializer):
+    role = serializers.ChoiceField(choices=['adopter', 'shelter'], default='adopter')
+
     class Meta:
         model = User
-        fields = ['email','password','first_name','last_name']
+        fields = ['email','password','first_name','last_name', 'role']
         extra_kwargs = {
             "password":{"write_only":True},
             }
@@ -66,3 +68,8 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'email', 'first_name', 'last_name', 'role', 'photoURL', 'bio', 'is_shelter', 'is_adopter', 'is_admin']
+
+class PublicUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'first_name', 'last_name', 'photoURL', 'role']

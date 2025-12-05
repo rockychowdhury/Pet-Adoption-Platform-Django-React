@@ -2,24 +2,26 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { MapPin, Calendar, Heart, Share2, ArrowLeft, CheckCircle } from 'lucide-react';
 import usePets from '../../hooks/usePets';
+import ApplicationModal from '../../components/Pet/ApplicationModal';
 
 const PetDetailsPage = () => {
     const { id } = useParams();
     const { useGetPet } = usePets();
     const { data: pet, isLoading: loading, error } = useGetPet(id);
+    const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
     if (error || !pet) return <div className="min-h-screen flex items-center justify-center">Pet not found.</div>;
 
     return (
-        <div className="min-h-screen bg-natural/20 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
+        <div className="min-h-screen bg-bg-primary pt-24 pb-12 px-4 sm:px-6 lg:px-8 transition-colors duration-300">
             <div className="max-w-5xl mx-auto">
-                <Link to="/pets" className="inline-flex items-center text-gray-600 hover:text-action mb-6 transition">
+                <Link to="/pets" className="inline-flex items-center text-text-secondary hover:text-action mb-6 transition">
                     <ArrowLeft size={20} className="mr-2" />
                     Back to Pets
                 </Link>
 
-                <div className="bg-white rounded-3xl shadow-xl overflow-hidden">
+                <div className="bg-bg-surface rounded-3xl shadow-xl overflow-hidden border border-border">
                     <div className="grid grid-cols-1 md:grid-cols-2">
                         {/* Image Section */}
                         <div className="h-96 md:h-auto relative">
@@ -29,10 +31,10 @@ const PetDetailsPage = () => {
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute top-4 right-4 flex gap-2">
-                                <button className="p-3 bg-white/90 backdrop-blur-sm rounded-full text-gray-600 hover:text-red-500 transition shadow-sm">
+                                <button className="p-3 bg-bg-surface/90 backdrop-blur-sm rounded-full text-text-secondary hover:text-red-500 transition shadow-sm">
                                     <Heart size={24} />
                                 </button>
-                                <button className="p-3 bg-white/90 backdrop-blur-sm rounded-full text-gray-600 hover:text-blue-500 transition shadow-sm">
+                                <button className="p-3 bg-bg-surface/90 backdrop-blur-sm rounded-full text-text-secondary hover:text-blue-500 transition shadow-sm">
                                     <Share2 size={24} />
                                 </button>
                             </div>
@@ -43,37 +45,37 @@ const PetDetailsPage = () => {
                             <div>
                                 <div className="flex justify-between items-start mb-4">
                                     <div>
-                                        <h1 className="text-4xl font-bold text-gray-800 font-logo">{pet.name}</h1>
-                                        <p className="text-xl text-gray-500 mt-1">{pet.breed}</p>
+                                        <h1 className="text-4xl font-bold text-text-primary font-logo">{pet.name}</h1>
+                                        <p className="text-xl text-text-secondary mt-1">{pet.breed}</p>
                                     </div>
-                                    <span className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${pet.status === 'available' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'
+                                    <span className={`px-4 py-2 rounded-full text-sm font-bold uppercase tracking-wider ${pet.status === 'available' ? 'bg-green-100 text-green-700' : 'bg-bg-secondary text-text-secondary'
                                         }`}>
                                         {pet.status}
                                     </span>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-6 mb-8">
-                                    <div className="bg-natural/30 p-4 rounded-2xl">
-                                        <span className="block text-xs text-gray-500 uppercase tracking-wide">Age</span>
-                                        <span className="text-lg font-semibold text-gray-800">{pet.age} Months</span>
+                                    <div className="bg-bg-primary/50 p-4 rounded-2xl border border-border">
+                                        <span className="block text-xs text-text-secondary uppercase tracking-wide">Age</span>
+                                        <span className="text-lg font-semibold text-text-primary">{pet.age} Months</span>
                                     </div>
-                                    <div className="bg-natural/30 p-4 rounded-2xl">
-                                        <span className="block text-xs text-gray-500 uppercase tracking-wide">Gender</span>
-                                        <span className="text-lg font-semibold text-gray-800 capitalize">{pet.gender}</span>
+                                    <div className="bg-bg-primary/50 p-4 rounded-2xl border border-border">
+                                        <span className="block text-xs text-text-secondary uppercase tracking-wide">Gender</span>
+                                        <span className="text-lg font-semibold text-text-primary capitalize">{pet.gender}</span>
                                     </div>
-                                    <div className="bg-natural/30 p-4 rounded-2xl">
-                                        <span className="block text-xs text-gray-500 uppercase tracking-wide">Color</span>
-                                        <span className="text-lg font-semibold text-gray-800">{pet.color}</span>
+                                    <div className="bg-bg-primary/50 p-4 rounded-2xl border border-border">
+                                        <span className="block text-xs text-text-secondary uppercase tracking-wide">Color</span>
+                                        <span className="text-lg font-semibold text-text-primary">{pet.color}</span>
                                     </div>
-                                    <div className="bg-natural/30 p-4 rounded-2xl">
-                                        <span className="block text-xs text-gray-500 uppercase tracking-wide">Weight</span>
-                                        <span className="text-lg font-semibold text-gray-800">{pet.weight} kg</span>
+                                    <div className="bg-bg-primary/50 p-4 rounded-2xl border border-border">
+                                        <span className="block text-xs text-text-secondary uppercase tracking-wide">Weight</span>
+                                        <span className="text-lg font-semibold text-text-primary">{pet.weight} kg</span>
                                     </div>
                                 </div>
 
                                 <div className="mb-8">
-                                    <h3 className="text-lg font-bold text-gray-800 mb-2">About {pet.name}</h3>
-                                    <p className="text-gray-600 leading-relaxed">
+                                    <h3 className="text-lg font-bold text-text-primary mb-2">About {pet.name}</h3>
+                                    <p className="text-text-secondary leading-relaxed">
                                         {pet.description || "No description provided."}
                                     </p>
                                 </div>
@@ -87,10 +89,14 @@ const PetDetailsPage = () => {
                             </div>
 
                             <div className="flex gap-4">
-                                <button className="flex-1 py-4 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
-                                    Adopt {pet.name}
+                                <button
+                                    onClick={() => setIsApplicationModalOpen(true)}
+                                    disabled={pet.status !== 'available'}
+                                    className="flex-1 py-4 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
+                                    {pet.status === 'available' ? `Adopt ${pet.name}` : `Status: ${pet.status}`}
                                 </button>
-                                <button className="px-6 py-4 border-2 border-gray-200 text-gray-700 rounded-xl font-bold hover:border-action hover:text-action transition">
+                                <button className="px-6 py-4 border-2 border-border text-text-secondary rounded-xl font-bold hover:border-action hover:text-action transition">
                                     Ask a Question
                                 </button>
                             </div>
@@ -98,6 +104,13 @@ const PetDetailsPage = () => {
                     </div>
                 </div>
             </div>
+
+            <ApplicationModal
+                isOpen={isApplicationModalOpen}
+                onClose={() => setIsApplicationModalOpen(false)}
+                petId={pet.id}
+                petName={pet.name}
+            />
         </div>
     );
 };

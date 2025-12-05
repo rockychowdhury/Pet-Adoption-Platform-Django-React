@@ -13,7 +13,7 @@ class PetListCreateView(generics.ListCreateAPIView):
     
     def get_permissions(self):
         if self.request.method == 'POST':
-            return [permissions.IsAuthenticated(), IsShelter() | IsAdmin()]
+            return [permissions.IsAuthenticated(), (IsShelter | IsAdmin)()]
         return [permissions.AllowAny()]
 
     def get_serializer_class(self):
@@ -42,6 +42,15 @@ class PetListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(age__gte=age_min)
         if age_max:
             queryset = queryset.filter(age__lte=age_max)
+        
+        # Filter by shelter (e.g. ?shelter=me or ?shelter=1)
+        shelter_param = self.request.query_params.get('shelter')
+        if shelter_param:
+            if shelter_param == 'me' and self.request.user.is_authenticated:
+                queryset = queryset.filter(shelter=self.request.user)
+            else:
+                # Optional: allow filtering by specific shelter ID if needed
+                pass
             
         # Search (Name, Breed, Description)
         if search_query:
@@ -73,7 +82,7 @@ class PetRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
     def get_permissions(self):
         if self.request.method in permissions.SAFE_METHODS:
             return [permissions.AllowAny()]
-        return [permissions.IsAuthenticated(), IsShelterOwnerOrReadOnly() | IsAdmin()]
+        return [permissions.IsAuthenticated(), (IsShelterOwnerOrReadOnly | IsAdmin)()]
     serializer_class = PetDetailSerializer
 
     def get_serializer_class(self):

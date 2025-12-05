@@ -6,6 +6,8 @@ import Routes from './routers/Routes';
 import { Bounce, ToastContainer } from "react-toastify";
 import UIProvider from './context/UIProvider';
 
+import { ThemeProvider } from './context/ThemeContext';
+
 const root = document.getElementById("root");
 
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -24,9 +26,11 @@ ReactDOM.createRoot(root).render(
         transition={Bounce}
       />
       <UIProvider>
-        <AuthProvider>
-          <Routes></Routes>
-        </AuthProvider>
+        <ThemeProvider>
+          <AuthProvider>
+            <Routes></Routes>
+          </AuthProvider>
+        </ThemeProvider>
       </UIProvider>
     </QueryClientProvider>
   </StrictMode>,

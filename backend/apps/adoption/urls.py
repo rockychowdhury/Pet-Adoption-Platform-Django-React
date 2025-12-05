@@ -3,7 +3,7 @@ from rest_framework.routers import DefaultRouter
 from .views import AdoptionApplicationViewSet
 
 router = DefaultRouter()
-router.register(r'applications', AdoptionApplicationViewSet, basename='application')
+router.register(r'', AdoptionApplicationViewSet, basename='application')
 
 urlpatterns = [
     path('', include(router.urls)),

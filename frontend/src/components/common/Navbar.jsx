@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router';
-import { Menu, X, Heart, User } from 'lucide-react';
+import { Menu, X, User, LogOut, LayoutDashboard, Sun, Leaf } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
-
+import { useTheme } from '../../context/ThemeContext';
 import LoginModal from '../AuthPages/LoginModal';
 import RegisterModal from '../AuthPages/RegisterModal';
 
@@ -13,14 +13,11 @@ const Navbar = () => {
     const [showRegister, setShowRegister] = useState(false);
     const location = useLocation();
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
 
     useEffect(() => {
         const handleScroll = () => {
-            if (window.scrollY > 20) {
-                setScrolled(true);
-            } else {
-                setScrolled(false);
-            }
+            setScrolled(window.scrollY > 20);
         };
         window.addEventListener('scroll', handleScroll);
         return () => window.removeEventListener('scroll', handleScroll);
@@ -29,50 +26,71 @@ const Navbar = () => {
     const navLinks = [
         { name: 'Home', path: '/' },
         { name: 'Find a Pet', path: '/pets' },
+        { name: 'Community', path: '/community' },
         { name: 'About Us', path: '/about' },
-        { name: 'Contact', path: '/contact' },
     ];
+
+    if (user) {
+        navLinks.push({ name: 'Dashboard', path: '/dashboard' });
+    }
 
     const openLogin = () => { setShowLogin(true); setShowRegister(false); setIsOpen(false); };
     const openRegister = () => { setShowRegister(true); setShowLogin(false); setIsOpen(false); };
 
     return (
         <>
-            <nav className={`fixed w-full z-40 transition-all duration-300 ${scrolled || location.pathname !== '/' ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'}`}>
+            <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-bg-surface/90 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
                 <div className="container mx-auto px-6 flex justify-between items-center">
-                    <Link to="/" className="text-2xl font-bold font-logo text-natural flex items-center">
-                        FurEver<span className="text-action">Home</span>
+                    {/* Logo */}
+                    <Link to="/" className="text-2xl font-bold font-logo tracking-tighter text-brand-primary flex items-center gap-2">
+                        FurEver<span className="text-brand-secondary">Home</span>
                     </Link>
 
-                    {/* Desktop Menu */}
-                    <div className="hidden md:flex items-center space-x-8">
+                    {/* Desktop Nav */}
+                    <div className="hidden md:flex items-center gap-8">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
-                                className={`font-medium hover:text-action transition ${scrolled || location.pathname !== '/' ? 'text-gray-600' : 'text-gray-800'}`}
+                                className={`text-sm font-medium transition-colors hover:text-brand-secondary ${location.pathname === link.path ? 'text-brand-secondary font-bold' : 'text-text-primary'}`}
                             >
                                 {link.name}
                             </Link>
                         ))}
                     </div>
 
-                    <div className="hidden md:flex items-center space-x-4">
+                    {/* Auth & Theme Buttons */}
+                    <div className="hidden md:flex items-center gap-4">
+                        <button
+                            onClick={toggleTheme}
+                            className="p-2 rounded-full text-text-primary hover:bg-bg-secondary transition"
+                            title="Toggle Comfort Mode"
+                        >
+                            {theme === 'light' ? <Leaf size={20} /> : <Sun size={20} />}
+                        </button>
+
                         {user ? (
-                            <>
-                                <Link to="/user/profile" className="p-2 rounded-full hover:bg-gray-100 transition">
-                                    <User size={20} className="text-gray-600" />
-                                </Link>
-                                <button onClick={logout} className="px-5 py-2 rounded-full bg-action text-white font-semibold hover:bg-action_dark transition">
-                                    Logout
+                            <div className="flex items-center gap-4">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-8 h-8 rounded-full bg-brand-secondary/20 flex items-center justify-center text-brand-secondary font-bold">
+                                        {user.first_name?.[0]}
+                                    </div>
+                                    <span className="text-sm font-medium text-text-primary">{user.first_name}</span>
+                                </div>
+                                <button
+                                    onClick={logout}
+                                    className="p-2 text-text-secondary hover:text-status-error transition"
+                                    title="Logout"
+                                >
+                                    <LogOut size={20} />
                                 </button>
-                            </>
+                            </div>
                         ) : (
                             <>
-                                <button onClick={openLogin} className={`font-medium hover:text-action transition ${scrolled || location.pathname !== '/' ? 'text-gray-600' : 'text-gray-800'}`}>
-                                    Login
+                                <button onClick={openLogin} className="text-sm font-bold text-text-primary hover:text-brand-primary transition">
+                                    Log In
                                 </button>
-                                <button onClick={openRegister} className="px-5 py-2 rounded-full bg-action text-white font-semibold hover:bg-action_dark transition shadow-md hover:shadow-lg">
+                                <button onClick={openRegister} className="px-5 py-2.5 bg-brand-primary text-text-inverted rounded-full text-sm font-bold hover:opacity-90 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
                                     Sign Up
                                 </button>
                             </>
@@ -80,58 +98,52 @@ const Navbar = () => {
                     </div>
 
                     {/* Mobile Menu Button */}
-                    <button className="md:hidden text-gray-600" onClick={() => setIsOpen(!isOpen)}>
+                    <button className="md:hidden text-text-primary" onClick={() => setIsOpen(!isOpen)}>
                         {isOpen ? <X size={28} /> : <Menu size={28} />}
                     </button>
                 </div>
 
                 {/* Mobile Menu */}
                 {isOpen && (
-                    <div className="md:hidden bg-white absolute top-full left-0 w-full shadow-lg py-4 px-6 flex flex-col space-y-4">
+                    <div className="md:hidden absolute top-full left-0 w-full bg-bg-surface shadow-xl border-t border-border py-6 px-6 flex flex-col gap-4">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
                                 to={link.path}
-                                className="text-gray-600 font-medium hover:text-action"
                                 onClick={() => setIsOpen(false)}
+                                className="text-lg font-medium text-text-primary"
                             >
                                 {link.name}
                             </Link>
                         ))}
-                        <hr />
+                        <hr className="border-border" />
+                        <div className="flex justify-between items-center">
+                            <span className="text-text-primary">Theme</span>
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2 rounded-full text-text-primary hover:bg-bg-secondary transition"
+                            >
+                                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                            </button>
+                        </div>
                         {user ? (
-                            <>
-                                <Link to="/user/profile" className="text-gray-600 font-medium hover:text-action" onClick={() => setIsOpen(false)}>
-                                    Profile
-                                </Link>
-                                <button onClick={() => { logout(); setIsOpen(false) }} className="text-left text-action font-semibold">
-                                    Logout
-                                </button>
-                            </>
+                            <button onClick={() => { logout(); setIsOpen(false) }} className="text-left text-status-error font-medium">Logout</button>
                         ) : (
-                            <>
-                                <button onClick={openLogin} className="text-left text-gray-600 font-medium hover:text-action">
-                                    Login
+                            <div className="flex flex-col gap-3">
+                                <button onClick={openLogin} className="w-full py-3 text-center font-bold text-text-primary border border-border rounded-xl">
+                                    Log In
                                 </button>
-                                <button onClick={openRegister} className="text-left text-action font-semibold">
+                                <button onClick={openRegister} className="w-full py-3 text-center font-bold bg-brand-primary text-text-inverted rounded-xl">
                                     Sign Up
                                 </button>
-                            </>
+                            </div>
                         )}
                     </div>
                 )}
             </nav>
 
-            <LoginModal
-                isOpen={showLogin}
-                onClose={() => setShowLogin(false)}
-                onSwitchToRegister={openRegister}
-            />
-            <RegisterModal
-                isOpen={showRegister}
-                onClose={() => setShowRegister(false)}
-                onSwitchToLogin={openLogin}
-            />
+            <LoginModal isOpen={showLogin} onClose={() => setShowLogin(false)} onSwitchToRegister={openRegister} />
+            <RegisterModal isOpen={showRegister} onClose={() => setShowRegister(false)} onSwitchToLogin={openLogin} />
         </>
     );
 };

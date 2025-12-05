@@ -43,14 +43,14 @@ const PetListingPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-natural/20 pt-24 pb-12 px-4 sm:px-6 lg:px-8 font-inter">
+        <div className="min-h-screen bg-bg-primary pt-24 pb-12 px-4 sm:px-6 lg:px-8 font-inter transition-colors duration-300">
             <div className="max-w-7xl mx-auto">
 
                 {/* Header Section */}
                 <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-6">
                     <div>
-                        <h1 className="text-4xl font-bold text-gray-800 font-logo mb-2">Find Your Companion</h1>
-                        <p className="text-gray-600">Browse our available pets and find your perfect match.</p>
+                        <h1 className="text-4xl font-bold text-text-primary font-logo mb-2">Find Your Companion</h1>
+                        <p className="text-text-secondary">Browse our available pets and find your perfect match.</p>
                     </div>
 
                     <div className="flex gap-3 w-full md:w-auto">
@@ -62,15 +62,15 @@ const PetListingPage = () => {
                                 placeholder="Search by name, breed..."
                                 value={filters.search}
                                 onChange={handleFilterChange}
-                                className="w-full pl-10 pr-4 py-3 rounded-full border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                                className="w-full pl-10 pr-4 py-3 rounded-full border border-border bg-bg-surface text-text-primary focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
                             />
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" size={18} />
                         </div>
 
                         {/* Toggle Filters (Mobile/Desktop) */}
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-5 py-3 rounded-full font-semibold transition border ${showFilters ? 'bg-action text-white border-action' : 'bg-white text-gray-700 border-gray-200 hover:border-action'}`}
+                            className={`flex items-center gap-2 px-5 py-3 rounded-full font-semibold transition border ${showFilters ? 'bg-action text-white border-action' : 'bg-bg-surface text-text-primary border-border hover:border-action'}`}
                         >
                             <Filter size={18} />
                             Filters
@@ -90,9 +90,9 @@ const PetListingPage = () => {
 
                 {/* Expanded Filters Panel */}
                 {showFilters && (
-                    <div className="bg-white p-6 rounded-3xl shadow-sm mb-8 animate-fade-in border border-gray-100">
+                    <div className="bg-bg-surface p-6 rounded-3xl shadow-sm mb-8 animate-fade-in border border-border">
                         <div className="flex justify-between items-center mb-4">
-                            <h3 className="font-bold text-gray-800">Filter Options</h3>
+                            <h3 className="font-bold text-text-primary">Filter Options</h3>
                             <button onClick={clearFilters} className="text-sm text-red-500 hover:underline font-medium">Clear All</button>
                         </div>
 
@@ -105,7 +105,7 @@ const PetListingPage = () => {
                                         name="ordering"
                                         value={filters.ordering}
                                         onChange={handleFilterChange}
-                                        className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-action outline-none appearance-none cursor-pointer"
+                                        className="w-full px-4 py-2.5 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none appearance-none cursor-pointer"
                                     >
                                         <option value="-created_at">Newest First</option>
                                         <option value="created_at">Oldest First</option>
@@ -164,7 +164,7 @@ const PetListingPage = () => {
                                     placeholder="0"
                                     value={filters.age_min}
                                     onChange={handleFilterChange}
-                                    className="w-full px-4 py-2.5 rounded-xl bg-gray-50 border border-gray-200 focus:border-action outline-none"
+                                    className="w-full px-4 py-2.5 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none"
                                 />
                             </div>
                             <div className="space-y-1">
@@ -186,29 +186,29 @@ const PetListingPage = () => {
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-white rounded-3xl h-96 shadow-sm"></div>
+                            <div key={i} className="bg-bg-surface rounded-3xl h-96 shadow-sm"></div>
                         ))}
                     </div>
                 ) : pets.length === 0 ? (
-                    <div className="text-center py-20 bg-white rounded-3xl shadow-sm border border-gray-100">
-                        <div className="bg-gray-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Search size={32} className="text-gray-400" />
+                    <div className="text-center py-20 bg-bg-surface rounded-3xl shadow-sm border border-border">
+                        <div className="bg-bg-secondary w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <Search size={32} className="text-text-secondary" />
                         </div>
-                        <h3 className="text-xl font-bold text-gray-800 mb-2">No pets found</h3>
-                        <p className="text-gray-500">Try adjusting your filters or search terms.</p>
+                        <h3 className="text-xl font-bold text-text-primary mb-2">No pets found</h3>
+                        <p className="text-text-secondary">Try adjusting your filters or search terms.</p>
                         <button onClick={clearFilters} className="mt-4 text-action font-semibold hover:underline">Clear all filters</button>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {pets.map((pet) => (
-                            <Link to={`/pets/${pet.id}`} key={pet.id} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 transform hover:-translate-y-1 border border-gray-100">
-                                <div className="h-72 overflow-hidden relative bg-gray-100">
+                            <Link to={`/pets/${pet.id}`} key={pet.id} className="group bg-bg-surface rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 transform hover:-translate-y-1 border border-border">
+                                <div className="h-72 overflow-hidden relative bg-bg-secondary">
                                     <img
                                         src={pet.photo_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=1000"}
                                         alt={pet.name}
                                         className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
                                     />
-                                    <div className="absolute top-4 right-4 bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-gray-700 uppercase tracking-wider shadow-sm flex items-center gap-1">
+                                    <div className="absolute top-4 right-4 bg-bg-surface/95 backdrop-blur-sm px-3 py-1 rounded-full text-xs font-bold text-text-secondary uppercase tracking-wider shadow-sm flex items-center gap-1">
                                         <div className={`w-2 h-2 rounded-full ${pet.status === 'available' ? 'bg-green-500' : 'bg-orange-500'}`}></div>
                                         {pet.status}
                                     </div>
@@ -219,8 +219,8 @@ const PetListingPage = () => {
                                 <div className="p-6">
                                     <div className="flex justify-between items-start mb-3">
                                         <div>
-                                            <h3 className="text-2xl font-bold text-gray-800 group-hover:text-action transition mb-1">{pet.name}</h3>
-                                            <p className="text-gray-500 text-sm font-medium">{pet.breed}</p>
+                                            <h3 className="text-2xl font-bold text-text-primary group-hover:text-action transition mb-1">{pet.name}</h3>
+                                            <p className="text-text-secondary text-sm font-medium">{pet.breed}</p>
                                         </div>
                                         {pet.gender === 'male' ? (
                                             <span className="bg-blue-50 text-blue-500 p-2 rounded-full"><Search size={18} className="rotate-90 opacity-0" /> ♂</span>
@@ -229,7 +229,7 @@ const PetListingPage = () => {
                                         )}
                                     </div>
 
-                                    <div className="flex items-center gap-4 text-sm text-gray-500 mb-4">
+                                    <div className="flex items-center gap-4 text-sm text-text-secondary mb-4">
                                         <span className="flex items-center gap-1">
                                             <div className="w-1 h-1 rounded-full bg-gray-400"></div>
                                             {pet.age} months
@@ -240,10 +240,10 @@ const PetListingPage = () => {
                                         </span>
                                     </div>
 
-                                    <div className="w-full h-px bg-gray-100 mb-4"></div>
+                                    <div className="w-full h-px bg-border mb-4"></div>
 
                                     <div className="flex justify-between items-center">
-                                        <span className="text-xs font-bold text-gray-400 uppercase tracking-wider">Posted {new Date(pet.created_at).toLocaleDateString()}</span>
+                                        <span className="text-xs font-bold text-text-secondary uppercase tracking-wider">Posted {new Date(pet.created_at).toLocaleDateString()}</span>
                                         <span className="text-action font-bold text-sm group-hover:underline">View Details</span>
                                     </div>
                                 </div>

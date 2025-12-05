@@ -10,7 +10,8 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         first_name: '',
         last_name: '',
         email: '',
-        password: ''
+        password: '',
+        role: 'adopter'
     });
 
     const handleChange = (e) => {
@@ -27,27 +28,57 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         <Modal isOpen={isOpen} onClose={onClose} title="Create Account">
             <form onSubmit={handleSubmit} className="space-y-4">
 
+                {/* Role Selection */}
+                <div className="flex gap-4 mb-6">
+                    <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, role: 'adopter' })}
+                        className={`flex-1 py-3 px-4 rounded-xl border-2 transition font-bold flex flex-col items-center gap-2 ${formData.role === 'adopter'
+                            ? 'border-action bg-action/5 text-action'
+                            : 'border-gray-100 text-gray-500 hover:border-gray-200'
+                            }`}
+                    >
+                        <span>🐶</span>
+                        Adopter
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, role: 'shelter' })}
+                        className={`flex-1 py-3 px-4 rounded-xl border-2 transition font-bold flex flex-col items-center gap-2 ${formData.role === 'shelter'
+                            ? 'border-action bg-action/5 text-action'
+                            : 'border-gray-100 text-gray-500 hover:border-gray-200'
+                            }`}
+                    >
+                        <span>🏠</span>
+                        Shelter
+                    </button>
+                </div>
+
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {formData.role === 'shelter' ? 'Shelter Name' : 'First Name'}
+                        </label>
                         <input
                             type="text"
                             name="first_name"
                             required
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
-                            placeholder="John"
+                            placeholder={formData.role === 'shelter' ? "Happy Paws" : "John"}
                             value={formData.first_name}
                             onChange={handleChange}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                            {formData.role === 'shelter' ? 'Representative' : 'Last Name'}
+                        </label>
                         <input
                             type="text"
                             name="last_name"
                             required
                             className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
-                            placeholder="Doe"
+                            placeholder={formData.role === 'shelter' ? "Manager" : "Doe"}
                             value={formData.last_name}
                             onChange={handleChange}
                         />
@@ -90,7 +121,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                     type="submit"
                     className="w-full py-3 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
-                    Sign Up
+                    {formData.role === 'shelter' ? 'Register Shelter' : 'Create Account'}
                 </button>
             </form>
             <div className="mt-6 text-center text-gray-500 text-sm">

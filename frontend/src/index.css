@@ -2,13 +2,62 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-marble: #F2F8FC;
-  --color-action: #896442;
-  --color-action-dark: #70503E;
-  --color-primary: #FCEED2;
-  --color-secondary: #FFE2B8;
-  --color-natural: #333333;
-  --color-highlight: #70503E;
-  --color-new-bg: #f3f6f8;
+@layer base {
+  :root {
+    /* Base Colors - Light (Cream/Warm) */
+    --color-bg-primary: #FFF8E7;
+    /* Main background (Cream) */
+    --color-bg-secondary: #FDE4C3;
+    /* Secondary background (Peach/Highlight) */
+    --color-bg-surface: #FFFFFF;
+    /* Card/Modal background (White) */
+
+    --color-text-primary: #2D2D2D;
+    /* Main text (Charcoal) */
+    --color-text-secondary: #57534E;
+    /* Secondary text (Stone 600) */
+    --color-text-inverted: #FFFFFF;
+    /* Text on dark backgrounds */
+
+    --color-brand-primary: #2D2D2D;
+    /* Primary Action (Charcoal) */
+    --color-brand-secondary: #A68A6D;
+    /* Accent (Gold/Brown) */
+
+    --color-border: #E5E7EB;
+    /* Light border */
+    --color-status-success: #22c55e;
+    --color-status-error: #ef4444;
+  }
+
+  .dark {
+    /* Comfort/Nature Mode (Deep Slate/Night) - Eye Refreshing & Premium */
+    --color-bg-primary: #0F172A;
+    /* Slate 900 - Deep Night Background */
+    --color-bg-secondary: #1E293B;
+    /* Slate 800 - Lighter secondary/Surface */
+    --color-bg-surface: #1E293B;
+    /* Slate 800 - Cards match secondary or slightly lighter */
+
+    --color-text-primary: #F8FAFC;
+    /* Slate 50 - Bright White text for readability */
+    --color-text-secondary: #94A3B8;
+    /* Slate 400 - Muted secondary text */
+    --color-text-inverted: #0F172A;
+    /* Slate 900 - Text on light accents */
+
+    --color-brand-primary: #FDBA74;
+    /* Orange 300 - Warmth remains */
+    --color-brand-secondary: #818CF8;
+    /* Indigo 400 - Calming accent */
+
+    --color-border: #334155;
+    /* Slate 700 - Subtle dark borders */
+    --color-status-success: #4ade80;
+    --color-status-error: #f87171;
+  }
+}
+
+body {
+  @apply bg-bg-primary text-text-primary transition-colors duration-300;
 }

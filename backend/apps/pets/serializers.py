@@ -17,7 +17,4 @@ class PetCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pet
         exclude = ['created_at', 'updated_at']
-
-    def create(self, validated_data):
-        validated_data['shelter'] = self.context['request'].user
-        return super().create(validated_data)
+        read_only_fields = ['shelter']
