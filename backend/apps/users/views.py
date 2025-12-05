@@ -17,17 +17,26 @@ class CustomTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         response = super().post(request, *args, **kwargs)
         refresh_token = response.data.get("refresh")
-        # access_token = response.data.get('access')
+        access_token = response.data.get('access')
 
         response.set_cookie(
             key="refresh_token",
             value=refresh_token,
             httponly=True,
             samesite="None",
-            secure= True,
-            max_age=7*24*60*60, #7days
+            secure=True,
+            max_age=30*24*60*60, # 30 days
         )
-        response.data.pop("refresh",None)
+        response.set_cookie(
+            key="access_token",
+            value=access_token,
+            httponly=True,
+            samesite="None",
+            secure=True,
+            max_age=15*60, # 15 minutes
+        )
+        response.data.pop("refresh", None)
+        response.data.pop("access", None)
         return response
 
 
@@ -43,7 +52,16 @@ class CustomTokenRefreshView(APIView):
         try:
             token = RefreshToken(refresh_token)
             access_token = str(token.access_token)
-            return Response({"access": access_token})
+            response = Response({"message": "Token refreshed"})
+            response.set_cookie(
+                key="access_token",
+                value=access_token,
+                httponly=True,
+                samesite="None",
+                secure=True,
+                max_age=15*60, # 15 minutes
+            )
+            return response
         except TokenError as e:
             return Response(
                 {"message": str(e), 'code': 'invalid-refresh-token'},
@@ -62,6 +80,7 @@ class UserProfileView(APIView):
             "last_name": user.last_name,
             "phone_number": user.phone_number,
             "photoURL": user.photoURL,
+            "bio": user.bio,
         })
 
 
@@ -107,6 +126,7 @@ class LogoutView(APIView):
             if not refresh_token:
                 response = Response({"message": "Logout successful"}, status=200)
                 response.delete_cookie("refresh_token", samesite="None")
+                response.delete_cookie("access_token", samesite="None")
                 return response
 
             try:
@@ -117,6 +137,7 @@ class LogoutView(APIView):
 
             response = Response({"message": "Logout successful"}, status=200)
             response.delete_cookie("refresh_token", samesite="None")
+            response.delete_cookie("access_token", samesite="None")
             return response
 
         except Exception as e:
