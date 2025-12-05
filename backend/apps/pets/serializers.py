@@ -4,7 +4,7 @@ from .models import Pet
 class PetListSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pet
-        fields = ['id', 'name', 'species', 'breed', 'photo', 'status']
+        fields = ['id', 'name', 'species', 'breed', 'photo_url', 'status', 'gender', 'age', 'location']
 
 
 class PetDetailSerializer(serializers.ModelSerializer):
@@ -16,7 +16,7 @@ class PetDetailSerializer(serializers.ModelSerializer):
 class PetCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Pet
-        exclude = ['status', 'created_at', 'updated_at']
+        exclude = ['created_at', 'updated_at']
 
     def create(self, validated_data):
         validated_data['shelter'] = self.context['request'].user
