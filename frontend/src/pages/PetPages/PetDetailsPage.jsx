@@ -1,34 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router';
 import { MapPin, Calendar, Heart, Share2, ArrowLeft, CheckCircle } from 'lucide-react';
-import useAPI from '../../hooks/useAPI';
-import useAuth from '../../hooks/useAuth';
-import { toast } from 'react-toastify';
+import usePets from '../../hooks/usePets';
 
 const PetDetailsPage = () => {
     const { id } = useParams();
-    const api = useAPI();
-    const { user } = useAuth();
-    const [pet, setPet] = useState(null);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        const fetchPetDetails = async () => {
-            try {
-                const response = await api.get(`/pets/${id}/`);
-                setPet(response.data);
-            } catch (error) {
-                console.error("Failed to fetch pet details:", error);
-                toast.error("Failed to load pet details.");
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPetDetails();
-    }, [id]);
+    const { useGetPet } = usePets();
+    const { data: pet, isLoading: loading, error } = useGetPet(id);
 
     if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
-    if (!pet) return <div className="min-h-screen flex items-center justify-center">Pet not found.</div>;
+    if (error || !pet) return <div className="min-h-screen flex items-center justify-center">Pet not found.</div>;
 
     return (
         <div className="min-h-screen bg-natural/20 pt-24 pb-12 px-4 sm:px-6 lg:px-8">
