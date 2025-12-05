@@ -24,4 +24,5 @@ urlpatterns = [
     path('messaging/', include('apps.messaging.urls')),
     path('adoption/', include('apps.adoption.urls')),
     path('reviews/', include('apps.reviews.urls')),
+    path('pets/', include('apps.pets.urls')),
 ]
