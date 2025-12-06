@@ -90,7 +90,7 @@ const Navbar = () => {
                                 <button onClick={openLogin} className="text-sm font-bold text-text-primary hover:text-brand-primary transition">
                                     Log In
                                 </button>
-                                <button onClick={openRegister} className="px-5 py-2.5 bg-brand-primary text-text-inverted rounded-full text-sm font-bold hover:opacity-90 transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5">
+                                <button onClick={openRegister} className="btn-primary h-10 px-6 text-sm">
                                     Sign Up
                                 </button>
                             </>
