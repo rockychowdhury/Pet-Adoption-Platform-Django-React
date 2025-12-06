@@ -3,7 +3,7 @@ import PrivateRoute from './PrivateRoute';
 import ProfileLayout from "../layouts/ProfileLayout";
 import ProfilePage from "../pages/ProfilePages/ProfilePage";
 import HomePage from "../pages/HomePages/HomePage";
-import RegisterPage from "../pages/AuthPages/RegisterPage";
+
 import ErrorComponent from "../components/common/ErrorComponent";
 import PetListingPage from "../pages/PetPages/PetListingPage";
 import PetDetailsPage from "../pages/PetPages/PetDetailsPage";

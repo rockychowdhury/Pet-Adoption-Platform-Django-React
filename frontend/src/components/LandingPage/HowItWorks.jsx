@@ -1,6 +1,9 @@
 import React from 'react';
 import { Search, MessageSquare, Home } from 'lucide-react';
 
+import star from '../../assets/star.png';
+import stars from '../../assets/stars.png';
+
 const HowItWorks = () => {
     const steps = [
         {
@@ -27,11 +30,16 @@ const HowItWorks = () => {
     ];
 
     return (
-        <section className="py-24 bg-bg-primary">
-            <div className="max-w-[1440px] mx-auto px-8">
-                <div className="text-center mb-16">
-                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-4 font-logo">
+        <section className="py-24 bg-bg-primary relative overflow-hidden">
+            <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+                {/* Decorative Stars (Inside Container) */}
+                <img src={stars} alt="" className="absolute top-10 right-10 w-16 h-16 opacity-20 animate-pulse" style={{ filter: 'brightness(0)' }} />
+                <img src={star} alt="" className="absolute bottom-8 -left-5 w-10 h-10 opacity-10 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
+
+                <div className="text-center mb-16 relative">
+                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary mb-4 font-logo relative inline-block">
                         How It <span className="text-brand-secondary">Works</span>
+                        <img src={star} alt="" className="absolute -top-2 -right-8 w-6 h-6 animate-spin-slow opacity-80" style={{ filter: 'brightness(0)' }} />
                     </h2>
                     <p className="text-text-secondary text-lg max-w-2xl mx-auto">
                         Three simple steps to welcome a new friend into your life.

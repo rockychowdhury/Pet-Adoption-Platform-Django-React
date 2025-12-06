@@ -76,7 +76,7 @@
   }
 
   .input-field {
-    @apply h-12 w-full px-4 rounded-xl border border-border bg-bg-surface text-text-primary focus:outline-none focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary/20 transition-all duration-200;
+    @apply h-12 w-full px-4 rounded-xl border border-border bg-bg-surface text-text-primary focus:outline-none focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary transition-all duration-200;
   }
 
   .label {

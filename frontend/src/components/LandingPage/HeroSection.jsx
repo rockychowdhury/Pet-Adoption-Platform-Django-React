@@ -4,7 +4,7 @@ import bannerImg from '../../assets/bannerimg.png';
 import catImg from '../../assets/cat.png';
 import star from '../../assets/star.png';
 import stars from '../../assets/stars.png';
-import { Heart, ShieldCheck, MessageCircle } from 'lucide-react';
+import { Heart, ShieldCheck, MessageCircle, Sparkles } from 'lucide-react';
 
 const HeroSection = () => {
     return (
@@ -23,22 +23,26 @@ const HeroSection = () => {
                 {/* Left Side */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 lg:py-0 relative">
                     {/* Decorative Stars Left */}
-                    <img src={star} alt="star" className="absolute -top-10 left-10 w-8 h-8 opacity-60 animate-pulse" style={{ filter: 'brightness(0)' }} />
                     <img src={stars} alt="stars" className="absolute top-1/4 -left-12 w-16 h-16 opacity-40" style={{ filter: 'brightness(0)' }} />
+
+
+                    {/* #SAVELIFE Badge */}
+                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-full w-fit shadow-sm mb-6">
+                        <Sparkles className="text-brand-secondary fill-brand-secondary" size={20} />
+                        <span className="text-xs font-bold tracking-widest text-text-secondary uppercase">#SAVELIFE</span>
+                    </div>
 
                     {/* Main Heading */}
                     <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-text-primary leading-[1.1] mb-6 font-logo tracking-tight relative">
                         Find Your Perfect <br />
                         Pet <span className="text-brand-secondary relative inline-block">
                             Companion
-                            <img src={star} alt="star" className="absolute -top-6 -right-8 w-10 h-10 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
                         </span> <br />
                         Today
                     </h1>
 
                     {/* Subheading */}
                     <div className="mb-10 max-w-md relative">
-                        <p className="text-sm font-semibold text-text-secondary mb-2">#SaveALife</p>
                         <p className="text-text-secondary text-lg leading-relaxed">
                             Thousands of pets waiting for a loving home. Start your adoption journey now.
                         </p>
@@ -60,33 +64,35 @@ const HeroSection = () => {
 
                     {/* CTA Buttons */}
                     <div className="flex gap-4">
-                        <Link to="/pets" className="px-8 py-4 bg-brand-primary text-text-inverted rounded-full font-bold hover:opacity-90 transition shadow-xl hover:shadow-2xl transform hover:-translate-y-1">
+                        <button className="px-8 py-4 bg-[#2D2D2D] text-white rounded-full font-bold hover:bg-black hover:shadow-lg hover:-translate-y-1 active:scale-95 transition-all duration-300">
                             Adopt Now
-                        </Link>
-                        <Link to="/register" className="px-8 py-4 bg-transparent border-2 border-brand-primary text-brand-primary rounded-full font-bold hover:bg-brand-primary hover:text-text-inverted transition">
+                        </button>
+                        <button
+                            className="px-8 py-4 text-[#2D2D2D] rounded-full font-bold hover:bg-gray-50 hover:shadow-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 border border-gray-100"
+                            style={{ backgroundColor: '#ffffff' }}
+                        >
                             Join Us
-                        </Link>
+                        </button>
                     </div>
                 </div>
 
                 {/* Right Side - Enhanced with Depth */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center relative h-full perspective-1000">
                     {/* Floating Stars Right */}
-                    <img src={star} alt="star" className="absolute top-20 right-10 w-12 h-12 animate-bounce z-0" style={{ filter: 'brightness(0)' }} />
+                    <img src={star} alt="star" className="absolute -top-0 -right-5 w-10 h-10 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
                     <img src={stars} alt="stars" className="absolute bottom-40 left-0 w-20 h-20 opacity-30 z-0" style={{ filter: 'brightness(0)' }} />
 
                     {/* Main Image Container with Layering */}
                     <div className="relative z-20 w-full max-w-2xl px-4 flex justify-center items-center">
 
                         {/* Layer 3: Floating Glass Card 1 (Top Right) - BEHIND Image */}
-                        <div className="absolute top-10 right-4 md:right-0 bg-bg-surface/60 backdrop-blur-md p-4 rounded-2xl shadow-lg border border-white/20 animate-float z-0 max-w-[160px] transform translate-x-1/2">
-                            <div className="flex items-center gap-3 mb-2">
-                                <div className="p-2 bg-green-100 rounded-full text-green-600">
-                                    <ShieldCheck size={20} />
-                                </div>
-                                <span className="text-xs font-bold text-text-primary">Verified</span>
+                        <div className="absolute top-5 right-4 md:right-0 bg-white/95 backdrop-blur-md p-4 rounded-full shadow-lg border border-white/20 animate-float z-0 transform translate-x-1/2 flex items-center gap-2">
+                            <div className="w-4 h-4 bg-brand-secondary rounded-full flex items-center justify-center">
+                                <ShieldCheck size={12} className="text-white" />
                             </div>
-                            <p className="text-[10px] text-text-secondary leading-tight">All pets are vaccinated and health checked.</p>
+                            <div className="flex flex-col">
+                                <span className="text-xs font-bold text-text-secondary">Verified shelters & listings</span>
+                            </div>
                         </div>
 
                         {/* Layer 1: Main Banner Image */}
@@ -97,13 +103,13 @@ const HeroSection = () => {
                         />
 
                         {/* Layer 4: Floating Glass Card 2 (Bottom Right) - IN FRONT OF Image */}
-                        <div className="absolute bottom-20 right-0 md:-right-8 bg-bg-surface/60 backdrop-blur-md p-3 rounded-2xl shadow-lg border border-white/20 animate-float-delayed z-30 flex items-center gap-3">
-                            <div className="p-2 bg-red-100 rounded-full text-red-500">
+                        <div className="absolute bottom-10 right-0 md:-right-6 bg-white p-4 rounded-2xl shadow-soft border border-border animate-float-delayed z-30 flex items-center gap-3">
+                            <div className="bg-brand-secondary/10 p-2.5 rounded-full text-brand-secondary">
                                 <Heart size={20} fill="currentColor" />
                             </div>
                             <div>
-                                <p className="text-sm font-bold text-text-primary">100% Love</p>
-                                <p className="text-[10px] text-text-secondary">Guaranteed happiness</p>
+                                <p className="text-xs text-text-secondary font-bold uppercase tracking-wider">100% Love</p>
+                                <p className="text-sm font-bold text-text-primary">Guaranteed</p>
                             </div>
                         </div>
 
@@ -113,16 +119,12 @@ const HeroSection = () => {
 
             {/* Modern Scrolling Marquee Banner */}
             <div className="absolute bottom-8 left-0 w-full z-30 transform -rotate-1 origin-bottom-left">
-                <div className="bg-brand-primary text-text-inverted py-4 overflow-hidden shadow-2xl border-y border-white/10">
+                <div className="bg-[#2D2D2D] text-white py-3 overflow-hidden shadow-2xl">
                     <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
                         {[...Array(12)].map((_, i) => (
-                            <div key={i} className="flex items-center gap-4 text-sm sm:text-base font-bold tracking-[0.2em] uppercase opacity-90">
-                                <span>Adopt A Pet</span>
-                                <span className="text-brand-secondary">●</span>
-                                <span>Save A Life</span>
-                                <span className="text-brand-secondary">●</span>
-                                <span>Find Love</span>
-                                <span className="text-brand-secondary">●</span>
+                            <div key={i} className="flex items-center gap-8 text-sm md:text-base font-bold tracking-widest uppercase">
+                                <span>ADOPT A PET • SAVE A LIFE • FIND LOVE</span>
+                                <span>•</span>
                             </div>
                         ))}
                     </div>

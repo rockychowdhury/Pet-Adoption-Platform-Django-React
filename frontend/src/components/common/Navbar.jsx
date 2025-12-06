@@ -39,7 +39,7 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-bg-surface/90 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
+            <nav className={`fixed w-full z-50 transition-all duration-300 ${scrolled ? 'bg-bg-surface/90 dark:bg-bg-primary/90 backdrop-blur-md shadow-sm py-4' : 'bg-transparent py-6'}`}>
                 <div className="container mx-auto px-6 flex justify-between items-center">
                     {/* Logo */}
                     <Link to="/" className="text-2xl font-bold font-logo tracking-tighter text-brand-primary flex items-center gap-2">
@@ -105,7 +105,7 @@ const Navbar = () => {
 
                 {/* Mobile Menu */}
                 {isOpen && (
-                    <div className="md:hidden absolute top-full left-0 w-full bg-bg-surface shadow-xl border-t border-border py-6 px-6 flex flex-col gap-4">
+                    <div className="md:hidden absolute top-full left-0 w-full bg-bg-surface dark:bg-bg-primary shadow-xl border-t border-border py-6 px-6 flex flex-col gap-4">
                         {navLinks.map((link) => (
                             <Link
                                 key={link.name}
@@ -123,7 +123,7 @@ const Navbar = () => {
                                 onClick={toggleTheme}
                                 className="p-2 rounded-full text-text-primary hover:bg-bg-secondary transition"
                             >
-                                {theme === 'light' ? <Moon size={20} /> : <Sun size={20} />}
+                                {theme === 'light' ? <Leaf size={20} /> : <Sun size={20} />}
                             </button>
                         </div>
                         {user ? (

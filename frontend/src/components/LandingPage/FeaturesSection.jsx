@@ -1,8 +1,32 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Users, MessageSquare, Calendar, Share2, LayoutDashboard, FileText } from 'lucide-react';
+
+import star from '../../assets/star.png';
+import stars from '../../assets/stars.png';
 
 const FeaturesSection = () => {
     const [activeTab, setActiveTab] = useState('adopters');
+    const cardsRef = useRef([]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.remove('opacity-0', 'scale-90');
+                    entry.target.classList.add('opacity-100', 'scale-100');
+                }
+            });
+        }, {
+            threshold: 0.1,
+            rootMargin: "0px 0px -50px 0px"
+        });
+
+        cardsRef.current.forEach((card) => {
+            if (card) observer.observe(card);
+        });
+
+        return () => observer.disconnect();
+    }, []);
 
     const features = [
         {
@@ -50,12 +74,23 @@ const FeaturesSection = () => {
     ];
 
     return (
-        <section className="py-24 bg-bg-primary">
-            <div className="max-w-[1440px] mx-auto px-8">
+        <section className="py-24 bg-bg-primary relative">
+            {/* Background Decoration Container (Clipped) */}
+            <div className="absolute inset-0 overflow-hidden pointer-events-none">
+                <div className="max-w-[1440px] mx-auto px-8 relative h-full">
+                    <img src={stars} alt="" className="absolute top-20 left-4 w-16 h-16 opacity-30 animate-pulse" style={{ filter: 'brightness(0)' }} />
+                    <img src={star} alt="" className="absolute bottom-40 -right-10 w-10 h-10 opacity-20 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
+                    <img src={stars} alt="" className="absolute top-1/2 left-0 w-12 h-12 opacity-20 animate-float" style={{ filter: 'brightness(0)' }} />
+                </div>
+            </div>
+
+            <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+
                 {/* Section Header */}
-                <div className="text-center mb-20">
-                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary font-logo mb-4">
+                <div className="text-center mb-20 relative">
+                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary font-logo mb-4 relative inline-block">
                         Everything in <span className="text-brand-secondary">One Place</span>
+                        <img src={star} alt="" className="absolute -top-4 -right-6 w-6 h-6 animate-bounce opacity-80" style={{ filter: 'brightness(0)' }} />
                     </h2>
                     <p className="text-text-secondary text-lg max-w-3xl mx-auto">
                         See exactly how FurEver Home supports adopters and shelters — from first community post to signed adoption papers.
@@ -116,7 +151,11 @@ const FeaturesSection = () => {
                     {/* Right Column: Grid */}
                     <div className="lg:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-6">
                         {features.map((feature, index) => (
-                            <div key={index} className="bg-white p-8 rounded-3xl shadow-soft border border-transparent hover:border-brand-secondary/20 transition-all duration-300 hover:-translate-y-1">
+                            <div
+                                key={index}
+                                ref={el => cardsRef.current[index] = el}
+                                className="bg-white p-8 rounded-3xl shadow-soft border border-transparent hover:border-brand-secondary/20 transition-all duration-700 ease-out opacity-0 scale-90 hover:-translate-y-1"
+                            >
                                 <div className="flex justify-between items-start mb-6">
                                     <div className="w-12 h-12 rounded-2xl bg-bg-secondary flex items-center justify-center text-text-primary">
                                         {feature.icon}

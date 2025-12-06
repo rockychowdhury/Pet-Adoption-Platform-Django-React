@@ -3,6 +3,9 @@ import useAPI from '../../hooks/useAPI';
 import { Link } from 'react-router';
 import { Heart, ArrowRight } from 'lucide-react';
 
+import star from '../../assets/star.png';
+import stars from '../../assets/stars.png';
+
 const FeaturedPets = () => {
     const api = useAPI();
     const [pets, setPets] = useState([]);
@@ -24,12 +27,17 @@ const FeaturedPets = () => {
     }, []);
 
     return (
-        <section className="py-24 bg-bg-primary transition-colors duration-300">
-            <div className="max-w-[1440px] mx-auto px-8">
+        <section className="py-24 bg-bg-primary transition-colors duration-300 relative overflow-hidden">
+            <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+                {/* Decorative Stars (Inside Container) */}
+                <img src={stars} alt="" className="absolute top-0 left-4 w-20 h-20 opacity-20 animate-pulse" style={{ filter: 'brightness(0)' }} />
+                <img src={star} alt="" className="absolute bottom-10 right-10 w-12 h-12 opacity-10 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
+
                 {/* Header */}
-                <div className="text-center mb-16 space-y-4">
-                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary font-logo">
+                <div className="text-center mb-16 space-y-4 relative">
+                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary font-logo relative inline-block">
                         Meet Our <span className="text-brand-secondary">Stars</span>
+                        <img src={star} alt="" className="absolute -top-4 -right-8 w-6 h-6 animate-spin-slow opacity-80" style={{ filter: 'brightness(0)' }} />
                     </h2>
                     <p className="text-text-secondary text-lg max-w-2xl mx-auto font-medium">
                         A few of the furry faces currently waiting for their forever homes.
