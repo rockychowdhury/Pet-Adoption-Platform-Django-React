@@ -29,25 +29,25 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
             <form onSubmit={handleSubmit} className="space-y-4">
 
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <label className="label">Email Address</label>
                     <input
                         type="email"
                         name="email"
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                        className="input-field"
                         placeholder="you@example.com"
                         value={formData.email}
                         onChange={handleChange}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label className="label">Password</label>
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
                             name="password"
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                            className="input-field pr-10"
                             placeholder="••••••••"
                             value={formData.password}
                             onChange={handleChange}
@@ -55,25 +55,25 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-action"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-brand-secondary"
                         >
                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
                     </div>
                 </div>
                 <div className="flex justify-end">
-                    <button type="button" className="text-sm text-action hover:underline">Forgot Password?</button>
+                    <button type="button" className="text-sm text-brand-secondary hover:underline font-medium">Forgot Password?</button>
                 </div>
                 <button
                     type="submit"
-                    className="w-full py-3 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="btn-primary w-full"
                 >
                     Login
                 </button>
             </form>
-            <div className="mt-6 text-center text-gray-500 text-sm">
+            <div className="mt-6 text-center text-text-secondary text-sm">
                 Don't have an account?{' '}
-                <button onClick={onSwitchToRegister} className="text-action font-bold hover:underline">
+                <button onClick={onSwitchToRegister} className="text-brand-secondary font-bold hover:underline">
                     Sign Up
                 </button>
             </div>

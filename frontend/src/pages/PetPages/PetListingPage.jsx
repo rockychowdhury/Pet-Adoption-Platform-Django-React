@@ -65,39 +65,39 @@ const PetListingPage = () => {
             <div className="max-w-[1440px] mx-auto">
 
                 {/* Header Section */}
-                <div className="flex flex-col md:flex-row justify-between items-end mb-8 gap-6">
-                    <div>
-                        <h1 className="text-[40px] font-bold text-text-primary font-logo mb-2 leading-tight">Find Your Companion</h1>
+                <div className="flex flex-col lg:flex-row justify-between items-center mb-12 gap-6">
+                    <div className="text-center lg:text-left">
+                        <h1 className="text-4xl md:text-5xl font-bold text-text-primary font-logo mb-2 leading-tight">Find Your Companion</h1>
                         <p className="text-text-secondary text-lg">Browse our available pets and find your perfect match.</p>
                     </div>
 
-                    <div className="flex gap-6 w-full md:w-auto items-center">
+                    <div className="flex flex-col sm:flex-row gap-4 w-full lg:w-auto items-center">
                         {/* Search Bar */}
-                        <div className="relative flex-grow md:flex-grow-0 md:w-64">
+                        <div className="relative w-full sm:w-72">
                             <input
                                 type="text"
                                 name="search"
                                 placeholder="Search by name, breed..."
                                 value={filters.search}
                                 onChange={handleFilterChange}
-                                className="w-full pl-10 pr-4 h-10 rounded-full border border-border bg-bg-surface text-text-primary focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition text-sm"
+                                className="w-full pl-12 pr-4 h-12 rounded-full border-none bg-bg-surface/50 hover:bg-bg-surface focus:bg-bg-surface text-text-primary focus:ring-2 focus:ring-brand-secondary/20 outline-none transition-all shadow-sm text-sm font-medium placeholder:text-text-secondary/50"
                             />
-                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-text-secondary" size={16} />
+                            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-text-secondary" size={18} />
                         </div>
 
                         {/* Toggle Filters */}
                         <button
                             onClick={() => setShowFilters(!showFilters)}
-                            className={`flex items-center gap-2 px-5 h-10 rounded-full font-semibold transition border text-sm ${showFilters ? 'bg-action text-white border-action' : 'bg-bg-surface text-text-primary border-border hover:border-action'}`}
+                            className={`flex items-center gap-2 px-6 h-12 rounded-full font-bold transition-all shadow-sm text-sm ${showFilters ? 'bg-text-primary text-bg-primary' : 'bg-bg-surface text-text-primary hover:bg-white hover:shadow-md'}`}
                         >
-                            <Filter size={16} />
+                            <Filter size={18} />
                             Filters
                         </button>
 
                         {(user?.role === 'shelter' || user?.role === 'admin') && (
                             <button
                                 onClick={() => setIsCreateModalOpen(true)}
-                                className="flex items-center gap-2 px-5 h-10 bg-action text-white rounded-full font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl text-sm"
+                                className="flex items-center gap-2 px-6 h-12 bg-brand-primary text-white rounded-full font-bold hover:bg-black transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm"
                             >
                                 <Plus size={18} />
                                 <span className="hidden sm:inline">List Pet</span>
@@ -107,18 +107,18 @@ const PetListingPage = () => {
                 </div>
 
                 {/* Expanded Filters Panel */}
-                <div className={`overflow-hidden transition-all duration-300 ease-in-out ${showFilters ? 'max-h-[500px] opacity-100 mb-8' : 'max-h-0 opacity-0 mb-0'}`}>
-                    <div className="bg-bg-surface p-6 rounded-3xl shadow-sm border border-border">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showFilters ? 'max-h-[500px] opacity-100 mb-12' : 'max-h-0 opacity-0 mb-0'}`}>
+                    <div className="bg-bg-surface p-8 rounded-[32px] shadow-soft border border-white/20">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6">
                             {/* Sort By */}
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Sort By</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-text-secondary uppercase tracking-widest ml-1">Sort By</label>
                                 <div className="relative">
                                     <select
                                         name="ordering"
                                         value={filters.ordering}
                                         onChange={handleFilterChange}
-                                        className="w-full px-4 h-10 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none appearance-none cursor-pointer text-sm"
+                                        className="w-full px-4 h-12 rounded-2xl bg-bg-primary border-none text-text-primary focus:ring-2 focus:ring-brand-secondary/20 outline-none appearance-none cursor-pointer text-sm font-medium"
                                     >
                                         <option value="-created_at">Newest First</option>
                                         <option value="created_at">Oldest First</option>
@@ -126,154 +126,150 @@ const PetListingPage = () => {
                                         <option value="-age">Age (Oldest)</option>
                                         <option value="name">Name (A-Z)</option>
                                     </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-secondary pointer-events-none" size={16} />
                                 </div>
                             </div>
 
                             {/* Species */}
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Species</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-text-secondary uppercase tracking-widest ml-1">Species</label>
                                 <div className="relative">
                                     <select
                                         name="species"
                                         value={filters.species}
                                         onChange={handleFilterChange}
-                                        className="w-full px-4 h-10 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none appearance-none cursor-pointer text-sm"
+                                        className="w-full px-4 h-12 rounded-2xl bg-bg-primary border-none text-text-primary focus:ring-2 focus:ring-brand-secondary/20 outline-none appearance-none cursor-pointer text-sm font-medium"
                                     >
-                                        <option value="">All Species</option>
+                                        <option value="">Any</option>
                                         <option value="Dog">Dog</option>
                                         <option value="Cat">Cat</option>
                                         <option value="Bird">Bird</option>
                                         <option value="Rabbit">Rabbit</option>
                                     </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-secondary pointer-events-none" size={16} />
                                 </div>
                             </div>
 
                             {/* Gender */}
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Gender</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-text-secondary uppercase tracking-widest ml-1">Gender</label>
                                 <div className="relative">
                                     <select
                                         name="gender"
                                         value={filters.gender}
                                         onChange={handleFilterChange}
-                                        className="w-full px-4 h-10 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none appearance-none cursor-pointer text-sm"
+                                        className="w-full px-4 h-12 rounded-2xl bg-bg-primary border-none text-text-primary focus:ring-2 focus:ring-brand-secondary/20 outline-none appearance-none cursor-pointer text-sm font-medium"
                                     >
-                                        <option value="">Any Gender</option>
+                                        <option value="">Any</option>
                                         <option value="male">Male</option>
                                         <option value="female">Female</option>
                                     </select>
-                                    <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" size={16} />
+                                    <ChevronDown className="absolute right-4 top-1/2 transform -translate-y-1/2 text-text-secondary pointer-events-none" size={16} />
                                 </div>
                             </div>
 
                             {/* Age Range */}
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Min Age</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-text-secondary uppercase tracking-widest ml-1">Min Age</label>
                                 <input
                                     type="number"
                                     name="age_min"
-                                    placeholder="0"
+                                    placeholder="0 months"
                                     value={filters.age_min}
                                     onChange={handleFilterChange}
-                                    className="w-full px-4 h-10 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none text-sm"
+                                    className="w-full px-4 h-12 rounded-2xl bg-bg-primary border-none text-text-primary focus:ring-2 focus:ring-brand-secondary/20 outline-none text-sm font-medium placeholder:text-text-secondary/50"
                                 />
                             </div>
-                            <div className="space-y-1">
-                                <label className="text-xs font-bold text-gray-500 uppercase ml-1 mb-1 block">Max Age</label>
+                            <div className="space-y-2">
+                                <label className="text-[10px] font-bold text-text-secondary uppercase tracking-widest ml-1">Max Age</label>
                                 <input
                                     type="number"
                                     name="age_max"
                                     placeholder="Any"
                                     value={filters.age_max}
                                     onChange={handleFilterChange}
-                                    className="w-full px-4 h-10 rounded-xl bg-bg-primary border border-border text-text-primary focus:border-action outline-none text-sm"
+                                    className="w-full px-4 h-12 rounded-2xl bg-bg-primary border-none text-text-primary focus:ring-2 focus:ring-brand-secondary/20 outline-none text-sm font-medium placeholder:text-text-secondary/50"
                                 />
                             </div>
                         </div>
-                        <div className="flex justify-end mt-4">
-                            <button onClick={clearFilters} className="text-sm text-red-500 hover:underline font-medium">Clear All</button>
+                        <div className="flex justify-end mt-6">
+                            <button onClick={clearFilters} className="text-xs font-bold text-red-500 hover:text-red-600 transition uppercase tracking-wider">Clear All Filters</button>
                         </div>
                     </div>
                 </div>
 
                 {/* Results Count & Active Filters */}
-                <div className="flex flex-wrap items-center gap-4 mb-8">
-                    <span className="font-bold text-text-primary">Showing {pets.length} pets</span>
-                    {activeFilters.map((filter) => (
-                        <div key={filter.key} className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg-surface border border-border text-sm text-text-secondary shadow-sm">
-                            <span>{filter.label}</span>
-                            <button onClick={() => removeFilter(filter.key)} className="hover:text-red-500 transition">
-                                <X size={14} />
-                            </button>
-                        </div>
-                    ))}
+                <div className="flex flex-wrap items-center justify-between gap-4 mb-8 px-2">
+                    <span className="font-bold text-text-primary text-sm">Showing {pets.length} pets</span>
+                    <div className="flex flex-wrap gap-2">
+                        {activeFilters.map((filter) => (
+                            <div key={filter.key} className="flex items-center gap-2 px-3 py-1 rounded-full bg-bg-surface border border-border/50 text-xs font-bold text-text-secondary shadow-sm">
+                                <span>{filter.label}</span>
+                                <button onClick={() => removeFilter(filter.key)} className="hover:text-red-500 transition">
+                                    <X size={12} />
+                                </button>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
                 {/* Pet Grid */}
                 {loading ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 animate-pulse">
                         {[...Array(6)].map((_, i) => (
-                            <div key={i} className="bg-bg-surface rounded-3xl h-96 shadow-sm"></div>
+                            <div key={i} className="bg-bg-surface rounded-[32px] h-[450px] shadow-soft"></div>
                         ))}
                     </div>
                 ) : pets.length === 0 ? (
-                    <div className="text-center py-20 bg-bg-surface rounded-3xl shadow-sm border border-border max-w-2xl mx-auto">
-                        <div className="bg-bg-secondary w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Search size={32} className="text-text-secondary" />
+                    <div className="text-center py-32 bg-bg-surface rounded-[32px] shadow-soft border border-white/20 max-w-2xl mx-auto">
+                        <div className="bg-bg-primary w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                            <Search size={40} className="text-text-secondary/50" />
                         </div>
-                        <h3 className="text-xl font-bold text-text-primary mb-2">No pets found</h3>
-                        <p className="text-text-secondary">Try adjusting your filters or search terms.</p>
-                        <button onClick={clearFilters} className="mt-6 px-6 py-2 bg-action text-white rounded-full font-semibold hover:bg-action_dark transition">Clear filters</button>
+                        <h3 className="text-2xl font-bold text-text-primary mb-2">No pets found</h3>
+                        <p className="text-text-secondary mb-8">Try adjusting your filters or search terms.</p>
+                        <button onClick={clearFilters} className="px-8 py-3 bg-text-primary text-bg-primary rounded-full font-bold hover:opacity-90 transition">Clear filters</button>
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                         {pets.map((pet) => (
-                            <Link to={`/pets/${pet.id}`} key={pet.id} className="group bg-bg-surface rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition duration-300 transform hover:-translate-y-1 border border-border flex flex-col">
-                                <div className="h-72 overflow-hidden relative bg-bg-secondary">
+                            <Link to={`/pets/${pet.id}`} key={pet.id} className="group bg-bg-surface rounded-[32px] p-3 shadow-soft hover:shadow-xl transition-all duration-500 hover:-translate-y-2 border border-white/20 flex flex-col h-full">
+                                {/* Image Container */}
+                                <div className="h-64 rounded-[24px] overflow-hidden relative bg-bg-primary">
                                     <img
                                         src={pet.photo_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=1000"}
                                         alt={pet.name}
                                         className="w-full h-full object-cover transition duration-700 group-hover:scale-110"
                                     />
-                                    <div className="absolute top-4 right-4 bg-bg-surface/95 backdrop-blur-sm px-3 py-1 rounded-md text-[10px] font-bold text-text-secondary uppercase tracking-wider shadow-sm flex items-center gap-1.5">
-                                        <div className={`w-2 h-2 rounded-full ${pet.status === 'available' ? 'bg-green-500' : pet.status === 'pending' ? 'bg-orange-500' : 'bg-gray-500'}`}></div>
-                                        {pet.status}
-                                    </div>
-                                    <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/70 to-transparent p-6 opacity-0 group-hover:opacity-100 transition duration-300">
-                                        <p className="text-white text-sm font-medium line-clamp-2">{pet.description}</p>
+                                    <div className="absolute top-3 right-3">
+                                        <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm ${pet.status === 'available' ? 'bg-green-500 text-white' :
+                                                pet.status === 'pending' ? 'bg-orange-500 text-white' :
+                                                    'bg-gray-500 text-white'
+                                            }`}>
+                                            {pet.status === 'available' ? '● Available' : pet.status === 'pending' ? '● Pending' : '● Adopted'}
+                                        </span>
                                     </div>
                                 </div>
-                                <div className="p-6 flex-grow flex flex-col justify-between">
-                                    <div>
-                                        <div className="flex justify-between items-start mb-2">
-                                            <h3 className="text-2xl font-bold text-text-primary group-hover:text-action transition">{pet.name}</h3>
-                                            {pet.gender === 'male' ? (
-                                                <div className="w-8 h-8 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                                                    <BsGenderMale size={18} />
-                                                </div>
-                                            ) : (
-                                                <div className="w-8 h-8 rounded-full bg-pink-50 flex items-center justify-center text-pink-500">
-                                                    <BsGenderFemale size={18} />
-                                                </div>
-                                            )}
-                                        </div>
-                                        <p className="text-text-secondary text-sm font-medium mb-4">{pet.breed}</p>
 
-                                        <div className="flex items-center gap-3 text-sm text-text-secondary mb-4">
-                                            <span>{pet.age} months</span>
-                                            <div className="w-1 h-1 rounded-full bg-gray-300"></div>
-                                            <span>{pet.species}</span>
+                                {/* Content */}
+                                <div className="px-4 pt-5 pb-2 flex-grow flex flex-col">
+                                    <div className="flex justify-between items-start mb-1">
+                                        <h3 className="text-2xl font-bold text-text-primary group-hover:text-brand-secondary transition-colors">{pet.name}</h3>
+                                        <div className="w-8 h-8 rounded-full bg-bg-primary flex items-center justify-center text-text-secondary group-hover:bg-brand-secondary group-hover:text-white transition-colors">
+                                            {/* Using a generic icon or specific gender icon */}
+                                            {pet.gender === 'male' ? <BsGenderMale size={16} /> : <BsGenderFemale size={16} />}
                                         </div>
                                     </div>
 
-                                    <div>
-                                        <div className="w-full h-px bg-border mb-4"></div>
-                                        <div className="flex justify-between items-center">
-                                            <span className="text-[10px] font-bold text-text-secondary uppercase tracking-wider">POSTED {new Date(pet.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}</span>
-                                            <span className="text-action font-bold text-xs tracking-wide group-hover:underline uppercase">View Details</span>
-                                        </div>
+                                    <p className="text-text-secondary text-sm font-medium mb-1">{pet.breed}</p>
+                                    <p className="text-text-secondary/70 text-xs mb-6">{pet.age} months • {pet.species}</p>
+
+                                    <div className="mt-auto pt-4 border-t border-border/50 flex justify-between items-center">
+                                        <span className="text-[10px] font-bold text-text-secondary/50 uppercase tracking-widest">
+                                            POSTED {new Date(pet.created_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }).toUpperCase()}
+                                        </span>
+                                        <span className="text-xs font-bold text-brand-secondary uppercase tracking-wider group-hover:underline">
+                                            View Details
+                                        </span>
                                     </div>
                                 </div>
                             </Link>

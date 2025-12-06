@@ -34,8 +34,8 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                         type="button"
                         onClick={() => setFormData({ ...formData, role: 'adopter' })}
                         className={`flex-1 py-3 px-4 rounded-xl border-2 transition font-bold flex flex-col items-center gap-2 ${formData.role === 'adopter'
-                            ? 'border-action bg-action/5 text-action'
-                            : 'border-gray-100 text-gray-500 hover:border-gray-200'
+                            ? 'border-brand-secondary bg-brand-secondary/5 text-brand-secondary'
+                            : 'border-border text-text-secondary hover:border-gray-300'
                             }`}
                     >
                         <span>🐶</span>
@@ -45,8 +45,8 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                         type="button"
                         onClick={() => setFormData({ ...formData, role: 'shelter' })}
                         className={`flex-1 py-3 px-4 rounded-xl border-2 transition font-bold flex flex-col items-center gap-2 ${formData.role === 'shelter'
-                            ? 'border-action bg-action/5 text-action'
-                            : 'border-gray-100 text-gray-500 hover:border-gray-200'
+                            ? 'border-brand-secondary bg-brand-secondary/5 text-brand-secondary'
+                            : 'border-border text-text-secondary hover:border-gray-300'
                             }`}
                     >
                         <span>🏠</span>
@@ -56,28 +56,28 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
                 <div className="grid grid-cols-2 gap-4">
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="label">
                             {formData.role === 'shelter' ? 'Shelter Name' : 'First Name'}
                         </label>
                         <input
                             type="text"
                             name="first_name"
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                            className="input-field"
                             placeholder={formData.role === 'shelter' ? "Happy Paws" : "John"}
                             value={formData.first_name}
                             onChange={handleChange}
                         />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                        <label className="label">
                             {formData.role === 'shelter' ? 'Representative' : 'Last Name'}
                         </label>
                         <input
                             type="text"
                             name="last_name"
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                            className="input-field"
                             placeholder={formData.role === 'shelter' ? "Manager" : "Doe"}
                             value={formData.last_name}
                             onChange={handleChange}
@@ -85,25 +85,25 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                     </div>
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Email Address</label>
+                    <label className="label">Email Address</label>
                     <input
                         type="email"
                         name="email"
                         required
-                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                        className="input-field"
                         placeholder="you@example.com"
                         value={formData.email}
                         onChange={handleChange}
                     />
                 </div>
                 <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
+                    <label className="label">Password</label>
                     <div className="relative">
                         <input
                             type={showPassword ? "text" : "password"}
                             name="password"
                             required
-                            className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                            className="input-field pr-10"
                             placeholder="••••••••"
                             value={formData.password}
                             onChange={handleChange}
@@ -111,7 +111,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-action"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-text-secondary hover:text-brand-secondary"
                         >
                             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                         </button>
@@ -119,14 +119,14 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 </div>
                 <button
                     type="submit"
-                    className="w-full py-3 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                    className="btn-primary w-full"
                 >
                     {formData.role === 'shelter' ? 'Register Shelter' : 'Create Account'}
                 </button>
             </form>
-            <div className="mt-6 text-center text-gray-500 text-sm">
+            <div className="mt-6 text-center text-text-secondary text-sm">
                 Already have an account?{' '}
-                <button onClick={onSwitchToLogin} className="text-action font-bold hover:underline">
+                <button onClick={onSwitchToLogin} className="text-brand-secondary font-bold hover:underline">
                     Login
                 </button>
             </div>

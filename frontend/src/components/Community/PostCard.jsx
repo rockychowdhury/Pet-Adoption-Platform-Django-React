@@ -38,86 +38,94 @@ const PostCard = ({ post, onUpdate }) => {
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-6">
-            <div className="p-4 flex justify-between items-start">
+        <div className="bg-bg-surface rounded-[24px] shadow-soft border border-white/20 overflow-hidden mb-6">
+            <div className="p-5 flex justify-between items-start">
                 <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                    <div className="w-10 h-10 rounded-full bg-bg-primary overflow-hidden border border-white/20">
                         {post.user.photoURL ? (
                             <img src={post.user.photoURL} alt={post.user.first_name} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-gray-500 font-bold">
+                            <div className="w-full h-full flex items-center justify-center text-text-secondary font-bold text-base">
                                 {post.user.first_name?.[0]}
                             </div>
                         )}
                     </div>
                     <div>
-                        <h3 className="font-bold text-gray-800">{post.user.first_name} {post.user.last_name}</h3>
-                        <p className="text-xs text-gray-500">{new Date(post.created_at).toLocaleDateString()}</p>
+                        <div className="flex items-center gap-2">
+                            <h3 className="font-bold text-text-primary text-base">{post.user.first_name} {post.user.last_name}</h3>
+                            {/* Mock Role */}
+                            <span className="text-[10px] font-bold text-text-secondary bg-bg-primary px-2 py-0.5 rounded-full">Adopter</span>
+                        </div>
+                        <p className="text-[10px] text-text-secondary font-medium mt-0.5">
+                            Adopted 2 weeks ago • {new Date(post.created_at).toLocaleDateString()}
+                        </p>
                     </div>
                 </div>
-                <button className="text-gray-400 hover:text-gray-600">
+                <button className="text-text-secondary hover:text-text-primary transition">
                     <MoreHorizontal size={20} />
                 </button>
             </div>
 
-            <div className="px-4 pb-2">
-                <p className="text-gray-700 whitespace-pre-wrap">{post.content}</p>
+            <div className="px-5 pb-3">
+                <p className="text-text-primary text-base leading-relaxed whitespace-pre-wrap">{post.content}</p>
             </div>
 
             {post.image && (
-                <div className="w-full h-64 sm:h-80 bg-gray-100 mt-2">
+                <div className="w-full h-64 sm:h-80 bg-bg-secondary mt-2">
                     <img src={post.image} alt="Post content" className="w-full h-full object-cover" />
                 </div>
             )}
 
-            <div className="p-4 border-t border-gray-50 flex items-center justify-between text-gray-500">
-                <div className="flex gap-4">
+            <div className="px-5 py-4 flex items-center justify-between text-text-secondary">
+                <div className="flex gap-5">
                     <button
                         onClick={handleLike}
-                        className={`flex items-center gap-1.5 transition ${post.is_liked ? 'text-red-500' : 'hover:text-red-500'}`}
+                        className={`flex items-center gap-1.5 transition group ${post.is_liked ? 'text-red-500' : 'hover:text-red-500'}`}
                     >
-                        <Heart size={20} fill={post.is_liked ? "currentColor" : "none"} />
-                        <span className="text-sm font-medium">{post.reaction_count}</span>
+                        <Heart size={20} fill={post.is_liked ? "currentColor" : "none"} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold">{post.reaction_count}</span>
                     </button>
                     <button
                         onClick={() => setIsCommenting(!isCommenting)}
-                        className="flex items-center gap-1.5 hover:text-blue-500 transition"
+                        className="flex items-center gap-1.5 hover:text-brand-secondary transition group"
                     >
-                        <MessageCircle size={20} />
-                        <span className="text-sm font-medium">{post.comments.length}</span>
+                        <MessageCircle size={20} className="group-hover:scale-110 transition-transform" />
+                        <span className="text-xs font-bold">{post.comments.length}</span>
                     </button>
                 </div>
-                <button className="hover:text-action transition">
+                <button className="hover:text-brand-secondary transition transform hover:scale-110">
                     <Share2 size={20} />
                 </button>
             </div>
 
             {/* Comments Section */}
             {(isCommenting || post.comments.length > 0) && (
-                <div className="bg-gray-50 p-4 border-t border-gray-100">
+                <div className="bg-[#FAF7F5] p-5 border-t border-white/10">
                     {post.comments.map((comment) => (
                         <div key={comment.id} className="flex gap-3 mb-4 last:mb-2">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
+                            <div className="w-8 h-8 rounded-full bg-bg-surface overflow-hidden flex-shrink-0 border border-white/20 mt-1">
                                 {comment.user.photoURL ? (
                                     <img src={comment.user.photoURL} alt={comment.user.first_name} className="w-full h-full object-cover" />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs font-bold">
+                                    <div className="w-full h-full flex items-center justify-center text-text-secondary text-xs font-bold">
                                         {comment.user.first_name?.[0]}
                                     </div>
                                 )}
                             </div>
-                            <div className="flex-1 bg-white p-3 rounded-2xl rounded-tl-none shadow-sm">
-                                <p className="text-xs font-bold text-gray-800 mb-0.5">{comment.user.first_name} {comment.user.last_name}</p>
-                                <p className="text-sm text-gray-600">{comment.content}</p>
+                            <div className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-black/5">
+                                <div className="flex items-baseline gap-2 mb-1">
+                                    <p className="text-xs font-bold text-text-primary">{comment.user.first_name} {comment.user.last_name}</p>
+                                    <span className="text-[10px] text-text-secondary font-medium">(Shelter volunteer)</span>
+                                </div>
+                                <p className="text-sm text-text-secondary leading-relaxed">{comment.content}</p>
                             </div>
                         </div>
                     ))}
 
                     {user && (
-                        <form onSubmit={handleComment} className="flex gap-3 mt-4">
-                            <div className="w-8 h-8 rounded-full bg-gray-200 overflow-hidden flex-shrink-0">
-                                {/* Current user avatar placeholder */}
-                                <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs font-bold">
+                        <form onSubmit={handleComment} className="flex gap-3 mt-6 items-center">
+                            <div className="w-8 h-8 rounded-full bg-bg-surface overflow-hidden flex-shrink-0 border border-white/20">
+                                <div className="w-full h-full flex items-center justify-center text-text-secondary text-xs font-bold">
                                     {user.first_name?.[0]}
                                 </div>
                             </div>
@@ -126,13 +134,13 @@ const PostCard = ({ post, onUpdate }) => {
                                     type="text"
                                     value={commentText}
                                     onChange={(e) => setCommentText(e.target.value)}
-                                    placeholder="Write a comment..."
-                                    className="w-full pl-4 pr-12 py-2 rounded-full border border-gray-200 focus:border-action focus:ring-1 focus:ring-action outline-none text-sm"
+                                    placeholder="Write a supportive comment..."
+                                    className="w-full pl-5 pr-24 py-3 rounded-full bg-white border-none outline-none text-sm text-text-primary placeholder:text-text-secondary/50 shadow-sm focus:ring-0"
                                 />
                                 <button
                                     type="submit"
                                     disabled={loading || !commentText.trim()}
-                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-action font-bold text-xs disabled:opacity-50"
+                                    className="absolute right-1.5 top-1/2 -translate-y-1/2 px-6 py-2 bg-[#2D2D2D] text-white rounded-full font-bold text-xs hover:opacity-90 transition disabled:opacity-50"
                                 >
                                     Post
                                 </button>

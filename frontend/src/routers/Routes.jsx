@@ -8,6 +8,7 @@ import ErrorComponent from "../components/common/ErrorComponent";
 import PetListingPage from "../pages/PetPages/PetListingPage";
 import PetDetailsPage from "../pages/PetPages/PetDetailsPage";
 import CommunityPage from "../pages/CommunityPages/CommunityPage";
+import AboutPage from "../pages/AboutPages/AboutPage";
 import Navbar from "../components/common/Navbar";
 import DashboardLayout from "../layouts/DashboardLayout";
 import ShelterDashboard from "../pages/Dashboard/ShelterDashboard";
@@ -37,6 +38,10 @@ const router = createBrowserRouter([
     {
         path: '/community',
         element: <><Navbar /><CommunityPage /></>
+    },
+    {
+        path: '/about',
+        element: <><Navbar /><AboutPage /></>
     },
     {
         path: '/dashboard',
