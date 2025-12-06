@@ -1,6 +1,7 @@
 import React from 'react';
 import HeroSection from '../../components/LandingPage/HeroSection';
 import FeaturedPets from '../../components/LandingPage/FeaturedPets';
+import FeaturesSection from '../../components/LandingPage/FeaturesSection';
 import HowItWorks from '../../components/LandingPage/HowItWorks';
 import Footer from '../../components/LandingPage/Footer';
 import Navbar from '../../components/common/Navbar'; // Assuming Navbar exists or needs to be created
@@ -24,6 +25,7 @@ const HomePage = () => {
                     <>
                         <HeroSection />
                         <FeaturedPets />
+                        <FeaturesSection />
                         <HowItWorks />
                     </>
                 )}
