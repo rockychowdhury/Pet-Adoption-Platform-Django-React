@@ -1,10 +1,9 @@
 
 const SubHeading = () => {
     return (
-        <div className="opacity-70 text-2xl">
-            <span className="bg-action text-white px-2 rounded-full text-base">#SaveALife</span> <br />
-            Thousands of pets waiting for a loving home.<br />
-            Start your adoption journey now.
+        <div className="text-text-secondary text-lg max-w-lg leading-relaxed font-medium">
+            Connecting loving homes with pets in need of a second chance.
+            Search verified shelters, meet your match, and bring home unconditional love.
         </div>
     );
 };
