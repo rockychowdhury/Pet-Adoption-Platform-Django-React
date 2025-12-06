@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import useAPI from '../../hooks/useAPI';
 import { Link } from 'react-router';
-import { Heart } from 'lucide-react';
+import { Heart, ArrowRight } from 'lucide-react';
 
 const FeaturedPets = () => {
     const api = useAPI();
@@ -12,8 +12,6 @@ const FeaturedPets = () => {
         const fetchFeaturedPets = async () => {
             try {
                 const response = await api.get('/pets/?limit=4');
-                // Assuming the API returns a list, take the first 4
-                // If pagination is implemented, response.data.results might be needed
                 const data = Array.isArray(response.data) ? response.data : response.data.results || [];
                 setPets(data.slice(0, 4));
             } catch (error) {
@@ -26,33 +24,51 @@ const FeaturedPets = () => {
     }, []);
 
     return (
-        <section className="py-20 bg-bg-primary transition-colors duration-300">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-16">
-                    <h2 className="text-3xl md:text-4xl font-bold text-text-primary mb-4 font-logo">Meet Our <span className="text-action">Stars</span></h2>
-                    <p className="text-text-secondary max-w-2xl mx-auto font-inter">These adorable pets are looking for their forever homes. Could you be the one?</p>
+        <section className="py-24 bg-bg-primary transition-colors duration-300">
+            <div className="max-w-[1440px] mx-auto px-8">
+                {/* Header */}
+                <div className="text-center mb-16 space-y-4">
+                    <h2 className="text-4xl md:text-5xl font-bold text-text-primary font-logo">
+                        Meet Our <span className="text-brand-secondary">Stars</span>
+                    </h2>
+                    <p className="text-text-secondary text-lg max-w-2xl mx-auto font-medium">
+                        A few of the furry faces currently waiting for their forever homes.
+                    </p>
                 </div>
 
                 {loading ? (
-                    <div className="text-center py-12">Loading stars...</div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 animate-pulse">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="bg-white rounded-[32px] h-[400px] shadow-soft"></div>
+                        ))}
+                    </div>
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
                         {pets.map((pet) => (
-                            <div key={pet.id} className="bg-bg-surface rounded-3xl shadow-lg overflow-hidden hover:shadow-2xl transition duration-300 group border border-border">
-                                <div className="relative h-64 overflow-hidden">
+                            <div key={pet.id} className="group bg-white rounded-[32px] p-4 shadow-soft hover:shadow-xl transition-all duration-300 hover:-translate-y-2 border border-transparent hover:border-brand-secondary/20">
+                                {/* Image Container */}
+                                <div className="relative h-72 rounded-[24px] overflow-hidden mb-5">
                                     <img
                                         src={pet.photo_url || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=1000"}
                                         alt={pet.name}
-                                        className="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"
+                                        className="w-full h-full object-cover transform group-hover:scale-110 transition duration-700"
                                     />
-                                    <button className="absolute top-4 right-4 p-2 bg-bg-surface/80 backdrop-blur-sm rounded-full text-text-secondary hover:text-red-500 transition">
+                                    <button className="absolute top-3 right-3 w-10 h-10 bg-white rounded-full flex items-center justify-center text-text-secondary hover:text-red-500 hover:bg-red-50 transition shadow-sm">
                                         <Heart size={20} />
                                     </button>
                                 </div>
-                                <div className="p-6">
-                                    <h3 className="text-xl font-bold text-text-primary mb-1">{pet.name}</h3>
-                                    <p className="text-sm text-text-secondary mb-4">{pet.breed} • {pet.age} months</p>
-                                    <Link to={`/pets/${pet.id}`} className="block w-full py-2 text-center border border-action text-action rounded-xl font-semibold hover:bg-action hover:text-white transition duration-300">
+
+                                {/* Content */}
+                                <div className="px-2 pb-2">
+                                    <h3 className="text-2xl font-bold text-text-primary mb-1">{pet.name}</h3>
+                                    <p className="text-sm text-text-secondary font-medium mb-6">
+                                        {pet.breed} • {pet.age} years
+                                    </p>
+
+                                    <Link
+                                        to={`/pets/${pet.id}`}
+                                        className="inline-block text-sm font-bold text-text-primary group-hover:text-brand-secondary transition-colors"
+                                    >
                                         View Profile
                                     </Link>
                                 </div>
@@ -61,9 +77,14 @@ const FeaturedPets = () => {
                     </div>
                 )}
 
-                <div className="text-center mt-12">
-                    <Link to="/pets" className="inline-flex items-center text-action font-semibold hover:text-action_dark transition">
-                        View All Pets <span className="ml-2">→</span>
+                {/* Footer Link */}
+                <div className="text-center mt-16">
+                    <Link
+                        to="/pets"
+                        className="inline-flex items-center gap-2 text-brand-secondary font-bold hover:text-brand-primary transition-colors text-lg group"
+                    >
+                        View All Pets
+                        <ArrowRight size={20} className="transform group-hover:translate-x-1 transition-transform" />
                     </Link>
                 </div>
             </div>
