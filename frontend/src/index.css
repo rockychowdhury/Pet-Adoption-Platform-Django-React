@@ -58,6 +58,32 @@
   }
 }
 
+@layer components {
+  .card {
+    @apply bg-bg-surface rounded-3xl border border-border shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
+  }
+
+  .btn-primary {
+    @apply h-12 px-6 bg-brand-primary text-white font-bold rounded-xl transition-all duration-200 hover:opacity-90 flex items-center justify-center;
+  }
+
+  .btn-secondary {
+    @apply h-12 px-6 border-2 border-brand-secondary text-brand-secondary font-bold rounded-xl transition-all duration-200 hover:bg-brand-secondary hover:text-white flex items-center justify-center;
+  }
+
+  .btn-ghost {
+    @apply h-10 px-4 text-text-secondary font-medium rounded-xl transition-all duration-200 hover:bg-gray-50 flex items-center justify-center;
+  }
+
+  .input-field {
+    @apply h-12 w-full px-4 rounded-xl border border-border bg-bg-surface text-text-primary focus:outline-none focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary/20 transition-all duration-200;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-text-secondary mb-1;
+  }
+}
+
 body {
-  @apply bg-bg-primary text-text-primary transition-colors duration-300;
+  @apply bg-bg-primary text-text-primary font-inter transition-colors duration-300;
 }

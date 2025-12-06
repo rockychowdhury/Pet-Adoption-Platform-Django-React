@@ -54,6 +54,7 @@ export default {
       boxShadow: {
         'custom-light': '0 4px 6px rgba(0, 0, 0, 0.1)', // Light shadow
         'custom-dark': '0 4px 6px rgba(0, 0, 0, 0.4)', // Dark shadow
+        'soft': '0 4px 20px -2px rgba(0, 0, 0, 0.1)', // Soft shadow for cards
       },
       spacing: {
         128: '32rem', // Custom large spacing
@@ -64,6 +65,9 @@ export default {
       },
       screens: {
         xs: '480px', // Added custom breakpoint for extra small screens
+      },
+      transitionDuration: {
+        '400': '400ms',
       },
     },
   },
