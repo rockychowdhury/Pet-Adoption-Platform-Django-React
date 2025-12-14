@@ -1,22 +1,23 @@
 from rest_framework import serializers
 from .models import Conversation, Message
-from apps.users.serializers import UserSerializer
+from apps.users.serializers import PublicUserSerializer
 
 class MessageSerializer(serializers.ModelSerializer):
-    sender = serializers.StringRelatedField(read_only=True)
+    sender = PublicUserSerializer(read_only=True)
 
     class Meta:
         model = Message
-        fields = ['id', 'conversation', 'sender', 'content', 'is_read', 'created_at']
+        fields = ['id', 'conversation', 'sender', 'content', 'message_type', 'attachment_url', 'is_read', 'created_at']
         read_only_fields = ['sender', 'conversation']
 
 class ConversationSerializer(serializers.ModelSerializer):
-    participants = serializers.StringRelatedField(many=True, read_only=True)
+    participants = PublicUserSerializer(many=True, read_only=True)
+    admins = PublicUserSerializer(many=True, read_only=True)
     last_message = serializers.SerializerMethodField()
 
     class Meta:
         model = Conversation
-        fields = ['id', 'participants', 'last_message', 'created_at', 'updated_at']
+        fields = ['id', 'participants', 'name', 'is_group', 'group_image', 'admins', 'last_message', 'created_at', 'updated_at']
 
     def get_last_message(self, obj):
         last_msg = obj.messages.order_by('-created_at').first()
