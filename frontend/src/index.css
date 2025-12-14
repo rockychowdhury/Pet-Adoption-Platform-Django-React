@@ -4,86 +4,310 @@
 
 @layer base {
   :root {
-    /* Base Colors - Light (Cream/Warm) */
+    /* Light Mode - Warm & Inviting Theme */
+    /* Background Colors */
     --color-bg-primary: #FFF8E7;
-    /* Main background (Cream) */
+    /* Main background - Warm cream */
     --color-bg-secondary: #FDE4C3;
-    /* Secondary background (Peach/Highlight) */
+    /* Secondary background - Soft peach */
     --color-bg-surface: #FFFFFF;
-    /* Card/Modal background (White) */
+    /* Surface/Card background - Pure white */
+    --color-bg-overlay: rgba(45, 45, 45, 0.5);
+    /* Overlay for modals - Semi-transparent dark */
 
-    --color-text-primary: #2D2D2D;
-    /* Main text (Charcoal) */
+    /* Text Colors */
+    --color-text-primary: #1F2937;
+    /* Primary text - Charcoal gray */
     --color-text-secondary: #57534E;
-    /* Secondary text (Stone 600) */
+    /* Secondary text - Warm stone */
+    --color-text-tertiary: #9CA3AF;
+    /* Tertiary text - Muted gray */
     --color-text-inverted: #FFFFFF;
-    /* Text on dark backgrounds */
+    /* Inverted text - White for dark backgrounds */
+    --color-text-muted: #D1D5DB;
+    /* Muted text - Very light gray */
 
+    /* Brand Colors */
     --color-brand-primary: #2D2D2D;
-    /* Primary Action (Charcoal) */
+    /* Primary brand - Charcoal (buttons, links) */
     --color-brand-secondary: #A68A6D;
-    /* Accent (Gold/Brown) */
+    /* Secondary brand - Warm brown/gold */
+    --color-brand-accent: #D4B896;
+    /* Accent - Light gold for highlights */
 
+    /* Border Colors */
     --color-border: #E5E7EB;
-    /* Light border */
-    --color-status-success: #22c55e;
-    --color-status-error: #ef4444;
+    /* Default border - Light gray */
+    --color-border-light: #F3F4F6;
+    /* Light border - Very light gray */
+    --color-border-focus: #A68A6D;
+    /* Focus border - Brand secondary */
+    --color-border-error: #EF4444;
+    /* Error border - Red */
+
+    /* Status Colors */
+    --color-status-success: #22C55E;
+    /* Success - Green */
+    --color-status-error: #EF4444;
+    /* Error - Red */
+    --color-status-warning: #F59E0B;
+    /* Warning - Amber */
+    --color-status-info: #3B82F6;
+    /* Info - Blue */
   }
 
   .dark {
-    /* Comfort/Nature Mode (Deep Slate/Night) - Eye Refreshing & Premium */
+    /* Dark Mode - Modern & Comfortable Theme */
+    /* Background Colors */
     --color-bg-primary: #0F172A;
-    /* Slate 900 - Deep Night Background */
+    /* Main background - Deep slate */
     --color-bg-secondary: #1E293B;
-    /* Slate 800 - Lighter secondary/Surface */
+    /* Secondary background - Slate 800 */
     --color-bg-surface: #1E293B;
-    /* Slate 800 - Cards match secondary or slightly lighter */
+    /* Surface/Card background - Slate 800 */
+    --color-bg-overlay: rgba(0, 0, 0, 0.7);
+    /* Overlay for modals - Dark overlay */
 
+    /* Text Colors */
     --color-text-primary: #F8FAFC;
-    /* Slate 50 - Bright White text for readability */
+    /* Primary text - Slate 50 (bright white) */
     --color-text-secondary: #94A3B8;
-    /* Slate 400 - Muted secondary text */
+    /* Secondary text - Slate 400 */
+    --color-text-tertiary: #64748B;
+    /* Tertiary text - Slate 500 */
     --color-text-inverted: #0F172A;
-    /* Slate 900 - Text on light accents */
+    /* Inverted text - Dark for light backgrounds */
+    --color-text-muted: #475569;
+    /* Muted text - Slate 600 */
 
+    /* Brand Colors */
     --color-brand-primary: #FDBA74;
-    /* Orange 300 - Warmth remains */
+    /* Primary brand - Warm orange (buttons, links) */
     --color-brand-secondary: #818CF8;
-    /* Indigo 400 - Calming accent */
+    /* Secondary brand - Indigo */
+    --color-brand-accent: #A78BFA;
+    /* Accent - Purple for highlights */
 
+    /* Border Colors */
     --color-border: #334155;
-    /* Slate 700 - Subtle dark borders */
-    --color-status-success: #4ade80;
-    --color-status-error: #f87171;
+    /* Default border - Slate 700 */
+    --color-border-light: #475569;
+    /* Light border - Slate 600 */
+    --color-border-focus: #818CF8;
+    /* Focus border - Brand secondary */
+    --color-border-error: #F87171;
+    /* Error border - Red */
+
+    /* Status Colors */
+    --color-status-success: #4ADE80;
+    /* Success - Green */
+    --color-status-error: #F87171;
+    /* Error - Red */
+    --color-status-warning: #FBBF24;
+    /* Warning - Amber */
+    --color-status-info: #60A5FA;
+    /* Info - Blue */
   }
 }
 
 @layer components {
+  /* Card Components */
   .card {
-    @apply bg-bg-surface rounded-3xl border border-border shadow-soft transition-all duration-200 hover:-translate-y-1 hover:shadow-lg;
+    @apply bg-bg-surface rounded-2xl border border-border shadow-soft transition-all duration-300 hover:shadow-lg;
   }
 
+  .card-hover {
+    @apply card hover:-translate-y-1 hover:border-border-focus;
+  }
+
+  /* Button Components */
   .btn-primary {
-    @apply h-12 px-6 bg-brand-primary text-white font-bold rounded-xl transition-all duration-200 hover:opacity-90 flex items-center justify-center;
+    @apply h-12 px-6 bg-brand-primary text-text-inverted font-semibold rounded-xl transition-all duration-200 hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-secondary {
-    @apply h-12 px-6 border-2 border-brand-secondary text-brand-secondary font-bold rounded-xl transition-all duration-200 hover:bg-brand-secondary hover:text-white flex items-center justify-center;
+    @apply h-12 px-6 border-2 border-brand-secondary text-brand-secondary font-semibold rounded-xl transition-all duration-200 hover:bg-brand-secondary hover:text-text-inverted active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-ghost {
-    @apply h-10 px-4 text-text-secondary font-medium rounded-xl transition-all duration-200 hover:bg-gray-50 flex items-center justify-center;
+    @apply h-10 px-4 text-text-secondary font-medium rounded-xl transition-all duration-200 hover:bg-bg-secondary hover:text-text-primary active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
+  .btn-outline {
+    @apply h-12 px-6 border-2 border-border text-text-primary font-semibold rounded-xl transition-all duration-200 hover:border-border-focus hover:bg-bg-secondary active:scale-[0.98] flex items-center justify-center gap-2;
+  }
+
+  /* Input Components */
   .input-field {
-    @apply h-12 w-full px-4 rounded-xl border border-border bg-bg-surface text-text-primary focus:outline-none focus:border-brand-secondary focus:ring-2 focus:ring-brand-secondary transition-all duration-200;
+    @apply h-12 w-full px-4 rounded-xl border border-border bg-bg-surface text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-focus focus:ring-2 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-bg-secondary;
+  }
+  
+  .input-field:focus {
+    --tw-ring-color: var(--color-border-focus);
+    --tw-ring-opacity: 0.2;
   }
 
+  .input-error {
+    @apply input-field border-border-error focus:border-border-error;
+  }
+  
+  .input-error:focus {
+    --tw-ring-color: var(--color-border-error);
+    --tw-ring-opacity: 0.2;
+  }
+
+  .input-success {
+    @apply input-field border-status-success focus:border-status-success;
+  }
+  
+  .input-success:focus {
+    --tw-ring-color: var(--color-status-success);
+    --tw-ring-opacity: 0.2;
+  }
+
+  /* Label Components */
   .label {
-    @apply block text-sm font-medium text-text-secondary mb-1;
+    @apply block text-sm font-semibold text-text-primary mb-2;
+  }
+
+  .label-optional {
+    @apply label text-text-secondary;
+  }
+
+  /* Auth Specific Components */
+  .auth-container {
+    @apply min-h-screen w-full bg-bg-primary flex items-center justify-center p-4;
+  }
+
+  .auth-card {
+    @apply bg-bg-surface rounded-3xl shadow-xl w-full max-w-[440px] p-8 md:p-10 flex flex-col items-center relative border border-border;
+  }
+
+  .auth-input {
+    @apply h-12 w-full px-4 rounded-xl border border-border bg-bg-secondary text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-border-focus focus:ring-2 transition-all duration-200;
+  }
+  
+  .auth-input:focus {
+    --tw-ring-color: var(--color-border-focus);
+    --tw-ring-opacity: 0.2;
+  }
+
+  .auth-button {
+    @apply w-full h-12 px-6 bg-brand-primary text-text-inverted font-semibold rounded-xl transition-all duration-200 hover:opacity-90 active:scale-[0.98] flex items-center justify-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  /* Status Messages */
+  .alert-success {
+    @apply p-4 rounded-xl text-sm text-status-success;
+    background-color: color-mix(in srgb, var(--color-status-success) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-status-success) 20%, transparent);
+  }
+
+  .alert-error {
+    @apply p-4 rounded-xl text-sm text-status-error;
+    background-color: color-mix(in srgb, var(--color-status-error) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-status-error) 20%, transparent);
+  }
+
+  .alert-warning {
+    @apply p-4 rounded-xl text-sm text-status-warning;
+    background-color: color-mix(in srgb, var(--color-status-warning) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-status-warning) 20%, transparent);
+  }
+
+  .alert-info {
+    @apply p-4 rounded-xl text-sm text-status-info;
+    background-color: color-mix(in srgb, var(--color-status-info) 10%, transparent);
+    border: 1px solid color-mix(in srgb, var(--color-status-info) 20%, transparent);
+  }
+
+  /* Divider */
+  .divider {
+    @apply relative text-center my-6 before:content-[''] before:absolute before:top-1/2 before:left-0 before:right-0 before:h-px before:bg-border;
+  }
+
+  .divider-text {
+    @apply relative inline-block px-4 bg-bg-surface text-text-tertiary text-sm font-medium;
   }
 }
 
 body {
   @apply bg-bg-primary text-text-primary font-inter transition-colors duration-300;
+}
+
+/* Animations */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.5s ease-out;
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out;
+}
+
+.animate-slide-in {
+  animation: slide-in 0.3s ease-out;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Focus visible for accessibility */
+*:focus-visible {
+  @apply outline-none ring-2 ring-offset-2 ring-offset-bg-primary;
+  --tw-ring-color: var(--color-border-focus);
+}
+
+/* Selection styling */
+::selection {
+  @apply text-text-primary;
+  background-color: color-mix(in srgb, var(--color-brand-secondary) 30%, transparent);
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-bg-secondary;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-border-focus;
 }
