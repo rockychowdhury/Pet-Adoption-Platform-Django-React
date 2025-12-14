@@ -8,24 +8,38 @@ export default {
   theme: {
     extend: {
       colors: {
-        // Semantic System
+        // Unified Semantic Color System
         bg: {
           primary: 'var(--color-bg-primary)',
           secondary: 'var(--color-bg-secondary)',
           surface: 'var(--color-bg-surface)',
+          overlay: 'var(--color-bg-overlay)',
         },
         text: {
           primary: 'var(--color-text-primary)',
           secondary: 'var(--color-text-secondary)',
+          tertiary: 'var(--color-text-tertiary)',
           inverted: 'var(--color-text-inverted)',
+          muted: 'var(--color-text-muted)',
         },
         brand: {
           primary: 'var(--color-brand-primary)',
           secondary: 'var(--color-brand-secondary)',
+          accent: 'var(--color-brand-accent)',
         },
-        border: 'var(--color-border)',
-
-        // Legacy/Direct mappings (keeping some for safety but mapping to new system)
+        border: {
+          DEFAULT: 'var(--color-border)',
+          light: 'var(--color-border-light)',
+          focus: 'var(--color-border-focus)',
+          error: 'var(--color-border-error)',
+        },
+        status: {
+          success: 'var(--color-status-success)',
+          error: 'var(--color-status-error)',
+          warning: 'var(--color-status-warning)',
+          info: 'var(--color-status-info)',
+        },
+        // Legacy support (mapped to semantic system)
         action: 'var(--color-brand-primary)',
         secondary: 'var(--color-brand-secondary)',
       },

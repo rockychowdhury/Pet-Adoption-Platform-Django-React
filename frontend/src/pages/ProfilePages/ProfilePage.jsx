@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router';
 import useAuth from '../../hooks/useAuth';
 import useAPI from '../../hooks/useAPI';
 import { User, Mail, Phone, MapPin, Edit2, Save, X } from 'lucide-react';
@@ -6,6 +7,7 @@ import { User, Mail, Phone, MapPin, Edit2, Save, X } from 'lucide-react';
 const ProfilePage = () => {
     const { user, setUser } = useAuth();
     const api = useAPI();
+    const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
     const [formData, setFormData] = useState({
         first_name: '',
@@ -52,45 +54,104 @@ const ProfilePage = () => {
         }
     };
 
+    const [activeTab, setActiveTab] = useState('about');
+
     if (!user) return <div className="text-center py-20">Loading profile...</div>;
 
+    const StatItem = ({ label, value }) => (
+        <div className="text-center px-4">
+            <div className="font-bold text-lg text-natural">{value}</div>
+            <div className="text-xs text-text-secondary uppercase tracking-wider">{label}</div>
+        </div>
+    );
+
+    const Badge = ({ type }) => {
+        if (type === 'verified') return <span className="p-1.5 bg-blue-100 text-blue-600 rounded-full" title="Verified Type"><User size={12} /></span>;
+        if (type === 'pet_owner') return <span className="p-1.5 bg-amber-100 text-amber-700 rounded-full" title="Verified Pet Owner"><div className="w-3 h-3">🐾</div></span>;
+        return null;
+    };
+
     return (
-        <div className="container mx-auto px-6 py-12">
-            <div className="max-w-4xl mx-auto bg-white rounded-3xl shadow-xl overflow-hidden">
-                <div className="bg-gradient-to-r from-primary to-secondary h-48 relative">
-                    <div className="absolute -bottom-16 left-10">
+        <div className="container mx-auto px-4 sm:px-6 py-8">
+            <div className="max-w-4xl mx-auto bg-bg-surface rounded-3xl shadow-xl overflow-hidden card">
+                {/* Header Banner */}
+                <div className="h-48 bg-gradient-to-r from-brand-secondary to-brand-accent relative">
+                    <div className="absolute -bottom-16 left-8 sm:left-12">
                         <img
                             src={formData.photoURL || "https://i.ibb.co.com/hWK4ZpT/petDP.jpg"}
                             alt="Profile"
-                            className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover bg-white"
+                            className="w-32 h-32 rounded-full border-4 border-bg-surface shadow-lg object-cover bg-bg-surface"
                         />
                     </div>
                 </div>
 
-                <div className="pt-20 px-10 pb-10">
-                    <div className="flex justify-between items-start mb-8">
+                {/* Profile Controls & Stats */}
+                <div className="pt-20 px-8 sm:px-12 pb-6">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                         <div>
-                            <h1 className="text-3xl font-bold text-natural font-logo">
-                                {user.first_name} {user.last_name}
-                            </h1>
-                            <p className="text-gray-500 font-medium">{user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'User'}</p>
+                            <div className="flex items-center gap-2">
+                                <h1 className="text-3xl font-bold text-natural font-logo">
+                                    {user.first_name} {user.last_name}
+                                </h1>
+                                {user.verified_identity && <Badge type="verified" />}
+                                {user.role === 'adopter' && <Badge type="pet_owner" />}
+                            </div>
+                            <p className="text-gray-500 font-medium">{user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Pet Lover'}</p>
+                            {user.location && (
+                                <div className="flex items-center text-sm text-gray-500 mt-1">
+                                    <MapPin size={14} className="mr-1" />
+                                    {user.location}
+                                </div>
+                            )}
                         </div>
+
+                        <div className="flex items-center gap-6 bg-bg-secondary px-6 py-3 rounded-2xl">
+                            <StatItem label="Followers" value={user.followers_count || 0} />
+                            <div className="w-px h-8 bg-gray-300"></div>
+                            <StatItem label="Following" value={user.following_count || 0} />
+                            <div className="w-px h-8 bg-gray-300"></div>
+                            <StatItem label="Posts" value={0} /> {/* Placeholder for now */}
+                        </div>
+
                         <button
                             onClick={() => setIsEditing(!isEditing)}
-                            className={`flex items-center px-4 py-2 rounded-xl transition ${isEditing ? 'bg-gray-100 text-gray-600' : 'bg-action text-white hover:bg-action_dark'}`}
+                            className={`flex items-center px-4 py-2 rounded-xl transition ${isEditing ? 'bg-bg-secondary text-text-secondary' : 'bg-brand-secondary text-text-inverted hover:opacity-90'}`}
                         >
                             {isEditing ? <><X size={18} className="mr-2" /> Cancel</> : <><Edit2 size={18} className="mr-2" /> Edit Profile</>}
                         </button>
                     </div>
 
                     {message && (
-                        <div className={`p-4 rounded-xl mb-6 ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <div className={`mt-6 p-4 rounded-xl ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
                             {message}
                         </div>
                     )}
+                </div>
 
+                {/* Tabs Config */}
+                {!isEditing && (
+                    <div className="border-t border-border">
+                        <div className="flex px-8 sm:px-12 gap-8">
+                            {['About', 'My Pets', 'Posts'].map((tab) => (
+                                <button
+                                    key={tab}
+                                    onClick={() => setActiveTab(tab.toLowerCase())}
+                                    className={`py-4 font-bold text-sm border-b-2 transition ${activeTab === tab.toLowerCase()
+                                        ? 'border-brand-secondary text-brand-secondary'
+                                        : 'border-transparent text-text-tertiary hover:text-text-primary'
+                                        }`}
+                                >
+                                    {tab}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Content Area */}
+                <div className="px-8 sm:px-12 py-8 bg-bg-primary min-h-[300px]">
                     {isEditing ? (
-                        <form onSubmit={handleSubmit} className="space-y-6">
+                        <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
                                     <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
@@ -99,7 +160,7 @@ const ProfilePage = () => {
                                         name="first_name"
                                         value={formData.first_name}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                                        className="input-field"
                                     />
                                 </div>
                                 <div>
@@ -109,7 +170,7 @@ const ProfilePage = () => {
                                         name="last_name"
                                         value={formData.last_name}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                                        className="input-field"
                                     />
                                 </div>
                                 <div>
@@ -119,7 +180,7 @@ const ProfilePage = () => {
                                         name="phone_number"
                                         value={formData.phone_number}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                                        className="input-field"
                                     />
                                 </div>
                                 <div>
@@ -129,7 +190,7 @@ const ProfilePage = () => {
                                         name="photoURL"
                                         value={formData.photoURL}
                                         onChange={handleChange}
-                                        className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                                        className="input-field"
                                     />
                                 </div>
                             </div>
@@ -140,14 +201,14 @@ const ProfilePage = () => {
                                     rows="4"
                                     value={formData.bio}
                                     onChange={handleChange}
-                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-action focus:ring-2 focus:ring-action/20 outline-none transition"
+                                    className="input-field"
                                 ></textarea>
                             </div>
                             <div className="flex justify-end">
                                 <button
                                     type="submit"
                                     disabled={loading}
-                                    className="flex items-center px-6 py-3 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl disabled:opacity-50"
+                                    className="btn-primary"
                                 >
                                     <Save size={20} className="mr-2" />
                                     {loading ? 'Saving...' : 'Save Changes'}
@@ -155,28 +216,82 @@ const ProfilePage = () => {
                             </div>
                         </form>
                     ) : (
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <div className="space-y-4">
-                                <div className="flex items-center text-gray-600">
-                                    <Mail size={20} className="mr-3 text-action" />
-                                    <span>{user.email}</span>
+                        <>
+                            {activeTab === 'about' && (
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                                    <div className="md:col-span-2 space-y-6">
+                                        <div>
+                                            <h3 className="text-lg font-bold text-natural mb-3">About Me</h3>
+                                            <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                                                {user.bio || 'No bio added yet. Tell the community about yourself!'}
+                                            </p>
+                                        </div>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Contact Info</h3>
+                                        <div className="space-y-3">
+                                            <div className="flex items-center text-gray-600">
+                                                <Mail size={18} className="mr-3 text-brand-secondary" />
+                                                <span className="text-sm">{user.email}</span>
+                                            </div>
+                                            <div className="flex items-center text-gray-600">
+                                                <Phone size={18} className="mr-3 text-brand-secondary" />
+                                                <span className="text-sm">{user.phone_number || 'Not provided'}</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div className="flex items-center text-gray-600">
-                                    <Phone size={20} className="mr-3 text-action" />
-                                    <span>{user.phone_number || 'No phone number added'}</span>
+                            )}
+
+                            {activeTab === 'my pets' && (
+                                <div>
+                                    <div className="flex justify-between items-center mb-6">
+                                        <h3 className="text-lg font-bold text-natural">My Pets</h3>
+                                        {/* Future: Add "Add Pet" button */}
+                                    </div>
+
+                                    {user.user_pets && user.user_pets.length > 0 ? (
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                                            {user.user_pets.map(pet => (
+                                                <div
+                                                    key={pet.id}
+                                                    onClick={() => navigate(`/user/pets/${pet.id}`)}
+                                                    className="bg-bg-surface rounded-2xl p-4 shadow-sm border border-border hover:shadow-md transition cursor-pointer card-hover"
+                                                >
+                                                    <div className="h-40 rounded-xl bg-gray-100 mb-4 overflow-hidden">
+                                                        {pet.profile_photo ? (
+                                                            <img src={pet.profile_photo} alt={pet.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                                <span className="text-4xl">🐾</span>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <h4 className="font-bold text-lg text-natural">{pet.name}</h4>
+                                                        <p className="text-sm text-gray-500">{pet.breed} • {pet.age} yrs</p>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-12 bg-bg-surface rounded-2xl border-2 border-dashed border-border">
+                                            <div className="text-4xl mb-3">🐾</div>
+                                            <h3 className="text-lg font-bold text-gray-400">No pets added yet</h3>
+                                            <p className="text-gray-400 text-sm mt-1">Show off your furry friends to the community!</p>
+                                        </div>
+                                    )}
                                 </div>
-                                <div className="flex items-center text-gray-600">
-                                    <MapPin size={20} className="mr-3 text-action" />
-                                    <span>Location not set</span>
+                            )}
+
+                            {activeTab === 'posts' && (
+                                <div className="text-center py-12">
+                                    <div className="text-4xl mb-3">📝</div>
+                                    <h3 className="text-lg font-bold text-gray-400">No posts yet</h3>
+                                    <p className="text-gray-400 text-sm mt-1">Share your first update with the community!</p>
                                 </div>
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-bold text-natural mb-2">About Me</h3>
-                                <p className="text-gray-600 leading-relaxed">
-                                    {user.bio || 'No bio added yet. Click edit to tell us about yourself!'}
-                                </p>
-                            </div>
-                        </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>

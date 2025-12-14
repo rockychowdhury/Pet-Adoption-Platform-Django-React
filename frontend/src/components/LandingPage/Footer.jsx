@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 
 const Footer = () => {
     return (
-        <footer className="bg-[#2D2D2D] text-white pt-20 pb-10 font-inter">
+        <footer className="bg-brand-primary text-text-inverted pt-20 pb-10 font-inter">
             <div className="max-w-[1440px] mx-auto px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                     {/* Brand Column */}
@@ -13,7 +13,7 @@ const Footer = () => {
                             FurEver <span className="text-white">Home</span>
                         </h3>
                         <p className="text-gray-400 text-sm leading-relaxed max-w-xs">
-                            A warm, trusted space where shelters and adopters meet, share stories, and save lives together.
+                            A warm, trusted space where pet lovers meet, share stories, and save lives together.
                         </p>
                         <div className="flex space-x-4">
                             <a href="#" className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center hover:bg-brand-secondary transition duration-300 text-white">
@@ -71,7 +71,7 @@ const Footer = () => {
                 </div>
 
                 <div className="border-t border-white/10 pt-8 text-center text-gray-500 text-sm">
-                    <p>&copy; {new Date().getFullYear()} FurEver Home. All rights reserved.</p>
+                    <p>&copy; {new Date().getFullYear()} PetCircle. All rights reserved.</p>
                 </div>
             </div>
         </footer>

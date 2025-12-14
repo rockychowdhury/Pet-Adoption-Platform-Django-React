@@ -10,22 +10,22 @@ const HowItWorks = () => {
             step: "STEP 1",
             icon: <Search size={32} />,
             title: 'Browse verified pets',
-            description: 'Explore thousands of profiles from trusted shelters. Filter by species, age, size, and more to find your perfect match.',
-            iconBg: 'bg-[#F5F1E8]'
+            description: 'Explore thousands of profiles from trusted inputs. Filter by species, age, size, and more to find your perfect match.',
+            iconBg: 'bg-bg-secondary'
         },
         {
             step: "STEP 2",
             icon: <MessageSquare size={32} />,
             title: 'Connect & ask questions',
-            description: 'Chat directly with shelters, ask about behavior and history, and get guidance from our community.',
-            iconBg: 'bg-[#F5F1E8]'
+            description: 'Chat directly with owners, ask about behavior and history, and get guidance from our community.',
+            iconBg: 'bg-bg-secondary'
         },
         {
             step: "STEP 3",
             icon: <Home size={32} />,
             title: 'Bring them home',
             description: 'Complete your application, schedule a visit, and welcome your new family member into a loving home.',
-            iconBg: 'bg-[#F5F1E8]'
+            iconBg: 'bg-bg-secondary'
         }
     ];
 
@@ -48,12 +48,12 @@ const HowItWorks = () => {
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
                     {steps.map((step, index) => (
-                        <div key={index} className="bg-white p-8 rounded-[32px] shadow-soft hover:shadow-xl transition duration-300 border border-transparent hover:border-brand-secondary/20 group">
+                        <div key={index} className="bg-bg-surface p-8 rounded-[32px] shadow-soft hover:shadow-xl transition duration-300 border border-border hover:border-brand-secondary/20 group card-hover">
                             <div className="flex items-start justify-between mb-6">
                                 <div className={`w-16 h-16 ${step.iconBg} rounded-2xl flex items-center justify-center text-text-primary group-hover:scale-110 transition-transform duration-300`}>
                                     {step.icon}
                                 </div>
-                                <span className="px-3 py-1 bg-brand-secondary text-white text-[10px] font-bold rounded-full uppercase tracking-widest">
+                                <span className="px-3 py-1 bg-brand-secondary text-text-inverted text-[10px] font-bold rounded-full uppercase tracking-widest">
                                     {step.step}
                                 </span>
                             </div>

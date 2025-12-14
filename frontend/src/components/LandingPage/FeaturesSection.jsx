@@ -33,7 +33,7 @@ const FeaturesSection = () => {
             title: "Community Forum",
             tag: "COMMUNITY",
             icon: <Users size={20} />,
-            description: "Swap stories, get behaviour tips, and learn from adopters, foster parents, and shelter teams all in one warm feed.",
+            description: "Swap stories, get behaviour tips, and learn from adopters, foster parents, and rehomers all in one warm feed.",
             subtext: "React with likes, hearts, and thoughtful comments."
         },
         {
@@ -47,7 +47,7 @@ const FeaturesSection = () => {
             title: "Schedule Meet & Greets",
             tag: "VISITS",
             icon: <Calendar size={20} />,
-            description: "Pick a time, share who is coming, and confirm a visit with the shelter in a guided, step-by-step flow.",
+            description: "Pick a time, share who is coming, and confirm a visit with the owner in a guided, step-by-step flow.",
             subtext: "Automatic reminders and clear visit details."
         },
         {
@@ -68,7 +68,7 @@ const FeaturesSection = () => {
             title: "Adoption Requests",
             tag: "WORKFLOW",
             icon: <FileText size={20} />,
-            description: "Track every application from 'New' to 'FurEver Home' with notes, documents, and conversations in a single timeline.",
+            description: "Track every application from 'New' to 'PetCircle' with notes, documents, and conversations in a single timeline.",
             subtext: "Less email back-and-forth, more happy matches."
         }
     ];
@@ -93,7 +93,7 @@ const FeaturesSection = () => {
                         <img src={star} alt="" className="absolute -top-4 -right-6 w-6 h-6 animate-bounce opacity-80" style={{ filter: 'brightness(0)' }} />
                     </h2>
                     <p className="text-text-secondary text-lg max-w-3xl mx-auto">
-                        See exactly how FurEver Home supports adopters and shelters — from first community post to signed adoption papers.
+                        See exactly how FurEver Home supports adopters and families — from first community post to signed adoption papers.
                     </p>
                 </div>
 
@@ -104,7 +104,7 @@ const FeaturesSection = () => {
                             Built for every step of the <span className="text-brand-secondary">adoption journey.</span>
                         </h3>
                         <p className="text-text-secondary text-lg leading-relaxed">
-                            Whether you are discovering your first pet or running a busy shelter, you get clear tools for community, communication, visits, and paperwork — without juggling different apps.
+                            Whether you are discovering your first pet or rehoming a pet, you get clear tools for community, communication, visits, and paperwork — without juggling different apps.
                         </p>
 
                         {/* Toggle */}
@@ -119,7 +119,7 @@ const FeaturesSection = () => {
                                 onClick={() => setActiveTab('shelters')}
                                 className={`px-6 py-2 rounded-full text-sm font-bold transition-all ${activeTab === 'shelters' ? 'bg-white shadow-sm text-text-primary' : 'text-text-secondary hover:text-text-primary'}`}
                             >
-                                For shelters
+                                For Rehoming
                             </button>
                         </div>
 
@@ -133,7 +133,7 @@ const FeaturesSection = () => {
                                     <>
                                         <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Ask questions in the community</span>
                                         <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Follow pets & share profiles</span>
-                                        <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Chat with shelters in real time</span>
+                                        <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Chat with owners in real time</span>
                                         <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Book meet & greet visits</span>
                                     </>
                                 ) : (

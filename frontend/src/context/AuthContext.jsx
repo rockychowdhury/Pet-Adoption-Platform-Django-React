@@ -17,14 +17,33 @@ const AuthProvider = ({ children }) => {
         try {
             const response = await api.post('/user/register/', data);
             if (response.status === 201) {
-                toast.success("Registration successful! Logging you in...");
-                const { email, password } = data;
-                await login({ email, password });
+                toast.success("Registration successful! Please verify your email.");
+                // No auto-login, wait for verification
+                return response.data;
             }
         } catch (err) {
             console.error(err);
             toast.error(err.response?.data?.detail || "Registration failed. Please try again.");
             setError(err.response?.data?.detail || "Registration failed.");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const verifyEmail = async (email, code) => {
+        setLoading(true);
+        try {
+            const response = await api.post('/user/verify-email/', { email, code });
+            if (response.status === 200) {
+                toast.success("Email verified successfully!");
+                await getUser(); // Fetch user as cookies are set
+                return true;
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.error || "Verification failed.");
+            throw err;
         } finally {
             setLoading(false);
         }
@@ -78,44 +97,61 @@ const AuthProvider = ({ children }) => {
         }
     }
 
-    const refreshToken = () => {
-        return api.post('/user/token/refresh/');
+    const requestPasswordReset = async (email) => {
+        setLoading(true);
+        try {
+            await api.post('/user/request-password-reset/', { email });
+            toast.success("Password reset link sent to your email.");
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.detail || "Failed to send reset link.");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
     }
 
-    useEffect(() => {
-        getUser();
-    }, []);
-
-    useLayoutEffect(() => {
-        const refreshInterceptor = api.interceptors.response.use(
-            (response) => response,
-            async (error) => {
-                const originalRequest = error.config;
-                if (error.response?.status === 401 && originalRequest.url !== "/user/token/refresh/") {
-                    try {
-                        await refreshToken();
-                        // Retry the original request; cookies will be sent automatically
-                        return api(originalRequest);
-                    } catch (refreshError) {
-                        setUser(null);
-                        return Promise.reject(refreshError);
-                    }
-                }
-                return Promise.reject(error);
-            },
-        );
-        return () => {
-            api.interceptors.response.eject(refreshInterceptor);
+    const confirmPasswordReset = async (uidb64, token, password) => {
+        setLoading(true);
+        try {
+            await api.patch('/user/password-reset-confirm/', { uidb64, token, password });
+            toast.success("Password reset successfully! Please login.");
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.error || "Failed to reset password.");
+            throw err;
+        } finally {
+            setLoading(false);
         }
-    }, [])
+    }
+
+    const resendEmailVerification = async (email) => {
+        setLoading(true);
+        try {
+            const response = await api.post('/user/resend-email-verification/', { email });
+            toast.success("Verification code sent! Please check your email.");
+            return response.data;
+        } catch (err) {
+            console.error(err);
+            const errorMsg = err.response?.data?.error || 'Failed to resend code';
+            toast.error(errorMsg);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
 
     const authInfo = {
         user, setUser,
         loading, setLoading,
         register,
+        verifyEmail,
         login,
         getUser,
         logout,
+        requestPasswordReset,
+        confirmPasswordReset,
+        resendEmailVerification,
         error, setError
     };
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>

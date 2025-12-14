@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Outlet, useLocation, useNavigate } from 'react-router';
-import { LayoutDashboard, PawPrint, FileText, Settings, LogOut, User, MessageSquare, Users } from 'lucide-react';
+import { LayoutDashboard, PawPrint, FileText, Settings, LogOut, User, MessageSquare, Users, Heart } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 
 const DashboardLayout = () => {
@@ -19,43 +19,33 @@ const DashboardLayout = () => {
         return false;
     };
 
-    const shelterLinks = [
+    const dashboardLinks = [
         { name: 'Overview', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'Manage Pets', path: '/dashboard/pets', icon: PawPrint },
-        { name: 'Adoption Requests', path: '/dashboard/applications', icon: FileText },
-        { name: 'Messages', path: '/dashboard/messages', icon: MessageSquare },
-        { name: 'Community Posts', path: '/community', icon: Users },
-    ];
-
-    const adopterLinks = [
-        { name: 'My Applications', path: '/dashboard', icon: FileText },
-        { name: 'Saved Pets', path: '/dashboard/saved', icon: PawPrint },
+        { name: 'My Applications', path: '/dashboard/applications', icon: FileText },
+        { name: 'My Listings', path: '/dashboard/listings', icon: PawPrint }, // New for rehoming
+        { name: 'Saved Pets', path: '/dashboard/saved', icon: Heart },
+        { name: 'Messages', path: '/messages', icon: MessageSquare },
         { name: 'Community', path: '/community', icon: Users },
     ];
 
-    const links = user?.role === 'shelter' ? shelterLinks : adopterLinks;
-
     return (
-        <div className="min-h-screen bg-[#FDFBF7] flex font-inter">
+        <div className="min-h-screen bg-bg-primary flex font-inter">
             {/* Sidebar */}
-            <aside className="w-72 bg-white border-r border-[#E5E0D8] hidden md:flex flex-col fixed h-full z-10">
+            <aside className="w-72 bg-bg-surface border-r border-border hidden md:flex flex-col fixed h-full z-10">
                 <div className="p-8 pb-6">
                     <Link to="/" className="block">
-                        <h1 className="text-xl font-bold font-logo text-text-primary">FurEver Home</h1>
-                        {user?.role === 'shelter' && (
-                            <p className="text-xs text-text-secondary mt-1">Shelter dashboard</p>
-                        )}
+                        <h1 className="text-xl font-bold font-logo text-text-primary">PetCircle</h1>
                     </Link>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
-                    {links.map((link) => (
+                    {dashboardLinks.map((link) => (
                         <Link
                             key={link.path}
                             to={link.path}
                             className={`flex items-center gap-3 px-4 py-3 rounded-xl transition text-sm font-medium ${isActive(link.path)
-                                ? 'bg-[#F5F1EB] text-text-primary'
-                                : 'text-text-secondary hover:bg-[#FDFBF7] hover:text-text-primary'
+                                ? 'bg-bg-secondary text-text-primary'
+                                : 'text-text-secondary hover:bg-bg-secondary hover:text-text-primary'
                                 }`}
                         >
                             <link.icon size={18} className={isActive(link.path) ? 'text-text-primary' : 'text-text-secondary'} />
@@ -64,7 +54,7 @@ const DashboardLayout = () => {
                     ))}
                 </nav>
 
-                <div className="p-6 border-t border-[#E5E0D8]">
+                <div className="p-6 border-t border-border">
                     <div className="flex items-center gap-3 mb-4">
                         <div className="w-10 h-10 rounded-full bg-bg-secondary overflow-hidden border border-white/20">
                             {user?.photoURL ? (
@@ -80,7 +70,7 @@ const DashboardLayout = () => {
                                 {user?.first_name} {user?.last_name}
                             </p>
                             <p className="text-xs text-text-secondary truncate">
-                                {user?.role === 'shelter' ? 'Shelter Admin' : 'Adopter'}
+                                Pet Lover
                             </p>
                         </div>
                     </div>
@@ -95,7 +85,7 @@ const DashboardLayout = () => {
             </aside>
 
             {/* Mobile Header (Visible only on small screens) */}
-            <div className="md:hidden fixed top-0 w-full bg-white border-b border-[#E5E0D8] z-20 px-4 py-3 flex justify-between items-center">
+            <div className="md:hidden fixed top-0 w-full bg-bg-surface border-b border-border z-20 px-4 py-3 flex justify-between items-center">
                 <Link to="/" className="text-xl font-bold font-logo text-text-primary">
                     FurEver<span className="text-brand-primary">Home</span>
                 </Link>
@@ -110,8 +100,8 @@ const DashboardLayout = () => {
             </main>
 
             {/* Mobile Bottom Nav */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-[#E5E0D8] flex justify-around py-3 z-20">
-                {links.map((link) => (
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-bg-surface border-t border-border flex justify-around py-3 z-20">
+                {dashboardLinks.slice(0, 5).map((link) => (
                     <Link
                         key={link.path}
                         to={link.path}

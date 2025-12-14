@@ -18,12 +18,12 @@ const AboutPage = () => {
         },
         {
             title: 'Radical Transparency',
-            description: 'From shelter records to adoption fees, we believe in complete openness to build trust with our community.',
+            description: 'From medical records to adoption fees, we believe in complete openness to build trust with our community.',
             icon: Shield,
         },
         {
             title: 'Stronger Together',
-            description: 'We believe that by connecting shelters, adopters, and volunteers, we can solve the homeless pet crisis.',
+            description: 'We believe that by connecting families, adopters, and volunteers, we can solve the homeless pet crisis.',
             icon: Users,
         },
     ];
@@ -36,9 +36,9 @@ const AboutPage = () => {
     ];
 
     const milestones = [
-        { year: '2018', title: 'Platform Launch', description: 'FurEver Home started as a small project to help one local shelter go digital.' },
+        { year: '2018', title: 'Platform Launch', description: 'PetCircle started as a small project to help one local community go digital.' },
         { year: '2020', title: '1,000 Adoptions', description: 'We hit our first major milestone, proving that technology can save lives.' },
-        { year: '2022', title: 'Expanded Nationwide', description: 'Partnered with over 200 shelters across the country to bring pets to more homes.' },
+        { year: '2022', title: 'Expanded Nationwide', description: 'Partnered with over 200 communities across the country to bring pets to more homes.' },
         { year: '2024', title: 'The Comfort Update', description: 'Redesigned our entire platform to prioritize user well-being and emotional connection.' },
     ];
 
@@ -50,7 +50,7 @@ const AboutPage = () => {
             image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80"
         },
         {
-            text: "FurEver Home has transformed how we operate. We're finding homes for pets faster than ever before.",
+            text: "PetCircle has transformed how we operate. We're finding homes for pets faster than ever before.",
             author: "Dr. Mark R.",
             role: "Shelter Director",
             image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
@@ -64,7 +64,7 @@ const AboutPage = () => {
     ];
 
     return (
-        <div className="bg-[#FDFBF7] min-h-screen font-inter text-text-primary">
+        <div className="bg-bg-primary min-h-screen font-inter text-text-primary">
             {/* Hero Section */}
             <section className="relative h-[600px] flex items-center justify-center overflow-hidden">
                 <div className="absolute inset-0 z-0">
@@ -81,7 +81,7 @@ const AboutPage = () => {
                         Connecting Hearts, <br /> Saving Lives
                     </h1>
                     <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        FurEver Home is more than just a platform. We are a movement dedicated to ensuring every pet finds a loving home and every home finds its perfect companion.
+                        PetCircle is more than just a platform. We are a movement dedicated to ensuring every pet finds a loving home and every home finds its perfect companion.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                         <Link to="/pets" className="px-8 py-4 bg-white text-text-primary rounded-full font-bold hover:bg-gray-100 transition shadow-lg">
@@ -95,7 +95,7 @@ const AboutPage = () => {
             </section>
 
             {/* Stats Section */}
-            <section className="bg-[#2D2D2D] py-16 text-white">
+            <section className="bg-brand-primary py-16 text-text-inverted">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                         {stats.map((stat, index) => (
@@ -122,7 +122,7 @@ const AboutPage = () => {
                                 It started with a single shelter struggling to get their pets seen. We realized that while there was no shortage of love, there was a shortage of connection.
                             </p>
                             <p>
-                                FurEver Home was born out of the belief that technology could bridge that gap. We built a platform that not only showcases pets but tells their stories, connects communities, and simplifies the adoption process.
+                                PetCircle was born out of the belief that technology could bridge that gap. We built a platform that not only showcases pets but tells their stories, connects communities, and simplifies the adoption process.
                             </p>
                             <p>
                                 Today, we are proud to be a leading force in animal welfare, helping thousands of pets find their forever families every single month.
@@ -162,7 +162,7 @@ const AboutPage = () => {
                     </div>
                     <div className="grid md:grid-cols-3 gap-8">
                         {values.map((value, index) => (
-                            <div key={index} className="bg-[#FDFBF7] p-10 rounded-[32px] text-center hover:shadow-xl transition duration-300 border border-[#E5E0D8]">
+                            <div key={index} className="bg-bg-primary p-10 rounded-[32px] text-center hover:shadow-xl transition duration-300 border border-border card-hover">
                                 <div className="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
                                     <value.icon size={40} className="text-text-primary" />
                                 </div>
@@ -216,7 +216,7 @@ const AboutPage = () => {
                                 <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-300 group-[.is-active]:bg-brand-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
                                     <div className="w-3 h-3 bg-white rounded-full"></div>
                                 </div>
-                                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-[#FDFBF7] p-6 rounded-2xl border border-[#E5E0D8] shadow-sm">
+                                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-bg-primary p-6 rounded-2xl border border-border shadow-sm card">
                                     <div className="flex items-center justify-between space-x-2 mb-1">
                                         <div className="font-bold text-text-primary">{milestone.title}</div>
                                         <time className="font-mono text-xs font-bold text-brand-primary">{milestone.year}</time>
@@ -230,7 +230,7 @@ const AboutPage = () => {
             </section>
 
             {/* Testimonials Section */}
-            <section className="py-24 bg-[#2D2D2D] text-white">
+            <section className="py-24 bg-brand-primary text-text-inverted">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16">
                         <h2 className="text-4xl font-bold mb-4">Stories That Inspire Us</h2>
@@ -258,7 +258,7 @@ const AboutPage = () => {
 
             {/* CTA Section */}
             <section className="py-24 max-w-5xl mx-auto px-6 text-center">
-                <div className="bg-[#2D2D2D] rounded-[48px] p-12 md:p-24 relative overflow-hidden">
+                <div className="bg-brand-primary rounded-[48px] p-12 md:p-24 relative overflow-hidden">
                     {/* Background pattern */}
                     <div className="absolute inset-0 opacity-10">
                         <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">

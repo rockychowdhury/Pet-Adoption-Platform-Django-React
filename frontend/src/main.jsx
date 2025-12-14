@@ -2,7 +2,8 @@ import { StrictMode } from 'react'
 import ReactDOM from "react-dom/client";
 import './index.css'
 import AuthProvider from './context/AuthContext';
-import Routes from './routers/Routes';
+import router from './routers/Routes';
+import { RouterProvider } from 'react-router-dom';
 import { Bounce, ToastContainer } from "react-toastify";
 import UIProvider from './context/UIProvider';
 
@@ -28,7 +29,7 @@ ReactDOM.createRoot(root).render(
       <UIProvider>
         <ThemeProvider>
           <AuthProvider>
-            <Routes></Routes>
+            <RouterProvider router={router} />
           </AuthProvider>
         </ThemeProvider>
       </UIProvider>

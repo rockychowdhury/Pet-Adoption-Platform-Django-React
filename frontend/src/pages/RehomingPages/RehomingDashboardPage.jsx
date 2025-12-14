@@ -1,0 +1,1 @@
+import React from 'react'; const RehomingDashboardPage = () => <div className='p-8'><h1 className='text-2xl font-bold'>RehomingDashboardPage</h1><p>Coming Soon</p></div>; export default RehomingDashboardPage;

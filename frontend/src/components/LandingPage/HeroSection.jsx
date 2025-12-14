@@ -64,13 +64,10 @@ const HeroSection = () => {
 
                     {/* CTA Buttons */}
                     <div className="flex gap-4">
-                        <button className="px-8 py-4 bg-[#2D2D2D] text-white rounded-full font-bold hover:bg-black hover:shadow-lg hover:-translate-y-1 active:scale-95 transition-all duration-300">
+                        <button className="btn-primary px-8 py-4 rounded-full">
                             Adopt Now
                         </button>
-                        <button
-                            className="px-8 py-4 text-[#2D2D2D] rounded-full font-bold hover:bg-gray-50 hover:shadow-lg hover:-translate-y-1 active:scale-95 transition-all duration-300 border border-gray-100"
-                            style={{ backgroundColor: '#ffffff' }}
-                        >
+                        <button className="btn-outline px-8 py-4 rounded-full">
                             Join Us
                         </button>
                     </div>
@@ -91,7 +88,7 @@ const HeroSection = () => {
                                 <ShieldCheck size={12} className="text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-text-secondary">Verified shelters & listings</span>
+                                <span className="text-xs font-bold text-text-secondary">Verified owners & listings</span>
                             </div>
                         </div>
 
@@ -119,7 +116,7 @@ const HeroSection = () => {
 
             {/* Modern Scrolling Marquee Banner */}
             <div className="absolute bottom-8 left-0 w-full z-30 transform -rotate-1 origin-bottom-left">
-                <div className="bg-[#2D2D2D] text-white py-3 overflow-hidden shadow-2xl">
+                <div className="bg-brand-primary text-text-inverted py-3 overflow-hidden shadow-2xl">
                     <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
                         {[...Array(12)].map((_, i) => (
                             <div key={i} className="flex items-center gap-8 text-sm md:text-base font-bold tracking-widest uppercase">
