@@ -7,12 +7,6 @@ class IsAdmin(permissions.BasePermission):
     def has_permission(self, request, view):
         return bool(request.user and request.user.is_authenticated and request.user.is_admin)
 
-class IsShelter(permissions.BasePermission):
-    """
-    Allows access only to shelter users.
-    """
-    def has_permission(self, request, view):
-        return bool(request.user and request.user.is_authenticated and request.user.is_shelter)
 
 class IsAdopter(permissions.BasePermission):
     """
@@ -36,14 +30,6 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
         owner = getattr(obj, 'owner', getattr(obj, 'user', getattr(obj, 'applicant', getattr(obj, 'reviewer', None))))
         return owner == request.user
 
-class IsShelterOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Object-level permission to only allow the shelter that owns the pet to edit it.
-    """
-    def has_object_permission(self, request, view, obj):
-        if request.method in permissions.SAFE_METHODS:
-            return True
-        return obj.shelter == request.user
 
 class IsAdminOrReadOnly(permissions.BasePermission):
     """
