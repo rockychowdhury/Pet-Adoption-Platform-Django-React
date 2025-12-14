@@ -20,10 +20,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-ah_bs5%-jg-!e#ly8u-#o1@h938egi%le*)a9gd#-qd2ux%5dr'
+SECRET_KEY = config('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = ["*"]
 
 
@@ -34,11 +34,23 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle'
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '100/hour',  # Default for anonymous users
+        'user': '1000/hour',  # Default for authenticated users
+        'registration': '5/hour',  # Registration endpoint
+        'login': '10/hour',  # Login endpoint
+        'password_reset': '3/hour',  # Password reset endpoint
+        'resend_verification': '3/15min',  # Resend verification codes
+    }
 }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=15),
-    'REFRESH_TOKEN_LIFETIME': timedelta(days=30),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),  # Changed from 30 days to 7 days per spec
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,
     'ALGORITHM': 'HS256',
@@ -68,13 +80,22 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt',
     'rest_framework_simplejwt.token_blacklist',
+    'django_filters',
     'apps.users',
     'apps.pets',
-    'apps.community',
+    'apps.rehoming',
+    # 'apps.community',  # REMOVED: Community/social features not part of PetCircle MVP
     'apps.messaging',
     'apps.adoption',
     'apps.reviews',
+    'apps.admin_panel',
+    'apps.services',
+    'apps.common',
 ]
+
+# Media Files (Uploads)
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
@@ -88,8 +109,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-ROOT_URLCONF = 'FurEverHome.urls'
-
+ROOT_URLCONF = 'PetCircle.urls'
+ 
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
@@ -105,8 +126,8 @@ TEMPLATES = [
         },
     },
 ]
-
-WSGI_APPLICATION = 'FurEverHome.wsgi.application'
+ 
+WSGI_APPLICATION = 'PetCircle.wsgi.application'
 
 
 AUTH_USER_MODEL ='users.User'
@@ -163,4 +184,12 @@ STATIC_URL = 'static/'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+# Email Configuration
+EMAIL_BACKEND = config('EMAIL_BACKEND', default='django.core.mail.backends.console.EmailBackend')
+EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER', default='noreply@petcircle.com')
 

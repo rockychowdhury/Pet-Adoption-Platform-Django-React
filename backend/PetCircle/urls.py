@@ -20,9 +20,19 @@ from django.urls import path, include
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/',include('apps.users.urls')),
-    path('community/', include('apps.community.urls')),
+    # path('community/', include('apps.community.urls')),  # REMOVED: Community features not in PetCircle MVP
     path('messaging/', include('apps.messaging.urls')),
     path('adoption/', include('apps.adoption.urls')),
     path('reviews/', include('apps.reviews.urls')),
+    path('rehoming/', include('apps.rehoming.urls')),
+    path('admin-panel/', include('apps.admin_panel.urls')),
+    path('services/', include('apps.services.urls')),
     path('pets/', include('apps.pets.urls')),
+    path('common/', include('apps.common.urls')),
 ]
+
+from django.conf import settings
+from django.conf.urls.static import static
+
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
