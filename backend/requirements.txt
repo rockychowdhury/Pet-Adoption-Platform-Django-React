@@ -9,3 +9,5 @@ PyJWT==2.10.0
 python-decouple==3.8
 sqlparse==0.5.2
 typing_extensions==4.12.2
+django-filter==24.3
+reportlab==4.4.6
