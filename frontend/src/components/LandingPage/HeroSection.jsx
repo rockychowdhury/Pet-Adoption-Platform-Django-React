@@ -18,7 +18,7 @@ const HeroSection = () => {
             </div>
 
             {/* Content Container */}
-            <div className="container mx-auto px-6 sm:px-12 lg:px-20 relative z-10 flex flex-col lg:flex-row h-full items-center min-h-screen">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row h-full items-center min-h-screen">
 
                 {/* Left Side */}
                 <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 lg:py-0 relative">
@@ -46,7 +46,6 @@ const HeroSection = () => {
                         <p className="text-text-secondary text-lg leading-relaxed">
                             Thousands of pets waiting for a loving home. Start your adoption journey now.
                         </p>
-                        <img src={star} alt="star" className="absolute bottom-0 -right-10 w-6 h-6 opacity-50" style={{ filter: 'brightness(0)' }} />
                     </div>
 
                     {/* Social Proof */}
@@ -75,9 +74,8 @@ const HeroSection = () => {
 
                 {/* Right Side - Enhanced with Depth */}
                 <div className="w-full lg:w-1/2 flex items-center justify-center relative h-full perspective-1000">
-                    {/* Floating Stars Right */}
-                    <img src={star} alt="star" className="absolute -top-0 -right-5 w-10 h-10 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
-                    <img src={stars} alt="stars" className="absolute bottom-40 left-0 w-20 h-20 opacity-30 z-0" style={{ filter: 'brightness(0)' }} />
+                    {/* Floating Stars Right - More subtle placement */}
+                    <img src={star} alt="star" className="absolute top-10 right-10 w-8 h-8 animate-spin-slow opacity-80" />
 
                     {/* Main Image Container with Layering */}
                     <div className="relative z-20 w-full max-w-2xl px-4 flex justify-center items-center">

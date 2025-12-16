@@ -5,7 +5,7 @@ import { Link } from 'react-router';
 const Footer = () => {
     return (
         <footer className="bg-brand-primary text-text-inverted pt-20 pb-10 font-inter">
-            <div className="max-w-[1440px] mx-auto px-8">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
                     {/* Brand Column */}
                     <div className="space-y-6">

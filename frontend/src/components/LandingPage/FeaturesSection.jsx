@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Users, MessageSquare, Calendar, Share2, LayoutDashboard, FileText } from 'lucide-react';
-
+import { Users, MessageSquare, Calendar, Share2, LayoutDashboard, FileText, Sparkles } from 'lucide-react';
 import star from '../../assets/star.png';
-import stars from '../../assets/stars.png';
 
 const FeaturesSection = () => {
     const [activeTab, setActiveTab] = useState('adopters');
@@ -77,20 +75,20 @@ const FeaturesSection = () => {
         <section className="py-24 bg-bg-primary relative">
             {/* Background Decoration Container (Clipped) */}
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="max-w-[1440px] mx-auto px-8 relative h-full">
-                    <img src={stars} alt="" className="absolute top-20 left-4 w-16 h-16 opacity-30 animate-pulse" style={{ filter: 'brightness(0)' }} />
-                    <img src={star} alt="" className="absolute bottom-40 -right-10 w-10 h-10 opacity-20 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
-                    <img src={stars} alt="" className="absolute top-1/2 left-0 w-12 h-12 opacity-20 animate-float" style={{ filter: 'brightness(0)' }} />
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative h-full">
+                    <Sparkles className="absolute top-20 left-4 opacity-30 animate-pulse text-brand-secondary fill-current" size={64} />
+                    {/* Replaced Star with Image and removed bottom star for cleaner look */}
+                    <img src={star} alt="" className="absolute top-1/2 left-0 w-12 h-12 opacity-20 animate-float" style={{ filter: 'brightness(0) sepia(1) hue-rotate(-50deg) saturate(5)' }} />
                 </div>
             </div>
 
-            <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
 
                 {/* Section Header */}
                 <div className="text-center mb-20 relative">
                     <h2 className="text-4xl md:text-5xl font-bold text-text-primary font-logo mb-4 relative inline-block">
                         Everything in <span className="text-brand-secondary">One Place</span>
-                        <img src={star} alt="" className="absolute -top-4 -right-6 w-6 h-6 animate-bounce opacity-80" style={{ filter: 'brightness(0)' }} />
+                        <img src={star} alt="" className="absolute -top-6 -right-12 w-10 h-10 animate-spin-slow opacity-80" />
                     </h2>
                     <p className="text-text-secondary text-lg max-w-3xl mx-auto">
                         See exactly how FurEver Home supports adopters and families — from first community post to signed adoption papers.

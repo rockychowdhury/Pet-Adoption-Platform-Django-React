@@ -31,7 +31,7 @@ const HowItWorks = () => {
 
     return (
         <section className="py-24 bg-bg-primary relative overflow-hidden">
-            <div className="max-w-[1440px] mx-auto px-8 relative z-10">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Decorative Stars (Inside Container) */}
                 <img src={stars} alt="" className="absolute top-10 right-10 w-16 h-16 opacity-20 animate-pulse" style={{ filter: 'brightness(0)' }} />
                 <img src={star} alt="" className="absolute bottom-8 -left-5 w-10 h-10 opacity-10 animate-spin-slow" style={{ filter: 'brightness(0)' }} />
