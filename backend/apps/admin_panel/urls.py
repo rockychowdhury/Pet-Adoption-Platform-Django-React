@@ -1,11 +1,13 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import UserReportViewSet, LegalAgreementViewSet
+from .views import UserReportViewSet, LegalAgreementViewSet, ListingModerationViewSet, AnalyticsView
 
 router = DefaultRouter()
 router.register(r'reports', UserReportViewSet, basename='user-reports')
 router.register(r'agreements', LegalAgreementViewSet, basename='legal-agreements')
+router.register(r'listings', ListingModerationViewSet, basename='listing-moderation')
 
 urlpatterns = [
+    path('analytics/', AnalyticsView.as_view(), name='admin-analytics'),
     path('', include(router.urls)),
 ]

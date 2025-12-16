@@ -46,3 +46,64 @@ class LegalAgreementViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = LegalAgreement.objects.all().order_by('-created_at')
     serializer_class = LegalAgreementSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+
+class ListingModerationViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Admin view for managing pending listings.
+    Allows approving/rejecting listings.
+    """
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    # We use PetDetailSerializer to show full details, 
+    # but we might need a custom one if we want to show moderation history.
+    from apps.pets.serializers import PetDetailSerializer
+    serializer_class = PetDetailSerializer
+
+    def get_queryset(self):
+        from apps.pets.models import RehomingListing
+        # Default to showing pending_review first, but allow filtering
+        status_param = self.request.query_params.get('status')
+        if status_param:
+             return RehomingListing.objects.filter(status=status_param).order_by('-created_at')
+        return RehomingListing.objects.filter(status='pending_review').order_by('-created_at')
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        listing = self.get_object()
+        listing.status = 'active'
+        listing.save()
+        # Create ListingReview entry if not exists or update it
+        # listing.listing_review.status = 'approved' ...
+        return Response({'status': 'approved'})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        listing = self.get_object()
+        listing.status = 'rejected'
+        listing.save()
+        return Response({'status': 'rejected'})
+
+
+from rest_framework.views import APIView
+
+class AnalyticsView(APIView):
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+
+    def get(self, request):
+        from django.contrib.auth import get_user_model
+        from apps.pets.models import RehomingListing
+        from apps.adoption.models import AdoptionApplication
+        
+        User = get_user_model()
+        today = timezone.now().date()
+        
+        data = {
+            'total_users': User.objects.count(),
+            'new_users_today': User.objects.filter(date_joined__date=today).count(),
+            'active_listings': RehomingListing.objects.filter(status='active').count(),
+            'pending_listings': RehomingListing.objects.filter(status='pending_review').count(),
+            'total_applications': AdoptionApplication.objects.count(),
+            'pending_applications': AdoptionApplication.objects.filter(status='pending_review').count(),
+        }
+        return Response(data)
+
