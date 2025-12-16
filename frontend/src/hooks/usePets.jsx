@@ -46,10 +46,22 @@ const usePets = () => {
         });
     };
 
+    // Fetch My Pets (User's Listings)
+    const useGetUserPets = () => {
+        return useQuery({
+            queryKey: ['myPets'],
+            queryFn: async () => {
+                const response = await api.get('/user/pets/');
+                return response.data;
+            },
+        });
+    };
+
     return {
         useGetPets,
         useGetPet,
-        useCreatePet
+        useCreatePet,
+        useGetUserPets
     };
 };
 

@@ -1,25 +1,22 @@
 import React, { useState } from 'react';
 import { X } from 'lucide-react';
-import useAPI from '../../hooks/useAPI';
+import useAdoption from '../../hooks/useAdoption';
 import { toast } from 'react-toastify';
 
 const ApplicationModal = ({ isOpen, onClose, petId, petName }) => {
-    const api = useAPI();
+    const { useSubmitApplication } = useAdoption();
+    const submitMutation = useSubmitApplication();
     const [message, setMessage] = useState('');
-    const [loading, setLoading] = useState(false);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         try {
-            await api.post('/adoption/', { pet: petId, message });
+            await submitMutation.mutateAsync({ pet: petId, message });
             toast.success("Application submitted successfully!");
             onClose();
         } catch (error) {
             console.error(error);
             toast.error("Failed to submit application. You may have already applied.");
-        } finally {
-            setLoading(false);
         }
     };
 
@@ -57,10 +54,10 @@ const ApplicationModal = ({ isOpen, onClose, petId, petName }) => {
                         </button>
                         <button
                             type="submit"
-                            disabled={loading}
+                            disabled={submitMutation.isLoading}
                             className="px-8 py-3 bg-action text-white rounded-xl font-bold hover:bg-action_dark transition shadow-lg hover:shadow-xl disabled:opacity-70 disabled:cursor-not-allowed"
                         >
-                            {loading ? 'Submitting...' : 'Submit Application'}
+                            {submitMutation.isLoading ? 'Submitting...' : 'Submit Application'}
                         </button>
                     </div>
                 </form>
