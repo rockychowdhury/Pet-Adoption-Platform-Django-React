@@ -1,15 +1,48 @@
 import axios from "axios";
 import { baseURL } from "../utils/baseURL";
 
-const axiosInstance = axios.create(
-    {
-        baseURL:baseURL,
-        withCredentials:true,
-    }
-)
+// Shared axios instance for the app
+const axiosInstance = axios.create({
+    baseURL: baseURL,
+    withCredentials: true,
+});
 
-const useAPI = () => {
-    return axiosInstance
+// Track refresh in-flight to prevent stampede
+let refreshPromise = null;
+
+const refreshAccessToken = async () => {
+    if (!refreshPromise) {
+        refreshPromise = axios
+            .post(`${baseURL}/user/token/refresh/`, {}, { withCredentials: true })
+            .finally(() => {
+                refreshPromise = null;
+            });
+    }
+    return refreshPromise;
 };
+
+axiosInstance.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+        const status = error.response?.status;
+
+        // Only attempt refresh once per request
+        if ((status === 401 || status === 403) && !originalRequest?._retry) {
+            originalRequest._retry = true;
+            try {
+                await refreshAccessToken();
+                return axiosInstance(originalRequest);
+            } catch (refreshErr) {
+                // Propagate the original error if refresh fails; caller can decide to logout
+                return Promise.reject(refreshErr);
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+const useAPI = () => axiosInstance;
 
 export default useAPI;

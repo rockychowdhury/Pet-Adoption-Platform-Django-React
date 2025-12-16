@@ -1,64 +1,96 @@
 import React from 'react';
-import { Heart, Home, Activity, Clock, Users, Award, Smile, Globe, Shield, Zap, ArrowRight } from 'lucide-react';
+import { Heart, Home, Activity, Clock, Users, Award, Smile, Globe, Shield, Zap, ArrowRight, Mail, Search, Lightbulb, TrendingUp, Star } from 'lucide-react';
 import { Link } from 'react-router';
+import aboutImage1 from '../../assets/about1.png';
+import aboutImage2 from '../../assets/about2.jpg';
 
 const AboutPage = () => {
     const stats = [
-        { label: 'Lives Saved', value: '15,000+', icon: Heart },
-        { label: 'Active Shelters', value: '500+', icon: Home },
+        { label: 'Pets Adopted', value: '15,000+', icon: Heart },
+        { label: 'Partner Shelters', value: '500+', icon: Home },
         { label: 'Success Rate', value: '98%', icon: Activity },
-        { label: 'Support', value: '24/7', icon: Clock },
+        { label: 'Support Available', value: '24/7', icon: Clock },
     ];
 
     const values = [
         {
-            title: 'Compassion First',
-            description: 'We put the well-being of animals above all else, ensuring every decision is made with love and care.',
+            title: 'Compassion',
+            description: 'We approach every situation with empathy, understanding that life can be unpredictable.',
             icon: Heart,
         },
         {
-            title: 'Radical Transparency',
-            description: 'From medical records to adoption fees, we believe in complete openness to build trust with our community.',
+            title: 'Transparency',
+            description: 'Honesty builds trust. We ensure full disclosure in medical and behavioral histories.',
             icon: Shield,
         },
         {
-            title: 'Stronger Together',
-            description: 'We believe that by connecting families, adopters, and volunteers, we can solve the homeless pet crisis.',
+            title: 'Community',
+            description: 'We believe in the power of connection—neighbors helping neighbors for the love of pets.',
             icon: Users,
+        },
+        {
+            title: 'Excellence',
+            description: 'We hold ourselves to the highest standards of animal welfare and digital safety.',
+            icon: Star,
+        },
+        {
+            title: 'Innovation',
+            description: 'Using technology to solve timeless problems in pet adoption and care.',
+            icon: Lightbulb,
+        },
+        {
+            title: 'Impact',
+            description: 'We measure our success not in profits, but in lives saved and families created.',
+            icon: TrendingUp,
         },
     ];
 
     const team = [
-        { name: 'Olivia White', role: 'Founder & CEO', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&w=400&q=80' },
-        { name: 'Ethan Hall', role: 'Head of Shelter Ops', image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80' },
-        { name: 'Maya Patel', role: 'Lead Veterinarian', image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=400&q=80' },
-        { name: 'Sam Lee', role: 'Community Manager', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80' },
+        {
+            name: 'Amelia Stone',
+            role: 'Co-founder & CEO',
+            image: 'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=400&q=80',
+            description: 'Former shelter director focused on building ethical, adoption-first technology.'
+        },
+        {
+            name: 'Ravi Patel',
+            role: 'Head of Product',
+            image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
+            description: 'Designs flows that make it easy to apply, chat with shelters, and stay informed.'
+        },
+        {
+            name: 'Maria Lopez',
+            role: 'Shelter Partnerships',
+            image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80',
+            description: 'Supports rescues with dashboards, training, and heart-centered onboarding.'
+        },
+        {
+            name: 'Leo Kim',
+            role: 'Engineering Lead',
+            image: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80',
+            description: 'Builds reliable infrastructure for applications, messaging, and community features.'
+        },
     ];
 
-    const milestones = [
-        { year: '2018', title: 'Platform Launch', description: 'PetCircle started as a small project to help one local community go digital.' },
-        { year: '2020', title: '1,000 Adoptions', description: 'We hit our first major milestone, proving that technology can save lives.' },
-        { year: '2022', title: 'Expanded Nationwide', description: 'Partnered with over 200 communities across the country to bring pets to more homes.' },
-        { year: '2024', title: 'The Comfort Update', description: 'Redesigned our entire platform to prioritize user well-being and emotional connection.' },
-    ];
+
 
     const testimonials = [
         {
-            text: "The adoption process was so smooth. I felt supported every step of the way, and now I have my best friend.",
-            author: "Sarah Jenkins",
-            role: "Adopter",
+            text: "The chat with our shelter made us feel supported from day one. We knew exactly what to expect before Milo came home.",
+            author: "Jordan & Sam",
+            role: "Adopted Milo, 2 y/o mixed breed",
             image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80"
         },
         {
-            text: "PetCircle has transformed how we operate. We're finding homes for pets faster than ever before.",
-            author: "Dr. Mark R.",
-            role: "Shelter Director",
+            text: "Managing our pets and applications in one dashboard means we can spend more time caring for animals, not on spreadsheets.",
+            author: "Bright Paws Rescue",
+            role: "Shelter partner since 2021",
             image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
         },
         {
-            text: "I love the community here. It's not just about adopting; it's about sharing the journey with others.",
-            author: "Emily Chen",
-            role: "Volunteer",
+            text: "The community forum helped us with training tips and first vet visits. It felt like we weren't doing it alone.",
+            author: "The Chen Family",
+            role: "First-time adopters",
             image: "https://images.unsplash.com/photo-1554151228-14d9def656ec?auto=format&fit=crop&w=100&q=80"
         }
     ];
@@ -75,36 +107,38 @@ const AboutPage = () => {
                     />
                     <div className="absolute inset-0 bg-black/50"></div>
                 </div>
-                <div className="relative z-10 text-center max-w-4xl px-6">
-                    <p className="text-white/80 font-bold tracking-widest uppercase mb-4 text-sm">Who We Are</p>
-                    <h1 className="text-5xl md:text-7xl font-bold text-white mb-6 leading-tight">
-                        Connecting Hearts, <br /> Saving Lives
-                    </h1>
-                    <p className="text-xl text-white/90 mb-10 max-w-2xl mx-auto leading-relaxed">
-                        PetCircle is more than just a platform. We are a movement dedicated to ensuring every pet finds a loving home and every home finds its perfect companion.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link to="/pets" className="px-8 py-4 bg-white text-text-primary rounded-full font-bold hover:bg-gray-100 transition shadow-lg">
-                            Adopt a Pet
-                        </Link>
-                        <Link to="/community" className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold hover:bg-white/10 transition">
-                            Join Our Community
-                        </Link>
+                <div className="relative z-10 text-center max-w-4xl px-4 sm:px-6 lg:px-8">
+
+                    {/* Content */}
+                    <div className="relative z-10 max-w-4xl mx-auto space-y-6">
+                        <span className="inline-block py-1 px-3 rounded-full bg-white/20 backdrop-blur-md text-[#A68A6D] text-xs font-bold tracking-widest uppercase border border-white/10">
+                            Our Mission
+                        </span>
+                        <h1 className="text-5xl md:text-7xl font-bold text-white font-serif tracking-tight">
+                            Connecting Hearts,<br /> Saving Lives
+                        </h1>
+                        <p className="text-xl text-gray-200 max-w-2xl mx-auto font-light leading-relaxed">
+                            Building a world where every pet has a loving home and every owner has the support they need.
+                        </p>
+                        <div className="pt-8">
+                            <Link to="/adopt" className="bg-white text-[#2D2D2D] px-8 py-4 rounded-full font-bold hover:bg-gray-100 transition duration-300 inline-block shadow-lg">
+                                Start Your Journey
+                            </Link>
+                        </div>
                     </div>
                 </div>
             </section>
-
             {/* Stats Section */}
-            <section className="bg-brand-primary py-16 text-text-inverted">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+            <section className="bg-[#2D2D2D] py-16 text-white border-t border-white/10">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center divide-x divide-white/10">
                         {stats.map((stat, index) => (
-                            <div key={index} className="flex flex-col items-center">
-                                <div className="w-16 h-16 rounded-full bg-white/10 flex items-center justify-center mb-4">
-                                    <stat.icon size={32} className="text-brand-secondary" />
+                            <div key={index} className="px-4">
+                                <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/10 mb-4 text-[#A68A6D]">
+                                    <stat.icon size={24} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-4xl font-bold mb-2">{stat.value}</h3>
-                                <p className="text-white/60 uppercase tracking-wider text-xs font-bold">{stat.label}</p>
+                                <div className="text-4xl font-bold mb-2 font-serif">{stat.value}</div>
+                                <div className="text-sm text-gray-400 uppercase tracking-wider">{stat.label}</div>
                             </div>
                         ))}
                     </div>
@@ -112,62 +146,71 @@ const AboutPage = () => {
             </section>
 
             {/* Our Story Section */}
-            <section className="py-24 max-w-7xl mx-auto px-6">
-                <div className="grid md:grid-cols-2 gap-16 items-center">
+            <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid lg:grid-cols-2 gap-16 items-center">
+                    {/* Text Content */}
                     <div>
-                        <p className="text-brand-primary font-bold uppercase tracking-widest mb-2 text-sm">Our Story</p>
-                        <h2 className="text-4xl font-bold mb-8 text-text-primary">From a Simple Idea to a Global Movement</h2>
-                        <div className="space-y-6 text-text-secondary text-lg leading-relaxed">
+                        <p className="text-[#A68A6D] font-bold uppercase tracking-widest mb-4 text-sm font-sans">Who We Are</p>
+                        <h2 className="text-5xl font-bold mb-8 text-[#2D2D2D] font-serif">Our Story</h2>
+
+                        <div className="space-y-8 text-[#57534E] text-lg leading-relaxed font-light">
                             <p>
-                                It started with a single shelter struggling to get their pets seen. We realized that while there was no shortage of love, there was a shortage of connection.
+                                PetCircle began with a simple observation: too many beloved pets were ending up in shelters simply because their owners hit a rough patch and had nowhere else to turn. We set out to change that.
                             </p>
                             <p>
-                                PetCircle was born out of the belief that technology could bridge that gap. We built a platform that not only showcases pets but tells their stories, connects communities, and simplifies the adoption process.
-                            </p>
-                            <p>
-                                Today, we are proud to be a leading force in animal welfare, helping thousands of pets find their forever families every single month.
+                                What started as a small local network has grown into a nationwide movement. We're not just a platform; we're a safety net, a matchmaking service, and a community of animal lovers dedicated to ethical rehoming and responsible adoption.
                             </p>
                         </div>
-                        <div className="mt-10">
-                            <button className="flex items-center gap-2 text-brand-primary font-bold hover:underline">
-                                Read full story <ArrowRight size={20} />
-                            </button>
+
+                        {/* Quote Box */}
+                        <div className="mt-12 bg-white p-8 rounded-[2rem] shadow-sm border border-transparent relative">
+                            <div className="absolute left-0 top-8 bottom-8 w-1 bg-[#A68A6D] rounded-r-full"></div>
+                            <p className="text-lg font-medium text-[#2D2D2D] italic mb-4 leading-relaxed font-serif">
+                                "We believe that compassion is a verb. Every feature we build is designed to make kindness easier."
+                            </p>
+                            <p className="text-sm font-bold text-[#57534E] uppercase tracking-wider">— Sarah Jenkins, Founder</p>
                         </div>
                     </div>
-                    <div className="relative">
-                        <div className="grid grid-cols-2 gap-4">
+
+                    {/* Images Layout */}
+                    <div className="relative h-[500px] lg:h-[600px] w-full">
+                        {/* Main Image */}
+                        <div className="absolute top-0 left-0 w-[85%] h-[85%] rounded-[2.5rem] overflow-hidden shadow-xl z-0">
                             <img
-                                src="https://images.unsplash.com/photo-1529778873920-4da4926a7071?auto=format&fit=crop&w=600&q=80"
-                                alt="Cat"
-                                className="rounded-2xl shadow-lg w-full h-64 object-cover mt-12"
-                            />
-                            <img
-                                src="https://images.unsplash.com/photo-1587300003388-59208cc962cb?auto=format&fit=crop&w=600&q=80"
-                                alt="Dog"
-                                className="rounded-2xl shadow-lg w-full h-64 object-cover"
+                                src={aboutImage1}
+                                alt="Dog running"
+                                className="w-full h-full object-cover"
                             />
                         </div>
-                        {/* Decorative element */}
-                        <div className="absolute -z-10 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] bg-brand-secondary/5 rounded-full blur-3xl"></div>
+
+                        {/* Overlapping Image (Bottom Right) */}
+                        <div className="absolute bottom-10 right-0 w-[40%] h-[40%] rounded-[2rem] overflow-hidden shadow-2xl border-[8px] border-[#FFF8E7] z-10">
+                            <img
+                                src={aboutImage2}
+                                alt="Puppy detail"
+                                className="w-full h-full object-cover"
+                            />
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* Values Section */}
-            <section className="py-24 bg-white">
-                <div className="max-w-7xl mx-auto px-6">
+            <section className="py-24 bg-[#FFF8E7]">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="text-center mb-16">
-                        <p className="text-brand-primary font-bold uppercase tracking-widest mb-2 text-sm">Our Values</p>
-                        <h2 className="text-4xl font-bold text-text-primary">What Drives Us</h2>
+                        <p className="text-[#A68A6D] font-bold uppercase tracking-widest mb-4 text-sm font-sans">Our Principles</p>
+                        <h2 className="text-5xl font-bold text-[#2D2D2D] mb-6 font-serif">What Drives Us</h2>
+                        <p className="text-[#57534E] text-lg font-light">Core values that guide every decision we make.</p>
                     </div>
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {values.map((value, index) => (
-                            <div key={index} className="bg-bg-primary p-10 rounded-[32px] text-center hover:shadow-xl transition duration-300 border border-border card-hover">
-                                <div className="w-20 h-20 mx-auto bg-white rounded-full flex items-center justify-center mb-6 shadow-sm">
-                                    <value.icon size={40} className="text-text-primary" />
+                            <div key={index} className="bg-white p-10 rounded-[2rem] text-center hover:shadow-xl transition duration-300 border border-transparent hover:border-[#A68A6D]/20 shadow-sm flex flex-col items-center h-full">
+                                <div className="w-20 h-20 bg-[#FFF8E7] rounded-full flex items-center justify-center mb-8 text-[#A68A6D]">
+                                    <value.icon size={32} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-2xl font-bold mb-4 text-text-primary">{value.title}</h3>
-                                <p className="text-text-secondary leading-relaxed">{value.description}</p>
+                                <h3 className="text-2xl font-bold mb-4 text-[#2D2D2D] font-serif">{value.title}</h3>
+                                <p className="text-[#57534E] leading-relaxed font-light text-sm">{value.description}</p>
                             </div>
                         ))}
                     </div>
@@ -175,109 +218,145 @@ const AboutPage = () => {
             </section>
 
             {/* Team Section */}
-            <section className="py-24 max-w-7xl mx-auto px-6">
-                <div className="text-center mb-16">
-                    <p className="text-brand-primary font-bold uppercase tracking-widest mb-2 text-sm">Our Team</p>
-                    <h2 className="text-4xl font-bold text-text-primary">Meet the People Behind the Paws</h2>
+            <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-16 max-w-2xl mx-auto">
+                    <p className="text-[#A68A6D] font-bold uppercase tracking-widest mb-4 text-sm font-sans">The People</p>
+                    <h2 className="text-5xl font-bold text-[#2D2D2D] mb-6 font-serif">Meet Our Team</h2>
+                    <p className="text-[#57534E] text-lg font-light">
+                        A small team of animal lovers, designers, and shelter partners building tools that feel as kind as they are powerful.
+                    </p>
                 </div>
-                <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
+
+                <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {team.map((member, index) => (
-                        <div key={index} className="group">
-                            <div className="relative overflow-hidden rounded-2xl mb-4 aspect-[3/4]">
+                        <div key={index} className="group bg-white rounded-3xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300">
+                            {/* Image Container */}
+                            <div className="relative h-64 grayscale group-hover:grayscale-0 transition-all duration-500 overflow-hidden">
                                 <img
                                     src={member.image}
                                     alt={member.name}
-                                    className="w-full h-full object-cover transition duration-500 group-hover:scale-110 grayscale group-hover:grayscale-0"
+                                    className="w-full h-full object-cover"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition duration-300 flex items-end p-6">
-                                    <div className="text-white">
-                                        <p className="font-bold text-lg">{member.name}</p>
-                                        <p className="text-sm opacity-80">{member.role}</p>
-                                    </div>
+                                {/* Overlay Icons */}
+                                <div className="absolute bottom-4 right-4 flex gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 translate-y-2 group-hover:translate-y-0">
+                                    <a href="#" className="p-2 bg-black/50 hover:bg-black/70 rounded-full text-white backdrop-blur-sm transition-colors">
+                                        <Globe size={16} /> {/* Using Globe as placeholder for Linkedin */}
+                                    </a>
+                                    <a href="#" className="p-2 bg-black/50 hover:bg-black/70 rounded-full text-white backdrop-blur-sm transition-colors">
+                                        <Mail size={16} />
+                                    </a>
                                 </div>
                             </div>
-                            <h3 className="font-bold text-xl text-text-primary">{member.name}</h3>
-                            <p className="text-text-secondary text-sm">{member.role}</p>
+
+                            {/* Content */}
+                            <div className="p-6">
+                                <h3 className="font-bold text-xl text-[#2D2D2D] mb-1">{member.name}</h3>
+                                <p className="text-[#A68A6D] font-bold text-xs uppercase tracking-wider mb-4">{member.role}</p>
+                                <p className="text-[#57534E] text-sm leading-relaxed">
+                                    {member.description}
+                                </p>
+                            </div>
                         </div>
                     ))}
                 </div>
             </section>
 
-            {/* Milestones Section */}
-            <section className="py-24 bg-white">
-                <div className="max-w-4xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <p className="text-brand-primary font-bold uppercase tracking-widest mb-2 text-sm">Our Journey</p>
-                        <h2 className="text-4xl font-bold text-text-primary">Milestones That Shaped Us</h2>
-                    </div>
-                    <div className="space-y-12 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-gray-300 before:to-transparent">
-                        {milestones.map((milestone, index) => (
-                            <div key={index} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                                <div className="flex items-center justify-center w-10 h-10 rounded-full border border-white bg-gray-300 group-[.is-active]:bg-brand-primary text-white shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2">
-                                    <div className="w-3 h-3 bg-white rounded-full"></div>
-                                </div>
-                                <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] bg-bg-primary p-6 rounded-2xl border border-border shadow-sm card">
-                                    <div className="flex items-center justify-between space-x-2 mb-1">
-                                        <div className="font-bold text-text-primary">{milestone.title}</div>
-                                        <time className="font-mono text-xs font-bold text-brand-primary">{milestone.year}</time>
-                                    </div>
-                                    <div className="text-text-secondary text-sm">{milestone.description}</div>
-                                </div>
+            {/* Trusted Partners Section */}
+            <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-16 max-w-2xl mx-auto">
+                    <p className="text-[#A68A6D] font-bold uppercase tracking-widest mb-4 text-sm font-sans">Trusted Partners</p>
+                    <h2 className="text-5xl font-bold text-[#2D2D2D] mb-6 font-serif">Working Together to Save Lives</h2>
+                    <p className="text-[#57534E] text-lg font-light">
+                        From local shelters to national organizations, FurEver Home supports teams dedicated to ethical, responsible adoption.
+                    </p>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                    {[1, 2, 3, 4, 5, 6].map((item, index) => (
+                        <div key={index} className="bg-white h-24 rounded-2xl flex items-center justify-center shadow-sm hover:shadow-md transition-shadow grayscale hover:grayscale-0 opacity-70 hover:opacity-100 duration-300">
+                            {/* Placeholder Logos using Text or Icons since assets weren't provided */}
+                            <div className="text-[#2D2D2D] font-bold text-xl flex items-center gap-2">
+                                <Award size={24} />
+                                <span className="hidden md:inline">Partner</span>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
             </section>
 
             {/* Testimonials Section */}
-            <section className="py-24 bg-brand-primary text-text-inverted">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16">
-                        <h2 className="text-4xl font-bold mb-4">Stories That Inspire Us</h2>
-                        <p className="text-white/60 max-w-2xl mx-auto">Real stories from the people who make our community special.</p>
-                    </div>
-                    <div className="grid md:grid-cols-3 gap-8">
-                        {testimonials.map((testimonial, index) => (
-                            <div key={index} className="bg-white/5 p-8 rounded-2xl backdrop-blur-sm border border-white/10 hover:bg-white/10 transition">
-                                <div className="flex gap-1 text-brand-secondary mb-4">
-                                    {[...Array(5)].map((_, i) => <Smile key={i} size={16} fill="currentColor" />)}
-                                </div>
-                                <p className="text-lg italic mb-6 text-white/90">"{testimonial.text}"</p>
-                                <div className="flex items-center gap-4">
-                                    <img src={testimonial.image} alt={testimonial.author} className="w-12 h-12 rounded-full object-cover" />
-                                    <div>
-                                        <p className="font-bold">{testimonial.author}</p>
-                                        <p className="text-xs text-white/60 uppercase tracking-wider">{testimonial.role}</p>
+            <section className="py-24 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="bg-[#3E332B] rounded-[3rem] p-12 md:p-20 text-center relative overflow-hidden">
+                    <div className="relative z-10">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4 font-serif">Stories That Inspire Us</h2>
+                        <p className="text-white/70 max-w-2xl mx-auto mb-16 text-lg font-light">
+                            Real families, real pets, and the journeys that started with a single message on FurEver Home.
+                        </p>
+
+                        <div className="grid md:grid-cols-3 gap-8">
+                            {testimonials.map((testimonial, index) => (
+                                <div key={index} className="bg-white p-8 rounded-3xl text-left shadow-lg transform hover:-translate-y-1 transition-transform duration-300 flex flex-col h-full">
+                                    <div className="flex justify-between items-start mb-6">
+                                        <div className="w-10 h-10 bg-[#FAF8F5] rounded-full flex items-center justify-center text-[#A68A6D] font-serif text-xl border border-[#E6D4B9]">
+                                            "
+                                        </div>
+                                        <div className="flex gap-1">
+                                            {[...Array(5)].map((_, i) => (
+                                                <svg key={i} className="w-4 h-4 text-[#FFB800] fill-current" viewBox="0 0 20 20">
+                                                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                                                </svg>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <p className="text-[#57534E] text-lg leading-relaxed mb-8 flex-grow font-light italic">
+                                        "{testimonial.text}"
+                                    </p>
+
+                                    <div className="flex items-center gap-4 mt-auto">
+                                        <img src={testimonial.image} alt={testimonial.author} className="w-12 h-12 rounded-full object-cover ring-2 ring-[#F3F4F6]" />
+                                        <div>
+                                            <p className="font-bold text-[#2D2D2D]">{testimonial.author}</p>
+                                            <p className="text-xs text-[#A68A6D] font-bold uppercase tracking-wide">{testimonial.role}</p>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
                     </div>
                 </div>
             </section>
 
             {/* CTA Section */}
-            <section className="py-24 max-w-5xl mx-auto px-6 text-center">
-                <div className="bg-brand-primary rounded-[48px] p-12 md:p-24 relative overflow-hidden">
-                    {/* Background pattern */}
-                    <div className="absolute inset-0 opacity-10">
-                        <svg className="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
-                            <path d="M0 100 C 20 0 50 0 100 100 Z" fill="white" />
-                        </svg>
-                    </div>
+            <section className="py-24 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <div className="bg-gradient-to-br from-[#3E332B] to-[#1F1812] rounded-[3rem] p-12 md:p-24 relative overflow-hidden shadow-2xl">
+                    {/* Shiny Gradient Effect - Overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-tr from-white/5 to-transparent opacity-50 pointer-events-none"></div>
+                    <div className="absolute -top-[50%] -left-[50%] w-[200%] h-[200%] bg-gradient-to-br from-transparent via-white/5 to-transparent opacity-30 rotate-45 pointer-events-none blur-3xl"></div>
 
-                    <div className="relative z-10">
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6">Ready to Make a Difference?</h2>
-                        <p className="text-white/80 text-xl mb-10 max-w-2xl mx-auto">
-                            Join our community today. Whether you adopt, foster, or volunteer, you are changing lives.
+                    <div className="relative z-10 max-w-3xl mx-auto">
+                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-serif">Ready to Make a Difference?</h2>
+                        <p className="text-white/80 text-lg md:text-xl mb-12 leading-relaxed font-light">
+                            Whether you're looking to adopt, share a pet's story, or support as a shelter partner, FurEver Home gives you everything you need to create more happy endings.
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link to="/pets" className="px-8 py-4 bg-white text-text-primary rounded-full font-bold hover:bg-gray-100 transition shadow-lg">
-                                Find a Pet
+
+                        <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
+                            <Link to="/pets" className="px-8 py-4 bg-white text-[#2D2D2D] rounded-full font-bold hover:bg-gray-100 transition shadow-lg flex items-center justify-center gap-2 group">
+                                <Search size={20} className="text-[#2D2D2D]" />
+                                <span>Browse Pets</span>
                             </Link>
-                            <Link to="/register" className="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold hover:bg-white/10 transition">
-                                Create Account
+                            <Link to="/register" className="px-8 py-4 bg-transparent border border-white/30 text-white rounded-full font-bold hover:bg-white/10 transition flex items-center justify-center gap-2">
+                                <Heart size={20} className="text-white" />
+                                <span>Become a Partner</span>
                             </Link>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-3 text-xs font-bold tracking-[0.2em] text-white/40 uppercase">
+                            <span>Every click can change a life</span>
+                            <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+                            <Award size={14} />
+                            <div className="w-1 h-1 bg-white/40 rounded-full"></div>
+                            <span>Thank you for caring</span>
                         </div>
                     </div>
                 </div>
