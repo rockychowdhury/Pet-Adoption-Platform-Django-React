@@ -152,7 +152,7 @@ class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
 
     def post(self, request):
-        email = request.data.get('email')
+        email = request.data.get('email', '').lower()
         code = request.data.get('code')
 
         if not email or not code:
@@ -171,6 +171,7 @@ class VerifyEmailView(APIView):
 
         # Success
         user.email_verified = True
+        user.is_active = True  # Activate user upon successful verification
         user.verification_code = None
         user.verification_code_expires_at = None
         user.save()
@@ -208,7 +209,7 @@ class ResendEmailVerificationView(APIView):
     throttle_classes = [ResendVerificationRateThrottle]
     
     def post(self, request):
-        email = request.data.get('email')
+        email = request.data.get('email', '').lower()
         
         if not email:
             return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)

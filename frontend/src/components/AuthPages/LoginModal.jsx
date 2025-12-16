@@ -1,10 +1,12 @@
 import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, Loader2, Mail } from 'lucide-react';
+import { Eye, EyeOff, Loader2 } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
-import Modal from '../common/Modal';
+import Modal from '../common/Modal/Modal';
 import Logo from '../common/Logo';
-import DarkInput from '../Auth/DarkInput';
-import DarkButton from '../Auth/DarkButton';
+import Input from '../common/Form/Input';
+import Button from '../common/Buttons/Button';
+import Checkbox from '../common/Form/Checkbox';
+import Alert from '../common/Feedback/Alert';
 
 const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -41,67 +43,60 @@ const LoginModal = ({ isOpen, onClose, onSwitchToRegister }) => {
             </div>
 
             {error && (
-                <div className="alert-error mb-4">
+                <Alert variant="error" className="mb-4">
                     {error}
-                </div>
+                </Alert>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="relative">
-                    <DarkInput
-                        label="Email Address"
-                        type="email"
-                        name="email"
-                        required
-                        placeholder="you@example.com"
-                        value={formData.email}
-                        onChange={handleChange}
-                        icon={Mail}
-                    />
-                </div>
+                <Input
+                    label="Email Address"
+                    type="email"
+                    name="email"
+                    className="w-full"
+                    placeholder="you@example.com"
+                    value={formData.email}
+                    onChange={handleChange}
+                    required
+                />
 
                 <div className="relative">
-                    <DarkInput
+                    <Input
                         label="Password"
                         type={showPassword ? "text" : "password"}
                         name="password"
-                        required
+                        className="w-full"
                         placeholder="Enter your password"
                         value={formData.password}
                         onChange={handleChange}
-                        icon={Lock}
+                        required
+                        endIcon={
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="text-text-tertiary hover:text-text-primary transition"
+                            >
+                                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                            </button>
+                        }
                     />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-3 top-[38px] text-text-tertiary hover:text-text-primary transition p-1"
-                        aria-label={showPassword ? 'Hide password' : 'Show password'}
-                    >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
                 </div>
 
                 <div className="flex items-center justify-between pt-1">
-                    <label className="flex items-center gap-2 cursor-pointer group">
-                        <input
-                            type="checkbox"
-                            className="w-4 h-4 rounded border-border bg-bg-surface checked:bg-brand-secondary checked:border-border-focus focus:ring-2 focus:ring-border-focus/20 cursor-pointer text-brand-secondary"
-                        />
-                        <span className="text-sm text-text-secondary group-hover:text-text-primary transition-colors">Remember me</span>
-                    </label>
+                    <Checkbox label="Remember me" />
                     <button type="button" className="text-sm font-semibold text-brand-secondary hover:text-brand-primary hover:underline transition-colors">
                         Forgot password?
                     </button>
                 </div>
 
-                <DarkButton
+                <Button
                     type="submit"
-                    disabled={isLoading}
-                    loading={isLoading}
+                    variant="primary"
                     className="w-full mt-2"
+                    isLoading={isLoading}
                 >
                     Log In
-                </DarkButton>
+                </Button>
             </form>
 
             <div className="divider">

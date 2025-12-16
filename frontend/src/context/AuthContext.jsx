@@ -12,6 +12,14 @@ const AuthProvider = ({ children }) => {
     const [error, setError] = useState(null);
     const api = useAPI();
 
+    // Restore session on mount
+    useLayoutEffect(() => {
+        const initializeAuth = async () => {
+            await getUser();
+        };
+        initializeAuth();
+    }, []);
+
     const register = async (data) => {
         setLoading(true);
         try {
@@ -141,17 +149,53 @@ const AuthProvider = ({ children }) => {
         }
     }
 
+    const verifyPhone = async (phone_number, code) => {
+        setLoading(true);
+        try {
+            const response = await api.post('/user/verify-phone/', { phone_number, code });
+            if (response.status === 200) {
+                toast.success("Phone verified successfully!");
+                await getUser();
+                return true;
+            }
+        } catch (err) {
+            console.error(err);
+            toast.error(err.response?.data?.error || "Verification failed.");
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    const resendPhoneVerification = async (phone_number) => {
+        setLoading(true);
+        try {
+            const response = await api.post('/user/resend-phone-verification/', { phone_number });
+            toast.success("SMS code sent! Please check your phone.");
+            return response.data;
+        } catch (err) {
+            console.error(err);
+            const errorMsg = err.response?.data?.error || 'Failed to resend code';
+            toast.error(errorMsg);
+            throw err;
+        } finally {
+            setLoading(false);
+        }
+    }
+
     const authInfo = {
         user, setUser,
         loading, setLoading,
         register,
         verifyEmail,
+        verifyPhone,
         login,
         getUser,
         logout,
         requestPasswordReset,
         confirmPasswordReset,
         resendEmailVerification,
+        resendPhoneVerification,
         error, setError
     };
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>

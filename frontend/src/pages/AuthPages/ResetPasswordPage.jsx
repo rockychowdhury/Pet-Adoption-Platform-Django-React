@@ -8,7 +8,7 @@ import DarkButton from '../../components/Auth/DarkButton';
 import useAuth from '../../hooks/useAuth';
 
 const ResetPasswordPage = () => {
-    const { uidb64, token } = useParams();
+    const { uid: uidb64, token } = useParams();
     const navigate = useNavigate();
     const { confirmPasswordReset } = useAuth();
 

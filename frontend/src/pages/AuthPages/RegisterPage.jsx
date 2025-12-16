@@ -16,7 +16,9 @@ const RegisterPage = () => {
         first_name: '',
         last_name: '',
         email: '',
+        phone_number: '',
         password: '',
+        confirm_password: '',
         role: 'adopter' // default role
     });
 
@@ -75,6 +77,13 @@ const RegisterPage = () => {
             newErrors.email = 'Please enter a valid email address';
         }
 
+        // Basic phone validation (can be enhanced)
+        if (!formData.phone_number) {
+            newErrors.phone_number = 'Phone number is required';
+        } else if (formData.phone_number.length < 10) {
+            newErrors.phone_number = 'Please enter a valid phone number';
+        }
+
         if (formData.password.length < 8) {
             newErrors.password = 'Password must be at least 8 characters';
         } else if (!/[A-Z]/.test(formData.password)) {
@@ -83,6 +92,10 @@ const RegisterPage = () => {
             newErrors.password = 'Include at least one number';
         } else if (!/[^a-zA-Z0-9]/.test(formData.password)) {
             newErrors.password = 'Include at least one special character';
+        }
+
+        if (formData.password !== formData.confirm_password) {
+            newErrors.confirm_password = 'Passwords must match';
         }
 
         if (!agreedToTerms) {
@@ -100,9 +113,11 @@ const RegisterPage = () => {
 
         setIsLoading(true);
         try {
-            await register(formData);
+            // Remove confirm_password before sending
+            const { confirm_password, ...dataToSend } = formData;
+            await register(dataToSend);
             // Navigate to email verification page
-            navigate('/verify-email', { state: { email: formData.email } });
+            navigate('/verify-email', { state: { email: formData.email, phone_number: formData.phone_number } });
         } catch (err) {
             console.error('Registration failed:', err);
             setErrors({ submit: err.response?.data?.detail || 'Registration failed' });
@@ -166,6 +181,22 @@ const RegisterPage = () => {
                         required
                     />
 
+                    {/* Phone Number */}
+                    <div>
+                        <DarkInput
+                            type="tel"
+                            name="phone_number"
+                            value={formData.phone_number}
+                            onChange={handleChange}
+                            placeholder="+1 (555) 000-0000"
+                            error={errors.phone_number}
+                            required
+                        />
+                        <p className="text-xs text-text-tertiary mt-1 ml-1">
+                            We'll send you a verification code
+                        </p>
+                    </div>
+
                     {/* Password */}
                     <div>
                         <div className="relative">
@@ -174,14 +205,14 @@ const RegisterPage = () => {
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
-                                placeholder="Enter your password"
+                                placeholder="Create a strong password"
                                 error={errors.password}
                                 required
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors p-1"
+                                className="absolute right-4 top-3 text-text-tertiary hover:text-text-primary transition-colors p-1"
                                 aria-label={showPassword ? 'Hide password' : 'Show password'}
                             >
                                 {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -212,6 +243,17 @@ const RegisterPage = () => {
                         )}
                     </div>
 
+                    {/* Confirm Password */}
+                    <DarkInput
+                        type={showPassword ? 'text' : 'password'}
+                        name="confirm_password"
+                        value={formData.confirm_password}
+                        onChange={handleChange}
+                        placeholder="Re-enter your password"
+                        error={errors.confirm_password}
+                        required
+                    />
+
                     {/* Terms & Conditions */}
                     <div>
                         <label className="flex items-start gap-3 cursor-pointer group">
@@ -225,6 +267,10 @@ const RegisterPage = () => {
                                 I agree to the{' '}
                                 <Link to="/terms" className="text-brand-secondary font-medium transition-colors hover:text-brand-primary hover:underline" target="_blank">
                                     Terms & Conditions
+                                </Link>
+                                {' '}and{' '}
+                                <Link to="/privacy" className="text-brand-secondary font-medium transition-colors hover:text-brand-primary hover:underline" target="_blank">
+                                    Privacy Policy
                                 </Link>
                             </span>
                         </label>

@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Eye, EyeOff, User, Mail, Lock, Phone, AlertCircle, Loader2, Check, X as XIcon } from 'lucide-react';
+import { Eye, EyeOff, User, Mail, Lock, Phone, AlertCircle, Check } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
-import Modal from '../common/Modal';
+import Modal from '../common/Modal/Modal';
 import { useNavigate } from 'react-router';
 import Logo from '../common/Logo';
-import DarkInput from '../Auth/DarkInput';
-import DarkButton from '../Auth/DarkButton';
+import Input from '../common/Form/Input';
+import Button from '../common/Buttons/Button';
+import Checkbox from '../common/Form/Checkbox';
+import Alert from '../common/Feedback/Alert';
 
 const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
     const [showPassword, setShowPassword] = useState(false);
@@ -120,15 +122,14 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 </div>
 
                 {displayedError && (
-                    <div className="bg-red-50 text-red-600 p-3 rounded-xl flex items-center gap-2 text-sm mb-4 border border-red-100 animate-fade-in">
-                        <AlertCircle size={16} />
+                    <Alert variant="error" className="mb-4">
                         {displayedError}
-                    </div>
+                    </Alert>
                 )}
 
                 <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
-                        <DarkInput
+                        <Input
                             label="First Name"
                             name="first_name"
                             value={formData.first_name}
@@ -136,7 +137,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                             placeholder="First Name"
                             required
                         />
-                        <DarkInput
+                        <Input
                             label="Last Name"
                             name="last_name"
                             value={formData.last_name}
@@ -147,28 +148,28 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                     </div>
 
                     <div className="relative">
-                        <DarkInput
+                        <Input
                             label="Email Address"
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             placeholder="you@example.com"
-                            icon={Mail}
+                            startIcon={<Mail size={18} />}
                             required
                         />
                     </div>
 
                     <div className="space-y-1">
                         <div className="relative">
-                            <DarkInput
+                            <Input
                                 label="Phone Number"
                                 type="tel"
                                 name="phone_number"
                                 value={formData.phone_number}
                                 onChange={handleChange}
                                 placeholder="+1 (555) 000-0000"
-                                icon={Phone}
+                                startIcon={<Phone size={18} />}
                                 required
                             />
                         </div>
@@ -177,23 +178,25 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
 
                     <div className="space-y-1">
                         <div className="relative">
-                            <DarkInput
+                            <Input
                                 label="Password"
                                 type={showPassword ? "text" : "password"}
                                 name="password"
                                 value={formData.password}
                                 onChange={handleChange}
                                 placeholder="Create a strong password"
-                                icon={Lock}
+                                startIcon={<Lock size={18} />}
                                 required
+                                endIcon={
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="text-text-secondary hover:text-text-primary"
+                                    >
+                                        {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                                    </button>
+                                }
                             />
-                            <button
-                                type="button"
-                                onClick={() => setShowPassword(!showPassword)}
-                                className="absolute right-3 top-[38px] text-text-secondary hover:text-text-primary"
-                            >
-                                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
                         </div>
 
                         {/* Password Strength Meter */}
@@ -229,44 +232,40 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                     </div>
 
                     <div className="relative">
-                        <DarkInput
+                        <Input
                             label="Confirm Password"
                             type="password"
                             name="confirm_password"
                             value={formData.confirm_password}
                             onChange={handleChange}
                             placeholder="Re-enter your password"
-                            icon={Lock}
+                            startIcon={<Lock size={18} />}
                             required
                         />
                     </div>
 
                     <div className="pt-2">
-                        <label className="flex items-start gap-3 cursor-pointer group">
-                            <div className="relative flex items-center">
-                                <input
-                                    type="checkbox"
-                                    name="termsAccepted"
-                                    checked={formData.termsAccepted}
-                                    onChange={handleChange}
-                                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-border bg-bg-surface checked:border-brand-primary checked:bg-brand-primary transition-all"
-                                />
-                                <Check size={14} className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100" />
-                            </div>
-                            <span className="text-xs text-text-secondary leading-tight pt-0.5 group-hover:text-text-primary transition-colors">
+                        <div className="flex items-start gap-3">
+                            <Checkbox
+                                name="termsAccepted"
+                                checked={formData.termsAccepted}
+                                onChange={handleChange}
+                            />
+                            <span className="text-xs text-text-secondary leading-tight pt-0.5 mt-1">
                                 I agree to the <a href="#" className="font-bold underline hover:text-brand-secondary">Terms of Service</a> and <a href="#" className="font-bold underline hover:text-brand-secondary">Privacy Policy</a>
                             </span>
-                        </label>
+                        </div>
                     </div>
 
-                    <DarkButton
+                    <Button
                         type="submit"
                         disabled={isLoading || !formData.termsAccepted}
-                        loading={isLoading}
+                        isLoading={isLoading}
                         className="w-full mt-4"
+                        variant="primary"
                     >
                         Create Account
-                    </DarkButton>
+                    </Button>
                 </form>
             </div>
         </Modal>
