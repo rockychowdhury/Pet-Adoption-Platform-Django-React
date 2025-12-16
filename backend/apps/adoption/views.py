@@ -23,7 +23,7 @@ class AdoptionApplicationViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         # Return applications where user is applicant OR user is pet owner
-        return AdoptionApplication.objects.filter(models.Q(applicant=user) | models.Q(pet__owner=user)).distinct().order_by('-created_at')
+        return AdoptionApplication.objects.filter(models.Q(applicant=user) | models.Q(pet__pet_owner=user)).distinct().order_by('-created_at')
 
     def perform_create(self, serializer):
         # Auto-populate readiness_score from adopter profile if exists
@@ -158,9 +158,4 @@ class AdopterProfileViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(profile)
         return Response(serializer.data)
     
-    @action(detail=False, methods=['get'])
-    def me(self, request):
-        """Get current user's adopter profile"""
-        profile, created = AdopterProfile.objects.get_or_create(user=request.user)
-        serializer = self.get_serializer(profile)
-        return Response(serializer.data)
+
