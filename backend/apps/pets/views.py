@@ -1,4 +1,6 @@
 from rest_framework import generics, permissions
+from rest_framework.exceptions import PermissionDenied
+from django.utils import timezone
 from .models import RehomingListing
 from .serializers import (
     PetListSerializer,
@@ -6,6 +8,7 @@ from .serializers import (
     PetCreateUpdateSerializer
 )
 from apps.users.permissions import IsAdmin, IsOwnerOrReadOnly
+from apps.rehoming.models import RehomingIntervention
 
 class PetListCreateView(generics.ListCreateAPIView):
     queryset = RehomingListing.objects.all()
@@ -134,11 +137,26 @@ class PetListCreateView(generics.ListCreateAPIView):
         return queryset
 
     def perform_create(self, serializer):
-        # Enforce verification check
+        # Enforce verification + pre‑rehoming intervention requirements
         if not self.request.user.can_create_listing:
-            from rest_framework.exceptions import PermissionDenied
             raise PermissionDenied("You must complete identity and contact verification before creating a listing.")
-        
+
+        # Ensure user has completed intervention and acknowledged resources
+        intervention = RehomingIntervention.objects.filter(
+            user=self.request.user
+        ).order_by('-created_at').first()
+
+        if not intervention or not intervention.acknowledged_at:
+            raise PermissionDenied(
+                "Please complete the pre‑rehoming assessment and acknowledge the resources before creating a listing."
+            )
+
+        # Respect optional cooling period
+        if intervention.cooling_period_end and timezone.now() < intervention.cooling_period_end:
+            raise PermissionDenied(
+                "You have started a 48‑hour cooling period. You can create a listing once it has ended."
+            )
+
         serializer.save(pet_owner=self.request.user)
 
 
