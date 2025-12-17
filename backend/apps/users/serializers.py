@@ -4,7 +4,7 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import AuthenticationFailed
-from .models import UserPet, UserProfile, VerificationDocument
+from .models import UserPet, UserProfile, VerificationDocument, RoleRequest
 
 User = get_user_model()
 
@@ -49,12 +49,22 @@ class VerificationDocumentSerializer(serializers.ModelSerializer):
         fields = ['id', 'document_type', 'document_url', 'status', 'admin_notes', 'reviewed_at', 'created_at']
         read_only_fields = ['status', 'admin_notes', 'reviewed_at', 'created_at']
 
-class UserRegistrationSerializer(serializers.ModelSerializer):
-    role = serializers.ChoiceField(choices=[('adopter', 'Adopter'), ('pet_owner', 'Pet Owner'), ('service_provider', 'Service Provider')], default='adopter')
+class RoleRequestSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    
+    class Meta:
+        model = RoleRequest
+        fields = ['id', 'user', 'user_email', 'requested_role', 'reason', 'status', 'admin_notes', 'created_at', 'updated_at']
+        read_only_fields = ['user', 'status', 'admin_notes', 'created_at', 'updated_at']
 
+    def create(self, validated_data):
+        validated_data['user'] = self.context['request'].user
+        return super().create(validated_data)
+
+class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['email','password','first_name','last_name', 'role', 'phone_number', 'location_city', 'location_state']
+        fields = ['email','password','first_name','last_name', 'phone_number', 'location_city', 'location_state']
         extra_kwargs = {
             "password":{"write_only":True},
             }
@@ -123,7 +133,7 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'photoURL', 'bio', 
             'phone_number', 'location_city', 'location_state', 'location_country',
             'email_verified', 'phone_verified', 'verified_identity', 'pet_owner_verified',
-            'is_adopter', 'is_pet_owner', 'is_service_provider', 'is_admin', 
+            'is_user', 'is_service_provider', 'is_admin', 
             'can_create_listing', 'account_status',
             'user_pets', 'profile', 'verification_documents'
         ]

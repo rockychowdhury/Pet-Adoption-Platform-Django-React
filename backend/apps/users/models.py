@@ -29,10 +29,8 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     class UserRole(models.TextChoices):
         ADMIN                   = 'admin', _('Admin')
-        PET_OWNER               = 'pet_owner', _('Pet Owner')
-        ADOPTER                 = 'adopter', _('Adopter')
         SERVICE_PROVIDER        = 'service_provider', _('Service Provider')
-        GUEST                   = 'guest', _('Guest')
+        USER                    = 'user', _('User')
 
     class AccountStatus(models.TextChoices):
         ACTIVE = 'active', _('Active')
@@ -74,7 +72,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     profile_visibility      = models.CharField(max_length=10, choices=ProfileVisibility.choices, default=ProfileVisibility.PUBLIC)
     
     # Role and Status
-    role                    = models.CharField(max_length=20, choices=UserRole.choices, default=UserRole.GUEST)
+    role                    = models.CharField(max_length=20, choices=UserRole.choices, default=UserRole.USER)
     account_status          = models.CharField(max_length=20, choices=AccountStatus.choices, default=AccountStatus.ACTIVE)
     
     # Django Auth Fields
@@ -97,12 +95,8 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.email} ({self.role})"
     
     @property
-    def is_adopter(self):
-        return self.role == User.UserRole.ADOPTER
-
-    @property
-    def is_pet_owner(self):
-        return self.role == User.UserRole.PET_OWNER
+    def is_user(self):
+        return self.role == User.UserRole.USER
     
     @property
     def is_service_provider(self):
@@ -270,3 +264,30 @@ class VerificationDocument(models.Model):
         verbose_name = 'Verification Document'
         verbose_name_plural = 'Verification Documents'
         ordering = ['-created_at']
+
+
+class RoleRequest(models.Model):
+    """
+    Model for users to request a role change (e.g., to Service Provider).
+    """
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('approved', 'Approved'),
+        ('rejected', 'Rejected'),
+    )
+
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='role_requests')
+    requested_role = models.CharField(max_length=20, choices=User.UserRole.choices)
+    reason = models.TextField(help_text="Reason for requesting this role")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    admin_notes = models.TextField(blank=True, null=True, help_text="Notes from admin regarding approval/rejection")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return f"{self.user.email} requesting {self.requested_role}"
+
+    class Meta:
+        ordering = ['-created_at']
+

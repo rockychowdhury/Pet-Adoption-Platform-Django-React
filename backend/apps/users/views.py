@@ -10,9 +10,10 @@ from rest_framework import viewsets, permissions
 from apps.users.permissions import IsOwnerOrReadOnly
 from .serializers import (
     UserRegistrationSerializer, UserUpdateSerializer, UserSerializer, 
-    UserPetSerializer, PublicUserSerializer, VerificationDocumentSerializer
+    UserPetSerializer, PublicUserSerializer, VerificationDocumentSerializer, RoleRequestSerializer
 )
-from .models import UserPet, VerificationDocument
+from .utils import send_verification_email, send_password_reset_email
+from .models import UserPet, VerificationDocument, RoleRequest
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -69,15 +70,33 @@ class CustomTokenObtainPairView(TokenObtainPairView):
 
 class CustomTokenRefreshView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     def post(self, request, *args, **kwargs):
         refresh_token = request.COOKIES.get('refresh_token')
+        
         if not refresh_token:
-            return Response(
+            response = Response(
                 {"message": "Refresh token not provided", 'code': 'invalid-refresh-token'},
                 status=401
             )
+            response.delete_cookie("refresh_token", samesite="None")
+            response.delete_cookie("access_token", samesite="None")
+            return response
+
         try:
             token = RefreshToken(refresh_token)
+            
+            # Check if user exists
+            user_id = token.payload.get('user_id')
+            if not User.objects.filter(id=user_id).exists():
+                response = Response(
+                    {"message": "User not found", 'code': 'user-not-found'},
+                    status=401
+                )
+                response.delete_cookie("refresh_token", samesite="None")
+                response.delete_cookie("access_token", samesite="None")
+                return response
+
             access_token = str(token.access_token)
             response = Response({"message": "Token refreshed"})
             response.set_cookie(
@@ -90,10 +109,13 @@ class CustomTokenRefreshView(APIView):
             )
             return response
         except TokenError as e:
-            return Response(
+            response = Response(
                 {"message": str(e), 'code': 'invalid-refresh-token'},
                 status=401
             )
+            response.delete_cookie("refresh_token", samesite="None")
+            response.delete_cookie("access_token", samesite="None")
+            return response
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated]
@@ -108,6 +130,7 @@ class UserProfileView(APIView):
 
 class UserRegistrationView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [RegistrationRateThrottle]
     
     def post(self, request, *args, **kwargs):
@@ -123,13 +146,7 @@ class UserRegistrationView(APIView):
             
             # Send Email
             try:
-                send_mail(
-                    subject='Verify your email - PetCircle',
-                    message=f'Your verification code is: {code}',
-                    from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@petcircle.com',
-                    recipient_list=[user.email],
-                    fail_silently=False,
-                )
+                send_verification_email(user.email, code)
             except Exception as e:
                 print(f"Failed to send email: {e}") 
                 # In prod, you might want to rollback or queue it. For now, we continue.
@@ -150,6 +167,7 @@ class UserRegistrationView(APIView):
 
 class VerifyEmailView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
 
     def post(self, request):
         email = request.data.get('email', '').lower()
@@ -206,6 +224,7 @@ class VerifyEmailView(APIView):
 class ResendEmailVerificationView(APIView):
     """Resend email verification code to user"""
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [ResendVerificationRateThrottle]
     
     def post(self, request):
@@ -238,13 +257,7 @@ class ResendEmailVerificationView(APIView):
         
         # Send verification email
         try:
-            send_mail(
-                subject='Resend: Verify your email - PetCircle',
-                message=f'Your new verification code is: {code}\n\nThis code expires in 15 minutes.',
-                from_email=settings.DEFAULT_FROM_EMAIL if hasattr(settings, 'DEFAULT_FROM_EMAIL') else 'noreply@petcircle.com',
-                recipient_list=[user.email],
-                fail_silently=False,
-            )
+            send_verification_email(user.email, code)
         except Exception as e:
             print(f"Failed to send email: {e}")
             return Response(
@@ -273,28 +286,24 @@ class UserProfileUpdateView(APIView):
 
 class LogoutView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     def post(self, request):
+        response = Response({"message": "Logout successful"}, status=200)
+        
+        # Always delete cookies specifically
+        response.delete_cookie("refresh_token", samesite="None")
+        response.delete_cookie("access_token", samesite="None")
+
         try:
             refresh_token = request.COOKIES.get('refresh_token')
-            if not refresh_token:
-                response = Response({"message": "Logout successful"}, status=200)
-                response.delete_cookie("refresh_token", samesite="None")
-                response.delete_cookie("access_token", samesite="None")
-                return response
-
-            try:
+            if refresh_token:
                 token = RefreshToken(refresh_token)
                 token.blacklist()
-            except Exception as e:
-                return Response({"error": "Invalid or expired token"}, status=400)
+        except Exception:
+            # Token might be invalid or expired, but we still want to clear cookies
+            pass
 
-            response = Response({"message": "Logout successful"}, status=200)
-            response.delete_cookie("refresh_token", samesite="None")
-            response.delete_cookie("access_token", samesite="None")
-            return response
-
-        except Exception as e:
-            return Response({"error": str(e)}, status=400)
+        return response
 
         
 class UserDeactivateView(APIView):
@@ -307,6 +316,7 @@ class UserDeactivateView(APIView):
 
 class UserActivateView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     def patch(self,request):
         email = request.data.get('email')
         password = request.data.get('password')
@@ -361,6 +371,7 @@ from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 
 class RequestPasswordResetView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     throttle_classes = [PasswordResetRateThrottle]
     
     def post(self, request):
@@ -373,13 +384,7 @@ class RequestPasswordResetView(APIView):
             # In production, send this link via email
             link = f"http://localhost:5173/password-reset/{uidb64}/{token}"
             
-            send_mail(
-                subject='Password Reset Request - PetCircle',
-                message=f'Click the link to reset your password: {link}',
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[user.email],
-                fail_silently=False, 
-            )
+            send_password_reset_email(user.email, link)
             print(f"PASSWORD RESET LINK FOR {email}: {link}")
             
             return Response({"message": "Password reset link sent to email."}, status=200)
@@ -389,6 +394,7 @@ class RequestPasswordResetView(APIView):
 
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     
     def patch(self, request):
         uidb64 = request.data.get('uidb64')
@@ -426,6 +432,7 @@ class UserPetViewSet(viewsets.ModelViewSet):
 
 class PublicUserProfileView(APIView):
     permission_classes = [AllowAny]
+    authentication_classes = []
     
     def get(self, request, pk):
         try:
@@ -448,3 +455,38 @@ class VerificationDocumentViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(user=self.request.user)
+
+
+class RoleRequestViewSet(viewsets.ModelViewSet):
+    """
+    ViewSet for managing role requests.
+    Users can create and list their requests.
+    Admins can list all and update status.
+    """
+    serializer_class = RoleRequestSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.is_staff or user.is_superuser or user.role == 'admin':
+             return RoleRequest.objects.all()
+        return RoleRequest.objects.filter(user=user)
+
+    def perform_create(self, serializer):
+        serializer.save(user=self.request.user)
+
+    def partial_update(self, request, *args, **kwargs):
+        if not (request.user.is_staff or request.user.role == 'admin'):
+             return Response({"error": "Permission denied. Only admins can update status."}, status=status.HTTP_403_FORBIDDEN)
+         
+        response = super().partial_update(request, *args, **kwargs)
+        
+        # If successfully approved, update the user's role
+        if response.status_code == 200:
+            instance = self.get_object()
+            if instance.status == 'approved':
+                user = instance.user
+                user.role = instance.requested_role
+                user.save()
+        
+        return response

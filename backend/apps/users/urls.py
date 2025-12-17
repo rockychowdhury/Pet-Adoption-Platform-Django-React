@@ -16,13 +16,15 @@ from .views import (
     RequestPasswordResetView,
     PasswordResetConfirmView,
     VerifyEmailView,
-    ResendEmailVerificationView
+    ResendEmailVerificationView,
+    RoleRequestViewSet
 )
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'pets', UserPetViewSet, basename='user-pets')
 router.register(r'verification-documents', VerificationDocumentViewSet, basename='verification-documents')
+router.register(r'role-requests', RoleRequestViewSet, basename='role-requests')
 
 urlpatterns = [
     path('',UserProfileView.as_view(),name="user_profile"),
