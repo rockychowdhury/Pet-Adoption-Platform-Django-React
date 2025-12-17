@@ -56,12 +56,10 @@ const RehomingInterventionPage = () => {
 
         const payload = {
             reason: formData.reason,
-            explanation: formData.explanation,
             urgency: formData.urgency.includes('week') ? 'immediate' :
                 formData.urgency.includes('1 month') ? 'short_term' :
                     formData.urgency.includes('3 months') ? 'medium_term' : 'flexible',
             resources_viewed: formData.reviewedResources,
-            // We can append commitment to explanation if needed
             explanation: `${formData.explanation}\n\nCommitment: ${formData.commitment}`
         };
 

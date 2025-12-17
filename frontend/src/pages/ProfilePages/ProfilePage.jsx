@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 import useAuth from '../../hooks/useAuth';
 import useAPI from '../../hooks/useAPI';
-import { User, Mail, Phone, MapPin, Edit2, Save, X } from 'lucide-react';
+import { User, Mail, Phone, MapPin, Edit2, Save, X, Shield, Briefcase } from 'lucide-react';
 
 const ProfilePage = () => {
     const { user, setUser } = useAuth();
@@ -28,8 +28,41 @@ const ProfilePage = () => {
                 bio: user.bio || '',
                 photoURL: user.photoURL || ''
             });
+            fetchRoleRequests();
         }
     }, [user]);
+
+    const [roleRequest, setRoleRequest] = useState(null);
+    const [requestLoading, setRequestLoading] = useState(false);
+
+    const fetchRoleRequests = async () => {
+        try {
+            const response = await api.get('/users/role-requests/');
+            // Find pending request for service provider
+            const pending = response.data.find(r => r.status === 'pending' && r.requested_role === 'service_provider');
+            setRoleRequest(pending);
+        } catch (e) {
+            console.error(e);
+        }
+    };
+
+    const handleRoleRequest = async () => {
+        if (roleRequest) return;
+        setRequestLoading(true);
+        try {
+            await api.post('/users/role-requests/', {
+                requested_role: 'service_provider',
+                reason: 'User requested upgrade via profile.'
+            });
+            setMessage('Role upgrade request sent successfully!');
+            fetchRoleRequests();
+        } catch (e) {
+            console.error(e);
+            setMessage('Failed to send request.');
+        } finally {
+            setRequestLoading(false);
+        }
+    };
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -66,8 +99,9 @@ const ProfilePage = () => {
     );
 
     const Badge = ({ type }) => {
-        if (type === 'verified') return <span className="p-1.5 bg-blue-100 text-blue-600 rounded-full" title="Verified Type"><User size={12} /></span>;
-        if (type === 'pet_owner') return <span className="p-1.5 bg-amber-100 text-amber-700 rounded-full" title="Verified Pet Owner"><div className="w-3 h-3">🐾</div></span>;
+        if (type === 'verified') return <span className="p-1.5 bg-blue-100 text-blue-600 rounded-full" title="Verified Identity"><User size={12} /></span>;
+        if (type === 'service_provider') return <span className="p-1.5 bg-purple-100 text-purple-700 rounded-full" title="Service Provider"><Briefcase size={12} /></span>;
+        if (type === 'admin') return <span className="p-1.5 bg-red-100 text-red-700 rounded-full" title="Admin"><Shield size={12} /></span>;
         return null;
     };
 
@@ -94,7 +128,8 @@ const ProfilePage = () => {
                                     {user.first_name} {user.last_name}
                                 </h1>
                                 {user.verified_identity && <Badge type="verified" />}
-                                {user.role === 'adopter' && <Badge type="pet_owner" />}
+                                {user.role === 'service_provider' && <Badge type="service_provider" />}
+                                {user.role === 'admin' && <Badge type="admin" />}
                             </div>
                             <p className="text-gray-500 font-medium">{user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Pet Lover'}</p>
                             {user.location && (
@@ -228,15 +263,47 @@ const ProfilePage = () => {
                                         </div>
                                     </div>
                                     <div className="space-y-4">
-                                        <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Contact Info</h3>
-                                        <div className="space-y-3">
-                                            <div className="flex items-center text-gray-600">
-                                                <Mail size={18} className="mr-3 text-brand-secondary" />
-                                                <span className="text-sm">{user.email}</span>
+                                        <div className="space-y-4">
+                                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Contact Info</h3>
+                                            <div className="space-y-3">
+                                                <div className="flex items-center text-gray-600">
+                                                    <Mail size={18} className="mr-3 text-brand-secondary" />
+                                                    <span className="text-sm">{user.email}</span>
+                                                </div>
+                                                <div className="flex items-center text-gray-600">
+                                                    <Phone size={18} className="mr-3 text-brand-secondary" />
+                                                    <span className="text-sm">{user.phone_number || 'Not provided'}</span>
+                                                </div>
                                             </div>
-                                            <div className="flex items-center text-gray-600">
-                                                <Phone size={18} className="mr-3 text-brand-secondary" />
-                                                <span className="text-sm">{user.phone_number || 'Not provided'}</span>
+                                        </div>
+
+                                        {/* Role Management Section */}
+                                        <div className="space-y-4 pt-4 border-t border-gray-100">
+                                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Account Status</h3>
+                                            <div className="bg-bg-surface rounded-xl border border-border p-4">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="font-medium text-natural">Current Role</span>
+                                                    <span className="text-brand-primary capitalize">{user.role?.replace('_', ' ') || 'User'}</span>
+                                                </div>
+
+                                                {user.role === 'user' && (
+                                                    <div className="mt-4">
+                                                        {roleRequest ? (
+                                                            <div className="flex items-center text-sm text-yellow-600 bg-yellow-50 p-2 rounded-lg">
+                                                                <div className="w-2 h-2 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
+                                                                Request for Service Provider status is Pending
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={handleRoleRequest}
+                                                                disabled={requestLoading}
+                                                                className="w-full py-2 text-sm font-medium text-brand-secondary border border-brand-secondary rounded-lg hover:bg-brand-secondary hover:text-white transition flex items-center justify-center gap-2"
+                                                            >
+                                                                {requestLoading ? 'Sending...' : 'Request Service Provider Status'}
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                )}
                                             </div>
                                         </div>
                                     </div>
@@ -295,7 +362,7 @@ const ProfilePage = () => {
                     )}
                 </div>
             </div>
-        </div>
+        </div >
     );
 };
 

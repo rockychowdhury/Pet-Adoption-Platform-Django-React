@@ -6,7 +6,6 @@ import ErrorComponent from "../components/common/ErrorComponent";
 import MessagingPage from "../pages/MessagingPages/MessagingPage"; // Keep existing if valid
 import AboutPage from "../pages/AboutPages/AboutPage";
 import VerifyEmailPage from "../pages/AuthPages/VerifyEmailPage";
-import VerifyPhonePage from "../pages/AuthPages/VerifyPhonePage";
 import Navbar from "../components/common/Navbar";
 import DashboardLayout from "../layouts/DashboardLayout";
 import AuthPageLayout from "../layouts/AuthPageLayout";
@@ -113,10 +112,6 @@ const routes = [
     {
         path: '/verify-email',
         element: <VerifyEmailPage />
-    },
-    {
-        path: '/verify-phone',
-        element: <VerifyPhonePage />
     },
     {
         path: '/forgot-password',
