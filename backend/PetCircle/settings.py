@@ -44,7 +44,7 @@ REST_FRAMEWORK = {
         'registration': '5/hour',  # Registration endpoint
         'login': '10/hour',  # Login endpoint
         'password_reset': '3/hour',  # Password reset endpoint
-        'resend_verification': '3/15min',  # Resend verification codes
+        'resend_verification': '5/hour',  # Resend verification codes
     }
 }
 
