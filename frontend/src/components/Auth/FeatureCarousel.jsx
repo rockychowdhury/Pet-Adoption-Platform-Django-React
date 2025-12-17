@@ -5,6 +5,7 @@ import React, { useState, useEffect } from 'react';
  * 3 slides showcasing PetCircle features
  * Refactored to use Tailwind CSS utility classes
  */
+
 const FeatureCarousel = () => {
     const [activeSlide, setActiveSlide] = useState(0);
     const [isPaused, setIsPaused] = useState(false);
@@ -12,115 +13,85 @@ const FeatureCarousel = () => {
     const slides = [
         {
             id: 1,
-            headline: 'Find Loving Homes for Pets',
-            subheading: 'Connect with verified adopters through our responsible rehoming system',
-            features: [
-                'Verified adopters and pet owners',
-                'Detailed behavioral assessments',
-                'Safe application process',
-                'Post-adoption support'
-            ],
-            // Using a gradient background as placeholder
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            bgImage: 'https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=1920&h=1080&fit=crop' // Family with dog
+            headline: 'Find Your Perfect Companion',
+            subheading: 'Connect with verified pets needing loving homes.',
+            image: "https://images.unsplash.com/photo-1450778869180-41d0601e046e?q=80&w=2086&auto=format&fit=crop", // Dog running
+            tags: ['Verified Pets', 'Safe Adoption']
         },
         {
             id: 2,
-            headline: 'Quality Pet Care Services',
-            subheading: 'Find verified foster care providers and veterinary clinics in your area',
-            features: [
-                'Licensed foster care providers',
-                'Certified veterinary clinics',
-                'Real client reviews',
-                'Easy booking and contact'
-            ],
-            background: 'linear-gradient(135deg, #f093fb 0%, #f5576c 100%)',
-            bgImage: 'https://images.unsplash.com/photo-1628009368231-7bb7cfcb0def?w=1920&h=1080&fit=crop' // Vet clinic
+            headline: 'Rehome Responsibly',
+            subheading: 'Find the perfect new family for your pet with our guided process.',
+            image: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?q=80&w=2043&auto=format&fit=crop", // Cat close up
+            tags: ['Secure Process', 'Vetted Adopters']
         },
         {
             id: 3,
-            headline: 'Join a Caring Community',
-            subheading: 'Connect with fellow pet lovers, share experiences, and build lasting friendships',
-            features: [
-                'Share pet moments and stories',
-                'Connect with local pet owners',
-                'Join community groups',
-                'Attend pet-friendly events'
-            ],
-            background: 'linear-gradient(135deg, #fa709a 0%, #fee140 100%)',
-            bgImage: 'https://images.unsplash.com/photo-1588943211346-0908a1fb0b01?w=1920&h=1080&fit=crop' // Pet community
+            headline: 'Join Our Community',
+            subheading: 'Be part of a growing network of pet lovers and advocates.',
+            image: "https://images.unsplash.com/photo-1548199973-03cce0bbc87b?q=80&w=2069&auto=format&fit=crop", // Dogs playing
+            tags: ['Community', 'Support']
         }
     ];
 
-    // Auto-rotate every 5 seconds
     useEffect(() => {
         if (!isPaused) {
-            const interval = setInterval(() => {
+            const timer = setInterval(() => {
                 setActiveSlide((prev) => (prev + 1) % slides.length);
             }, 5000);
-
-            return () => clearInterval(interval);
+            return () => clearInterval(timer);
         }
     }, [isPaused, slides.length]);
 
-    const goToSlide = (index) => {
-        setActiveSlide(index);
-    };
-
     return (
         <div
-            className="relative w-full h-full overflow-hidden"
+            className="relative w-full h-full overflow-hidden bg-gray-900 rounded-none"
             onMouseEnter={() => setIsPaused(true)}
             onMouseLeave={() => setIsPaused(false)}
         >
             {slides.map((slide, index) => (
                 <div
                     key={slide.id}
-                    className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-[cubic-bezier(0.4,0,0.2,1)] ${index === activeSlide ? 'opacity-100 z-10' : 'opacity-0 z-0'
+                    className={`absolute inset-0 transition-all duration-1000 ease-in-out ${index === activeSlide ? 'opacity-100 scale-100 ring-0' : 'opacity-0 scale-105'
                         }`}
                 >
-                    {/* Background Image */}
-                    <div
-                        className="w-full h-full bg-cover bg-center"
-                        style={{
-                            background: slide.background,
-                            backgroundImage: `url(${slide.bgImage})`,
-                            backgroundSize: 'cover',
-                            backgroundPosition: 'center'
-                        }}
-                    />
+                    {/* Background Image with Overlay */}
+                    <div className="absolute inset-0">
+                        <img
+                            src={slide.image}
+                            alt={slide.headline}
+                            className="w-full h-full object-cover transition-transform duration-[2000ms] hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent" />
+                    </div>
 
-                    {/* Content Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 to-black/60 flex items-center justify-center p-8 md:p-16 z-20">
-                        <div className="max-w-[500px] text-center">
-                            <h1 className="text-3xl md:text-5xl font-bold text-white mb-4 drop-shadow-lg">
-                                {slide.headline}
-                            </h1>
-                            <p className="text-lg md:text-xl text-white/90 mb-8 font-normal drop-shadow-md">
-                                {slide.subheading}
-                            </p>
-                            <ul className="list-none p-0 m-0 text-left inline-block">
-                                {slide.features.map((feature, idx) => (
-                                    <li key={idx} className="text-sm md:text-base text-white/90 mb-2 pl-6 relative before:content-['•'] before:absolute before:left-0 before:text-brand-secondary drop-shadow-sm">
-                                        {feature}
-                                    </li>
-                                ))}
-                            </ul>
+                    {/* Content */}
+                    <div className="absolute bottom-0 left-0 w-full p-12 text-left z-10">
+                        <div className="mb-4 flex gap-2">
+                            {slide.tags.map(tag => (
+                                <span key={tag} className="px-3 py-1 bg-white/20 backdrop-blur-md rounded-full text-xs font-semibold text-white border border-white/10 uppercase tracking-wider">
+                                    {tag}
+                                </span>
+                            ))}
                         </div>
+                        <h2 className="text-4xl font-bold text-white mb-3 leading-tight font-logo drop-shadow-sm">
+                            {slide.headline}
+                        </h2>
+                        <p className="text-lg text-gray-200 font-light max-w-md drop-shadow-sm">
+                            {slide.subheading}
+                        </p>
                     </div>
                 </div>
             ))}
 
-            {/* Dot Navigation */}
-            <div className={`absolute bottom-10 left-1/2 -translate-x-1/2 flex gap-2 z-30 transition-opacity duration-300 ${isPaused ? 'opacity-100' : 'opacity-70'}`}>
+            {/* Indicators */}
+            <div className="absolute bottom-12 right-12 flex gap-3 z-20">
                 {slides.map((_, index) => (
                     <button
                         key={index}
-                        className={`w-2 h-2 rounded-full cursor-pointer transition-all duration-300 hover:scale-125 hover:bg-white ${index === activeSlide
-                                ? 'w-3 h-3 bg-white scale-110 shadow-[0_0_10px_rgba(255,255,255,0.5)]'
-                                : 'bg-white/40'
+                        onClick={() => setActiveSlide(index)}
+                        className={`h-2 rounded-full transition-all duration-300 ${index === activeSlide ? 'w-8 bg-white' : 'w-2 bg-white/40 hover:bg-white/60'
                             }`}
-                        onClick={() => goToSlide(index)}
                         aria-label={`Go to slide ${index + 1}`}
                     />
                 ))}

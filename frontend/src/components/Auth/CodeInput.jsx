@@ -77,7 +77,7 @@ const CodeInput = ({ value, onChange, onComplete }) => {
                     onChange={(e) => handleChange(index, e.target.value)}
                     onKeyDown={(e) => handleKeyDown(index, e)}
                     onPaste={handlePaste}
-                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold bg-bg-secondary border border-border rounded-lg text-text-primary focus:border-border-focus focus:outline-none focus:ring-2 focus:ring-border-focus/20 transition-all caret-brand-secondary"
+                    className="w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-bold bg-gray-50 border border-gray-200 rounded-xl text-gray-900 focus:bg-white focus:border-gray-900 focus:outline-none transition-all duration-200"
                     aria-label={`Digit ${index + 1}`}
                     autoFocus={index === 0}
                 />

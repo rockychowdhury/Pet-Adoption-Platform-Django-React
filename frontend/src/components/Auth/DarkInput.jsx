@@ -16,20 +16,37 @@ const DarkInput = forwardRef(({
     disabled,
     required,
     className = '',
+    startIcon,
     ...props
 }, ref) => {
-    let inputClasses = "auth-input";
-    
+    const [isFocused, setIsFocused] = React.useState(false);
+
+    // Base classes
+    let inputClasses = "w-full py-3 rounded-xl outline-none transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed";
+
+    // Icon padding
+    if (startIcon) {
+        inputClasses += " pl-11 pr-4";
+    } else {
+        inputClasses += " px-4";
+    }
+
+    // Standard Border Logic
     if (error) {
-        inputClasses = "input-error";
-    } else if (success) {
-        inputClasses = "input-success";
+        inputClasses += " border border-red-300 bg-red-50 text-red-900 placeholder-red-300 focus:ring-1 focus:ring-red-500";
+    } else {
+        inputClasses += " border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900";
     }
 
     const finalClasses = `${inputClasses} ${className}`.trim();
 
     return (
-        <div className="w-full">
+        <div className="w-full relative">
+            {startIcon && (
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10 text-gray-400">
+                    {startIcon}
+                </div>
+            )}
             <input
                 ref={ref}
                 type={type}
@@ -40,17 +57,21 @@ const DarkInput = forwardRef(({
                 disabled={disabled}
                 required={required}
                 className={finalClasses}
+                onFocus={(e) => {
+                    setIsFocused(true);
+                    if (props.onFocus) props.onFocus(e);
+                }}
+                onBlur={(e) => {
+                    setIsFocused(false);
+                    if (props.onBlur) props.onBlur(e);
+                }}
                 aria-invalid={error ? 'true' : 'false'}
                 aria-required={required ? 'true' : 'false'}
                 {...props}
             />
-            {error && (
-                <p className="text-status-error text-sm mt-2 font-medium" role="alert">
-                    {error}
-                </p>
-            )}
+
             {success && (
-                <p className="text-status-success text-sm mt-2 font-medium">
+                <p className="text-green-600 text-xs mt-1.5 font-medium">
                     {success}
                 </p>
             )}
@@ -63,7 +84,7 @@ DarkInput.displayName = 'DarkInput';
 DarkInput.propTypes = {
     type: PropTypes.string,
     name: PropTypes.string.isRequired,
-    value: PropTypes.string.isRequired,
+    value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
     onChange: PropTypes.func.isRequired,
     placeholder: PropTypes.string,
     error: PropTypes.string,
@@ -71,6 +92,8 @@ DarkInput.propTypes = {
     disabled: PropTypes.bool,
     required: PropTypes.bool,
     className: PropTypes.string,
+    passwordStrength: PropTypes.string,
+    startIcon: PropTypes.node,
 };
 
 export default DarkInput;

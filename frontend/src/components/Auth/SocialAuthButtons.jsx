@@ -10,9 +10,9 @@ const SocialAuthButtons = () => {
         console.log('Google auth clicked');
     };
 
-    const handleAppleAuth = () => {
-        // TODO: Implement Apple OAuth
-        console.log('Apple auth clicked');
+    const handleFacebookAuth = () => {
+        // TODO: Implement Facebook OAuth
+        console.log('Facebook auth clicked');
     };
 
     const buttonBase = "flex-1 h-12 px-4 text-sm font-medium border border-border rounded-xl cursor-pointer transition-all duration-200 flex items-center justify-center gap-2 hover:scale-[1.01] hover:shadow-md active:scale-[0.99]";
@@ -34,16 +34,16 @@ const SocialAuthButtons = () => {
                 Google
             </button>
 
-            {/* Apple Button */}
+            {/* Facebook Button */}
             <button
                 type="button"
-                onClick={handleAppleAuth}
-                className={`${buttonBase} bg-text-primary text-text-inverted hover:opacity-90 border-text-primary`}
+                onClick={handleFacebookAuth}
+                className={`${buttonBase} bg-[#1877F2] text-white hover:bg-[#1864D9] border-[#1877F2]`}
             >
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
-                    <path d="M15.538 4.462c-.85.993-2.234 1.764-3.573 1.661-.17-1.334.502-2.742 1.292-3.615.85-1.009 2.32-1.736 3.497-1.779.133 1.392-.42 2.769-1.216 3.733zM17.5 13.966c-.344 1.029-.511 1.49-.958 2.398-.623 1.268-1.502 2.844-2.592 2.856-.973.013-1.227-.686-2.554-.678-1.327.009-1.612.691-2.584.678-1.09-.013-1.912-1.443-2.535-2.71-1.753-3.562-1.938-7.742-.856-9.964.771-1.583 1.99-2.512 3.134-2.512 1.166 0 1.898.692 2.862.692.933 0 1.502-.693 2.849-.693 1.017 0 2.093.697 2.863 1.898-2.517 1.502-2.108 5.415.42 7.035z" />
+                    <path d="M20 10.061C20 4.505 15.523 0 10 0S0 4.505 0 10.061C0 15.083 3.657 19.245 8.438 19.949v-6.995H5.897V10.06h2.541V7.846c0-2.522 1.492-3.915 3.777-3.915 1.094 0 2.238.197 2.238.197v2.476h-1.26c-1.243 0-1.63.775-1.63 1.57v1.888h2.773l-.443 2.895h-2.33v6.995C16.343 19.245 20 15.083 20 10.061z" />
                 </svg>
-                Apple
+                Facebook
             </button>
         </div>
     );
