@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Lock, CheckCircle } from 'lucide-react';
+import { Lock, CheckCircle, Mail } from 'lucide-react';
 import AuthSplitLayout from '../../layouts/AuthSplitLayout';
 import FeatureCarousel from '../../components/Auth/FeatureCarousel';
 import DarkInput from '../../components/Auth/DarkInput';
@@ -9,7 +9,6 @@ import useAuth from '../../hooks/useAuth';
 
 const ForgotPasswordPage = () => {
     const { requestPasswordReset } = useAuth();
-
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -17,16 +16,13 @@ const ForgotPasswordPage = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         // Simple email validation
         if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             setError('Please enter a valid email address');
             return;
         }
-
         setIsLoading(true);
         setError('');
-
         try {
             await requestPasswordReset(email);
             setSuccess(true);
@@ -41,21 +37,16 @@ const ForgotPasswordPage = () => {
 
     return (
         <AuthSplitLayout carousel={<FeatureCarousel />}>
-            <div className="text-center">
+            <div className="w-full max-w-md mx-auto">
                 {!success ? (
                     <>
-                        {/* Icon */}
-                        <div className="flex justify-center mb-6">
-                            <div className="w-16 h-16 rounded-full bg-brand-secondary/10 border border-brand-secondary/20 flex items-center justify-center">
-                                <Lock size={32} className="text-brand-secondary" />
-                            </div>
-                        </div>
-
                         {/* Header */}
-                        <h1 className="text-3xl font-bold text-text-primary mb-3">Reset your password</h1>
-                        <p className="text-base font-normal text-text-secondary mb-8">
-                            Enter your email and we'll send you a reset link
-                        </p>
+                        <div className="text-center mb-8">
+                            <h1 className="text-3xl font-bold text-gray-900 mb-2 font-logo">Reset Password</h1>
+                            <p className="text-gray-500">
+                                Enter your email and we'll send you a reset link
+                            </p>
+                        </div>
 
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-5">
@@ -64,48 +55,45 @@ const ForgotPasswordPage = () => {
                                 name="email"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                placeholder="Email"
+                                placeholder="Email Address"
+                                startIcon={<Mail size={20} className="text-gray-400" />}
                                 error={error}
                                 required
                             />
 
                             <DarkButton type="submit" loading={isLoading}>
-                                Send reset link
+                                Send Reset Link
                             </DarkButton>
-                        </form>
 
-                        {/* Back to Login */}
-                        <p className="mt-6 text-sm text-text-secondary">
-                            Remember your password?{' '}
-                            <Link to="/login" className="text-brand-secondary font-medium transition-colors hover:text-brand-primary hover:underline">
-                                Back to login
-                            </Link>
-                        </p>
+                            <div className="flex justify-center mt-6">
+                                <Link to="/login" className="text-sm font-medium text-brand-primary hover:text-brand-secondary">
+                                    Back to Login
+                                </Link>
+                            </div>
+                        </form>
                     </>
                 ) : (
                     <>
                         {/* Success State */}
-                        <div className="flex justify-center mb-6">
-                            <div className="w-16 h-16 rounded-full bg-status-success/10 border border-status-success/20 flex items-center justify-center">
-                                <CheckCircle size={32} className="text-status-success" />
+                        <div className="text-center">
+                            <div className="flex justify-center mb-6">
+                                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+                                    <CheckCircle size={32} className="text-status-success" />
+                                </div>
                             </div>
+
+                            <h1 className="text-2xl font-bold text-gray-900 mb-2 font-logo">Check your email!</h1>
+                            <p className="text-gray-500 mb-8">
+                                We sent password reset instructions to<br />
+                                <span className="font-medium text-gray-900">{email}</span>
+                            </p>
+
+                            <Link to="/login">
+                                <DarkButton type="button">
+                                    Back to Login
+                                </DarkButton>
+                            </Link>
                         </div>
-
-                        <h1 className="text-3xl font-bold text-text-primary mb-3">Check your email!</h1>
-                        <p className="text-base font-normal text-text-secondary mb-8">
-                            We sent password reset instructions to<br />
-                            <span className="text-text-primary font-medium">{email}</span>
-                        </p>
-
-                        <p className="text-sm text-text-tertiary mb-6">
-                            Didn't receive the email? Check your spam folder or try again.
-                        </p>
-
-                        <Link to="/login">
-                            <DarkButton type="button">
-                                Back to login
-                            </DarkButton>
-                        </Link>
                     </>
                 )}
             </div>

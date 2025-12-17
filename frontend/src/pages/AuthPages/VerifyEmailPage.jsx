@@ -18,9 +18,8 @@ const VerifyEmailPage = () => {
     const [canResend, setCanResend] = useState(false);
     const [resendTimer, setResendTimer] = useState(60);
 
-    // Get email and phone from navigation state or localStorage
+    // Get email from navigation state or localStorage
     const email = location.state?.email || localStorage.getItem('verificationEmail');
-    const phone_number = location.state?.phone_number || localStorage.getItem('verificationPhone');
 
     useEffect(() => {
         if (!email) {
@@ -28,9 +27,8 @@ const VerifyEmailPage = () => {
             return;
         }
 
-        // Store email and phone in localStorage
+        // Store email in localStorage
         localStorage.setItem('verificationEmail', email);
-        if (phone_number) localStorage.setItem('verificationPhone', phone_number);
 
         // Start resend timer  
         const timer = setInterval(() => {
@@ -44,7 +42,7 @@ const VerifyEmailPage = () => {
         }, 1000);
 
         return () => clearInterval(timer);
-    }, [email, phone_number, navigate]);
+    }, [email, navigate]);
 
     const handleCodeChange = (newCode) => {
         setCode(newCode);
@@ -63,8 +61,8 @@ const VerifyEmailPage = () => {
         try {
             await verifyEmail(email, code);
             localStorage.removeItem('verificationEmail');
-            // Redirect to phone verification as per flow
-            navigate('/verify-phone', { state: { email, phone: phone_number } });
+            // Redirect to dashboard after successful verification
+            navigate('/dashboard');
         } catch (err) {
             console.error('Verification failed:', err);
             setError(err.response?.data?.error || 'Invalid verification code');
@@ -88,23 +86,17 @@ const VerifyEmailPage = () => {
 
     return (
         <AuthSplitLayout carousel={<FeatureCarousel />}>
-            <div className="text-center">
-                {/* Icon */}
-                <div className="flex justify-center mb-6">
-                    <div className="w-16 h-16 rounded-full bg-brand-secondary/10 border border-brand-secondary/20 flex items-center justify-center">
-                        <Mail size={32} className="text-brand-secondary" />
-                    </div>
+            <div className="w-full max-w-md mx-auto">
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2 font-logo">Verify Your Email</h1>
+                    <p className="text-gray-500">
+                        We sent a verification code to <br />
+                        <span className="font-medium text-gray-900">{email}</span>
+                    </p>
                 </div>
 
-                {/* Header */}
-                <h1 className="text-3xl font-bold text-text-primary mb-3">Verify your email</h1>
-                <p className="text-base font-normal text-text-secondary mb-8">
-                    We sent a verification code to <br />
-                    <span className="text-text-primary font-medium">{email}</span>
-                </p>
-
                 {/* Code Input */}
-                <div className="mb-6">
+                <div className="mb-8">
                     <CodeInput
                         value={code}
                         onChange={handleCodeChange}
@@ -112,36 +104,7 @@ const VerifyEmailPage = () => {
                     />
                 </div>
 
-                {/* Timer */}
-                <div className="flex items-center justify-center gap-2 text-sm text-text-secondary mb-4">
-                    <Clock size={16} />
-                    <span>Code expires in {Math.floor(resendTimer / 60)}:{String(resendTimer % 60).padStart(2, '0')}</span>
-                </div>
-
-                {/* Error Message */}
-                {error && (
-                    <div className="alert-error mb-4">
-                        {error}
-                    </div>
-                )}
-
-                {/* Resend Link */}
-                <div className="text-sm text-text-secondary mb-6">
-                    <span>Didn't receive the code? </span>
-                    {canResend ? (
-                        <button
-                            onClick={handleResend}
-                            className="text-brand-secondary font-semibold bg-transparent border-none cursor-pointer p-0 inline hover:text-brand-primary transition-colors"
-                            type="button"
-                        >
-                            Resend
-                        </button>
-                    ) : (
-                        <span className="text-text-tertiary">
-                            Resend in {resendTimer}s
-                        </span>
-                    )}
-                </div>
+                {/* Timer and Error Removed as per redesign request */}
 
                 {/* Verify Button */}
                 <DarkButton
@@ -149,18 +112,38 @@ const VerifyEmailPage = () => {
                     onClick={handleVerify}
                     loading={isLoading}
                     disabled={code.length !== 6}
-                    className="mb-4"
+                    className="mb-6"
                 >
-                    Verify email
+                    Verify Email
                 </DarkButton>
 
+                {/* Resend Link */}
+                <div className="text-center text-sm text-gray-500 mb-4">
+                    <span>Didn't receive the code? </span>
+                    {canResend ? (
+                        <button
+                            onClick={handleResend}
+                            className="text-brand-primary font-bold hover:underline bg-transparent border-none cursor-pointer p-0 inline"
+                            type="button"
+                        >
+                            Resend
+                        </button>
+                    ) : (
+                        <span className="text-gray-400">
+                            Resend in {resendTimer}s
+                        </span>
+                    )}
+                </div>
+
                 {/* Helper Text */}
-                <p className="text-xs text-text-tertiary">
-                    Check your spam folder or{' '}
-                    <Link to="/register" className="text-brand-secondary font-medium transition-colors hover:text-brand-primary hover:underline">
-                        use a different email
-                    </Link>
-                </p>
+                <div className="text-center">
+                    <p className="text-xs text-gray-400">
+                        Check your spam folder or{' '}
+                        <Link to="/register" className="text-gray-900 font-bold hover:underline transition-colors">
+                            use a different email
+                        </Link>
+                    </p>
+                </div>
             </div>
         </AuthSplitLayout>
     );
