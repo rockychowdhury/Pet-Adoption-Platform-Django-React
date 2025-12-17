@@ -37,7 +37,7 @@ const useAxiosSecure = () => {
                         await refreshAccessToken();
                         return axiosInstance(originalRequest);
                     } catch (refreshErr) {
-                        await logout();
+                    await logout();
                         return Promise.reject(refreshErr);
                     }
                 }
