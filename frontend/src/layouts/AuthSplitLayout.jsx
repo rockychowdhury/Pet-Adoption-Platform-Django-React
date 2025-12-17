@@ -13,20 +13,20 @@ const AuthSplitLayout = ({ carousel, children }) => {
     return (
         <div className="flex flex-col md:flex-row min-h-screen w-full bg-bg-primary font-inter text-text-primary">
             {/* Left Panel - Carousel */}
-            <div className="w-full md:w-[40%] lg:w-1/2 h-[40vh] md:h-screen md:sticky md:top-0 relative overflow-hidden bg-gradient-to-br from-brand-secondary/20 to-brand-primary/10">
+            <div className="w-full md:w-[40%] lg:w-1/2 h-[40vh] md:h-screen md:sticky md:top-0 relative overflow-hidden bg-gray-900">
                 {/* Logo - Top Left */}
-                <div className="absolute top-6 left-6 md:top-10 md:left-10 z-10">
-                    <Link to="/" className="flex items-center gap-2 text-text-primary hover:opacity-80 transition-opacity">
+                <div className="absolute top-6 left-6 md:top-10 md:left-10 z-30">
+                    <Link to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
                         <PawPrint size={24} className="text-brand-secondary" />
                         <span className="text-xl font-bold tracking-tight">PetCircle</span>
                     </Link>
                 </div>
 
                 {/* Back to Website Button - Top Right */}
-                <div className="absolute top-6 right-6 md:top-10 md:right-10 z-10">
+                <div className="absolute top-6 right-6 md:top-10 md:right-10 z-30">
                     <Link
                         to="/"
-                        className="flex items-center gap-2 px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-bg-surface/80 backdrop-blur-sm text-text-primary text-xs md:text-sm font-medium hover:bg-bg-surface transition-all border border-border"
+                        className="flex items-center gap-2 px-4 py-2 md:px-6 md:py-2.5 rounded-full bg-black/20 backdrop-blur-md text-white text-xs md:text-sm font-medium hover:bg-black/40 transition-all border border-white/10"
                     >
                         Back to website
                         <ArrowRight size={16} />

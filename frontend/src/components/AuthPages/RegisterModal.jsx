@@ -22,7 +22,6 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
         phone_number: '',
         password: '',
         confirm_password: '',
-        role: 'adopter',
         termsAccepted: false
     });
 
@@ -89,8 +88,7 @@ const RegisterModal = ({ isOpen, onClose, onSwitchToLogin }) => {
                 last_name: formData.last_name,
                 email: formData.email,
                 phone_number: formData.phone_number,
-                password: formData.password,
-                role: formData.role
+                password: formData.password
             });
             onClose();
             navigate('/verify-email', { state: { email: formData.email } });

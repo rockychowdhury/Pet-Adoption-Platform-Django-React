@@ -4,7 +4,7 @@ import './index.css'
 import AuthProvider from './context/AuthContext';
 import router from './routers/Routes';
 import { RouterProvider } from 'react-router-dom';
-import { Bounce, ToastContainer } from "react-toastify";
+import { Slide, ToastContainer } from "react-toastify";
 import UIProvider from './context/UIProvider';
 
 import { ThemeProvider } from './context/ThemeContext';
@@ -19,12 +19,17 @@ ReactDOM.createRoot(root).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
       <ToastContainer
-        autoClose={3000}
-        hideProgressBar={true}
-        newestOnTop={true}
+        position="bottom-right"
+        autoClose={4000}
+        hideProgressBar={false}
+        newestOnTop={false}
         closeOnClick={true}
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
         pauseOnHover
-        transition={Bounce}
+        theme="colored"
+        transition={Slide}
       />
       <UIProvider>
         <ThemeProvider>
