@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 import { AuthContext } from "./Contexts";
 import PropTypes from "prop-types";
@@ -6,46 +6,74 @@ import useAPI from "../hooks/useAPI";
 
 
 
+import { authObserver } from "../utils/AuthObserver";
+import { extractErrorMessage } from "../utils/errorUtils";
+
 const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const api = useAPI();
 
+    // Listen for global auth failures (e.g. refresh failed)
+    useEffect(() => {
+        const handleLogout = () => {
+            setUser(null);
+        };
+        authObserver.subscribe(handleLogout);
+        return () => authObserver.unsubscribe(handleLogout);
+    }, []);
+
+    const getUser = React.useCallback(async () => {
+        setLoading(true);
+        try {
+            const response = await api.get('/user/');
+            if (response.status === 200) {
+                setUser(response.data);
+            }
+        } catch (error) {
+            // detailed logging for debugging
+            console.log("Failed to fetch user:", error);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    }, [api]);
+
     // Restore session on mount
-    useLayoutEffect(() => {
+    useEffect(() => {
         const initializeAuth = async () => {
             await getUser();
         };
         initializeAuth();
-    }, []);
+    }, [getUser]);
 
-    const register = async (data) => {
+    const register = React.useCallback(async (data) => {
         setLoading(true);
         try {
             const response = await api.post('/user/register/', data);
             if (response.status === 201) {
                 toast.success("Registration successful! Please verify your email.");
-                // No auto-login, wait for verification
                 return response.data;
             }
         } catch (err) {
             console.error(err);
-            toast.error(err.response?.data?.detail || "Registration failed. Please try again.");
-            setError(err.response?.data?.detail || "Registration failed.");
+            const msg = extractErrorMessage(err, "Registration failed.");
+            toast.error(msg);
+            setError(msg);
             throw err;
         } finally {
             setLoading(false);
         }
-    }
+    }, [api]);
 
-    const verifyEmail = async (email, code) => {
+    const verifyEmail = React.useCallback(async (email, code) => {
         setLoading(true);
         try {
             const response = await api.post('/user/verify-email/', { email, code });
             if (response.status === 200) {
                 toast.success("Email verified successfully!");
-                await getUser(); // Fetch user as cookies are set
+                await getUser();
                 return true;
             }
         } catch (err) {
@@ -55,15 +83,15 @@ const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [api, getUser]);
 
-    const login = async (credentials) => {
+    const login = React.useCallback(async (credentials) => {
         setLoading(true);
         try {
             const response = await api.post('/user/token/', credentials);
             if (response.status === 200) {
                 toast.success("Welcome back!");
-                await getUser(); // Fetch user details after successful login
+                await getUser();
             }
         } catch (err) {
             setLoading(false);
@@ -72,25 +100,11 @@ const AuthProvider = ({ children }) => {
             const errorMessage = err.response?.data?.detail || "Login failed. Please check your credentials.";
             toast.error(errorMessage);
             setError(errorMessage);
+            throw err;
         }
-    }
+    }, [api, getUser]);
 
-    const getUser = async () => {
-        setLoading(true);
-        try {
-            const response = await api.get('/user/');
-            if (response.status === 200) {
-                setUser(response.data);
-            }
-        } catch (error) {
-            console.log("Failed to fetch user:", error);
-            setUser(null);
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const logout = async () => {
+    const logout = React.useCallback(async () => {
         try {
             const res = await api.post('/user/logout/');
             if (res.status === 200) {
@@ -103,9 +117,9 @@ const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [api]);
 
-    const requestPasswordReset = async (email) => {
+    const requestPasswordReset = React.useCallback(async (email) => {
         setLoading(true);
         try {
             await api.post('/user/request-password-reset/', { email });
@@ -117,9 +131,9 @@ const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [api]);
 
-    const confirmPasswordReset = async (uidb64, token, password) => {
+    const confirmPasswordReset = React.useCallback(async (uidb64, token, password) => {
         setLoading(true);
         try {
             await api.patch('/user/password-reset-confirm/', { uidb64, token, password });
@@ -131,9 +145,9 @@ const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [api]);
 
-    const resendEmailVerification = async (email) => {
+    const resendEmailVerification = React.useCallback(async (email) => {
         setLoading(true);
         try {
             const response = await api.post('/user/resend-email-verification/', { email });
@@ -147,57 +161,22 @@ const AuthProvider = ({ children }) => {
         } finally {
             setLoading(false);
         }
-    }
+    }, [api]);
 
-    const verifyPhone = async (phone_number, code) => {
-        setLoading(true);
-        try {
-            const response = await api.post('/user/verify-phone/', { phone_number, code });
-            if (response.status === 200) {
-                toast.success("Phone verified successfully!");
-                await getUser();
-                return true;
-            }
-        } catch (err) {
-            console.error(err);
-            toast.error(err.response?.data?.error || "Verification failed.");
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const resendPhoneVerification = async (phone_number) => {
-        setLoading(true);
-        try {
-            const response = await api.post('/user/resend-phone-verification/', { phone_number });
-            toast.success("SMS code sent! Please check your phone.");
-            return response.data;
-        } catch (err) {
-            console.error(err);
-            const errorMsg = err.response?.data?.error || 'Failed to resend code';
-            toast.error(errorMsg);
-            throw err;
-        } finally {
-            setLoading(false);
-        }
-    }
-
-    const authInfo = {
+    const authInfo = React.useMemo(() => ({
         user, setUser,
         loading, setLoading,
         register,
         verifyEmail,
-        verifyPhone,
         login,
         getUser,
         logout,
         requestPasswordReset,
         confirmPasswordReset,
         resendEmailVerification,
-        resendPhoneVerification,
         error, setError
-    };
+    }), [user, loading, error, register, verifyEmail, login, getUser, logout, requestPasswordReset, confirmPasswordReset, resendEmailVerification]);
+
     return <AuthContext.Provider value={authInfo}>{children}</AuthContext.Provider>
 }
 

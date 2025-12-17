@@ -1,5 +1,6 @@
 import axios from "axios";
 import { baseURL } from "../utils/baseURL";
+import { authObserver } from "../utils/AuthObserver";
 
 // Shared axios instance for the app
 const axiosInstance = axios.create({
@@ -34,7 +35,8 @@ axiosInstance.interceptors.response.use(
                 await refreshAccessToken();
                 return axiosInstance(originalRequest);
             } catch (refreshErr) {
-                // Propagate the original error if refresh fails; caller can decide to logout
+                // Refresh failed - notify listeners (AuthContext) to logout
+                authObserver.notify();
                 return Promise.reject(refreshErr);
             }
         }
