@@ -10,7 +10,7 @@ class PetSerializer(serializers.ModelSerializer):
         model = RehomingListing
         fields = [
             'id', 'pet_name', 'species', 'breed', 'photos', 'status', 
-            'gender', 'age_display', 'adoption_fee', 'location_city', 'location_state',
+            'gender', 'age_display', 'location_city', 'location_state',
             'owner_name', 'created_at', 'published_at'
         ]
 
@@ -25,7 +25,7 @@ class PetListSerializer(serializers.ModelSerializer):
         model = RehomingListing
         fields = [
             'id', 'pet_name', 'species', 'breed', 'main_photo', 'status', 
-            'gender', 'age_display', 'adoption_fee', 'location_city', 'location_state',
+            'gender', 'age_display', 'location_city', 'location_state',
             'owner_name', 'urgency_level', 'published_at'
         ]
     

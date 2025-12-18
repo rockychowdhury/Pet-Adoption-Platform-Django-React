@@ -150,6 +150,32 @@ class PetProfile(models.Model):
         null=True
     )
     
+    # Physical Attributes
+    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Weight in lbs")
+    size = models.CharField(
+        max_length=10,
+        choices=[
+            ('xs', 'Extra Small'),
+            ('s', 'Small'),
+            ('m', 'Medium'),
+            ('l', 'Large'),
+            ('xl', 'Extra Large'),
+        ],
+        blank=True,
+        null=True
+    )
+
+    # Community & Personality Features
+    personality_traits = models.JSONField(default=list, blank=True, help_text="e.g., playful, calm, energetic")
+    fun_facts = models.TextField(blank=True, null=True, help_text="Fun facts or quirks about the pet")
+    gotcha_day = models.DateField(blank=True, null=True, help_text="Adoption anniversary")
+
+    # Health & Safety (Critical for Rehoming)
+    is_vaccinated = models.BooleanField(default=False)
+    is_spayed_neutered = models.BooleanField(default=False)
+    has_aggression_history = models.BooleanField(default=False, help_text="Mandatory disclosure for safety")
+    aggression_details = models.TextField(blank=True, null=True, help_text="Required if aggression history is True")
+
     description = models.TextField(max_length=500, blank=True, null=True, help_text="Short description (500 char max)")
     photos = models.JSONField(default=list, blank=True, help_text="Array of photo URLs (up to 5 photos)")
     profile_photo = models.URLField(blank=True, null=True, help_text="Main profile photo URL")

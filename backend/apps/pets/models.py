@@ -129,19 +129,7 @@ class RehomingListing(models.Model):
         verbose_name="Video URL"
     )
     
-    # Adoption Fee & Terms
-    adoption_fee = models.DecimalField(
-        max_digits=6,
-        decimal_places=2,
-        default=0.00,
-        verbose_name="Adoption Fee",
-        help_text="$0-300 allowed"
-    )
-    fee_explanation = models.TextField(
-        blank=True,
-        help_text="Required if fee > $0",
-        verbose_name="Fee Explanation"
-    )
+
     
     # Included Items (JSON array of checkboxes)
     # ["food", "bowls", "leash", "crate", "bed", "toys", "medical_records", "microchip_info", "other"]
@@ -217,14 +205,11 @@ class RehomingListing(models.Model):
             models.Index(fields=['status', '-published_at']),
             models.Index(fields=['species', 'status']),
             models.Index(fields=['location_city', 'location_state']),
-            models.Index(fields=['adoption_fee']),
+
             models.Index(fields=['-published_at']),
         ]
         constraints = [
-            models.CheckConstraint(
-                check=models.Q(adoption_fee__gte=0) & models.Q(adoption_fee__lte=300),
-                name='adoption_fee_range'
-            ),
+
         ]
     
     def __str__(self):

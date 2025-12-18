@@ -37,8 +37,11 @@ class UserPetSerializer(serializers.ModelSerializer):
         model = UserPet
         fields = [
             'id', 'owner', 'name', 'species', 'breed', 
-            'birth_date', 'age', 'gender', 'description', 
-            'photos', 'profile_photo', 'is_active',
+            'birth_date', 'age', 'age_display', 'gender', 'weight', 'size',
+            'personality_traits', 'fun_facts', 'gotcha_day',
+            'is_vaccinated', 'is_spayed_neutered', 
+            'has_aggression_history', 'aggression_details',
+            'description', 'photos', 'profile_photo', 'is_active',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at']

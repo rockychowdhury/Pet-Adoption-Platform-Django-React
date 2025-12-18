@@ -26,8 +26,18 @@ class PetListCreateView(generics.ListCreateAPIView):
         return PetListSerializer
 
     def get_queryset(self):
-        queryset = RehomingListing.objects.filter(status='active')
-        
+        # Base queryset
+        queryset = RehomingListing.objects.all()
+
+        # Filter by owner (e.g. ?owner=me)
+        owner_param = self.request.query_params.get('owner')
+        if owner_param == 'me' and self.request.user.is_authenticated:
+            # Owner sees ALL their pets (Draft, Active, etc.)
+            queryset = queryset.filter(pet_owner=self.request.user)
+        else:
+            # Public only sees ACTIVE pets
+            queryset = queryset.filter(status='active')
+            
         # Filtering
         species = self.request.query_params.get('species')
         breed = self.request.query_params.get('breed')
@@ -46,14 +56,6 @@ class PetListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(age_months__gte=int(age_min) * 12)
         if age_max:
             queryset = queryset.filter(age_months__lte=int(age_max) * 12)
-        
-        # Filter by owner (e.g. ?owner=me)
-        owner_param = self.request.query_params.get('owner')
-        if owner_param:
-            if owner_param == 'me' and self.request.user.is_authenticated:
-                queryset = queryset.filter(pet_owner=self.request.user)
-            else:
-                pass
             
         # Search (Name, Breed, Description)
         if search_query:

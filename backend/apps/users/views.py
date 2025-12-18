@@ -425,7 +425,10 @@ class UserPetViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get_queryset(self):
-        return UserPet.objects.all()
+        user = self.request.user
+        if user.is_authenticated:
+            return UserPet.objects.filter(owner=user).order_by('-created_at')
+        return UserPet.objects.none()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
