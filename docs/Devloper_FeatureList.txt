@@ -1,0 +1,1354 @@
+# PETCIRCLE - DEVELOPER FEATURES SPECIFICATION
+
+## PROJECT OVERVIEW
+
+PetCircle is a community platform for pet owners that combines three core functions:
+1. Social network for pet lovers
+2. Responsible pet rehoming system
+3. Service provider directory (foster care & veterinary)
+
+Target: Web application (Django REST + React)
+
+---
+
+## PHASE 1: MVP FEATURES (Weeks 1-16)
+
+### MODULE 1: USER MANAGEMENT (Weeks 1-2)
+
+**1.1 Authentication**
+- User registration (email, password, first name, last name)
+- Email verification (send code, confirm)
+- Phone verification (SMS code)
+- Login/logout (JWT tokens in httpOnly cookies)
+- Password reset flow
+- Session management
+
+**1.2 User Profile**
+- Basic profile fields:
+  - Name, username, email, phone
+  - Profile photo upload
+  - Bio (500 char max)
+  - Location (city, state, country)
+  - Member since date
+- Edit profile functionality
+- Privacy settings:
+  - Profile visibility (public, friends only, private)
+  - Contact info visibility
+- Account status: active, suspended, banned
+
+**1.3 Verification System**
+- Verification badges:
+  - Email verified (automatic)
+  - Phone verified (automatic)
+  - Identity verified (manual admin approval)
+  - Pet owner verified (manual admin approval)
+- Upload verification documents:
+  - Government ID
+  - Pet ownership proof (vet records, microchip docs)
+- Admin review queue for manual verifications
+
+**Database Models:**
+```
+User (extends Django AbstractUser)
+- email, first_name, last_name, password
+- role: pet_owner, service_provider, admin
+- phone, phone_verified, email_verified
+- location_city, location_state, location_country
+- account_status
+- created_at, updated_at
+
+UserProfile (OneToOne with User)
+- bio
+- profile_photo_url
+- privacy_settings (JSON)
+- verification_badges (JSON)
+```
+
+---
+
+### MODULE 2: PET PROFILES (Weeks 2-3)
+
+**2.1 Pet Profile Creation**
+- User can create multiple pet profiles
+- Fields:
+  - Name
+  - Species (dog, cat, rabbit, bird, other)
+  - Breed (text input or dropdown)
+  - Age (calculated from birth date or manual input)
+  - Gender (male, female, unknown)
+  - Photo upload (up to 5 photos)
+  - Short description (500 char)
+- Link pet to user (owner)
+- Pet profile status: active, inactive, deceased
+
+**2.2 Pet Profile Display**
+- View pet profile page
+- Show all pet details
+- Photo gallery
+- Edit/delete (owner only)
+
+**Database Models:**
+```
+PetProfile
+- owner_id (FK to User)
+- name
+- species
+- breed
+- age
+- gender
+- photos (JSON array of URLs)
+- description
+- is_active
+- created_at, updated_at
+```
+
+---
+
+### MODULE 3: REHOMING SYSTEM (Weeks 3-8)
+
+**3.1 Pre-Rehoming Intervention (Week 3-4)**
+
+**Reason Assessment Form:**
+- Multi-step questionnaire before creating listing
+- Step 1: Select reason from dropdown:
+  - Moving/housing restrictions
+  - Allergies
+  - Financial hardship
+  - Time constraints
+  - Behavioral issues
+  - Health issues (owner)
+  - Too many pets
+  - Other
+- Step 2: Text explanation (500 words minimum)
+- Step 3: Urgency level (immediate, 1 month, 3 months, flexible)
+
+**Resource Recommendations:**
+- Based on selected reason, show targeted help:
+  - Behavioral issues → Link to trainer directory
+  - Financial → Link to assistance programs
+  - Moving → Pet-friendly housing resources
+  - Time → Dog walker/pet sitter options
+- User must acknowledge viewing resources (checkbox)
+- 48-hour cooling period (optional, save progress)
+
+**Acknowledgment Checkboxes:**
+- I have reviewed available resources
+- I have attempted alternatives
+- I understand this is permanent
+- I commit to honest disclosure
+- I will not list elsewhere while active
+
+**Database Models:**
+```
+RehomingIntervention
+- user_id (FK)
+- reason_category
+- reason_text
+- urgency_level
+- resources_viewed (JSON)
+- acknowledged_at
+- created_at
+```
+
+**3.2 Rehoming Listing Creation (Weeks 5-6)**
+
+**Listing Form - Section 1: Pet Details**
+- Link to existing pet profile OR create new
+- Medical history:
+  - Spayed/neutered (yes/no/scheduled)
+  - Microchipped (yes/no + chip number)
+  - Vaccinations up to date (yes/no/partial)
+  - Upload vaccination records (PDF/image)
+  - Current medications (text list)
+  - Medical conditions checkboxes:
+    - None, Allergies, Arthritis, Diabetes, Seizures, Heart condition, Kidney disease, Dental issues, Vision/hearing impairment, Skin conditions, Other (describe)
+  - Last vet visit date
+  - Veterinarian contact (name, clinic, phone)
+
+**Behavioral Profile (Simplified 10 questions):**
+1. Energy level (1-5 scale: very low to very high)
+2. Good with children (yes/no/unknown + age range)
+3. Good with dogs (yes/no/selective/unknown)
+4. Good with cats (yes/no/unknown)
+5. House-trained (yes/mostly/no)
+6. Crate-trained (yes/no)
+7. Separation anxiety (yes/no/mild)
+8. Aggression history (REQUIRED):
+   - Has this pet ever bitten or injured a person? (yes/no)
+   - Has this pet ever bitten or injured another animal? (yes/no)
+   - If yes to either: Describe incident (required text)
+9. Exercise needs (minimal/moderate/high/intense)
+10. Ideal home type (any/house with yard preferred/house with yard required)
+
+**Listing Form - Section 2: Rehoming Story**
+- Text field (1000+ characters required)
+- Guided prompts displayed:
+  - How did you get this pet?
+  - What is their personality?
+  - Why are you rehoming?
+  - What kind of home is best?
+
+**Listing Form - Section 3: Media**
+- Photo upload (5 required, 15 max)
+- Video upload (optional, 1 video, 15 sec - 3 min)
+- Photo requirements enforced:
+  - Recent (within 30 days)
+  - Clear quality
+  - Watermark applied automatically
+
+**Listing Form - Section 4: Adoption Terms**
+- Adoption fee ($0-300 slider)
+- Fee explanation (text field if fee > $0)
+- Included items (checkboxes):
+  - Food, Bowls, Leash/collar, Crate, Bed, Toys, Medical records, Microchip info, Other
+- Timeline: Ideal adoption date (date picker)
+- Adopter preferences:
+  - Experience level required (dropdown)
+  - Willing to stay in touch (yes/no)
+  - Take back if doesn't work out (yes/no/conditions)
+
+**Listing Form - Section 5: Location**
+- City/zip code (required)
+- Service area (25mi/50mi/statewide/national)
+- Privacy: Hide exact address until approved
+
+**Submit for Review:**
+- Status: DRAFT → PENDING_REVIEW
+- User receives confirmation email
+
+**Database Models:**
+```
+RehomingListing
+- pet_owner_id (FK to User)
+- pet_profile_id (FK to PetProfile, nullable if new pet)
+- pet_name, species, breed, age, gender, weight, size
+- medical_history (JSON)
+- behavioral_profile (JSON)
+- aggression_disclosed (boolean)
+- aggression_details (text)
+- rehoming_story (text)
+- adoption_fee
+- included_items (JSON)
+- photos (JSON array)
+- video_url
+- urgency_level
+- timeline
+- location_city, location_zip
+- service_area_miles
+- status (draft, pending_review, active, on_hold, adopted, expired, rejected)
+- rejection_reason (text, nullable)
+- created_at, updated_at, published_at
+```
+
+**3.3 Listing Moderation (Week 6)**
+
+**Admin Review Queue:**
+- List all pending listings
+- View full listing details
+- Automated checks status:
+  - All required fields complete
+  - Photos meet quality standards
+  - Vaccination records uploaded
+  - No contact info in text
+  - Adoption fee within limits
+  - Account verified
+
+**Admin Actions:**
+- Approve → Status: ACTIVE, published_at set, email owner
+- Request changes → Status: DRAFT, email with required edits
+- Reject → Status: REJECTED, reason required, email owner
+
+**Red Flag Detection (implement later):**
+- Multiple listings in short time
+- Suspected breeding language
+- Contradictory information
+- Price anomalies
+
+**3.4 Browse Rehoming Listings (Week 7)**
+
+**Search & Filter:**
+- Search bar (keyword search in pet name, breed, description)
+- Filters:
+  - Species (multi-select)
+  - Location (zip code + radius in miles)
+  - Age range (slider)
+  - Size (checkboxes: XS, S, M, L, XL)
+  - Good with kids (checkbox)
+  - Good with dogs (checkbox)
+  - Good with cats (checkbox)
+  - Energy level (slider)
+  - Adoption fee range (slider $0-300)
+- Sort by:
+  - Newest
+  - Closest (distance from user)
+  - Most urgent
+  - Lowest fee
+
+**Listing Card Display:**
+- Pet photo (main)
+- Pet name, species, breed
+- Age, gender, size
+- Location (city only)
+- Brief description (first 150 chars)
+- Adoption fee
+- Distance from user
+- Badges: Vet verified, Low energy, Good with kids, etc.
+- "View Details" button
+
+**Listing Detail Page:**
+- Full photo gallery (swipeable)
+- Video player (if available)
+- All pet details
+- Medical history
+- Behavioral profile
+- Rehoming story
+- Adoption fee breakdown
+- Included items
+- Pet owner profile (name, photo, verification badges, join date)
+- "Apply to Adopt" button (if logged in)
+- "Share" button (social share)
+- "Report" button
+
+**3.5 Adoption Application (Week 8)**
+
+**Adopter Profile (Created on First Application):**
+- If user hasn't created adopter profile, redirect to form
+- Fields:
+  - Housing info:
+    - Type (house/apartment/condo/other)
+    - Own or rent
+    - If rent: Landlord approval (yes/no, upload document)
+    - Yard (yes-fenced/yes-unfenced/no)
+  - Household:
+    - Number of adults
+    - Number of children (ages)
+    - Current pets (add each: species, age, spayed/neutered)
+  - Experience:
+    - Current pet owner (yes/no)
+    - Previous pet owner (yes/no, explain what happened)
+    - Experience with this species (1-5 scale)
+    - Ever surrendered a pet (yes/no, explain)
+  - Lifestyle:
+    - Work schedule (hours away from home)
+    - Activity level (1-5 scale)
+    - Exercise commitment (hours per day)
+    - Travel frequency (rarely/monthly/weekly)
+  - References:
+    - Personal reference 1 (name, email, phone, relationship)
+    - Personal reference 2
+    - Veterinarian reference (if previous owner: clinic name, phone)
+  - Why adopt (essay, 500+ words)
+
+**Adopter Readiness Score (Auto-Calculated):**
+- Algorithm based on:
+  - Housing suitability (yard for high-energy dogs, etc.)
+  - Experience level
+  - Lifestyle match
+  - References provided
+- Display to pet owner: Ready (80-100%), Good (60-79%), Needs Improvement (<60%)
+
+**Application Submission:**
+- Select listing to apply for
+- Review adopter profile (edit if needed)
+- Answer pet owner's custom questions (if any)
+- Write personalized message (500+ words):
+  - Why this specific pet?
+  - How will you meet their needs?
+  - Relevant experience
+- Submit button
+- Status: PENDING_REVIEW
+- Email confirmation to applicant
+- Email notification to pet owner
+
+**Database Models:**
+```
+AdopterProfile (OneToOne with User)
+- housing_type
+- own_or_rent
+- landlord_approval
+- yard_type
+- num_adults
+- num_children
+- children_ages (JSON)
+- current_pets (JSON array)
+- pet_experience (JSON)
+- work_schedule
+- activity_level
+- exercise_commitment
+- travel_frequency
+- references (JSON)
+- why_adopt (text)
+- readiness_score (calculated)
+- created_at, updated_at
+
+AdoptionApplication
+- listing_id (FK)
+- applicant_id (FK to User)
+- applicant_message (text)
+- custom_answers (JSON)
+- status (pending_review, info_requested, rejected, approved_meet_greet, meet_greet_success, trial_period, adopted, completed, returned)
+- rejection_reason (text, nullable)
+- created_at, updated_at
+```
+
+**3.6 Pet Owner Reviews Applications (Week 8)**
+
+**Application Dashboard (Pet Owner View):**
+- List all applications for their listing
+- For each application show:
+  - Applicant name, photo
+  - Readiness score badge
+  - Application date
+  - Status
+  - Preview of message (first 100 chars)
+- Click to view full application
+
+**Application Detail View:**
+- Full adopter profile
+- Application message
+- Custom question answers
+- References (with contact info)
+
+**Pet Owner Actions:**
+1. **Request More Info:**
+   - Button opens message form
+   - Send questions via platform messaging
+   - Status: INFO_REQUESTED
+   - Applicant notified
+
+2. **Reject Application:**
+   - Button opens rejection form
+   - Reason dropdown (not a good match, housing concerns, experience level, references issue, other)
+   - Optional text explanation
+   - Status: REJECTED
+   - Email sent to applicant (compassionate template)
+
+3. **Approve for Meet & Greet:**
+   - Button: "Approve"
+   - Status: APPROVED_MEET_GREET
+   - Both parties' contact info revealed
+   - Email both parties with next steps
+   - Suggest meeting guidelines
+
+**3.7 Post-Application Flow (Out of Scope for MVP)**
+- Meet & greet scheduling
+- Home checks
+- Trial periods
+- Finalization
+- Payment/escrow
+- Reviews
+
+These will be Phase 2 features. For MVP, stop at application approval.
+
+---
+
+### MODULE 4: MESSAGING (Weeks 9-10)
+
+**4.1 Direct Messaging**
+
+**Conversation List:**
+- Show all user's conversations
+- Sort by most recent message
+- Display:
+  - Other participant name, photo
+  - Last message preview (first 50 chars)
+  - Timestamp (relative: "2 hours ago")
+  - Unread indicator (badge count)
+  - Status: Active, Archived
+- Filter: All, Unread, Archived
+- Search conversations (by participant name)
+
+**Conversation View:**
+- Load message history (paginated, 50 messages per page)
+- Display messages:
+  - Sender name, photo
+  - Message text
+  - Media (images, if attached)
+  - Timestamp
+  - Read status (seen/not seen)
+- Message input box at bottom
+- Send button
+- Attach photo button (optional)
+- Character counter (5000 max)
+
+**Send Message:**
+- Text message (required)
+- Optional: Attach 1 photo
+- Submit
+- Message appears immediately (optimistic UI)
+- API call to save
+- Other party gets notification
+
+**Start New Conversation:**
+- From user profile: "Send Message" button
+- From listing: "Contact Owner" button
+- Opens conversation (create if doesn't exist)
+
+**Database Models:**
+```
+Conversation
+- participant_1_id (FK to User)
+- participant_2_id (FK to User)
+- last_message_at
+- created_at
+- unique_together: (participant_1, participant_2)
+
+Message
+- conversation_id (FK)
+- sender_id (FK to User)
+- text
+- media_url (nullable)
+- is_read (boolean, default false)
+- created_at
+```
+
+**4.2 Messaging Restrictions (Safety)**
+- New users (<30 days) can only message:
+  - Users they applied to adopt from
+  - Users who applied to their listing
+  - Service providers
+- Cannot initiate with random users
+- After 30 days, restriction lifted
+
+**4.3 Message Notifications**
+- Real-time: WebSocket (Django Channels) - implement if time permits
+- Fallback: Email notification for new messages (after 5 min delay)
+- In-app notification badge (unread count)
+
+---
+
+### MODULE 5: REVIEWS (Weeks 11-12)
+
+**5.1 Review System**
+
+**Post-Adoption Review (Both Parties):**
+- After application status = ADOPTED
+- Platform sends email prompt (after 7 days)
+- Review form:
+  - Overall rating (1-5 stars, required)
+  - Written review (200+ chars, required)
+  - Would recommend (yes/no)
+- Submit button
+- Review visible on other party's profile
+
+**Pet Owner Reviews Adopter:**
+- Categories (each 1-5 stars):
+  - Responsiveness
+  - Preparation
+  - Follow-through
+- Text review
+
+**Adopter Reviews Pet Owner:**
+- Categories (each 1-5 stars):
+  - Honesty (pet description accuracy)
+  - Communication
+  - Pet care quality
+- Text review
+
+**Display Reviews on Profile:**
+- List all reviews received
+- Show overall average rating
+- Sort by: Most recent, Highest rated, Lowest rated
+- Each review shows:
+  - Reviewer name (first name + last initial)
+  - Rating
+  - Text
+  - Date
+  - Adoption details (pet name)
+
+**Database Models:**
+```
+AdoptionReview
+- application_id (FK)
+- reviewer_id (FK to User)
+- reviewee_id (FK to User)
+- reviewer_role (pet_owner or adopter)
+- rating_overall
+- rating_responsiveness (nullable)
+- rating_preparation (nullable)
+- rating_honesty (nullable)
+- rating_communication (nullable)
+- review_text
+- would_recommend (boolean)
+- created_at
+```
+
+**5.2 Service Provider Reviews**
+- After booking/visit completed
+- Similar structure as adoption reviews
+- Categories:
+  - Quality of care
+  - Communication
+  - Cleanliness
+  - Value for money
+- Photo upload optional (1 photo)
+- Display on service provider profile
+
+---
+
+### MODULE 6: ADMIN PANEL (Weeks 13-14)
+
+**6.1 Enhanced Django Admin**
+
+**User Management:**
+- List all users
+- Filter by: Role, verification status, account status
+- Search by: Name, email, username
+- Actions:
+  - View user detail
+  - Edit user
+  - Suspend account (temporary)
+  - Ban account (permanent)
+  - Send warning email
+  - Verify identity (manual approval)
+  - Verify pet owner (manual approval)
+
+**Listing Moderation Queue:**
+- List all pending listings
+- View listing details
+- Approve/reject actions
+- Send feedback to owner
+
+**Report Review Queue:**
+- List all user reports
+- Types: Spam, Harassment, Inappropriate content, Animal welfare concern, Misrepresentation
+- Priority: High (animal welfare), Medium (harassment), Low (spam)
+- Actions:
+  - Review reported content
+  - Contact reporter for details
+  - Take action on reported user (warn/suspend/ban)
+  - Remove content
+  - Dismiss report
+
+**Analytics Dashboard (Basic):**
+- Total users (count)
+- New users this month
+- Total active listings
+- Total adoptions completed
+- Pending applications count
+- Reports pending count
+- Charts:
+  - User growth over time (line chart)
+  - Adoptions per month (bar chart)
+  - Listings by species (pie chart)
+
+**Database Models:**
+```
+UserReport
+- reporter_id (FK to User)
+- reported_user_id (FK to User, nullable)
+- reported_content_type (listing/post/message/profile)
+- reported_content_id
+- report_type (spam/harassment/inappropriate/animal_welfare/misrepresentation)
+- description (text)
+- status (pending/reviewed/action_taken/dismissed)
+- admin_notes (text)
+- created_at, resolved_at
+```
+
+---
+
+### MODULE 7: LEGAL & SAFETY (Weeks 15-16)
+
+**7.1 Legal Pages**
+
+**Terms of Service Page:**
+- Static page with full ToS text
+- Sections:
+  - Platform use rules
+  - User responsibilities
+  - Rehoming guidelines
+  - Payment terms
+  - Liability disclaimers
+  - Dispute resolution
+  - Termination policy
+- User must accept on registration (checkbox + link to ToS)
+
+**Privacy Policy Page:**
+- Static page with privacy policy
+- Sections:
+  - Data collection (what we collect)
+  - Data usage (how we use it)
+  - Data sharing (who we share with)
+  - User rights (access, deletion, export)
+  - Cookies
+  - Security measures
+  - Contact info
+
+**Adoption Agreement Generator:**
+- After application approved, generate PDF
+- Template includes:
+  - Pet details
+  - Pet owner details
+  - Adopter details
+  - Adoption fee
+  - Transfer of ownership clause
+  - Medical disclosure acknowledgment
+  - Return policy (30 days)
+  - Signatures (digital)
+- Both parties must sign (e-signature)
+- Store signed PDF
+
+**Database Models:**
+```
+LegalAgreement
+- application_id (FK)
+- agreement_type (adoption/foster/service)
+- document_url (PDF stored in S3)
+- pet_owner_signed_at
+- adopter_signed_at
+- created_at
+```
+
+**7.2 Identity Verification**
+
+**Upload ID Document:**
+- User profile settings → Verification section
+- Upload government ID (driver's license or passport)
+- Photo file (JPEG/PNG, max 5MB)
+- Submit for review
+- Admin reviews manually:
+  - Check document authenticity (basic)
+  - Match name to account
+  - Approve/reject
+- Badge added to profile if approved
+
+**Pet Ownership Verification:**
+- Upload one of:
+  - Veterinary records (PDF/image)
+  - Microchip registration
+  - Adoption papers
+  - Pet license
+- Admin reviews:
+  - Check pet name matches
+  - Check owner name matches
+- Badge added if approved
+
+**7.3 Report System**
+
+**Report Button:**
+- Available on:
+  - User profiles
+  - Listings
+  - Messages
+  - Posts (Phase 2)
+- Click "Report" → Opens report form
+- Report form:
+  - Report type (dropdown)
+  - Description (text, 100+ chars)
+  - Submit
+- Creates UserReport record
+- Admin notified
+- Reporter receives confirmation email
+
+---
+
+### MODULE 8: SERVICE PROVIDER DIRECTORY (Phase 1.5 - If Time Permits)
+
+**8.1 Foster Care Provider Listings**
+
+**Service Provider Registration:**
+- User role: service_provider
+- Additional fields:
+  - Business name
+  - Business type (foster_care/veterinary)
+  - Description (500+ words)
+  - Address (full)
+  - Phone, email, website
+  - License number
+  - Insurance info
+- Submit for verification
+
+**Foster Service Profile:**
+- Species accepted (checkboxes: dogs, cats, small animals)
+- Capacity (number)
+- Current availability (available/limited/full)
+- Environment details:
+  - Home-based or facility
+  - Indoor/outdoor space
+  - Fenced yard (yes/no, size)
+  - Other pets in home
+  - Children in household
+- Care standards (text descriptions):
+  - Exercise routine
+  - Feeding schedule
+  - Medication administration
+  - Special diet accommodation
+- Pricing:
+  - Daily rate (number)
+  - Weekly discount (percentage)
+  - Monthly rate (number)
+- Photo gallery (8+ photos required)
+- Video tour (optional)
+
+**Browse Foster Services:**
+- Search by location (zip + radius)
+- Filters:
+  - Species accepted
+  - Availability
+  - Price range
+  - Has fenced yard
+- Sort by: Distance, price, rating
+- Display provider cards:
+  - Business name
+  - Photo
+  - Rating (stars)
+  - Price (daily rate)
+  - Distance
+  - Availability indicator
+- Click → View full profile
+
+**Provider Detail Page:**
+- All profile info
+- Photo gallery
+- Location map
+- Reviews section
+- "Contact Provider" button (opens message)
+
+**Database Models:**
+```
+ServiceProvider
+- user_id (OneToOne)
+- business_name
+- business_type (foster_care/veterinary)
+- description
+- address_line1, address_line2, city, state, zip
+- latitude, longitude
+- phone, email, website
+- license_number
+- insurance_info
+- verification_status (pending/verified/suspended)
+- created_at, updated_at
+
+FosterService
+- provider_id (OneToOne to ServiceProvider)
+- species_accepted (JSON)
+- capacity
+- current_availability
+- environment_details (JSON)
+- care_standards (JSON)
+- daily_rate
+- weekly_discount
+- monthly_rate
+- photos (JSON array)
+- video_url
+```
+
+**8.2 Veterinary Clinic Listings**
+
+**Vet Clinic Profile:**
+- Clinic type (general/emergency/specialty/mobile)
+- Services offered (checkboxes):
+  - Wellness exams
+  - Vaccinations
+  - Dental cleanings
+  - Surgery
+  - Diagnostics
+  - Emergency care
+  - Boarding
+  - Grooming
+- Species treated (dogs/cats/exotic)
+- Hours of operation (JSON: day, open time, close time)
+- Pricing (text description or specific procedure prices)
+- Photo gallery (6+ photos)
+- Amenities (checkboxes):
+  - Separate cat area
+  - Parking
+  - Wheelchair accessible
+  - On-site pharmacy
+  - Boarding available
+
+**Browse Vet Clinics:**
+- Similar to foster search
+- Filters:
+  - Clinic type
+  - Services offered
+  - Species treated
+  - Open now (based on hours)
+- Display clinic cards
+- Click → View full profile
+
+**Database Models:**
+```
+VeterinaryClinic
+- provider_id (OneToOne to ServiceProvider)
+- clinic_type
+- services_offered (JSON)
+- species_treated (JSON)
+- hours_of_operation (JSON)
+- pricing_info (text)
+- photos (JSON)
+- amenities (JSON)
+```
+
+**8.3 Service Reviews**
+
+**Leave Review:**
+- After using service (manual trigger, no booking system in MVP)
+- Review form:
+  - Overall rating (1-5 stars)
+  - Category ratings:
+    - Communication
+    - Cleanliness
+    - Quality of care
+    - Value for money
+  - Written review (200+ words)
+  - Photo upload (optional, 1 photo)
+- Submit
+- Review appears on provider profile
+
+**Display Reviews:**
+- List all reviews for provider
+- Show average rating (calculated)
+- Sort by: Recent, highest rated, lowest rated
+- Each review shows:
+  - Reviewer name (first name + initial)
+  - Rating
+  - Text
+  - Photo (if uploaded)
+  - Date
+  - Service type used
+
+**Database Models:**
+```
+ServiceReview
+- provider_id (FK to ServiceProvider)
+- reviewer_id (FK to User)
+- service_type (foster/vet)
+- rating_overall
+- rating_communication
+- rating_cleanliness
+- rating_quality
+- rating_value
+- review_text
+- photo_url (nullable)
+- verified_client (boolean, default false)
+- created_at
+```
+
+---
+
+### MODULE 9: SOCIAL COMMUNITY FEATURES (Phase 2 - Deferred)
+
+**Features to defer:**
+- Social feed (posts, comments, reactions)
+- Groups & communities
+- Events (meetups, playdates)
+- Stories (24-hour ephemeral posts)
+- Polls
+- Lost pet alerts
+- Success story posts
+- Friend/follow system
+- Advanced notifications (real-time WebSocket)
+
+**Why defer:**
+- Complex features requiring significant dev time
+- Not critical for core value prop (rehoming)
+- Network effects need user base first
+- Can validate demand through MVP usage
+
+---
+
+## TECHNICAL IMPLEMENTATION NOTES
+
+### Backend (Django)
+
+**Project Structure:**
+```
+petcircle/
+├── config/           # Django settings
+├── users/            # User, UserProfile models
+├── pets/             # PetProfile models
+├── rehoming/         # Listing, Application, Review models
+├── services/         # ServiceProvider, Foster, Vet models
+├── messaging/        # Conversation, Message models
+├── core/             # Shared utilities
+└── manage.py
+```
+
+**Key Packages:**
+- djangorestframework
+- djangorestframework-simplejwt
+- django-cors-headers
+- pillow (image handling)
+- boto3 (AWS S3 for file storage)
+- celery (background tasks)
+- redis (cache + celery broker)
+- django-filter (API filtering)
+- drf-spectacular (API docs)
+
+**Authentication:**
+- JWT tokens stored in httpOnly cookies
+- Access token: 15 min expiry
+- Refresh token: 7 day expiry
+- CSRF protection enabled
+
+**File Uploads:**
+- Store in AWS S3 or local storage (dev)
+- Generate unique filenames (UUID)
+- Validate file types (images: JPEG, PNG, max 5MB)
+- Resize/compress images on upload (Pillow)
+- Apply watermark to listing photos
+
+**API Response Format:**
+```json
+{
+  "success": true,
+  "data": { ... },
+  "message": "Optional message",
+  "errors": [] // if success=false
+}
+```
+
+**Pagination:**
+- Default: 20 items per page
+- Max: 100 items per page
+- Use Django REST Framework pagination
+
+**Permissions:**
+- IsAuthenticated: Most endpoints
+- IsOwner: Edit/delete own content
+- IsAdminUser: Admin endpoints
+- Custom: IsVerified (for creating listings)
+
+### Frontend (React)
+
+**Project Structure:**
+```
+src/
+├── components/       # Reusable components
+├── pages/            # Page components
+├── features/         # Feature modules (rehoming, services, etc.)
+├── hooks/            # Custom React hooks
+├── services/         # API calls
+├── utils/            # Utilities
+├── App.jsx
+└── main.jsx
+```
+
+**State Management:**
+- React Query for server state
+- Context API for auth state
+- Local state for UI (useState)
+
+**Key Packages:**
+- react-router-dom
+- axios
+- react-query
+- react-hook-form (forms)
+- yup (validation)
+- tailwindcss (styling)
+- headlessui (accessible components)
+- react-dropzone (file uploads)
+- date-fns (date formatting)
+
+**API Client Setup:**
+- Axios instance with base URL
+- Interceptors for auth token
+- Error handling middleware
+
+**Forms:**
+- Use react-hook-form for all forms
+- Yup schemas for validation
+- Show errors inline
+- Disable submit during API call
+- Success/error toasts
+
+**Image Uploads:**
+- Use react-dropzone
+- Preview before upload
+- Show upload progress
+- Validate size/type on frontend
+
+### Database
+
+**PostgreSQL Schema:**
+- Use Django migrations
+- Add indexes on frequently queried fields:
+  - user_id foreign keys
+  - status fields
+  - created_at (for sorting)
+  - location fields (for geo search)
+- Add constraints:
+  - Unique constraints where needed
+  - Check constraints (e.g., adoption_fee <= 300)
+
+**Seeding Data (Development):**
+- Create management command for seed data
+- Generate:
+  - 50 test users
+  - 100 pet profiles
+  - 50 rehoming listings
+  - 20 service providers
+  - 100 reviews
+  - 50 applications
+
+### Deployment
+
+**Development:**
+- Docker Compose for local setup
+- Django dev server (runserver)
+- Vite dev server (npm run dev)
+- PostgreSQL container
+- Redis container
+
+**Production (Future):**
+- Backend: AWS EC2 or Heroku
+- Frontend: Netlify or Vercel
+- Database: AWS RDS (PostgreSQL)
+- File storage: AWS S3
+- CDN: Cloudflare
+
+---
+
+## API ENDPOINTS SUMMARY
+
+### Authentication
+- POST /api/auth/register/
+- POST /api/auth/login/
+- POST /api/auth/logout/
+- POST /api/auth/token/refresh/
+- POST /api/auth/verify-email/
+- POST /api/auth/verify-phone/
+- POST /api/auth/password-reset/
+- POST /api/auth/password-reset-confirm/
+
+### Users
+- GET /api/users/me/
+- PATCH /api/users/me/
+- GET /api/users/{id}/
+- POST /api/users/me/upload-id/
+- POST /api/users/me/upload-pet-docs/
+
+### Pets
+- GET /api/pets/
+- POST /api/pets/
+- GET /api/pets/{id}/
+- PATCH /api/pets/{id}/
+- DELETE /api/pets/{id}/
+
+### Rehoming
+- POST /api/rehoming/intervention/
+- GET /api/rehoming/listings/
+- POST /api/rehoming/listings/
+- GET /api/rehoming/listings/{id}/
+- PATCH /api/rehoming/listings/{id}/
+- DELETE /api/rehoming/listings/{id}/
+- POST /api/rehoming/applications/
+- GET /api/rehoming/applications/
+- GET /api/rehoming/applications/{id}/
+- PATCH /api/rehoming/applications/{id}/status/
+- POST /api/rehoming/reviews/
+- GET /api/rehoming/reviews/
+
+### Services
+- GET /api/services/providers/
+- POST /api/services/providers/
+- GET /api/services/providers/{id}/
+- GET /api/services/foster/
+- GET /api/services/vet/
+- POST /api/services/reviews/
+- GET /api/services/reviews/
+
+### Messaging
+- GET /api/messaging/conversations/
+- POST /api/messaging/conversations/
+- GET /api/messaging/conversations/{id}/messages/
+- POST /api/messaging/conversations/{id}/messages/
+- PATCH /api/messaging/messages/{id}/read/
+
+### Admin
+- GET /api/admin/users/
+- PATCH /api/admin/users/{id}/
+- GET /api/admin/listings/pending/
+- PATCH /api/admin/listings/{id}/approve/
+- PATCH /api/admin/listings/{id}/reject/
+- GET /api/admin/reports/
+- PATCH /api/admin/reports/{id}/resolve/
+- GET /api/admin/analytics/
+
+### Reports
+- POST /api/reports/
+
+---
+
+## TESTING REQUIREMENTS
+
+### Unit Tests
+- All model methods
+- API serializers
+- Custom validators
+- Utility functions
+
+### Integration Tests
+- API endpoints (all CRUD operations)
+- Authentication flow
+- Permission checks
+- File upload functionality
+
+### End-to-End Tests (Cypress/Playwright)
+- User registration & login
+- Create rehoming listing
+- Submit adoption application
+- Send message
+- Leave review
+- Admin moderation
+
+**Test Coverage Goal: 80%+**
+
+---
+
+## PERFORMANCE OPTIMIZATION
+
+**Database:**
+- Index frequently queried fields
+- Use select_related/prefetch_related for foreign keys
+- Implement database connection pooling
+
+**API:**
+- Implement pagination (all list endpoints)
+- Add caching for read-heavy endpoints (Redis)
+- Optimize serializers (only necessary fields)
+
+**Frontend:**
+- Code splitting (React.lazy)
+- Image lazy loading
+- Debounce search inputs
+- Optimize bundle size
+
+**Media:**
+- Compress images on upload
+- Use CDN for static assets
+- Implement lazy loading for images
+
+---
+
+## SECURITY CHECKLIST
+
+- [ ] HTTPS enforced in production
+- [ ] CSRF protection enabled
+- [ ] SQL injection prevention (use Django ORM)
+- [ ] XSS prevention (escape user input)
+- [ ] Rate limiting on sensitive endpoints
+- [ ] File upload validation (type, size)
+- [ ] Password strength requirements
+- [ ] JWT token expiry implemented
+- [ ] Sensitive data encrypted at rest
+- [ ] Environment variables for secrets
+- [ ] CORS configured properly
+- [ ] Admin panel restricted to staff
+
+---
+
+## DEVELOPMENT WORKFLOW
+
+**Week 1-2: Project Setup**
+- Initialize Django project
+- Setup React + Vite
+- Configure Docker Compose
+- Setup PostgreSQL
+- Create User, UserProfile models
+- Build authentication endpoints
+- Build registration/login UI
+
+**Week 3-4: Pet Profiles & Rehoming Intervention**
+- PetProfile model
+- Rehoming intervention questionnaire
+- UI for pet profiles and intervention
+
+**Week 5-6: Rehoming Listings**
+- RehomingListing model
+- Listing creation form (all sections)
+- Photo/video upload
+- Moderation queue
+
+**Week 7-8: Browse & Apply**
+- Listing search/filter API
+- Listing browse UI
+- AdopterProfile model
+- AdoptionApplication model
+- Application form UI
+- Pet owner application review UI
+
+**Week 9-10: Messaging**
+- Conversation, Message models
+- Messaging API
+- Messaging UI
+
+**Week 11-12: Reviews**
+- Review models
+- Review API
+- Review submission UI
+- Display reviews on profiles
+
+**Week 13-14: Admin Panel**
+- Enhance Django admin
+- Build moderation tools
+- Analytics dashboard
+
+**Week 15-16: Legal & Safety**
+- ToS, Privacy pages
+- Adoption agreement generator
+- Identity verification
+- Report system
+- Testing & bug fixes
+- Deployment prep
+
+---
+
+## POST-MVP ROADMAP
+
+**Phase 2: Social Features (Months 5-8)**
+- Social feed (posts, comments, reactions)
+- Groups & communities
+- Events
+- Stories
+- Advanced notifications (WebSocket)
+- Friend/follow system
+
+**Phase 3: Enhancements (Months 9-12)**
+- Payment integration (Stripe Connect)
+- Escrow system for adoption fees
+- Foster booking system
+- Vet appointment booking
+- Home check scheduling
+- Trial period management
+- Mobile app (React Native)
+
+**Phase 4: Scale (Year 2)**
+- AI matching algorithm
+- Photo recognition (lost pet matching)
+- Chatbot support
+- Advanced analytics
+- Multi-language support
+- International expansion
+
+---
+
+## SUCCESS METRICS TO TRACK
+
+**User Growth:**
+- New registrations per week
+- Active users (30-day)
+- User retention rate
+
+**Rehoming Success:**
+- Listings created
+- Applications submitted
+- Adoptions completed
+- Average time to adoption
+- Return rate (< 10% target)
+
+**Engagement:**
+- Messages sent
+- Reviews posted
+- Service provider signups
+
+**Quality:**
+- Listing approval rate
+- Reports filed
+- User bans (should be low)
+
+---
+
+This document provides a complete, focused specification for developers to implement PetCircle step-by-step. Start with weeks 1-16 for MVP, then evaluate user feedback before building Phase 2 features.

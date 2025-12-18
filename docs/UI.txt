@@ -1,0 +1,4692 @@
+# PETCIRCLE - FRONTEND PAGES DOCUMENTATION
+## Complete UI/UX Specification for Design & Development
+
+---
+
+## TABLE OF CONTENTS
+
+1. [Authentication Pages](#authentication-pages)
+2. [User Dashboard & Profile](#user-dashboard-profile)
+3. [Pet Profile Pages](#pet-profile-pages)
+4. [Rehoming System Pages](#rehoming-system-pages)
+5. [Browse & Search Pages](#browse-search-pages)
+6. [Application Pages](#application-pages)
+7. [Messaging Pages](#messaging-pages)
+8. [Service Provider Pages](#service-provider-pages)
+9. [Review Pages](#review-pages)
+10. [Admin Panel Pages](#admin-panel-pages)
+11. [Legal & Static Pages](#legal-static-pages)
+12. [Common UI Components](#common-ui-components)
+
+---
+
+## AUTHENTICATION PAGES
+
+### 1.1 Registration Page (`/register`)
+
+**Layout:** Centered single-column form
+
+**Header Section:**
+- PetCircle logo (top left)
+- Tagline: "Find loving homes for pets in need"
+- Navigation link: "Already have an account? Log in"
+
+**Main Form:**
+- Page title: "Create Your Account"
+- Subtitle: "Join our community of responsible pet lovers"
+
+**Form Fields:**
+- First Name (text input, required)
+  - Placeholder: "Enter your first name"
+  - Error message: "First name is required"
+- Last Name (text input, required)
+  - Placeholder: "Enter your last name"
+  - Error message: "Last name is required"
+- Email Address (email input, required)
+  - Placeholder: "you@example.com"
+  - Error messages: "Email is required" / "Please enter a valid email"
+- Phone Number (tel input, required)
+  - Placeholder: "+1 (555) 000-0000"
+  - Format helper text: "We'll send you a verification code"
+- Password (password input, required)
+  - Placeholder: "Create a strong password"
+  - Show/hide password toggle icon
+  - Password strength indicator bar (weak/medium/strong)
+  - Requirements list below:
+    - Minimum 8 characters
+    - At least one uppercase letter
+    - At least one number
+    - At least one special character
+- Confirm Password (password input, required)
+  - Placeholder: "Re-enter your password"
+  - Error message: "Passwords must match"
+
+**Terms Agreement:**
+- Checkbox (required): "I agree to the Terms of Service and Privacy Policy"
+- Links to: Terms of Service, Privacy Policy (open in new tab)
+
+**Submit Button:**
+- Text: "Create Account"
+- Full width, primary color
+- Disabled state until all required fields valid
+- Loading spinner when submitting
+
+**Footer:**
+- Text: "Already have an account? Log in"
+- Link to login page
+
+**Success Flow:**
+- Redirect to email verification page
+- Show success message: "Account created! Please verify your email."
+
+---
+
+### 1.2 Email Verification Page (`/verify-email`)
+
+**Layout:** Centered content with illustration
+
+**Header:**
+- Icon: Large envelope icon
+- Title: "Verify Your Email Address"
+- Subtitle: "We sent a verification code to [user email]"
+
+**Main Content:**
+- Input field: 6-digit verification code
+  - Large digit boxes (individual inputs)
+  - Auto-focus and auto-advance
+- Button: "Verify Email" (primary)
+- Button: "Resend Code" (text button, secondary)
+  - Show timer: "Resend in 60s" (countdown)
+
+**Helper Text:**
+- "Didn't receive the code? Check your spam folder"
+- "Wrong email? Go back to edit"
+
+**Success:**
+- Show checkmark animation
+- Message: "Email verified successfully!"
+- Auto-redirect to phone verification in 2 seconds
+
+---
+
+### 1.3 Phone Verification Page (`/verify-phone`)
+
+**Layout:** Similar to email verification
+
+**Header:**
+- Icon: Phone icon
+- Title: "Verify Your Phone Number"
+- Subtitle: "We sent an SMS code to [user phone]"
+
+**Main Content:**
+- Input field: 6-digit SMS code
+- Button: "Verify Phone" (primary)
+- Button: "Resend Code" (with countdown)
+
+**Success:**
+- Redirect to dashboard
+- Welcome message toast: "Welcome to PetCircle!"
+
+---
+
+### 1.4 Login Page (`/login`)
+
+**Layout:** Centered single-column form
+
+**Header:**
+- PetCircle logo
+- Page title: "Welcome Back"
+- Subtitle: "Log in to continue helping pets find homes"
+
+**Form Fields:**
+- Email Address (email input, required)
+  - Placeholder: "you@example.com"
+- Password (password input, required)
+  - Placeholder: "Enter your password"
+  - Show/hide toggle
+- Checkbox: "Remember me"
+- Link: "Forgot password?" (right aligned)
+
+**Submit Button:**
+- Text: "Log In"
+- Full width, primary color
+- Loading state
+
+**Divider:**
+- "OR" text with horizontal lines
+
+**Footer:**
+- Text: "Don't have an account? Sign up"
+- Link to registration page
+
+---
+
+### 1.5 Forgot Password Page (`/forgot-password`)
+
+**Layout:** Centered form
+
+**Header:**
+- Icon: Lock with question mark
+- Title: "Reset Your Password"
+- Subtitle: "Enter your email to receive reset instructions"
+
+**Form:**
+- Email input (required)
+  - Placeholder: "you@example.com"
+- Button: "Send Reset Link" (primary)
+
+**Success State:**
+- Icon: Checkmark in circle
+- Message: "Check your email!"
+- Instructions: "We sent password reset instructions to [email]"
+- Button: "Back to Login"
+
+---
+
+### 1.6 Reset Password Page (`/reset-password/:token`)
+
+**Layout:** Centered form
+
+**Header:**
+- Title: "Create New Password"
+- Subtitle: "Enter a new password for your account"
+
+**Form Fields:**
+- New Password (password input, required)
+  - Show/hide toggle
+  - Strength indicator
+- Confirm Password (password input, required)
+- Button: "Reset Password" (primary)
+
+**Success:**
+- Redirect to login
+- Toast: "Password updated successfully! Please log in."
+
+---
+
+## USER DASHBOARD & PROFILE
+
+### 2.1 User Dashboard (`/dashboard`)
+
+**Layout:** Full-width with sidebar navigation
+
+**Sidebar (Left):**
+- User avatar (circular)
+- User name
+- Verification badges (email, phone, ID, pet owner)
+- Navigation menu:
+  - Dashboard (home icon)
+  - My Pets (paw icon)
+  - My Listings (list icon)
+  - Applications (folder icon)
+  - Messages (message icon)
+  - Reviews (star icon)
+  - Settings (gear icon)
+  - Log Out (exit icon)
+
+**Main Content Area:**
+
+**Welcome Section:**
+- Greeting: "Welcome back, [First Name]!"
+- Quick stats cards (row of 4):
+  - Active Listings (number, "View All" link)
+  - Pending Applications (number, "Review" link)
+  - Unread Messages (number, "Read" link)
+  - Pets Added (number, "Add More" link)
+
+**Quick Actions Section:**
+- Title: "What would you like to do?"
+- Action cards (grid, 3 columns):
+  - Card 1: "Rehome a Pet"
+    - Icon: Heart
+    - Description: "Find a loving home for your pet"
+    - Button: "Start Rehoming"
+  - Card 2: "Find a Pet to Adopt"
+    - Icon: Search
+    - Description: "Browse pets looking for homes"
+    - Button: "Browse Pets"
+  - Card 3: "Find Services"
+    - Icon: Briefcase
+    - Description: "Foster care and veterinary services"
+    - Button: "Find Services"
+
+**Recent Activity Section:**
+- Title: "Recent Activity"
+- Activity feed (list):
+  - Each item shows:
+    - Icon (based on activity type)
+    - Activity text (e.g., "New application received for Max")
+    - Timestamp (relative)
+    - Action button (e.g., "View Application")
+- "View All Activity" link at bottom
+
+**Notifications Panel (Right Sidebar - Optional):**
+- Title: "Notifications"
+- List of recent notifications
+- Badge count for unread
+- "Mark all as read" button
+
+---
+
+### 2.2 User Profile Page (`/profile/me` or `/profile/:userId`)
+
+**Layout:** Full-width with header and tabs
+
+**Profile Header Section:**
+- Background banner (uploaded or default gradient)
+- Profile photo (large circular, overlapping banner)
+- Edit photo button (pencil icon, if own profile)
+- User name (large heading)
+- Location (city, state with pin icon)
+- Member since date
+- Verification badges (row of icons with tooltips):
+  - Email verified (green checkmark)
+  - Phone verified (green checkmark)
+  - ID verified (blue shield)
+  - Pet owner verified (gold star)
+- Action buttons (if viewing other's profile):
+  - "Send Message" (primary button)
+  - "Report User" (icon button)
+
+**Stats Bar:**
+- Horizontal row showing:
+  - Pets: [number]
+  - Successful Adoptions: [number]
+  - Reviews: [number] ([average rating] stars)
+
+**Tabs Navigation:**
+- About
+- Pets
+- Listings
+- Reviews
+
+**Tab 1: About**
+- Bio section:
+  - Title: "About Me"
+  - Bio text (500 char max)
+  - Edit button (if own profile)
+- Contact Information (if own profile or privacy allows):
+  - Email
+  - Phone
+  - Visibility toggle switches (Public/Friends/Private)
+
+**Tab 2: Pets**
+- Grid of pet profile cards (3 columns)
+- Each card shows:
+  - Pet photo
+  - Pet name
+  - Species & breed
+  - Age
+  - Status badge (Active/Rehoming/Adopted)
+  - "View Details" link
+- "Add New Pet" button (if own profile)
+
+**Tab 3: Listings**
+- List of rehoming listings
+- Each shows:
+  - Pet photo
+  - Pet name
+  - Status (Active/Pending/Adopted)
+  - Posted date
+  - Applications count
+  - "View Listing" button
+- Empty state: "No active listings"
+
+**Tab 4: Reviews**
+- Overall rating (large stars, number)
+- Review breakdown (bar chart):
+  - 5 stars: [count] [bar]
+  - 4 stars: [count] [bar]
+  - etc.
+- Filter dropdown: "All Reviews" / "As Pet Owner" / "As Adopter"
+- List of reviews:
+  - Each review shows:
+    - Reviewer name & photo (first name + initial)
+    - Star rating
+    - Review text
+    - Date
+    - Pet adoption context ("Adopted Max from this user")
+
+---
+
+### 2.3 Profile Settings Page (`/settings`)
+
+**Layout:** Full-width with sidebar menu
+
+**Settings Sidebar (Left):**
+- Personal Information
+- Account Security
+- Privacy Settings
+- Notifications
+- Verification
+- Delete Account
+
+**Main Content (Right):**
+
+**Section 1: Personal Information**
+- Title: "Personal Information"
+- Form fields:
+  - First Name (text input)
+  - Last Name (text input)
+  - Username (text input, unique validation)
+  - Email (text input, show "Verified" badge)
+  - Phone (text input, show "Verified" badge)
+  - Location:
+    - City (text input)
+    - State (dropdown)
+    - Country (dropdown)
+  - Bio (textarea, 500 char limit with counter)
+  - Profile Photo:
+    - Current photo preview
+    - "Upload New Photo" button
+    - Requirements: "Max 5MB, JPEG or PNG"
+- Save Changes button
+
+**Section 2: Account Security**
+- Title: "Account Security"
+- Change Password:
+  - Current Password (password input)
+  - New Password (password input with strength indicator)
+  - Confirm New Password (password input)
+  - "Update Password" button
+- Two-Factor Authentication (future):
+  - Toggle switch
+  - Status: "Not enabled"
+
+**Section 3: Privacy Settings**
+- Title: "Privacy Settings"
+- Profile Visibility:
+  - Radio buttons:
+    - Public (anyone can view)
+    - Friends Only (not implemented in MVP)
+    - Private (only me)
+- Contact Information Visibility:
+  - Email: Dropdown (Public/Private)
+  - Phone: Dropdown (Public/Private)
+- Show Activity Status:
+  - Toggle switch
+  - Description: "Let others see when you're online"
+
+**Section 4: Notifications**
+- Title: "Notification Preferences"
+- Email Notifications:
+  - New message received (checkbox)
+  - Application submitted (checkbox)
+  - Application status update (checkbox)
+  - New review posted (checkbox)
+  - Weekly digest (checkbox)
+- Push Notifications (future):
+  - All checkboxes with toggle
+
+**Section 5: Verification**
+- Title: "Account Verification"
+- Email Verification:
+  - Status: "Verified" with green checkmark
+  - Or: "Not Verified" with "Verify Now" button
+- Phone Verification:
+  - Status display + action button
+- Identity Verification:
+  - Status: "Not Verified" / "Pending Review" / "Verified"
+  - Upload ID button
+  - Instructions: "Upload government-issued ID (driver's license or passport)"
+  - File upload area with preview
+  - Submit button
+- Pet Owner Verification:
+  - Status display
+  - Upload documents button
+  - Instructions: "Upload vet records, microchip registration, or adoption papers"
+  - File upload area
+  - Submit button
+
+**Section 6: Delete Account**
+- Title: "Delete Account"
+- Warning box (red border):
+  - Icon: Warning triangle
+  - Text: "This action cannot be undone. All your data will be permanently deleted."
+- "Delete My Account" button (danger/red color)
+- Opens confirmation modal
+
+---
+
+## PET PROFILE PAGES
+
+### 3.1 My Pets Page (`/pets`)
+
+**Layout:** Grid view with sidebar
+
+**Header Section:**
+- Page title: "My Pets"
+- Subtitle: "Manage your pet profiles"
+- Button: "Add New Pet" (primary, top right)
+
+**Filter Sidebar (Left):**
+- Species filter (checkboxes):
+  - All
+  - Dogs
+  - Cats
+  - Rabbits
+  - Birds
+  - Other
+- Status filter (checkboxes):
+  - Active
+  - Being Rehomed
+  - Adopted
+  - Inactive
+
+**Main Content:**
+- Pet cards grid (3 columns)
+- Each card contains:
+  - Pet photo (large, top)
+  - Pet name (heading)
+  - Species & breed (subheading)
+  - Age, gender icons
+  - Status badge (colored):
+    - Active (green)
+    - Being Rehomed (yellow)
+    - Adopted (blue)
+    - Inactive (gray)
+  - Action buttons row:
+    - "View Profile" (text button)
+    - "Edit" (icon button)
+    - "Delete" (icon button)
+
+**Empty State:**
+- Illustration: Dog and cat sitting together
+- Text: "You haven't added any pets yet"
+- Button: "Add Your First Pet"
+
+---
+
+### 3.2 Add/Edit Pet Page (`/pets/new` or `/pets/:id/edit`)
+
+**Layout:** Centered form with progress indicator
+
+**Header:**
+- Page title: "Add New Pet" or "Edit Pet Profile"
+- Progress steps (if adding new): "1. Basic Info → 2. Photos → 3. Details"
+
+**Form Section 1: Basic Information**
+- Pet Name (text input, required)
+  - Placeholder: "What's your pet's name?"
+- Species (dropdown, required)
+  - Options: Dog, Cat, Rabbit, Bird, Other
+- Breed (text input, required)
+  - Placeholder: "Enter breed or mix"
+  - Helper text: "Be as specific as possible"
+- Birth Date (date picker)
+  - Or: Age input (number) with unit dropdown (years/months)
+- Gender (radio buttons, required)
+  - Male
+  - Female
+  - Unknown
+
+**Form Section 2: Photos**
+- Photo upload area (drag & drop or click to upload)
+- Requirements displayed: "Upload 1-5 photos, max 5MB each"
+- Photo preview grid (shows uploaded photos)
+- Each photo has:
+  - Preview thumbnail
+  - "Set as Primary" button
+  - Delete icon
+- Reorder photos by drag & drop
+
+**Form Section 3: Description**
+- Textarea (500 char max with counter)
+- Placeholder: "Tell us about your pet's personality, habits, and what makes them special"
+
+**Form Section 4: Status**
+- Dropdown: Active, Inactive, Deceased
+- Helper text: "Inactive pets won't appear in your public profile"
+
+**Action Buttons:**
+- "Save Pet" (primary button)
+- "Cancel" (secondary button)
+
+**Success:**
+- Redirect to pet detail page
+- Toast: "Pet profile saved successfully!"
+
+---
+
+### 3.3 Pet Detail Page (`/pets/:id`)
+
+**Layout:** Full-width with sidebar
+
+**Main Content Area:**
+
+**Photo Gallery Section:**
+- Large photo display (main photo)
+- Thumbnail strip below (all photos)
+- Photo navigation arrows
+- Fullscreen view button
+
+**Pet Information Card:**
+- Pet name (large heading)
+- Species & breed (subheading)
+- Info grid (2 columns):
+  - Age: [value]
+  - Gender: [value]
+  - Status: [badge]
+  - Added: [date]
+
+**Description Section:**
+- Title: "About [Pet Name]"
+- Description text
+- Empty state: "No description added"
+
+**Action Buttons (if owner):**
+- "Edit Profile" (primary button)
+- "Create Rehoming Listing" (secondary button)
+- "Delete Profile" (danger button)
+
+**Right Sidebar:**
+
+**Owner Information Card:**
+- Owner photo & name
+- "View Full Profile" link
+- If viewing own pet: Quick stats
+
+**Related Listings (if applicable):**
+- Title: "Rehoming Listing"
+- Show active listing card:
+  - Status badge
+  - Posted date
+  - Applications count
+  - "View Listing" button
+
+---
+
+## REHOMING SYSTEM PAGES
+
+### 4.1 Rehoming Intervention Page (`/rehoming/start`)
+
+**Layout:** Multi-step wizard
+
+**Page Header:**
+- Title: "Before You Rehome..."
+- Subtitle: "Let's explore all your options to keep your pet"
+
+**Progress Indicator:**
+- Step 1: Reason Assessment
+- Step 2: Resources
+- Step 3: Acknowledgment
+
+---
+
+**Step 1: Reason Assessment**
+
+**Main Content:**
+- Heading: "Why are you considering rehoming?"
+- Dropdown menu (required):
+  - Moving/housing restrictions
+  - Allergies
+  - Financial hardship
+  - Time constraints
+  - Behavioral issues
+  - Health issues (owner)
+  - Too many pets
+  - Other
+
+**Text Area:**
+- Label: "Please explain your situation in detail"
+- Placeholder: "Take your time to describe what's happening..."
+- Character counter: "Minimum 500 characters required"
+- Current count display
+
+**Urgency Level:**
+- Label: "How soon do you need to rehome?"
+- Radio buttons:
+  - Immediate (within 1 week)
+  - Within 1 month
+  - Within 3 months
+  - Flexible timeline
+
+**Button:** "Next: View Resources"
+
+---
+
+**Step 2: Resources & Alternatives**
+
+**Header:**
+- Icon: Lightbulb
+- Title: "Resources That Might Help"
+- Subtitle: "Based on your situation, here are some alternatives to rehoming"
+
+**Resource Cards (displayed based on reason):**
+
+**Example for "Behavioral Issues":**
+- Card 1: "Professional Dog Trainers"
+  - Description: "Certified trainers can help with many behavioral problems"
+  - Link: "Find Trainers in Your Area"
+  - Icon: Training whistle
+- Card 2: "Free Online Training Resources"
+  - Description: "Video tutorials and guides for common issues"
+  - Link: "View Resources"
+  - Icon: Play button
+- Card 3: "Veterinary Behaviorist"
+  - Description: "Medical issues can cause behavior problems"
+  - Link: "Find Specialists"
+  - Icon: Medical cross
+
+**Example for "Financial Hardship":**
+- Pet assistance programs
+- Low-cost vet clinics
+- Pet food banks
+- Payment plans
+
+**Required Action:**
+- Checkbox: "I have reviewed these resources and alternatives"
+- Disabled until user clicks at least 2 resource links
+
+**Cooling Period Notice:**
+- Info box (blue background):
+  - Icon: Clock
+  - Text: "We recommend a 48-hour cooling period before proceeding. You can save your progress and come back."
+- Button: "Save Progress & Exit"
+- Button: "Continue Now"
+
+---
+
+**Step 3: Acknowledgment**
+
+**Header:**
+- Title: "Important Acknowledgments"
+- Subtitle: "Please read and confirm your understanding"
+
+**Acknowledgment Checkboxes (all required):**
+- [ ] I have reviewed available resources and attempted alternatives
+- [ ] I understand that rehoming is a permanent decision
+- [ ] I commit to providing honest and complete information about my pet
+- [ ] I will not list my pet on other platforms while this listing is active
+- [ ] I understand PetCircle's responsibility is to facilitate connections, not guarantee outcomes
+
+**Commitment Statement:**
+- Textarea (optional but encouraged):
+  - "Why have you decided to move forward with rehoming?"
+  - Placeholder: "This helps us understand your commitment..."
+
+**Final Buttons:**
+- "Create Rehoming Listing" (primary, enabled only when all checked)
+- "Go Back" (secondary)
+
+**Success:**
+- Redirect to create listing page
+- Toast: "Let's create a great listing for your pet"
+
+---
+
+### 4.2 Create Rehoming Listing Page (`/rehoming/listing/new`)
+
+**Layout:** Multi-step form with fixed progress header
+
+**Progress Header (Sticky):**
+- Steps: Pet Details → Medical → Behavior → Story → Photos → Terms → Review
+- Current step highlighted
+- Completed steps show checkmark
+
+---
+
+**Step 1: Pet Details**
+
+**Section Header:**
+- Title: "Select or Add Pet"
+- Subtitle: "Choose an existing pet profile or create a new one"
+
+**Option 1: Select Existing Pet**
+- Radio button group showing user's pets
+- Each option shows:
+  - Pet photo thumbnail
+  - Pet name
+  - Species, breed, age
+
+**Option 2: Create New Pet**
+- Radio button: "Add a new pet profile"
+- Expands to show quick pet form:
+  - Name, species, breed, age, gender
+  - Photo upload
+
+**Buttons:**
+- "Next: Medical History" (primary)
+- "Save Draft" (secondary)
+
+---
+
+**Step 2: Medical History**
+
+**Section Header:**
+- Title: "Medical History"
+- Subtitle: "Complete medical information helps adopters make informed decisions"
+
+**Form Fields:**
+
+**Spay/Neuter Status:**
+- Radio buttons: Yes / No / Scheduled
+- If "Scheduled": Date picker for appointment
+
+**Microchip:**
+- Radio buttons: Yes / No
+- If "Yes": Text input for microchip number
+
+**Vaccinations:**
+- Radio buttons: Up to date / Partially complete / Not current
+- File upload: "Upload vaccination records (PDF or image)"
+- Preview of uploaded document
+
+**Current Medications:**
+- Textarea: "List any medications and dosages"
+- Placeholder: "e.g., Heartgard once monthly, Gabapentin 100mg twice daily"
+
+**Medical Conditions:**
+- Checkboxes (multiple select):
+  - None
+  - Allergies (expand to text field: "Describe allergies")
+  - Arthritis
+  - Diabetes
+  - Seizures
+  - Heart condition
+  - Kidney disease
+  - Dental issues
+  - Vision/hearing impairment
+  - Skin conditions
+  - Other (expand to text field)
+
+**Veterinary Information:**
+- Last Vet Visit: Date picker
+- Veterinarian Name: Text input
+- Clinic Name: Text input
+- Clinic Phone: Phone input
+
+**Buttons:**
+- "Next: Behavioral Profile"
+- "Back"
+- "Save Draft"
+
+---
+
+**Step 3: Behavioral Profile**
+
+**Section Header:**
+- Title: "Behavioral Profile"
+- Subtitle: "Help us understand your pet's personality and needs"
+
+**Form Fields:**
+
+**1. Energy Level:**
+- Slider (1-5)
+- Labels: Very Low → Low → Moderate → High → Very High
+- Icons showing energy level
+
+**2. Good with Children:**
+- Radio buttons: Yes / No / Unknown
+- If "Yes": Dropdown for age range
+  - Best with children over 12
+  - Best with children over 8
+  - Good with all ages
+
+**3. Good with Dogs:**
+- Radio buttons: Yes / Selective / No / Unknown
+- If "Selective": Text field "Explain preferences"
+
+**4. Good with Cats:**
+- Radio buttons: Yes / No / Unknown
+
+**5. House-Trained:**
+- Radio buttons: Yes / Mostly / No
+- Helper text: "Can they go 8+ hours without accidents?"
+
+**6. Crate-Trained:**
+- Radio buttons: Yes / No
+
+**7. Separation Anxiety:**
+- Radio buttons: No / Mild / Yes
+- If Yes/Mild: Text field "Describe symptoms"
+
+**8. Aggression History (CRITICAL):**
+- Alert box (yellow border):
+  - Icon: Warning
+  - Text: "Honesty about aggression is required by law and for adopter safety"
+- Question 1: "Has this pet ever bitten or injured a person?"
+  - Radio buttons: Yes / No
+  - If "Yes": Required text field "Describe the incident in detail (date, circumstances, injuries, follow-up)"
+- Question 2: "Has this pet ever bitten or injured another animal?"
+  - Radio buttons: Yes / No
+  - If "Yes": Required text field "Describe the incident"
+
+**9. Exercise Needs:**
+- Dropdown:
+  - Minimal (short walks)
+  - Moderate (daily walk)
+  - High (daily run/play)
+  - Intense (multiple hours daily)
+
+**10. Ideal Home Type:**
+- Radio buttons:
+  - Any home is fine
+  - House with yard preferred
+  - House with yard required
+  - Apartment suitable
+
+**Buttons:**
+- "Next: Rehoming Story"
+- "Back"
+- "Save Draft"
+
+---
+
+**Step 4: Rehoming Story**
+
+**Section Header:**
+- Title: "Tell Your Pet's Story"
+- Subtitle: "A compelling story helps adopters connect with your pet"
+
+**Guided Prompts (Shown as helpful tips):**
+- 💭 How did you get this pet?
+- 💭 What is their personality like?
+- 💭 Why are you rehoming?
+- 💭 What kind of home would be best?
+
+**Main Text Editor:**
+- Rich text editor (bold, italic, lists)
+- Character counter: "Minimum 1000 characters"
+- Current count display
+- Placeholder: "Start writing about [Pet Name]..."
+
+**Example Story (Collapsible):**
+- "View example story" expands to show well-written sample
+
+**Buttons:**
+- "Next: Add Photos"
+- "Back"
+- "Save Draft"
+
+---
+
+**Step 5: Photos & Video**
+
+**Section Header:**
+- Title: "Add Photos & Video"
+- Subtitle: "Great photos significantly increase adoption chances"
+
+**Photo Requirements (Info Box):**
+- ✓ 5 photos required, 15 maximum
+- ✓ Recent photos (within 30 days)
+- ✓ Clear, well-lit images
+- ✓ Show your pet's personality
+- ℹ️ Watermark will be applied automatically
+
+**Photo Upload Area:**
+- Large drag-and-drop zone
+- "Click to upload or drag photos here"
+- File type: JPEG, PNG (max 5MB each)
+
+**Photo Grid (After Upload):**
+- Preview thumbnails in grid
+- Primary photo badge on first image
+- Each photo has:
+  - Preview
+  - "Set as Primary" button
+  - Delete icon (X)
+  - Drag handle for reordering
+- Drag to reorder photos
+
+**Video Upload (Optional):**
+- Separate upload area
+- "Upload a video (15 seconds - 3 minutes)"
+- File type: MP4, MOV (max 50MB)
+- Preview player after upload
+- Delete button
+
+**Buttons:**
+- "Next: Adoption Terms"
+- "Back"
+- "Save Draft"
+
+---
+
+**Step 6: Adoption Terms**
+
+**Section Header:**
+- Title: "Adoption Terms"
+- Subtitle: "Set your preferences for adoption"
+
+**Adoption Fee:**
+- Slider: $0 - $300
+- Display amount dynamically
+- Info tooltip: "Adoption fees help ensure committed adopters and can offset care costs"
+- If fee > $0: Text area appears
+  - "Explain what the fee covers"
+  - Placeholder: "Adoption fee covers spay/neuter, vaccinations, microchip..."
+
+**Included Items:**
+- Checkboxes (multiple select):
+  - Food (current bag)
+  - Food bowls
+  - Leash & collar
+  - Crate
+  - Bed
+  - Toys
+  - Medical records
+  - Microchip paperwork
+  - Other (text field)
+
+**Timeline:**
+- Label: "Ideal adoption date"
+- Date picker (minimum: 1 week from today)
+- Helper text: "Allow time for proper screening"
+
+**Adopter Preferences:**
+
+**Experience Level Required:**
+- Dropdown:
+  - No experience needed
+  - Some pet experience preferred
+  - Experienced with this species required
+  - Expert level required (special needs)
+
+**Future Contact:**
+- Checkbox: "I'm willing to stay in touch and receive updates"
+
+**Return Policy:**
+- Radio buttons:
+  - I will take the pet back if it doesn't work out (within 30 days)
+  - I will take the pet back with conditions (explain below)
+  - I cannot take the pet back
+- If "with conditions": Text field appears
+
+**Buttons:**
+- "Next: Review & Submit"
+- "Back"
+- "Save Draft"
+
+---
+
+**Step 7: Review & Submit**
+
+**Section Header:**
+- Title: "Review Your Listing"
+- Subtitle: "Check everything before submitting for approval"
+
+**Review Sections (Collapsible Accordions):**
+
+**Pet Details:**
+- Display all pet info
+- Edit button (returns to that step)
+
+**Medical History:**
+- Display summary
+- Edit button
+
+**Behavioral Profile:**
+- Display summary with visual indicators
+- Edit button
+
+**Rehoming Story:**
+- Display full text
+- Edit button
+
+**Photos & Video:**
+- Photo gallery preview
+- Video player
+- Edit button
+
+**Adoption Terms:**
+- Display all terms
+- Edit button
+
+**Submission Checklist:**
+- Auto-checked items:
+  - ✓ All required fields completed
+  - ✓ Minimum photos uploaded
+  - ✓ Vaccination records provided
+  - ✓ Aggression history disclosed
+  - ✓ Story meets word count
+- Any incomplete items shown in red
+
+**Final Confirmation:**
+- Checkbox (required): "I confirm all information is accurate and complete"
+- Info box:
+  - "Your listing will be reviewed by our team within 24-48 hours"
+  - "You'll receive an email when it's approved or if changes are needed"
+
+**Buttons:**
+- "Submit for Review" (primary, disabled until checked)
+- "Back"
+- "Save Draft"
+
+**Success Modal:**
+- Checkmark animation
+- Title: "Listing Submitted!"
+- Message: "We're reviewing your listing and will email you within 48 hours"
+- Button: "View My Listings"
+- Button: "Back to Dashboard"
+
+---
+
+### 4.3 My Rehoming Listings Page (`/rehoming/my-listings`)
+
+**Layout:** List view with filters
+
+**Header:**
+- Title: "My Rehoming Listings"
+- Button: "Create New Listing" (primary, top right)
+
+**Filter Bar:**
+- Status tabs:
+  - All ([count])
+  - Active ([count])
+  - Pending Review ([count])
+  - On Hold ([count])
+  - Adopted ([count])
+  - Rejected ([count])
+- Sort dropdown: Newest / Oldest / Most Applications
+
+**Listing Cards (Vertical List):**
+
+**Each card contains:**
+
+**Left Section (Image):**
+- Pet photo (square thumbnail)
+
+**Middle Section (Details):**
+- Pet name (heading)
+- Species, breed, age (subheading)
+- Status badge (colored based on status)
+- Posted date
+- Stats row:
+  - Views: [number] (eye icon)
+  - Applications: [number] (folder icon)
+  - Messages: [number] (message icon)
+
+**Right Section (Actions):**
+- Button: "View Listing" (primary)
+- Button: "Edit" (secondary)
+- Dropdown menu (3 dots):
+  - Put On Hold
+  - Mark as Adopted
+  - Delete Listing
+
+**Empty State:**
+- Illustration: Empty box with pet paw
+- Text: "You haven't created any listings yet"
+- Button: "Create Your First Listing"
+
+---
+
+### 4.4 Listing Detail Page (Public View) (`/rehoming/listings/:id`)
+
+**Layout:** Full-width with sidebar
+
+**Main Content Area:**
+
+**Photo Gallery Section:**
+- Large image carousel (main display)
+- Thumbnail navigation below
+- Photo counter: "1 / 5"
+- Fullscreen button
+- If video available: Video thumbnail in gallery
+
+**Status Banner (if not active):**
+- Alert box: "This pet has been adopted" (green)
+- Or: "This listing is under review" (yellow)
+- Or: "This listing is on hold" (gray)
+
+**Pet Information Header:**
+- Pet name (large heading)
+- Species & breed (subheading)
+- Location: City, State (with distance from user)
+- Posted date (relative: "Posted 3 days ago")
+- View count (eye icon + number)
+
+**Quick Stats Bar:**
+- Age: [value]
+- Gender: [value with icon]
+- Weight: [value]
+- Energy Level: [visual bar 1-5]
+
+**About Section:**
+- Title: "[Pet Name]'s Story"
+- Full rehoming story text
+- "Read More" expansion if long
+
+**Behavioral Profile Section:**
+- Title: "Personality & Behavior"
+- Icon grid showing traits:
+  - Good with kids: ✓ (green) or ✗ (red)
+  - Good with dogs: ✓/Selective/✗
+  - Good with cats: ✓/✗
+  - House-trained: ✓/Mostly/✗
+  - Energy level: Visual indicator
+  - Exercise needs: Text description
+- If aggression disclosed:
+  - Alert box (yellow):
+    - "Important: Aggression History Disclosed"
+    - "View Details" expandable section
+
+**Medical History Section:**
+- Title: "Medical Information"
+- Grid layout:
+  - Spayed/Neutered: [status]
+  - Microchipped: [status + number]
+  - Vaccinations: [status]
+  - Medical Conditions: [list or "None"]
+  - Current Medications: [list or "None"]
+- Download vaccination records button (if available)
+- Veterinarian contact (if provided)
+
+**Adoption Terms Section:**
+- Title: "Adoption Details"
+- Adoption Fee: $[amount] (large, prominent)
+- Fee explanation text (if provided)
+- Included Items: List with checkmarks
+- Timeline: Ideal adoption date
+- Ideal Home: Description
+
+**Similar Pets Section (Bottom):**
+- Title: "Other Pets Looking for Homes"
+- Horizontal scroll of 4-6 pet cards
+- Each shows: Photo, name, species, location, fee
+
+---
+
+**Right Sidebar:**
+
+**Action Card (Sticky):**
+- Adoption Fee: $[amount] (large)
+- If logged in:
+  - Button: "Apply to Adopt" (primary, full width)
+  - Button: "Save Listing" (secondary, heart icon)
+  - Button: "Share" (secondary)
+- If not logged in:
+  - Button: "Log In to Apply" (primary)
+  - Text: "Create account to adopt"
+
+**Pet Owner Card:**
+- Owner photo (circular)
+- Owner name
+- Verification badges
+- Member since date
+- Response rate: "[percentage] responds within 24 hours"
+- Average rating: [stars] ([count] reviews)
+- Button: "View Profile"
+- Button: "Send Message"
+
+**Safety Tips Card:**
+- Icon: Shield
+- Title: "Safety Tips"
+- Bullet points:
+  - Meet in public places
+  - Bring a friend
+  - Trust your instincts
+  - Report suspicious behavior
+- Link: "Read full safety guidelines"
+
+**Report Listing:**
+- Link: "Report this listing" (small, bottom)
+
+---
+
+## BROWSE & SEARCH PAGES
+
+### 5.1 Browse Pets Page (`/adopt`)
+
+**Layout:** Full-width with filter sidebar
+
+**Page Header:**
+- Title: "Find Your Perfect Companion"
+- Subtitle: "Browse pets looking for loving homes"
+- Search bar (large, prominent):
+  - Placeholder: "Search by breed, name, or keyword..."
+  - Search icon button
+
+**Filter Sidebar (Left):**
+
+**Location Filter:**
+- Label: "Location"
+- Zip code input
+- Radius slider: 25mi / 50mi / 100mi / 200mi / Statewide
+- "Use my location" button
+
+**Species Filter:**
+- Label: "Type of Pet"
+- Checkboxes:
+  - Dogs ([count])
+  - Cats ([count])
+  - Rabbits ([count])
+  - Birds ([count])
+  - Other ([count])
+
+**Age Filter:**
+- Label: "Age"
+- Range slider: 0-15+ years
+- Quick select buttons: Puppy/Kitten, Young, Adult, Senior
+
+**Size Filter:**
+- Label: "Size"
+- Checkboxes:
+  - Extra Small (under 10 lbs)
+  - Small (10-25 lbs)
+  - Medium (25-50 lbs)
+  - Large (50-100 lbs)
+  - Extra Large (100+ lbs)
+
+**Personality Filter:**
+- Label: "Personality Traits"
+- Checkboxes:
+  - Good with kids
+  - Good with dogs
+  - Good with cats
+  - Low energy
+  - High energy
+  - House-trained
+
+**Adoption Fee Filter:**
+- Label: "Adoption Fee"
+- Range slider: $0 - $300
+
+**More Filters (Collapsible):**
+- Gender (male/female)
+- Special needs
+- Microchipped only
+- Up-to-date vaccinations
+
+**Action Buttons:**
+- "Apply Filters" (primary)
+- "Clear All" (text link)
+
+**Active Filters Display:**
+- Chips showing active filters above results
+- Each chip has X to remove
+
+---
+
+**Main Content Area:**
+
+**Results Header:**
+- Text: "[number] pets found"
+- Sort dropdown (right aligned):
+  - Newest First
+  - Closest to Me
+  - Lowest Fee
+  - Highest Fee
+  - Most Urgent
+
+**View Toggle:**
+- Grid view icon (default)
+- List view icon
+
+**Pet Cards Grid (Default 3 columns):**
+
+**Each card contains:**
+- Pet photo (fills top half)
+- Save button (heart icon, top right corner)
+- If urgent: "Urgent" badge overlay
+- Pet name (heading)
+- Species & breed (subheading)
+- Location (city + distance from user)
+- Brief description (first 100 chars)
+- Icon bar showing:
+  - Age (calendar icon)
+  - Gender (gender icon)
+  - Size (ruler icon)
+- Trait badges (small):
+  - "Good with kids"
+  - "House-trained"
+  - etc. (max 3 shown)
+- Adoption Fee: $[amount] (prominent)
+- "View Details" button (primary)
+
+**Load More:**
+- Button: "Load More Pets" (centered)
+- Or: Infinite scroll
+
+**Empty State:**
+- Illustration: Searching dog with magnifying glass
+- Text: "No pets match your search"
+- Suggestions:
+  - Try different filters
+  - Expand your search radius
+  - Remove some criteria
+- Button: "Clear Filters"
+
+---
+
+### 5.2 Search Results Page (`/search?q=golden+retriever`)
+
+**Layout:** Similar to browse page
+
+**Search Header:**
+- Search results for: "[query]" ([count] results)
+- Search bar pre-filled with query
+- Edit search button
+
+**Suggested Searches (if few results):**
+- "Did you mean: [suggestion]?"
+- Related search links
+
+**Rest of page:** Same as Browse Pets Page
+
+---
+
+## APPLICATION PAGES
+
+### 6.1 Adopter Profile Setup (`/adopter-profile`)
+
+**Layout:** Multi-step form
+
+**Page Header:**
+- Title: "Create Your Adopter Profile"
+- Subtitle: "Complete your profile to apply for pet adoptions"
+- Progress indicator: Step 1/5
+
+---
+
+**Step 1: Housing Information**
+
+**Form Fields:**
+
+**Housing Type:**
+- Dropdown:
+  - Single-family house
+  - Apartment
+  - Condo
+  - Townhouse
+  - Other
+
+**Ownership:**
+- Radio buttons:
+  - I own my home
+  - I rent
+- If "I rent": Additional fields appear:
+  - Checkbox: "I have landlord approval for pets"
+  - File upload: "Upload landlord approval letter" (optional)
+
+**Yard:**
+- Radio buttons:
+  - Yes - Fully fenced
+  - Yes - Partially fenced
+  - Yes - Unfenced
+  - No yard
+
+**Buttons:**
+- "Next: Household Info"
+- "Save & Exit"
+
+---
+
+**Step 2: Household Information**
+
+**Form Fields:**
+
+**Household Members:**
+- Number of adults: Number input (1-10)
+- Number of children: Number input (0-10)
+- If children > 0: "Children's ages" text input
+  - Placeholder: "e.g., 3, 7, 12"
+
+**Current Pets:**
+- Title: "Do you currently have pets?"
+- Radio: Yes / No
+- If "Yes": Repeatable form section
+  - Button: "Add a pet"
+  - Each pet entry:
+    - Species: Dropdown
+    - Age: Number input
+    - Spayed/Neutered: Checkbox
+    - Remove button
+
+**Buttons:**
+- "Next: Experience"
+- "Back"
+- "Save & Exit"
+
+---
+
+**Step 3: Pet Experience**
+
+**Form Fields:**
+
+**Current Pet Owner:**
+- Radio buttons: Yes / No
+
+**Previous Pet Owner:**
+- Radio buttons: Yes / No
+- If "Yes": Text area
+  - "Tell us about your previous pets and what happened to them"
+  - Placeholder: "This helps us understand your experience..."
+
+**Experience with Species:**
+- Label: "How experienced are you with [applying for species]?"
+- Slider (1-5):
+  - First time owner → Very experienced
+
+**Surrender History:**
+- Question: "Have you ever surrendered a pet to a shelter or rescue?"
+- Radio buttons: Yes / No
+- If "Yes": Required text area
+  - "Please explain the circumstances"
+
+**Buttons:**
+- "Next: Lifestyle"
+- "Back"
+- "Save & Exit"
+
+---
+
+**Step 4: Lifestyle Information**
+
+**Form Fields:**
+
+**Work Schedule:**
+- Label: "How many hours per day is your home empty?"
+- Number input (0-24)
+- Helper text: "Include work and regular commitments"
+
+**Activity Level:**
+- Label: "How would you describe your activity level?"
+- Slider (1-5):
+  - Very inactive → Very active
+- Icons showing activity levels
+
+**Exercise Commitment:**
+- Label: "How many hours per day can you dedicate to pet exercise?"
+- Number input (0-8)
+- Dropdown: Walking / Running / Playing / All
+
+**Travel Frequency:**
+- Label: "How often do you travel?"
+- Dropdown:
+  - Rarely (a few times per year)
+  - Monthly
+  - Weekly
+  - I work remotely and travel often
+
+**Buttons:**
+- "Next: References"
+- "Back"
+- "Save & Exit"
+
+---
+
+**Step 5: References & Statement**
+
+**Form Fields:**
+
+**Personal References:**
+- Instructions: "Provide 2 personal references (not family)"
+
+**Reference 1:**
+- Full Name: Text input
+- Relationship: Text input (friend, neighbor, colleague)
+- Email: Email input
+- Phone: Phone input
+
+**Reference 2:**
+- Same fields as Reference 1
+
+**Veterinarian Reference:**
+- Instructions: "If you currently or previously owned pets"
+- Clinic Name: Text input
+- Veterinarian Name: Text input
+- Phone: Phone input
+
+**Why Adopt Statement:**
+- Label: "Why do you want to adopt a pet?"
+- Text editor
+- Character counter: "Minimum 500 characters"
+- Placeholder: "Tell us about your motivations, lifestyle, what you're looking for in a pet, and how you'll provide a great home..."
+
+**Buttons:**
+- "Complete Profile" (primary)
+- "Back"
+- "Save & Exit"
+
+**Success:**
+- Redirect to apply for listing page
+- Toast: "Adopter profile created! You can now apply for pets."
+
+---
+
+### 6.2 View/Edit Adopter Profile (`/adopter-profile/view`)
+
+**Layout:** Single page with edit mode
+
+**Header:**
+- Title: "My Adopter Profile"
+- Button: "Edit Profile" (toggles edit mode)
+
+**Display Mode:**
+- All sections displayed as read-only cards:
+  - Housing Information
+  - Household
+  - Pet Experience
+  - Lifestyle
+  - References
+  - Why Adopt Statement
+- Each section has edit icon
+
+**Readiness Score Card:**
+- Large circular progress indicator
+- Score: [percentage]%
+- Label: "Adopter Readiness Score"
+- Status badge:
+  - 80-100%: "Ready" (green)
+  - 60-79%: "Good" (yellow)
+  - 0-59%: "Needs Improvement" (orange)
+- Explanation: "This score helps pet owners evaluate applications"
+- Breakdown (collapsible):
+  - Housing suitability: [score]
+  - Experience level: [score]
+  - Lifestyle match: [score]
+  - References: [score]
+
+---
+
+### 6.3 Submit Application Page (`/rehoming/listings/:id/apply`)
+
+**Layout:** Single-column form with listing sidebar
+
+**Left Main Content:**
+
+**Page Header:**
+- Title: "Apply to Adopt [Pet Name]"
+- Subtitle: "Complete your application"
+
+**Adopter Profile Review:**
+- Card: "Your Adopter Profile"
+- Readiness score badge
+- Quick summary of profile
+- Button: "Review/Edit Profile" (opens modal or navigates)
+
+**Custom Questions (if any from pet owner):**
+- Section: "Answer These Questions"
+- Display each question with text area
+
+**Personalized Message:**
+- Label: "Write a message to [Owner Name]"
+- Instructions displayed:
+  - Why are you interested in this specific pet?
+  - How will you meet their needs?
+  - What relevant experience do you have?
+- Text editor
+- Character counter: "Minimum 500 characters required"
+
+**Application Checklist:**
+- Auto-checked items:
+  - ✓ Adopter profile complete
+  - ✓ Readiness score: [percentage]%
+  - ✓ References provided
+  - ✓ Message meets word count
+
+**Commitment Statement:**
+- Checkbox (required): "I understand this application is not a guarantee of adoption and I may be asked to provide additional information or meet certain requirements"
+- Checkbox (required): "I agree to meet in person before finalizing any adoption"
+- Checkbox (required): "I confirm all information in my profile is accurate"
+
+**Buttons:**
+- "Submit Application" (primary, disabled until all required)
+- "Cancel" (secondary)
+
+**Right Sidebar:**
+
+**Listing Summary Card (Sticky):**
+- Pet photo
+- Pet name
+- Species, breed, age
+- Owner name & photo
+- Adoption fee
+- Key traits (bullets)
+- Link: "View Full Listing"
+
+**Application Tips:**
+- Icon: Lightbulb
+- Tips:
+  - Be specific about why this pet is right for you
+  - Mention how you'll handle challenges
+  - Show you've thought about long-term care
+  - Be honest about your situation
+
+**Success Modal:**
+- Checkmark animation
+- Title: "Application Submitted!"
+- Message: "[Owner Name] will review your application and respond soon. You can message them directly while you wait."
+- Buttons:
+  - "Send Message" (primary)
+  - "View My Applications" (secondary)
+  - "Continue Browsing" (text link)
+
+---
+
+### 6.4 My Applications Page (`/applications`)
+
+**Layout:** List view with tabs
+
+**Header:**
+- Title: "My Adoption Applications"
+- Subtitle: "Track the status of your applications"
+
+**Status Tabs:**
+- All ([count])
+- Pending Review ([count])
+- Info Requested ([count])
+- Approved for Meet & Greet ([count])
+- Rejected ([count])
+
+**Application Cards (Vertical List):**
+
+**Each card contains:**
+
+**Left Section:**
+- Pet photo (square)
+
+**Middle Section:**
+- Pet name (heading)
+- Owner name (subheading)
+- Applied date (relative)
+- Status badge (colored):
+  - Pending Review (yellow)
+  - Info Requested (blue)
+  - Approved (green)
+  - Rejected (red)
+- If "Info Requested": Unread message indicator
+
+**Right Section:**
+- Button: "View Application" (primary)
+- If approved: Owner contact info revealed
+  - Phone: [number]
+  - Email: [email]
+  - Button: "Message Owner"
+
+**Empty State:**
+- Illustration: Dog with application form
+- Text: "You haven't submitted any applications yet"
+- Button: "Browse Pets to Adopt"
+
+---
+
+### 6.5 Application Detail View (Applicant) (`/applications/:id`)
+
+**Layout:** Single column with sidebar
+
+**Main Content:**
+
+**Application Header:**
+- Status badge (large)
+- Application date
+- Last updated date
+
+**Pet & Owner Information:**
+- Pet photo & details
+- Owner info card
+- Link: "View Full Listing"
+
+**Your Application:**
+- Section: "Your Profile Summary"
+  - Readiness score
+  - Housing info summary
+  - Lifestyle summary
+- Section: "Your Message"
+  - Full message text
+- Section: "Custom Answers" (if applicable)
+  - Questions and your answers
+
+**Status Updates Timeline:**
+- Visual timeline showing:
+  - Application submitted (date/time)
+  - Owner viewed (date/time) - if tracked
+  - Status changes (date/time)
+  - Messages exchanged (count)
+
+**Action Buttons (Based on Status):**
+- If "Info Requested":
+  - Button: "Reply to Owner" (opens messaging)
+- If "Approved":
+  - Button: "Contact Owner" (opens messaging)
+  - Display: Owner's phone and email
+  - Button: "Schedule Meet & Greet" (future feature)
+- If "Rejected":
+  - Display rejection reason (if provided)
+  - Text: "Keep searching - your perfect pet is out there!"
+  - Button: "Browse More Pets"
+
+**Sidebar:**
+
+**Message Thread:**
+- Title: "Messages with Owner"
+- Mini conversation view
+- Shows last 3 messages
+- Button: "View All Messages"
+- Quick reply input
+
+---
+
+### 6.6 Review Applications Page (Pet Owner) (`/rehoming/listings/:id/applications`)
+
+**Layout:** List view with filters
+
+**Header:**
+- Back link: "← Back to Listing"
+- Title: "Applications for [Pet Name]"
+- Stats: "[number] total applications"
+
+**Filter Bar:**
+- Status tabs:
+  - All ([count])
+  - New ([count])
+  - Reviewed ([count])
+  - Approved ([count])
+  - Rejected ([count])
+- Sort: Newest / Oldest / Highest Score
+
+**Application Cards:**
+
+**Each card shows:**
+
+**Header Row:**
+- Applicant photo & name
+- Readiness score badge (colored):
+  - 80-100%: Green "Ready"
+  - 60-79%: Yellow "Good"
+  - <60%: Orange "Needs Work"
+- Application date
+- Status badge
+
+**Summary Row:**
+- Key info bullets:
+  - Housing: [type]
+  - Experience: [level]
+  - Current pets: [yes/no]
+  - Children: [yes/no, ages if applicable]
+
+**Message Preview:**
+- First 150 characters of applicant message
+- "Read more" link
+
+**Action Buttons:**
+- "View Full Application" (primary)
+- "Quick Reject" (icon button)
+
+**Empty State:**
+- Illustration: Waiting mailbox
+- Text: "No applications yet"
+- Subtitle: "We'll notify you when someone applies"
+
+---
+
+### 6.7 Application Detail View (Pet Owner) (`/applications/:id/review`)
+
+**Layout:** Full-width with action sidebar
+
+**Main Content:**
+
+**Applicant Header:**
+- Large applicant photo
+- Name (heading)
+- Member since date
+- Verification badges
+- Button: "View Full Profile"
+- Readiness score (large display)
+
+**Adopter Profile Sections:**
+
+**Housing Information:**
+- Housing type, ownership, yard details
+- If rented: landlord approval status
+- Visual icons for key info
+
+**Household:**
+- Adults, children (with ages)
+- Current pets list (if any)
+
+**Experience:**
+- Experience level indicator
+- Previous pet history
+- Surrender history (if disclosed)
+
+**Lifestyle:**
+- Work schedule
+- Activity level
+- Exercise commitment
+- Travel frequency
+- Visual gauges/charts
+
+**References:**
+- List of references with contact info
+- Veterinarian reference (if provided)
+
+**Application Message:**
+- Section: "Why [Applicant] Wants to Adopt [Pet Name]"
+- Full message text
+- If custom questions: answers displayed
+
+**Right Sidebar (Sticky):**
+
+**Quick Actions Card:**
+
+**Button: "Approve for Meet & Greet" (primary)**
+- Info: "This will share your contact info with the applicant"
+
+**Button: "Request More Information" (secondary)**
+- Opens text field to write questions
+- Sends via messaging system
+
+**Button: "Reject Application" (danger/outline)**
+- Opens rejection modal
+
+**Application Info:**
+- Applied: [date]
+- Status: [current]
+- Response time: "Reply within 48 hours recommended"
+
+**Safety Reminder:**
+- Icon: Shield
+- Text: "Always meet in public places first"
+- Link: "Safety guidelines"
+
+---
+
+**Rejection Modal:**
+- Title: "Reject Application"
+- Subtitle: "Help the applicant understand your decision"
+- Reason dropdown (required):
+  - Not a good match for pet's needs
+  - Housing concerns
+  - Experience level
+  - Reference issues
+  - Found a better match
+  - Other
+- Additional explanation (optional text area)
+- Checkbox: "Send compassionate rejection message"
+- Buttons:
+  - "Confirm Rejection" (danger)
+  - "Cancel" (secondary)
+
+**Approval Confirmation Modal:**
+- Title: "Approve Application"
+- Message: "Your contact information will be shared with [Applicant Name]"
+- Your contact info displayed:
+  - Phone: [number]
+  - Email: [email]
+- Next steps shown:
+  - Arrange meet & greet
+  - Discuss trial period
+  - Complete adoption agreement
+- Buttons:
+  - "Confirm Approval" (primary)
+  - "Cancel" (secondary)
+
+---
+
+## MESSAGING PAGES
+
+### 7.1 Messages Page (`/messages`)
+
+**Layout:** Split view (conversation list + chat)
+
+**Left Panel: Conversation List**
+
+**Header:**
+- Title: "Messages"
+- New message button (compose icon)
+- Search conversations input
+  - Placeholder: "Search messages..."
+
+**Filter Tabs:**
+- All ([count with unread badge])
+- Unread ([count])
+- Archived ([count])
+
+**Conversation Items:**
+- Each conversation shows:
+  - Other participant photo (circular)
+  - Online indicator (green dot if active)
+  - Participant name
+  - Last message preview (truncated)
+  - Timestamp (relative: "2h ago")
+  - Unread badge (if applicable)
+  - Pet context (small text): "About [Pet Name]"
+- Hover effect: Light background
+- Selected conversation: Highlighted background
+
+**Empty State:**
+- Icon: Empty inbox
+- Text: "No messages yet"
+- Subtitle: "Messages from adoption applications will appear here"
+
+---
+
+**Right Panel: Conversation View**
+
+**Conversation Header:**
+- Back button (mobile only)
+- Participant photo & name
+- Online status
+- Info button (opens participant profile modal)
+- More menu (3 dots):
+  - Archive conversation
+  - Report user
+  - Block user
+
+**Message Area:**
+- Scrollable message thread
+- Date separators: "Today", "Yesterday", "[Date]"
+- Messages grouped by sender:
+  - Other person's messages: Left aligned, gray bubble
+  - Your messages: Right aligned, blue bubble
+- Each message shows:
+  - Message text
+  - If image: Display image inline (click to enlarge)
+  - Timestamp (on hover or for last message)
+  - Read status (for your messages): "Seen" or "Delivered"
+
+**Load More:**
+- "Load earlier messages" button at top (if applicable)
+
+**Message Input Area (Bottom, Fixed):**
+- Text area:
+  - Placeholder: "Type your message..."
+  - Auto-expand up to 5 lines
+  - Character counter: "[count]/5000"
+- Buttons row:
+  - Attach image button (paperclip icon)
+  - Emoji button (smile icon) - future
+  - Send button (paper plane icon, blue, primary)
+    - Disabled if empty
+    - Shows loading spinner when sending
+
+**Image Attachment Preview:**
+- If image attached: Preview thumbnail appears above input
+- Remove button (X icon)
+
+**System Messages:**
+- Centered, gray background:
+  - "Application approved - you can now exchange contact info"
+  - "[User] joined [Date]"
+
+**Empty Conversation State:**
+- Illustration: Chat bubbles
+- Text: "Start the conversation"
+- Subtitle: "Say hello to [Name]!"
+
+---
+
+### 7.2 New Message Modal (`/messages/new`)
+
+**Modal Layout:**
+
+**Header:**
+- Title: "New Message"
+- Close button (X)
+
+**Form:**
+- To: Search/select user
+  - Search input with autocomplete
+  - Shows: Users you've interacted with (applied to/from)
+  - Each result: Photo, name, context ("Applied to adopt [Pet]")
+- Subject (optional): Text input
+  - Placeholder: "What's this about?"
+- Message: Text area
+  - Placeholder: "Write your message..."
+  - Character counter
+
+**Buttons:**
+- "Send Message" (primary)
+- "Cancel" (secondary)
+
+---
+
+## SERVICE PROVIDER PAGES
+
+### 8.1 Browse Foster Care Providers (`/services/foster`)
+
+**Layout:** Similar to browse pets, with map option
+
+**Page Header:**
+- Title: "Find Foster Care Providers"
+- Subtitle: "Temporary care for your pet when you need it"
+- View toggle: List / Map
+
+**Filter Sidebar:**
+
+**Location:**
+- Zip code input
+- Radius: 10mi / 25mi / 50mi / 100mi
+- "Use my location" button
+
+**Species Accepted:**
+- Checkboxes: Dogs, Cats, Small Animals
+
+**Availability:**
+- Radio buttons:
+  - Available now
+  - Limited availability
+  - All
+
+**Price Range:**
+- Slider: $0 - $200 per day
+
+**Environment:**
+- Checkboxes:
+  - Has fenced yard
+  - No other pets
+  - Good with children
+
+**Sort:**
+- Dropdown: Distance / Price / Rating
+
+---
+
+**Main Content (List View):**
+
+**Provider Cards:**
+
+**Each card shows:**
+- Provider photo (left)
+- Business name (heading)
+- Verification badge (if verified)
+- Star rating ([stars] - [count] reviews)
+- Location + distance from user
+- Species accepted icons
+- Availability badge (Available/Limited/Full)
+- Key features (bullets):
+  - Fenced yard
+  - 24/7 care
+  - Medication administration
+- Price: "$[amount]/day" (prominent)
+- Buttons:
+  - "View Profile" (primary)
+  - "Contact Provider" (secondary)
+
+---
+
+**Main Content (Map View):**
+- Full map showing provider locations
+- Markers for each provider
+- Click marker: Info popup
+  - Provider name
+  - Rating
+  - Price
+  - "View Profile" link
+- List sidebar (scrollable) showing all providers
+
+---
+
+### 8.2 Foster Provider Profile Page (`/services/foster/:id`)
+
+**Layout:** Full-width with booking sidebar
+
+**Hero Section:**
+- Photo gallery (large carousel)
+- If video: Video player option
+- Provider name (large heading)
+- Business type badge
+- Location
+- Star rating & review count
+- Verification badge
+
+**About Section:**
+- Full business description
+- "About Our Services" heading
+- Description text
+
+**Services & Amenities:**
+- Section: "What We Offer"
+- Grid of service badges:
+  - Species accepted
+  - Indoor/outdoor space
+  - Yard details
+  - Daily exercise
+  - Medication administration
+  - Special diet accommodation
+  - Grooming
+  - Photos/updates provided
+
+**Environment Details:**
+- Section: "Our Environment"
+- Subsections:
+  - Facility type (home-based/facility)
+  - Space details
+  - Other pets in home (if any)
+  - Children in household (if any)
+- Photo gallery of facility
+
+**Care Standards:**
+- Section: "Daily Care Routine"
+- Subsections:
+  - Exercise routine
+  - Feeding schedule
+  - Medication procedures
+  - Special accommodations
+
+**Pricing:**
+- Section: "Pricing"
+- Daily rate: $[amount]
+- Weekly discount: [percentage]% off
+- Monthly rate: $[amount]
+- Notes on what's included
+
+**Location:**
+- Section: "Location"
+- Map showing approximate area
+- Address (city/state, full address hidden)
+- "Get Directions" button (after booking)
+
+**Reviews Section:**
+- Average rating (large)
+- Rating breakdown (bar chart)
+- Filter: All / Recent / Highest / Lowest
+- Review cards (list)
+- "Write a Review" button (if used service)
+
+---
+
+**Right Sidebar (Sticky):**
+
+**Booking Card:**
+- Availability badge
+- Current capacity: "[number] spots available"
+- Price: "$[amount]/day" (large)
+- Discounts noted
+- Button: "Contact Provider" (primary)
+- Button: "Save" (heart icon, secondary)
+- Info: "Response time: Within [hours]"
+
+**Quick Info:**
+- License #: [number]
+- Insurance: [status]
+- Years in business: [number]
+- Success rate: [percentage]
+
+**Share:**
+- Share buttons (social media)
+
+---
+
+### 8.3 Browse Veterinary Clinics (`/services/vet`)
+
+**Layout:** Similar to foster browse
+
+**Filter Sidebar:**
+
+**Location:**
+- Zip code + radius
+
+**Clinic Type:**
+- Checkboxes:
+  - General practice
+  - Emergency care
+  - Specialty
+  - Mobile vet
+
+**Services:**
+- Checkboxes:
+  - Wellness exams
+  - Vaccinations
+  - Surgery
+  - Dental
+  - Emergency care
+  - Boarding
+  - Grooming
+
+**Species:**
+- Dogs, Cats, Exotic animals
+
+**Availability:**
+- Checkbox: "Open now"
+- Checkbox: "Weekend hours"
+
+**Sort:** Distance / Rating / Price
+
+---
+
+**Clinic Cards:**
+- Similar to foster provider cards
+- Shows: Name, rating, distance, services, hours
+- "Open Now" badge if applicable
+- Price indication ($$ scale)
+- Buttons: "View Profile" / "Call Now"
+
+---
+
+### 8.4 Vet Clinic Profile Page (`/services/vet/:id`)
+
+**Layout:** Similar to foster profile
+
+**Key Sections:**
+
+**Hours of Operation:**
+- Table showing daily hours
+- Current status: "Open Now" or "Opens at [time]"
+
+**Services Offered:**
+- List with icons
+- Each service may have price indication
+
+**Amenities:**
+- Checkboxes displayed:
+  - Separate cat area
+  - Parking available
+  - Wheelchair accessible
+  - On-site pharmacy
+  - Boarding available
+
+**Photo Gallery:**
+- Exterior, reception, exam rooms, etc.
+
+**Reviews:**
+- Similar to foster reviews
+- Categories: Communication, Cleanliness, Quality, Value
+
+**Sidebar:**
+- Phone number (call button)
+- Address
+- Hours today
+- "Get Directions" button
+- "Save Clinic" button
+- Share options
+
+---
+
+### 8.5 Leave Service Review Page (`/services/:id/review`)
+
+**Layout:** Single column form
+
+**Header:**
+- Back link
+- Title: "Review [Provider/Clinic Name]"
+- Subtitle: "Help others make informed decisions"
+
+**Form Fields:**
+
+**Overall Rating:**
+- Large star selector (1-5)
+- Required
+
+**Category Ratings:**
+- Each with star selector:
+  - Communication (1-5)
+  - Cleanliness (1-5)
+  - Quality of Care (1-5)
+  - Value for Money (1-5)
+
+**Written Review:**
+- Text editor
+- Character counter: "Minimum 200 characters"
+- Placeholder: "Share your experience..."
+
+**Photo Upload (Optional):**
+- Upload button: "Add a photo"
+- Preview thumbnail
+- Max 1 photo
+
+**Service Type:**
+- Dropdown: Foster Care / Veterinary Service
+
+**Would Recommend:**
+- Radio buttons: Yes / No
+
+**Buttons:**
+- "Submit Review" (primary)
+- "Cancel" (secondary)
+
+**Success:**
+- Redirect to provider profile
+- Toast: "Thank you for your review!"
+
+---
+
+## REVIEW PAGES
+
+### 9.1 Leave Adoption Review Page (`/adoptions/:id/review`)
+
+**Layout:** Single column form
+
+**Header:**
+- Title: "Review Your Adoption Experience"
+- Context: "Review for [Other Party Name]"
+- Subtitle: Reviewing as: Pet Owner / Adopter
+
+**Form Sections:**
+
+**If Reviewing as Pet Owner:**
+
+**Overall Rating:**
+- Star selector (1-5, large)
+
+**Category Ratings:**
+- Responsiveness (1-5 stars)
+- Preparation (1-5 stars)
+- Follow-through (1-5 stars)
+
+**Written Review:**
+- Label: "Tell us about your experience with [Adopter Name]"
+- Text editor (minimum 200 chars)
+- Prompts:
+  - How was the communication?
+  - How prepared were they?
+  - Would you recommend them?
+
+**If Reviewing as Adopter:**
+
+**Overall Rating:**
+- Star selector (1-5 stars)
+
+**Category Ratings:**
+- Honesty (1-5 stars) - "Pet description accuracy"
+- Communication (1-5 stars)
+- Pet Care Quality (1-5 stars)
+
+**Written Review:**
+- Label: "Tell us about your experience with [Owner Name]"
+- Text editor (minimum 200 chars)
+- Prompts:
+  - Was the pet accurately described?
+  - How was the communication?
+  - How well-cared for was the pet?
+
+**Common Fields:**
+
+**Would Recommend:**
+- Radio buttons: Yes / No
+
+**Privacy Notice:**
+- Info box: "Your review will be visible on [Name]'s profile. Your full name will be displayed as [First Name] [Last Initial]."
+
+**Buttons:**
+- "Submit Review" (primary)
+- "Skip for Now" (text link)
+
+**Success:**
+- Modal: "Thank you for your feedback!"
+- Button: "View [Name]'s Profile"
+- Button: "Back to Dashboard"
+
+---
+
+## ADMIN PANEL PAGES
+
+### 10.1 Admin Dashboard (`/admin`)
+
+**Layout:** Full-width dashboard with sidebar
+
+**Admin Sidebar:**
+- Dashboard (home icon)
+- Users (users icon)
+- Listings (list icon)
+- Reports (flag icon)
+- Verifications (shield icon)
+- Analytics (chart icon)
+- Settings (gear icon)
+
+---
+
+**Main Dashboard Content:**
+
+**Quick Stats Cards (Top Row):**
+- 4 cards in a row:
+  
+**Card 1: Users**
+- Icon: Users
+- Number: [total users]
+- Metric: "+[number] this month"
+- Arrow indicator (up/down)
+- Link: "View all users"
+
+**Card 2: Active Listings**
+- Icon: List
+- Number: [active listings]
+- Metric: "[number] pending review"
+- Link: "Review queue"
+
+**Card 3: Adoptions**
+- Icon: Heart
+- Number: [completed adoptions]
+- Metric: "[number] this month"
+- Link: "View details"
+
+**Card 4: Reports**
+- Icon: Flag
+- Number: [pending reports]
+- Metric: "[number] high priority"
+- Alert badge if > 0
+- Link: "Review reports"
+
+**Charts Section:**
+
+**Chart 1: User Growth (Line Chart)**
+- Title: "User Growth"
+- Time filter: Last 7 days / 30 days / 3 months / Year
+- X-axis: Time
+- Y-axis: Number of users
+- Line showing new registrations
+
+**Chart 2: Adoptions Per Month (Bar Chart)**
+- Title: "Monthly Adoptions"
+- Last 6 months
+- Bars for each month
+
+**Chart 3: Listings by Species (Pie Chart)**
+- Title: "Listings by Species"
+- Segments: Dogs, Cats, Other
+- Percentages displayed
+
+**Recent Activity Feed:**
+- Title: "Recent Activity"
+- List of latest actions:
+  - New user registrations
+  - Listings submitted
+  - Applications submitted
+  - Reports filed
+- Each item: Icon, description, timestamp
+- "View all activity" link
+
+**Pending Actions Widget:**
+- Title: "Requires Attention"
+- Checklist format:
+  - [number] listings to review
+  - [number] reports to investigate
+  - [number] verification requests
+- Each links to relevant section
+
+---
+
+### 10.2 Admin Users Page (`/admin/users`)
+
+**Layout:** Table view with filters
+
+**Header:**
+- Title: "User Management"
+- Search bar: "Search by name, email, username..."
+- Button: "Export Users" (CSV download)
+
+**Filter Bar:**
+- Role filter dropdown:
+  - All Users
+  - Pet Owners
+  - Service Providers
+  - Admins
+- Status dropdown:
+  - All Status
+  - Active
+  - Suspended
+  - Banned
+- Verification filter:
+  - All
+  - Email Verified
+  - Phone Verified
+  - ID Verified
+  - Pet Owner Verified
+- Sort: Newest / Oldest / Most Active
+
+**Users Table:**
+
+**Columns:**
+- Checkbox (for bulk actions)
+- User (photo + name + email)
+- Username
+- Role (badge)
+- Status (badge: Active/Suspended/Banned)
+- Verification badges (icons)
+- Join Date
+- Last Active
+- Actions (dropdown menu)
+
+**Action Dropdown for Each User:**
+- View Profile
+- Edit User
+- Send Warning Email
+- Suspend Account (temporary)
+- Ban Account (permanent)
+- Verify Identity
+- Verify Pet Owner
+- View Activity Log
+
+**Bulk Actions (Top):**
+- Select all checkbox
+- Bulk action dropdown:
+  - Send Email
+  - Suspend Selected
+  - Export Selected
+- Apply button
+
+**Pagination:**
+- Items per page: 20 / 50 / 100
+- Page numbers
+- Previous / Next buttons
+
+---
+
+### 10.3 Admin User Detail Page (`/admin/users/:id`)
+
+**Layout:** Tabbed view
+
+**Header:**
+- Back link: "← Back to Users"
+- User photo (large)
+- User name
+- Status badge
+- Action buttons:
+  - Edit User
+  - Send Warning
+  - Suspend
+  - Ban
+  - View Activity Log
+
+**Tabs:**
+- Profile
+- Verification
+- Listings
+- Applications
+- Reviews
+- Reports
+- Activity Log
+
+**Tab 1: Profile**
+- All user information displayed
+- Editable fields (admin can modify)
+- Save Changes button
+
+**Tab 2: Verification**
+- Verification status for each type
+- Upload documents view
+- ID document preview
+- Pet ownership documents preview
+- Approve/Reject buttons for each
+- Rejection reason field
+
+**Tab 3: Listings**
+- Table of all user's listings
+- Status, dates, applications count
+- Quick actions
+
+**Tab 4: Applications**
+- Table of all applications (submitted and received)
+- Status, dates
+- View details
+
+**Tab 5: Reviews**
+- Reviews given
+- Reviews received
+- Average ratings
+
+**Tab 6: Reports**
+- Reports filed by this user
+- Reports filed against this user
+- Status of each
+
+**Tab 7: Activity Log**
+- Chronological list of all actions:
+  - Logins
+  - Listings created/edited
+  - Applications submitted
+  - Messages sent
+  - Reports filed
+- Filterable by action type
+- Date range selector
+
+---
+
+### 10.4 Admin Listing Moderation Queue (`/admin/listings/pending`)
+
+**Layout:** List view
+
+**Header:**
+- Title: "Pending Listings - Moderation Queue"
+- Count: "[number] listings pending"
+- Sort: Oldest First / Newest First
+
+**Filter Bar:**
+- Species filter
+- Urgency filter
+- Automated checks status:
+  - All Passed
+  - Some Issues
+  - Major Issues
+
+**Listing Cards:**
+
+**Each card shows:**
+- Pet photo
+- Pet name, species, breed
+- Owner name + photo
+- Owner verification badges
+- Submitted date
+- Urgency level badge
+
+**Automated Checks Status:**
+- Checklist with green/red indicators:
+  - ✓ All required fields complete
+  - ✓ Photos meet quality (5+ uploaded)
+  - ✓ Vaccination records uploaded
+  - ✓ No contact info in text
+  - ✓ Adoption fee within limits ($0-300)
+  - ✓ Account verified
+  - ⚠ Aggression disclosed
+- Issues highlighted in red
+
+**Action Buttons:**
+- "Review Listing" (primary) - opens full view
+
+---
+
+### 10.5 Admin Listing Review Page (`/admin/listings/:id/review`)
+
+**Layout:** Full listing preview with admin controls
+
+**Left Main Content:**
+- Full listing display (as users see it)
+- All photos, video, details
+- Medical history
+- Behavioral profile
+- Rehoming story
+
+**Right Sidebar (Admin Controls):**
+
+**Automated Checks Card:**
+- All automated check results
+- Pass/fail for each
+- Details if failed
+
+**Red Flags Detection (If Any):**
+- Alert box showing:
+  - Multiple listings in short time
+  - Suspected breeding language
+  - Contradictory information
+  - Price anomalies
+  - Unusual contact patterns
+
+**Admin Actions Card:**
+
+**Approve Button (Green):**
+- "Approve Listing"
+- Confirmation: "This will make the listing public"
+- Sends approval email to owner
+
+**Request Changes Button (Yellow):**
+- "Request Changes"
+- Opens text area for feedback
+- Checkboxes for specific issues:
+  - Photos need improvement
+  - Story needs more detail
+  - Medical info incomplete
+  - Behavioral info unclear
+  - Vaccination records needed
+  - Other (specify)
+- Additional notes field
+- Send button
+- Sets status to DRAFT
+- Sends email with required changes
+
+**Reject Button (Red):**
+- "Reject Listing"
+- Opens modal with reason dropdown:
+  - Violation of ToS
+  - Suspected breeding/selling
+  - Insufficient information
+  - Animal welfare concerns
+  - Duplicate listing
+  - Other
+- Required explanation text field
+- Confirm button
+- Sets status to REJECTED
+- Sends rejection email
+
+**Admin Notes:**
+- Private text area
+- Only visible to admins
+- Save notes button
+- Shows history of all admin notes
+
+**Previous Actions Log:**
+- Timeline of moderation actions
+- Who did what, when
+
+---
+
+### 10.6 Admin Reports Queue (`/admin/reports`)
+
+**Layout:** List view with priority indicators
+
+**Header:**
+- Title: "User Reports"
+- Filter tabs:
+  - All ([count])
+  - Pending ([count])
+  - Under Review ([count])
+  - Resolved ([count])
+
+**Priority Filter:**
+- High (animal welfare) - red badge
+- Medium (harassment) - yellow badge
+- Low (spam) - gray badge
+
+**Report Type Filter:**
+- All Types
+- Spam
+- Harassment
+- Inappropriate Content
+- Animal Welfare Concern
+- Misrepresentation
+
+**Reports Table:**
+
+**Columns:**
+- Priority (colored dot)
+- Report Type
+- Reported User/Content
+- Reporter
+- Submitted Date
+- Status
+- Assigned To (admin)
+- Actions
+
+**Each Row:**
+- Click to expand details
+- Shows full report description
+- Link to reported content
+- Quick actions: Assign to Me / View / Resolve
+
+---
+
+### 10.7 Admin Report Detail Page (`/admin/reports/:id`)
+
+**Layout:** Split view
+
+**Left Panel:**
+
+**Report Information:**
+- Report type badge
+- Priority badge
+- Submitted date
+- Reporter info:
+  - Name, photo
+  - Profile link
+  - Previous reports filed (count)
+
+**Report Details:**
+- Full description text
+- Evidence links/screenshots
+
+**Reported Content Preview:**
+- If profile: User profile card
+- If listing: Listing preview
+- If message: Message thread preview
+- If post: Post preview
+- Direct link to view full content
+
+**Report History:**
+- Previous reports about this user/content
+- Similar reports
+- Patterns identified
+
+**Right Panel:**
+
+**Investigation Actions:**
+
+**Status Dropdown:**
+- Pending
+- Under Review
+- Action Taken
+- Dismissed
+
+**Assign To:**
+- Dropdown of admin users
+- "Assign to Me" button
+
+**Contact Reporter:**
+- Button: "Request More Info"
+- Opens message form
+- Send to reporter
+
+**Actions on Reported User:**
+- Button: "View User Profile"
+- Button: "Send Warning Email"
+- Button: "Suspend User" (temporary)
+- Button: "Ban User" (permanent)
+- Duration selector (for suspend)
+- Reason field (required)
+
+**Actions on Content:**
+- Button: "Remove Content"
+- Reason field
+- Notify user checkbox
+
+**Resolution:**
+- Text area: "Admin Notes"
+- Resolution action dropdown:
+  - No action needed
+  - Warning sent
+  - Content removed
+  - User suspended
+  - User banned
+- Button: "Mark as Resolved"
+
+**Activity Log:**
+- All actions taken on this report
+- Admin user, action, timestamp
+
+---
+
+### 10.8 Admin Analytics Page (`/admin/analytics`)
+
+**Layout:** Dashboard with multiple charts
+
+**Time Range Selector (Top):**
+- Buttons: 7 days / 30 days / 3 months / 6 months / 1 year / Custom
+
+**Metrics Grid:**
+
+**Row 1: Key Metrics (4 Cards)**
+- Total Users (with growth %)
+- Active Listings (with change)
+- Completed Adoptions (with rate)
+- Revenue (future - if fees implemented)
+
+**Row 2: User Analytics**
+
+**Chart: User Registrations Over Time**
+- Line chart
+- Daily/weekly/monthly aggregation
+- Filters by user role
+
+**Chart: User Retention**
+- Cohort analysis chart
+- Shows retention by signup month
+
+**Chart: User Activity**
+- Stacked area chart showing:
+  - Daily active users
+  - Weekly active users
+  - Monthly active users
+
+**Row 3: Listing Analytics**
+
+**Chart: Listings Created vs Adopted**
+- Dual line chart
+- Shows completion rate trend
+
+**Chart: Average Time to Adoption**
+- Line chart showing days
+- By species comparison
+
+**Chart: Listing Status Distribution**
+- Stacked bar chart:
+  - Active
+  - Pending
+  - Adopted
+  - Expired
+
+**Row 4: Application Analytics**
+
+**Chart: Application Conversion Rate**
+- Funnel chart:
+  - Applications submitted
+  - Applications approved
+  - Adoptions completed
+
+**Chart: Applications by Status**
+- Pie chart
+
+**Row 5: Geographic Data**
+
+**Map: Users by Location**
+- Heat map showing user density
+
+**Chart: Top Cities**
+- Bar chart of top 10 cities
+
+**Row 6: Engagement Metrics**
+
+**Chart: Messages Sent Over Time**
+- Line chart
+
+**Chart: Reviews Posted**
+- Line chart
+
+**Chart: Average Response Time**
+- Line chart (hours)
+
+**Export Options:**
+- Button: "Export Report" (PDF/CSV)
+- Date range selector
+- Metrics selector (checkboxes)
+
+---
+
+### 10.9 Admin Settings Page (`/admin/settings`)
+
+**Layout:** Single column with sections
+
+**Section 1: Platform Settings**
+
+**Adoption Fee Limits:**
+- Max adoption fee: Number input (default: $300)
+- Save button
+
+**Listing Approval:**
+- Auto-approve toggle: On/Off
+- If off: All listings require manual review
+
+**User Verification:**
+- Require email verification: Toggle
+- Require phone verification: Toggle
+- Manual ID verification: Toggle
+
+**Section 2: Email Templates**
+
+**Template List:**
+- Welcome email
+- Email verification
+- Listing approved
+- Listing rejected
+- Application received
+- Application approved
+- Application rejected
+- Each has "Edit" button
+
+**Template Editor (Modal):**
+- Subject line
+- Email body (rich text editor)
+- Variables available: {{user_name}}, {{listing_name}}, etc.
+- Preview button
+- Save button
+
+**Section 3: Automated Checks**
+
+**Photo Quality Check:**
+- Minimum photos required: Number input
+- Check resolution: Toggle
+- Check for clarity: Toggle
+
+**Content Moderation:**
+- Check for contact info: Toggle
+- Check for profanity: Toggle
+- Flag suspicious patterns: Toggle
+
+**Section 4: Safety & Security**
+
+**Rate Limiting:**
+- Max API requests per minute: Number
+- Max messages per hour: Number
+
+**Account Security:**
+- Password minimum length: Number
+- Require strong password: Toggle
+- Two-factor authentication available: Toggle
+
+**Section 5: Admin Users**
+
+**Admin List Table:**
+- Name, Email, Role, Last Active
+- Add New Admin button
+- Remove Admin button
+
+---
+
+## LEGAL & STATIC PAGES
+
+### 11.1 Terms of Service Page (`/terms`)
+
+**Layout:** Single column article
+
+**Header:**
+- Title: "Terms of Service"
+- Last updated: [Date]
+- Button: "Download PDF"
+
+**Table of Contents (Sidebar):**
+- Clickable links to sections
+- Sticky on scroll
+
+**Content Sections:**
+1. Acceptance of Terms
+2. User Accounts and Registration
+3. User Responsibilities
+4. Rehoming Guidelines
+5. Prohibited Activities
+6. Content Ownership and License
+7. Pet Adoption Process
+8. Payment Terms (if applicable)
+9. Liability and Disclaimers
+10. Dispute Resolution
+11. Termination Policy
+12. Changes to Terms
+13. Contact Information
+
+**Each section:**
+- Heading (H2)
+- Body text
+- Sub-sections if needed
+- Clear, readable typography
+
+**Footer:**
+- "By using PetCircle, you agree to these terms"
+- Link: "Contact us with questions"
+
+---
+
+### 11.2 Privacy Policy Page (`/privacy`)
+
+**Layout:** Similar to Terms of Service
+
+**Header:**
+- Title: "Privacy Policy"
+- Last updated: [Date]
+- Button: "Download PDF"
+
+**Table of Contents**
+
+**Content Sections:**
+1. Information We Collect
+   - Account information
+   - Pet information
+   - Usage data
+   - Location data
+   - Communications
+2. How We Use Your Information
+3. Information Sharing
+4. Data Security
+5. Your Rights
+   - Access your data
+   - Delete your data
+   - Export your data
+   - Opt-out options
+6. Cookies and Tracking
+7. Children's Privain cy
+8. International Users
+9. Changes to Privacy Policy
+10. Contact Us
+
+**Interactive Elements:**
+- Expandable sections
+- "Your Privacy Rights" callout box
+
+---
+
+### 11.3 About Us Page (`/about`)
+
+**Layout:** Marketing-style page
+
+**Hero Section:**
+- Large heading: "About PetCircle"
+- Subheading: "Connecting pets with loving homes"
+- Hero image: Happy adopted pets with families
+
+**Mission Section:**
+- Heading: "Our Mission"
+- Text explaining mission
+- Icon graphics
+
+**How It Works Section:**
+- Heading: "How PetCircle Works"
+- 3-step process:
+  - Step 1: Create a profile (icon + description)
+  - Step 2: Connect with the right match (icon + description)
+  - Step 3: Complete the adoption (icon + description)
+
+**Our Values Section:**
+- Grid of value cards:
+  - Responsible Rehoming
+  - Transparency
+  - Animal Welfare
+  - Community Support
+- Each with icon and description
+
+**Team Section (Optional):**
+- Photos and bios of founders/team
+
+**Statistics Section:**
+- Large numbers:
+  - [number] Pets Rehomed
+  - [number] Happy Families
+  - [number] Partner Services
+
+**CTA Section:**
+- "Ready to make a difference?"
+- Button: "Get Started"
+- Button: "Browse Pets"
+
+---
+
+### 11.4 How It Works Page (`/how-it-works`)
+
+**Layout:** Step-by-step guide
+
+**Header:**
+- Title: "How PetCircle Works"
+- Subtitle: "A responsible approach to pet rehoming"
+
+**For Pet Owners Section:**
+- Heading: "Rehoming Your Pet"
+
+**Steps (Vertical Timeline):**
+
+**Step 1: Assessment**
+- Icon: Clipboard
+- Heading: "Complete the Pre-Rehoming Assessment"
+- Description: "We'll help you explore all options before rehoming"
+- Details: What to expect
+- Time: ~15 minutes
+
+**Step 2: Create Listing**
+- Icon: Form
+- Heading: "Create a Detailed Listing"
+- Description: "Share your pet's story, photos, and medical history"
+- Details: What information is needed
+- Time: ~30 minutes
+
+**Step 3: Review**
+- Icon: Magnifying glass
+- Heading: "We Review Your Listing"
+- Description: "Our team ensures quality and safety"
+- Time: 24-48 hours
+
+**Step 4: Applications**
+- Icon: Folder
+- Heading: "Review Applications"
+- Description: "Potential adopters will apply - you choose the best match"
+- Details: What to look for
+
+**Step 5: Meet & Greet**
+- Icon: Handshake
+- Heading: "Arrange a Meeting"
+- Description: "Meet approved applicants in person"
+- Safety tips included
+
+**Step 6: Finalize**
+- Icon: Checkmark
+- Heading: "Complete the Adoption"
+- Description: "Sign agreement and transfer ownership"
+- Documents provided
+
+---
+
+**For Adopters Section:**
+- Heading: "Adopting a Pet"
+
+**Steps:**
+
+**Step 1: Browse**
+- Search and filter pets
+
+**Step 2: Create Profile**
+- Complete adopter profile
+
+**Step 3: Apply**
+- Submit application with message
+
+**Step 4: Interview**
+- Owner reviews and may request info
+
+**Step 5: Meet**
+- Arrange in-person meeting
+
+**Step 6: Trial Period (Optional)**
+- Foster-to-adopt option
+
+**Step 7: Adopt**
+- Sign agreement and bring pet home
+
+---
+
+**FAQ Section:**
+- Common questions with expandable answers
+
+**CTA:**
+- Buttons for both flows
+
+---
+
+### 11.5 Safety Guidelines Page (`/safety`)
+
+**Layout:** Article with sections
+
+**Header:**
+- Icon: Shield
+- Title: "Safety Guidelines"
+- Subtitle: "Keeping our community safe"
+
+**Sections:**
+
+**General Safety:**
+- Trust your instincts
+- Verify identity
+- Keep records
+- Report concerns
+
+**For Pet Owners:**
+- Screen applicants carefully
+- Meet in public places
+- Don't share personal info early
+- Be honest about pet
+- Get everything in writing
+
+**For Adopters:**
+- Meet the pet in person
+- Ask questions
+- Check vet records
+- Meet in public first
+- Don't rush decisions
+
+**Red Flags:**
+- Warning signs for both parties
+- What to watch out for
+- When to walk away
+
+**Meeting Safety:**
+- Choose public locations
+- Bring a friend
+- Daytime meetings
+- Tell someone where you are
+
+**Online Safety:**
+- Don't share contact info in listings
+- Use platform messaging
+- Be careful with photos
+- Report suspicious messages
+
+**Reporting:**
+- How to report users
+- How to report listings
+- What happens after reporting
+
+---
+
+### 11.6 FAQ Page (`/faq`)
+
+**Layout:** Searchable accordion
+
+**Header:**
+- Title: "Frequently Asked Questions"
+- Search bar: "Search FAQs..."
+
+**Categories (Tabs or Sections):**
+- General
+- For Pet Owners
+- For Adopters
+- Safety
+- Account & Technical
+
+**Each Category:**
+- List of questions (accordion)
+- Click to expand answer
+- Collapsible sections
+
+**Example Questions:**
+
+**General:**
+- What is PetCircle?
+- Is PetCircle free to use?
+- How does PetCircle work?
+- What pets can be rehomed?
+
+**For Pet Owners:**
+- How do I create a listing?
+- How long does approval take?
+- Can I edit my listing?
+- What if I change my mind?
+- How do I choose an adopter?
+
+**For Adopters:**
+- How do I apply?
+- What are adoption fees?
+- Can I return a pet?
+- What if my application is rejected?
+
+**Still Have Questions:**
+- Contact form link
+- Support email
+
+---
+
+### 11.7 Contact Us Page (`/contact`)
+
+**Layout:** Form with contact info
+
+**Header:**
+- Title: "Contact Us"
+- Subtitle: "We're here to help"
+
+**Contact Form:**
+- Name: Text input
+- Email: Email input
+- Subject: Dropdown
+  - General inquiry
+  - Technical support
+  - Report an issue
+  - Partnership opportunity
+  - Press inquiry
+  - Other
+- Message: Textarea (required, min 50 chars)
+- Attachment: File upload (optional)
+- Submit button
+
+**Contact Information Card:**
+- Email: support@petcircle.com
+- Phone: (555) 123-4567
+- Hours: Monday-Friday, 9am-5pm EST
+
+**Social Media Links:**
+- Facebook
+- Twitter/X
+- Instagram
+- LinkedIn
+
+**Office Location (if applicable):**
+- Address
+- Map
+
+---
+
+### 11.8 404 Error Page (`/404`)
+
+**Layout:** Centered content
+
+**Illustration:** Lost dog with question mark
+
+**Content:**
+- Heading: "Oops! Page Not Found"
+- Subheading: "The page you're looking for doesn't exist"
+- Error code: 404
+
+**Suggestions:**
+- "You might be looking for:"
+- Links:
+  - Browse Pets
+  - Find Services
+  - Go to Dashboard
+  - Go to Homepage
+
+**Search Bar:**
+- "Or search for what you need:"
+- Search input
+
+---
+
+### 11.9 500 Error Page (`/500`)
+
+**Layout:** Centered content
+
+**Illustration:** Confused cat
+
+**Content:**
+- Heading: "Something Went Wrong"
+- Subheading: "We're working on fixing this issue"
+- Error code: 500
+
+**Actions:**
+- Button: "Try Again"
+- Button: "Go to Homepage"
+- Text: "If the problem persists, please contact support"
+
+---
+
+## COMMON UI COMPONENTS
+
+### Component Library
+
+**1. Buttons**
+
+**Primary Button:**
+- Background: Blue (#2563EB)
+- Text: White
+- Rounded corners
+- Hover: Darker blue
+- Disabled: Gray, cursor not-allowed
+- Loading state: Spinner icon
+
+**Secondary Button:**
+- Background: White/Transparent
+- Border: Blue
+- Text: Blue
+- Hover: Light blue background
+
+**Danger Button:**
+- Background: Red
+- Text: White
+- Used for delete, reject actions
+
+**Text Button:**
+- No background
+- Underline on hover
+- Used for "Cancel", "Skip"
+
+**Icon Button:**
+- Square or circular
+- Icon only
+- Tooltip on hover
+
+---
+
+**2. Form Inputs**
+
+**Text Input:**
+- Border: Gray
+- Focus: Blue border
+- Error state: Red border
+- Label above
+- Helper text below
+- Error message in red
+- Character counter (if limited)
+
+**Textarea:**
+- Resizable vertically
+- Min height: 100px
+- Character counter
+
+**Dropdown/Select:**
+- Dropdown arrow icon
+- Search within (for long lists)
+- Keyboard navigation
+
+**Radio Buttons:**
+- Circular buttons
+- Label to right
+- Only one selectable
+
+**Checkboxes:**
+- Square boxes
+- Checkmark when selected
+- Label to right
+- Multiple selectable
+
+**Date Picker:**
+- Calendar popup
+- Navigate months
+- Select date
+- Format: MM/DD/YYYY
+
+**File Upload:**
+- Drag & drop zone
+- "Click to upload" text
+- File type restrictions shown
+- Progress bar during upload
+- Preview after upload
+- Delete button
+
+**Slider:**
+- Horizontal bar
+- Draggable handle
+- Current value displayed
+- Min/max labels
+
+**Toggle Switch:**
+- On/Off states
+- Sliding animation
+- Label to left or right
+
+---
+
+**3. Cards**
+
+**Basic Card:**
+- White background
+- Subtle shadow
+- Rounded corners
+- Padding: 16-24px
+
+**Interactive Card:**
+- Hover effect: Slight shadow increase
+- Cursor: pointer
+- Clickable entire card
+
+**Card with Image:**
+- Image at top (full width)
+- Content below
+- Overlay possible on image
+
+---
+
+**4. Badges**
+
+**Status Badges:**
+- Small, rounded rectangles
+- Colored backgrounds:
+  - Active: Green
+  - Pending: Yellow
+  - Rejected: Red
+  - Draft: Gray
+- White text
+- Used for statuses
+
+**Icon Badges:**
+- Small icon with text
+- Used for verification, features
+- Example: "✓ Verified"
+
+**Count Badges:**
+- Small circular badge
+- Numbers inside
+- Used for notifications
+- Positioned on icons
+
+---
+
+**5. Modals**
+
+**Standard Modal:**
+- Centered overlay
+- Blurred/darkened background
+- White content box
+- Close button (X) top right
+- Header section
+- Body section
+- Footer with buttons
+
+**Confirmation Modal:**
+- Warning icon
+- Confirmation message
+- "Are you sure?" text
+- Two buttons: Confirm / Cancel
+
+**Full-Screen Modal:**
+- Covers entire screen
+- Used for multi-step forms
+- Back button top left
+
+---
+
+**6. Alerts/Notifications**
+
+**Toast Notification:**
+- Appears top-right corner
+- Auto-dismiss after 5 seconds
+- Close button
+- Types:
+  - Success: Green
+  - Error: Red
+  - Warning: Yellow
+  - Info: Blue
+- Icon + message
+
+**Alert Box:**
+- Inline, within content
+- Full-width or contained
+- Same color types as toast
+- Not dismissible (usually)
+
+**Banner:**
+- Full-width, top of page
+- Important announcements
+- Dismissible
+
+---
+
+**7. Loading States**
+
+**Spinner:**
+- Circular rotating icon
+- Centered or inline
+- Sizes: Small / Medium / Large
+
+**Skeleton Loader:**
+- Gray placeholder shapes
+- Mimics content layout
+- Subtle animation
+- Used while loading content
+
+**Progress Bar:**
+- Horizontal bar
+- Percentage or determinate
+- Used for uploads
+
+---
+
+**8. Tables**
+
+**Data Table:**
+- Header row (bold)
+- Alternating row colors (subtle)
+- Hover effect on rows
+- Sortable columns (icon)
+- Action column (right)
+- Pagination footer
+- Responsive: Scroll horizontally on mobile
+
+---
+
+**9. Pagination**
+
+**Page Numbers:**
+- Current page: Highlighted
+- Clickable page numbers
+- Previous / Next buttons
+- "..." for skipped pages
+- "Go to page" input (optional)
+
+---
+
+**10. Navigation**
+
+**Top Navigation Bar:**
+- Logo left
+- Menu items center/right
+- User menu right (dropdown)
+- Mobile: Hamburger menu
+
+**Sidebar Navigation:**
+- Vertical menu
+- Icons + text
+- Active item highlighted
+- Collapsible (toggle icon)
+
+**Breadcrumbs:**
+- Home > Category > Page
+- Clickable links
+- Current page: Not linked
+
+---
+
+**11. Tabs**
+
+**Horizontal Tabs:**
+- Tab buttons in row
+- Active tab: Underline or highlight
+- Content changes below
+
+**Vertical Tabs:**
+- Tab buttons in column (left)
+- Content on right
+
+---
+
+**12. Tooltips**
+
+**Hover Tooltip:**
+- Small popup on hover
+- Dark background
+- White text
+- Arrow pointing to element
+- Brief explanation
+
+---
+
+**13. Avatars**
+
+**User Avatar:**
+- Circular image
+- Default: Initials if no photo
+- Colored background (generated)
+- Sizes: Small / Medium / Large
+
+**Avatar with Status:**
+- Small dot indicator
+- Green: Online
+- Gray: Offline
+
+---
+
+**14. Tags/Chips**
+
+**Tag:**
+- Small rounded rectangle
+- Background color (light)
+- Text label
+- Optional close button (X)
+- Used for filters, categories
+
+---
+
+**15. Accordions**
+
+**Accordion Item:**
+- Header: Clickable
+- Expand/collapse icon
+- Content: Reveals on click
+- One or multiple open (configurable)
+
+---
+
+**16. Image Galleries**
+
+**Grid Gallery:**
+- Images in grid
+- Click to enlarge
+- Hover: Overlay with info
+
+**Carousel:**
+- Single image display
+- Navigation arrows
+- Thumbnail strip below
+- Dots indicator
+- Swipe on mobile
+- Keyboard navigation
+
+**Lightbox:**
+- Full-screen image view
+- Dark background
+- Close button
+- Previous/Next navigation
+- Zoom controls
+
+---
+
+**17. Empty States**
+
+**Empty State Component:**
+- Illustration/icon (center)
+- Heading: "No [items] yet"
+- Subheading: Explanation
+- Call-to-action button
+- Alternative suggestions
+
+**Examples:**
+- No pets added
+- No messages
+- No search results
+- No notifications
+
+---
+
+**18. Search Components**
+
+**Search Bar:**
+- Input with search icon
+- Placeholder text
+- Clear button (X) when text entered
+- Autocomplete suggestions dropdown
+- Loading indicator
+- "No results" message
+
+**Search Filters:**
+- Filter sidebar or dropdowns
+- Applied filters shown as chips
+- Clear all button
+- Filter count indicator
+
+---
+
+**19. Rating Components**
+
+**Star Rating Display:**
+- 5 stars
+- Filled/empty/half states
+- Average number beside
+- Review count in parentheses
+
+**Star Rating Input:**
+- 5 clickable stars
+- Hover preview
+- Selected state
+- Clear selection option
+
+**Rating Breakdown:**
+- Horizontal bars for each star level
+- Count or percentage
+- 5 stars down to 1 star
+
+---
+
+**20. Maps**
+
+**Location Map:**
+- Interactive map (Google Maps/Mapbox)
+- Markers for locations
+- Zoom controls
+- Fullscreen option
+- Marker click: Info popup
+
+**Static Map:**
+- Non-interactive image
+- Shows location only
+- Click to open full map
+
+---
+
+**21. Video Players**
+
+**Video Player:**
+- Play/pause button
+- Progress bar
+- Volume control
+- Fullscreen option
+- Loading spinner
+- Thumbnail preview
+- Duration display
+
+---
+
+**22. Filters & Sort**
+
+**Filter Panel:**
+- Collapsible sections
+- Checkboxes for categories
+- Range sliders
+- Apply/Clear buttons
+- Active filter count
+
+**Sort Dropdown:**
+- Dropdown menu
+- Radio button selection
+- Current sort displayed
+- Updates results immediately
+
+---
+
+**23. Stepper/Progress Indicator**
+
+**Multi-Step Progress:**
+- Horizontal line connecting steps
+- Circle for each step
+- Step number inside circle
+- Completed: Checkmark
+- Current: Highlighted
+- Future: Gray
+- Step labels below
+
+---
+
+**24. Dropdowns & Menus**
+
+**Dropdown Menu:**
+- Trigger button
+- Menu appears below
+- List of options
+- Hover highlight
+- Click to select
+- Close on outside click
+
+**Context Menu:**
+- Right-click menu
+- Or 3-dot icon click
+- Actions list
+- Icons for each action
+- Dividers between groups
+
+---
+
+**25. Comments/Reviews Display**
+
+**Review Card:**
+- Reviewer avatar & name
+- Star rating
+- Review date
+- Review text
+- Helpful buttons (thumbs up/down)
+- Reply option (future)
+- Report link
+
+---
+
+**26. Timeline**
+
+**Activity Timeline:**
+- Vertical line
+- Events as dots on line
+- Date/time labels
+- Event description
+- Icons for event types
+- Most recent at top
+
+---
+
+**27. Statistics/Metrics**
+
+**Stat Card:**
+- Large number (metric value)
+- Label below
+- Trend indicator (up/down arrow)
+- Percentage change
+- Colored based on positive/negative
+
+**Progress Ring:**
+- Circular progress
+- Percentage in center
+- Colored segments
+- Label below
+
+---
+
+**28. Social Share**
+
+**Share Button/Modal:**
+- Share icon button
+- Opens modal with options:
+  - Facebook
+  - Twitter
+  - Email
+  - Copy link
+- Each with icon
+- Success message on action
+
+---
+
+**29. User Menu**
+
+**User Dropdown:**
+- Trigger: Avatar + name + down arrow
+- Dropdown appears below
+- Menu items:
+  - View Profile
+  - Settings
+  - Dashboard
+  - Help
+  - Log Out
+- Dividers between sections
+- Icons for each item
+
+---
+
+**30. Verification Badges**
+
+**Badge Icons:**
+- Small icon with tooltip
+- Types:
+  - Email verified (envelope + checkmark)
+  - Phone verified (phone + checkmark)
+  - ID verified (shield)
+  - Pet owner verified (paw + star)
+- Color coded: Green/Blue/Gold
+- Hover: Tooltip explains badge
+
+---
+
+## RESPONSIVE DESIGN BREAKPOINTS
+
+**Mobile (320px - 767px):**
+- Single column layouts
+- Hamburger menu
+- Stacked cards
+- Full-width buttons
+- Touch-friendly spacing (min 44px tap targets)
+- Bottom navigation for key actions
+- Swipeable galleries
+
+**Tablet (768px - 1023px):**
+- 2-column layouts where appropriate
+- Sidebar can be collapsed
+- Medium-sized images
+- Adapted navigation
+
+**Desktop (1024px+):**
+- Multi-column layouts
+- Full sidebar navigation
+- Larger images
+- Hover states
+- Keyboard shortcuts
+
+---
+
+## COLOR PALETTE
+
+**Primary Colors:**
+- Primary Blue: #2563EB (buttons, links, active states)
+- Primary Blue Hover: #1D4ED8
+- Primary Blue Light: #DBEAFE (backgrounds)
+
+**Secondary Colors:**
+- Secondary Green: #10B981 (success states)
+- Secondary Red: #EF4444 (errors, danger)
+- Secondary Yellow: #F59E0B (warnings, pending)
+- Secondary Gray: #6B7280 (text, borders)
+
+**Neutral Colors:**
+- White: #FFFFFF
+- Light Gray: #F3F4F6 (backgrounds)
+- Medium Gray: #9CA3AF (secondary text)
+- Dark Gray: #1F2937 (headings)
+- Black: #111827 (primary text)
+
+**Status Colors:**
+- Success: #10B981 (green)
+- Warning: #F59E0B (yellow)
+- Error: #EF4444 (red)
+- Info: #3B82F6 (blue)
+
+**Badge Colors:**
+- Active/Verified: #10B981 (green)
+- Pending: #F59E0B (yellow)
+- Rejected/Error: #EF4444 (red)
+- Inactive/Draft: #6B7280 (gray)
+- Adopted: #3B82F6 (blue)
+
+---
+
+## TYPOGRAPHY
+
+**Font Families:**
+- Primary: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif
+- Monospace (for codes): "Courier New", monospace
+
+**Heading Sizes:**
+- H1: 36px (2.25rem) - Page titles
+- H2: 30px (1.875rem) - Section headers
+- H3: 24px (1.5rem) - Subsections
+- H4: 20px (1.25rem) - Card titles
+- H5: 18px (1.125rem)
+- H6: 16px (1rem)
+
+**Body Text:**
+- Large: 18px (1.125rem) - Intro paragraphs
+- Regular: 16px (1rem) - Default body text
+- Small: 14px (0.875rem) - Helper text, captions
+- Extra Small: 12px (0.75rem) - Tiny labels
+
+**Font Weights:**
+- Light: 300
+- Regular: 400
+- Medium: 500
+- Semibold: 600
+- Bold: 700
+
+**Line Heights:**
+- Tight: 1.25 (headings)
+- Normal: 1.5 (body text)
+- Relaxed: 1.75 (long-form content)
+
+---
+
+## ICONOGRAPHY
+
+**Icon Library:** Lucide React or Heroicons
+
+**Common Icons Used:**
+- Home: House icon
+- User: User/person icon
+- Pets: Paw print
+- Search: Magnifying glass
+- Filter: Funnel
+- Settings: Gear/cog
+- Messages: Chat bubble
+- Notifications: Bell
+- Heart: Like/save
+- Star: Rating/favorite
+- Calendar: Date/events
+- Location: Pin/marker
+- Phone: Telephone
+- Email: Envelope
+- Edit: Pencil
+- Delete: Trash can
+- Close: X
+- Check: Checkmark
+- Warning: Triangle with !
+- Info: Circle with i
+- Upload: Cloud with arrow
+- Download: Cloud with down arrow
+- Share: Share nodes
+- Menu: Hamburger (3 lines)
+- More: 3 dots vertical/horizontal
+- Arrow: Right/left/up/down
+- Back: Left arrow
+- Forward: Right arrow
+- Expand: Plus
+- Collapse: Minus
+- External link: Box with arrow
+
+**Icon Sizes:**
+- Small: 16px
+- Medium: 20px
+- Large: 24px
+- Extra Large: 32px
+
+---
+
+## SPACING SYSTEM
+
+**Margin & Padding Scale:**
+- xs: 4px (0.25rem)
+- sm: 8px (0.5rem)
+- md: 16px (1rem)
+- lg: 24px (1.5rem)
+- xl: 32px (2rem)
+- 2xl: 48px (3rem)
+- 3xl: 64px (4rem)
+
+**Component Spacing:**
+- Between sections: 48px-64px
+- Between cards: 16px-24px
+- Card padding: 16px-24px
+- Button padding: 12px 24px
+- Input padding: 10px 12px
+
+---
+
+## ANIMATION & TRANSITIONS
+
+**Transition Durations:**
+- Fast: 150ms (hover states)
+- Normal: 300ms (most transitions)
+- Slow: 500ms (page transitions)
+
+**Easing Functions:**
+- Default: ease-in-out
+- Smooth: cubic-bezier(0.4, 0, 0.2, 1)
+
+**Common Animations:**
+- Button hover: Scale slightly, change color
+- Card hover: Lift (shadow increase)
+- Modal open: Fade in + scale from center
+- Toast notification: Slide in from top-right
+- Loading spinner: Rotate infinitely
+- Success checkmark: Draw animation
+- Skeleton: Shimmer/pulse effect
+
+---
+
+## ACCESSIBILITY REQUIREMENTS
+
+**Color Contrast:**
+- Text on background: Minimum 4.5:1 ratio
+- Large text: Minimum 3:1 ratio
+- Interactive elements: Clear focus states
+
+**Keyboard Navigation:**
+- All interactive elements accessible via Tab
+- Focus visible (outline)
+- Logical tab order
+- Enter/Space to activate buttons
+- Escape to close modals
+- Arrow keys for dropdowns/menus
+
+**Screen Reader Support:**
+- Semantic HTML (nav, main, article, etc.)
+- Alt text for all images
+- ARIA labels where needed
+- ARIA live regions for dynamic content
+- Skip to main content link
+- Form labels associated with inputs
+- Error messages read aloud
+
+**Focus Management:**
+- Blue outline on focus (2px solid #2563EB)
+- Focus trapped in modals
+- Focus restored after modal closes
+- Skip links for navigation
+
+**Other:**
+- Minimum tap target: 44x44px (mobile)
+- Text resizable up to 200%
+- No content only conveyed by color
+- Sufficient spacing between interactive elements
+
+---
+
+## LOADING & ERROR STATES
+
+**Page Loading:**
+- Full-page spinner (centered)
+- Or skeleton loaders matching content layout
+- Loading text: "Loading..."
+
+**Component Loading:**
+- Inline spinner
+- Disabled state for buttons
+- "Loading..." text in button
+
+**Empty States:**
+- Friendly illustration
+- Clear explanation
+- Suggested action
+
+**Error States:**
+- Input errors: Red border, error icon, error message below
+- Form errors: Summary at top with list
+- Page error: Error illustration, explanation, retry button
+- Toast notification for API errors
+
+**Success States:**
+- Success toast notification
+- Green checkmark animation
+- Success message
+- Auto-redirect or clear next steps
+
+---
+
+## FORM VALIDATION
+
+**Real-Time Validation:**
+- On blur (when user leaves field)
+- Show error immediately if invalid
+- Show success checkmark if valid
+- Don't validate on first keystroke
+
+**Validation Messages:**
+- Clear, specific
+- Explain what's wrong
+- How to fix it
+- Inline below field
+
+**Submit Validation:**
+- Check all fields
+- Scroll to first error
+- Focus first error field
+- Disable submit during API call
+- Show loading spinner on button
+
+**Required Fields:**
+- Asterisk (*) in label
+- "Required" text (optional)
+- Different error for empty vs invalid
+
+---
+
+## IMAGE GUIDELINES
+
+**Image Sizes:**
+- Thumbnail: 100x100px
+- Small card: 300x200px
+- Medium card: 600x400px
+- Large hero: 1200x600px
+- Profile photo: 200x200px
+
+**Image Formats:**
+- Photos: JPEG (compressed)
+- Icons/logos: PNG or SVG
+- Decorative illustrations: SVG preferred
+
+**Image Loading:**
+- Lazy load images below fold
+- Blur-up placeholder
+- Alt text always
+- Skeleton loader while loading
+
+**Image Optimization:**
+- Compress before upload
+- Responsive images (srcset)
+- Serve WebP with fallback
+
+---
+
+## MOBILE-SPECIFIC FEATURES
+
+**Touch Gestures:**
+- Swipe galleries left/right
+- Pull to refresh (future)
+- Swipe to delete (messages, etc.)
+- Pinch to zoom images
+
+**Mobile Navigation:**
+- Bottom tab bar (optional):
+  - Home
+  - Browse
+  - Messages
+  - Profile
+- Hamburger menu for main nav
+- Back button always visible
+
+**Mobile Forms:**
+- Appropriate input types (tel, email, number)
+- Large touch targets
+- Auto-focus first field (carefully)
+- Show/hide password toggle
+- Native date/time pickers
+
+**Mobile Modals:**
+- Full-screen on mobile
+- Slide up from bottom (alternative)
+- Close button prominent
+
+---
+
+## PERFORMANCE CONSIDERATIONS
+
+**Code Splitting:**
+- Lazy load routes
+- Lazy load heavy components
+- Bundle size optimization
+
+**Images:**
+- Lazy loading
+- Responsive images
+- Progressive JPEGs
+- CDN delivery
+
+**API Calls:**
+- Debounce search inputs (300ms)
+- Cache responses (React Query)
+- Pagination for lists
+- Optimistic updates
+
+**Animations:**
+- Use CSS transforms (GPU-accelerated)
+- Limit simultaneous animations
+- Reduce motion for users who prefer
+
+---
+
+## BROWSER SUPPORT
+
+**Minimum Support:**
+- Chrome 90+
+- Firefox 88+
+- Safari 14+
+- Edge 90+
+- Mobile Safari (iOS 14+)
+- Chrome Mobile (Android 10+)
+
+**Progressive Enhancement:**
+- Core features work in older browsers
+- Enhanced features for modern browsers
+- Graceful degradation
+
+---
+
+## NOTIFICATIONS & FEEDBACK
+
+**Toast Notifications:**
+- Position: Top-right
+- Duration: 5 seconds
+- Dismissible: Yes (X button)
+- Max on screen: 3
+- Queue additional
+
+**In-App Notifications:**
+- Badge on bell icon (count)
+- Dropdown list of notifications
+- Mark as read/unread
+- Clear all option
+- Link to full notification center
+
+**Email Notifications:**
+- Trigger: New message, application update, etc.
+- User can configure in settings
+- Unsubscribe link in footer
+
+**Push Notifications (Future):**
+- Browser push
+- Mobile app push
+- User opt-in required
+
+---
+
+## SEARCH FUNCTIONALITY
+
+**Search Features:**
+- Autocomplete suggestions
+- Recent searches
+- Popular searches
+- Search history (optional)
+- Clear search button
+- Search filters
+- Sort options
+
+**Search Results:**
+- Highlight matching terms
+- Show result count
+- Pagination
+- "No results" message with suggestions
+- Related searches
+
+---
+
+## DATA TABLES
+
+**Table Features:**
+- Sortable columns (click header)
+- Filter per column (optional)
+- Search within table
+- Row selection (checkboxes)
+- Bulk actions
+- Pagination
+- Items per page selector
+- Export (CSV, PDF)
+
+**Responsive Tables:**
+- Horizontal scroll on mobile
+- Or card view on mobile
+- Sticky header row
+
+---
+
+## CHATBOT/HELP (Future)
+
+**Help Widget:**
+- Floating button (bottom-right)
+- Chat bubble icon
+- Click to open chat window
+- Minimize/close options
+- Quick help articles
+- Contact support option
+
+---
+
+## DARK MODE (Future)
+
+**If Implementing:**
+- Toggle in settings
+- Respect system preference
+- Invert colors appropriately
+- Adjust contrast for readability
+- Test all components in dark mode
+
+---
+
+## LOCALIZATION (Future)
+
+**Considerations:**
+- Text strings in translation files
+- Date/time formats
+- Currency formats
+- RTL support (right-to-left languages)
+- Language selector
+
+---
+
+## ANALYTICS TRACKING
+
+**Events to Track:**
+- Page views
+- Button clicks
+- Form submissions
+- Search queries
+- Application submissions
+- Adoptions completed
+- User registrations
+- Time on page
+
+**Privacy:**
+- Anonymize IP addresses
+- Cookie consent banner
+- Respect Do Not Track
+- Privacy policy link
+
+---
+
+## TESTING CHECKLIST
+
+**Functional Testing:**
+- All links work
+- Forms submit correctly
+- Validation works
+- Buttons perform actions
+- Navigation works
+- Search functions
+- Filters apply
+
+**Visual Testing:**
+- Layout correct on all breakpoints
+- Images load
+- Colors correct
+- Typography consistent
+- Spacing correct
+- Hover states work
+
+**Accessibility Testing:**
+- Keyboard navigation
+- Screen reader compatible
+- Color contrast passes
+- Focus visible
+- Alt text present
+
+**Performance Testing:**
+- Page load time < 3 seconds
+- Images optimized
+- No console errors
+- Smooth animations
+- Responsive interactions
+
+**Cross-Browser Testing:**
+- Test in all supported browsers
+- Mobile devices
+- Different screen sizes
+
+**User Testing:**
+- User flows work end-to-end
+- Intuitive navigation
+- Clear calls-to-action
+- Error messages helpful
+- Success states clear
+
+---
+
+## DEPLOYMENT CHECKLIST
+
+**Pre-Launch:**
+- [ ] All features complete
+- [ ] Testing passed
+- [ ] Accessibility audit
+- [ ] Performance optimization
+- [ ] SEO optimization
+- [ ] Analytics integrated
+- [ ] Error tracking (Sentry)
+- [ ] Legal pages complete
+- [ ] Privacy policy
+- [ ] Terms of service
+- [ ] Email templates ready
+- [ ] Social media meta tags
+- [ ] Favicon and app icons
+- [ ] 404/500 pages
+- [ ] SSL certificate
+- [ ] Environment variables set
+- [ ] Database migrations run
+- [ ] Backup strategy in place
+
+**Post-Launch:**
+- [ ] Monitor errors
+- [ ] Track analytics
+- [ ] Gather user feedback
+- [ ] Plan iterations
+
+---
+
+## FUTURE ENHANCEMENTS
+
+**Phase 2 Features:**
+- Social feed (posts, comments)
+- Groups & communities
+- Events calendar
+- Stories (24-hour posts)
+- Live chat (WebSocket)
+- Video calls (for virtual meet & greets)
+- Mobile app (React Native)
+
+**Advanced Features:**
+- AI matching algorithm
+- Chatbot support
+- Advanced analytics dashboard
+- Payment processing (Stripe)
+- Escrow system
+- Booking system (for services)
+- Multi-language support
+- Dark mode
+- Progressive Web App (PWA)
+
+---
+
+## DESIGN SYSTEM & STYLE GUIDE
+
+**Component Library:**
+- Build reusable components
+- Storybook for documentation
+- Props documentation
+- Usage examples
+- Do's and don'ts
+
+**Design Tokens:**
+- Colors as variables
+- Spacing as variables
+- Typography as variables
+- Shadows as variables
+- Centralized and reusable
+
+**Brand Guidelines:**
+- Logo usage
+- Color palette
+- Typography rules
+- Photography style
+- Illustration style
+- Voice and tone
+
+---
+
+## FINAL NOTES FOR DEVELOPERS
+
+**Code Organization:**
+- Component-based structure
+- Separate business logic from UI
+- Reusable components in `/components`
+- Feature-specific components in `/features`
+- Utilities in `/utils`
+- API calls in `/services`
+- Custom hooks in `/hooks`
+
+**Naming Conventions:**
+- PascalCase for components
+- camelCase for functions/variables
+- UPPERCASE for constants
+- Descriptive names
+- Consistent file naming
+
+**Best Practices:**
+- DRY (Don't Repeat Yourself)
+- Component composition
+- Props validation (PropTypes or TypeScript)
+- Error boundaries
+- Loading states for async operations
+- Optimize re-renders
+- Clean code, comments where needed
+
+**State Management:**
+- React Query for server state
+- Context API for global UI state
+- Local state with useState
+- Avoid prop drilling
+
+**API Integration:**
+- Axios for HTTP requests
+- Centralized API service
+- Error handling
+- Request/response interceptors
+- Loading states
+- Success/error toasts
+
+**Performance:**
+- Code splitting
+- Lazy loading
+- Memoization where beneficial
+- Optimize images
+- Minimize bundle size
+
+---
+
+## CONCLUSION
+
+This comprehensive frontend documentation provides:
+- Complete page layouts and content specifications
+- Detailed UI component descriptions
+- Design system guidelines
+- Responsive design considerations
+- Accessibility requirements
+- User flows and interactions
+
+**For UI/UX Designers:**
+Use this document to create mockups and prototypes in Figma, Sketch, or design tools. All layouts, components, and content are specified.
+
+**For Frontend Developers:**
+Use this as a blueprint for implementation. Each page is detailed with exact elements, interactions, and states required.
+
+**For Banani AI:**
+This document provides structured, plain-text specifications that can be used to generate UI designs systematically.
+
+**Next Steps:**
+1. Review and approve this specification
+2. Create design mockups
+3. Develop component library
+4. Implement pages incrementally
+5. Test and iterate
+6. Launch MVP
+
+---
+
+**Document Version:** 1.0  
+**Last Updated:** December 2024  
+**Status:** Ready for Design & Development

@@ -1,0 +1,1009 @@
+# PetCircle Authentication Pages - UI Design Specification
+
+## Document Overview
+This document provides comprehensive UI/UX specifications for the authentication flow of PetCircle, a community platform for pet owners. It includes design requirements for AI design tools and implementation guidelines for frontend developers.
+
+---
+
+## 1. Layout Architecture
+
+### 1.1 Split-Screen Design
+- **Layout Type**: Two-column split screen (50/50 on desktop)
+- **Left Panel**: Hero carousel with feature slides
+- **Right Panel**: Authentication forms
+- **Responsive Behavior**:
+  - Desktop (>1024px): 50/50 split
+  - Tablet (768px-1024px): 40/60 split (carousel/form)
+  - Mobile (<768px): Stacked layout, carousel above form
+
+### 1.2 Container Structure
+```
+┌─────────────────────────────────────────────┐
+│  Left Panel (Carousel)  │  Right Panel      │
+│                          │  (Forms)          │
+│  [Feature Slides]        │  [Auth Forms]     │
+│                          │                   │
+│  • Slide Navigation      │  • Dynamic Form   │
+│  • Auto-rotation         │  • Form Switching │
+└─────────────────────────────────────────────┘
+```
+
+---
+
+## 2. Left Panel - Feature Carousel
+
+### 2.1 Carousel Specifications
+
+**Dimensions:**
+- Width: 50% of viewport (desktop)
+- Height: 100vh (full viewport height)
+- Fixed position during scroll
+
+**Behavior:**
+- Auto-rotation: 5 seconds per slide
+- Manual navigation: Dot indicators at bottom
+- Smooth transitions: 800ms ease-in-out
+- Pause on hover
+- Swipe gestures enabled (touch devices)
+
+**Overlay:**
+- Dark gradient overlay: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.5))
+- Ensures text readability over images
+
+### 2.2 Slide 1: Responsible Rehoming
+
+**Visual Content:**
+- Background: Warm, emotional photo of a family with a dog in a home setting
+- Suggested image: Family petting/hugging a dog, soft natural lighting
+- Image treatment: Slight blur with sharp focus on subjects
+
+**Text Content:**
+```
+Headline: "Find Loving Homes for Pets"
+Subheading: "Connect with verified adopters through our responsible rehoming system"
+
+Key Features (icon + text):
+• Verified adopters and pet owners
+• Detailed behavioral assessments
+• Safe application process
+• Post-adoption support
+```
+
+**Typography:**
+- Headline: 48px, Bold, White
+- Subheading: 20px, Regular, White (90% opacity)
+- Features: 16px, Regular, White (85% opacity)
+
+**Positioning:**
+- Content container: Centered vertically and horizontally
+- Max width: 500px
+- Padding: 60px
+
+### 2.3 Slide 2: Trusted Services
+
+**Visual Content:**
+- Background: Professional photo of a veterinary clinic or foster care facility
+- Suggested image: Clean, modern vet office or home foster environment with pets
+- Image treatment: Bright, professional lighting
+
+**Text Content:**
+```
+Headline: "Quality Pet Care Services"
+Subheading: "Find verified foster care providers and veterinary clinics in your area"
+
+Key Features (icon + text):
+• Licensed foster care providers
+• Certified veterinary clinics
+• Real client reviews
+• Easy booking and contact
+```
+
+**Color Accent:**
+- Subtle blue/teal accent for healthcare theme
+- Maintain overall warm brand consistency
+
+### 2.4 Slide 3: Community Connection
+
+**Visual Content:**
+- Background: Vibrant photo of pet owners socializing at a park or community event
+- Suggested image: Multiple pet owners with their pets, friendly interaction
+- Image treatment: Natural outdoor lighting, authentic candid style
+
+**Text Content:**
+```
+Headline: "Join a Caring Community"
+Subheading: "Connect with fellow pet lovers, share experiences, and build lasting friendships"
+
+Key Features (icon + text):
+• Share pet moments and stories
+• Connect with local pet owners
+• Join community groups
+• Attend pet-friendly events
+```
+
+**Visual Elements:**
+- Community icons: Hearts, paw prints, speech bubbles
+- Warm, friendly color palette
+
+### 2.5 Navigation Elements
+
+**Dot Indicators:**
+- Position: Bottom center of carousel
+- Spacing: 12px between dots
+- Inactive: 8px circle, white 40% opacity
+- Active: 10px circle, white 100% opacity with subtle pulse animation
+- Hover: Scale 1.2x transition
+
+**Brand Logo:**
+- Position: Top left corner
+- Logo: "PetCircle" wordmark + paw icon
+- Size: 180px width
+- Color: White
+- Padding: 40px from edges
+
+**Navigation Button:**
+- Text: "Back to website →"
+- Position: Top right corner
+- Style: Pill button, semi-transparent white background
+- Hover: Solid white background
+- Size: 160px × 40px
+
+---
+
+## 3. Right Panel - Authentication Forms
+
+### 3.1 Panel Specifications
+
+**Dimensions:**
+- Width: 50% of viewport (desktop)
+- Height: 100vh
+- Background: Dark theme (#1a1a1a)
+- Overflow: Auto scroll when content exceeds viewport
+
+**Container:**
+- Max width: 480px
+- Centered horizontally
+- Padding: 60px 40px
+- Background: #2a2a2a (slightly lighter than panel)
+- Border radius: 0 (full height panel)
+
+### 3.2 Form States & Transitions
+
+**Form Types:**
+1. Registration Form (default)
+2. Login Form
+3. Email Verification Form
+4. Forgot Password Form
+5. Password Reset Form
+
+**Transition Behavior:**
+- Fade out current form: 200ms
+- Fade in new form: 300ms
+- Maintain scroll position at top
+- Form fields reset on transition
+
+---
+
+## 4. Registration Form
+
+### 4.1 Header Section
+
+**Heading:**
+```
+"Create an account"
+Font: 36px, Bold
+Color: White (#ffffff)
+Margin-bottom: 12px
+```
+
+**Subheading:**
+```
+"Already have an account? [Log in]"
+Font: 16px, Regular
+Color: Gray (#9ca3af)
+Link color: Beige/Gold (#d4b896) - matches brand
+Link hover: Lighter beige (#e5d4b8)
+```
+
+### 4.2 Form Fields
+
+**Field Structure:**
+- Label: Hidden (using placeholder labels)
+- Input fields: Dark background with border
+- Spacing: 20px between fields
+
+**Field 1 & 2: Name Fields (Side by Side)**
+```
+Layout: Two columns, equal width with 16px gap
+
+First Name Input:
+- Placeholder: "First name"
+- Width: 48%
+- Height: 52px
+- Background: #1f1f1f
+- Border: 1px solid #3a3a3a
+- Focus border: 1px solid #d4b896
+- Text color: White
+- Placeholder color: #6b7280
+- Border radius: 8px
+- Padding: 0 16px
+
+Last Name Input:
+- Same specs as First Name
+- Placeholder: "Last name"
+```
+
+**Field 3: Email**
+```
+Email Input:
+- Placeholder: "Email"
+- Width: 100%
+- Type: email
+- Validation: Real-time email format check
+- Error state: Red border (#ef4444)
+- Error message: Below field, 14px, red
+```
+
+**Field 4: Password**
+```
+Password Input:
+- Placeholder: "Enter your password"
+- Width: 100%
+- Type: password
+- Icon: Eye icon (toggle visibility) - positioned right
+- Icon color: #6b7280
+- Icon hover: #9ca3af
+- Password strength indicator:
+  - Position: Below field
+  - Display: Weak / Medium / Strong
+  - Color: Red / Orange / Green
+  - Progress bar: 4px height
+```
+
+**Password Requirements:**
+- Minimum 8 characters
+- At least 1 uppercase letter
+- At least 1 number
+- At least 1 special character
+
+### 4.3 Terms & Conditions
+
+**Checkbox:**
+```
+Layout: Checkbox + Label (inline)
+
+Checkbox:
+- Size: 20px × 20px
+- Background: #1f1f1f
+- Border: 1px solid #3a3a3a
+- Checked: Background #d4b896, White checkmark
+- Border radius: 4px
+
+Label:
+- Text: "I agree to the [Terms & Conditions]"
+- Font: 14px, Regular
+- Color: #9ca3af
+- Link: Underlined, #d4b896
+```
+
+### 4.4 Submit Button
+
+```
+Create Account Button:
+- Width: 100%
+- Height: 52px
+- Background: #d4b896
+- Text: "Create account"
+- Font: 16px, Semibold
+- Color: Dark brown (#2a1810)
+- Border radius: 8px
+- Margin-top: 24px
+
+Hover state:
+- Background: #e5d4b8
+- Slight scale: 1.01
+- Transition: 200ms
+
+Disabled state:
+- Background: #4a4a4a
+- Color: #6b7280
+- Cursor: not-allowed
+- Opacity: 0.6
+
+Loading state:
+- Spinner icon (white, center)
+- Text: "Creating account..."
+- Disabled
+```
+
+### 4.5 Divider & Social Auth
+
+**Divider:**
+```
+Text: "Or register with"
+Style: Line with centered text
+Line color: #3a3a3a
+Text color: #6b7280
+Font: 14px
+Margin: 32px 0
+```
+
+**Social Buttons:**
+```
+Layout: Two buttons side by side, 16px gap
+
+Google Button:
+- Width: 48%
+- Height: 48px
+- Background: #ffffff
+- Text: "Google"
+- Icon: Google logo (left aligned)
+- Font: 15px, Medium
+- Color: #1f1f1f
+- Border: None
+- Border radius: 8px
+
+Apple Button:
+- Same specs as Google
+- Background: #000000
+- Text: "Apple"
+- Icon: Apple logo
+- Color: #ffffff
+```
+
+---
+
+## 5. Login Form
+
+### 5.1 Structure
+
+**Header:**
+```
+Heading: "Welcome back"
+Subheading: "Don't have an account? [Sign up]"
+(Same styling as registration header)
+```
+
+**Fields:**
+1. Email input
+2. Password input with toggle visibility
+3. "Forgot password?" link (right-aligned, 14px)
+
+**Submit Button:**
+```
+Text: "Log in"
+(Same styling as registration button)
+```
+
+**Remember Me:**
+```
+Checkbox: "Remember me for 30 days"
+Position: Below password, left-aligned
+(Same checkbox styling as ToS)
+```
+
+---
+
+## 6. Email Verification Form
+
+### 6.1 Structure
+
+**Icon:**
+```
+Email icon (or envelope)
+Size: 64px
+Color: #d4b896
+Margin-bottom: 24px
+Centered
+```
+
+**Header:**
+```
+Heading: "Verify your email"
+Subheading: "We sent a verification code to [user@email.com]"
+```
+
+**Verification Code Input:**
+```
+Layout: 6 separate input boxes (for 6-digit code)
+
+Each box:
+- Width: 52px
+- Height: 60px
+- Background: #1f1f1f
+- Border: 1px solid #3a3a3a
+- Focus: Border #d4b896
+- Text: Centered, 24px, Bold, White
+- Border radius: 8px
+- Gap between boxes: 12px
+- Auto-focus next box on input
+```
+
+**Timer:**
+```
+Text: "Code expires in 05:00"
+Font: 14px, Regular
+Color: #9ca3af
+Position: Below code inputs
+Centered
+```
+
+**Resend Link:**
+```
+Text: "Didn't receive code? [Resend]"
+Position: Below timer
+Margin-top: 16px
+Resend button: Only enabled after 60s
+```
+
+**Submit Button:**
+```
+Text: "Verify email"
+(Same styling as registration button)
+```
+
+---
+
+## 7. Forgot Password Form
+
+### 7.1 Structure
+
+**Header:**
+```
+Heading: "Reset your password"
+Subheading: "Enter your email and we'll send you a reset link"
+```
+
+**Fields:**
+1. Email input
+
+**Submit Button:**
+```
+Text: "Send reset link"
+```
+
+**Success State:**
+```
+Replace form with success message:
+Icon: Check circle (green)
+Heading: "Check your email"
+Message: "We sent a password reset link to [user@email.com]"
+Button: "Back to login"
+```
+
+---
+
+## 8. Password Reset Form
+
+### 8.1 Structure
+
+**Header:**
+```
+Heading: "Create new password"
+Subheading: "Your new password must be different from previous passwords"
+```
+
+**Fields:**
+1. New password (with strength indicator)
+2. Confirm password
+
+**Password Match Indicator:**
+```
+Display below confirm password field
+Green checkmark: "Passwords match"
+Red X: "Passwords don't match"
+Font: 14px
+```
+
+**Submit Button:**
+```
+Text: "Reset password"
+```
+
+**Success State:**
+```
+Icon: Check circle (green)
+Heading: "Password reset successful"
+Button: "Go to login"
+Auto-redirect after 3 seconds
+```
+
+---
+
+## 9. Design System
+
+### 9.1 Color Palette
+
+```
+Primary Colors:
+- Brand Gold: #d4b896
+- Light Gold: #e5d4b8
+- Dark Gold: #c4a886
+
+Backgrounds:
+- Panel Dark: #1a1a1a
+- Container Dark: #2a2a2a
+- Input Dark: #1f1f1f
+
+Text:
+- Primary: #ffffff
+- Secondary: #9ca3af
+- Tertiary: #6b7280
+
+Borders:
+- Default: #3a3a3a
+- Focus: #d4b896
+- Error: #ef4444
+
+States:
+- Success: #10b981
+- Error: #ef4444
+- Warning: #f59e0b
+- Info: #3b82f6
+```
+
+### 9.2 Typography
+
+```
+Font Family: 
+- Primary: 'Inter', sans-serif
+- Fallback: system-ui, -apple-system, sans-serif
+
+Headings:
+- H1: 36px, Bold (700)
+- H2: 28px, Semibold (600)
+- H3: 24px, Semibold (600)
+
+Body:
+- Large: 18px, Regular (400)
+- Medium: 16px, Regular (400)
+- Small: 14px, Regular (400)
+- Tiny: 12px, Regular (400)
+
+Line Heights:
+- Headings: 1.2
+- Body: 1.5
+```
+
+### 9.3 Spacing Scale
+
+```
+- xs: 4px
+- sm: 8px
+- md: 16px
+- lg: 24px
+- xl: 32px
+- 2xl: 48px
+- 3xl: 64px
+```
+
+### 9.4 Border Radius
+
+```
+- Small: 4px
+- Medium: 8px
+- Large: 12px
+- Full: 9999px (pill)
+```
+
+---
+
+## 10. Component States
+
+### 10.1 Input States
+
+**Default:**
+- Border: #3a3a3a
+- Background: #1f1f1f
+
+**Focus:**
+- Border: #d4b896
+- Background: #1f1f1f
+- Outline: None
+- Box shadow: 0 0 0 3px rgba(212, 184, 150, 0.1)
+
+**Error:**
+- Border: #ef4444
+- Background: #1f1f1f
+- Error message visible
+
+**Disabled:**
+- Border: #3a3a3a
+- Background: #1a1a1a
+- Opacity: 0.5
+- Cursor: not-allowed
+
+**Success:**
+- Border: #10b981
+- Background: #1f1f1f
+- Green checkmark icon (right)
+
+### 10.2 Button States
+
+**Primary Button:**
+- Default: #d4b896
+- Hover: #e5d4b8 + scale(1.01)
+- Active: #c4a886
+- Focus: Ring #d4b896 40% opacity
+- Disabled: #4a4a4a + opacity 0.6
+
+**Secondary Button (Social):**
+- Default: Background color + no shadow
+- Hover: Slight shadow + scale(1.01)
+- Active: Darker shadow
+
+---
+
+## 11. Animations & Transitions
+
+### 11.1 Form Transitions
+
+```css
+Form switch:
+- Fade out: 200ms ease-out
+- Fade in: 300ms ease-in
+- Opacity transition
+
+Input focus:
+- Border color: 150ms ease
+- Box shadow: 200ms ease
+
+Button hover:
+- Transform: 200ms ease
+- Background: 150ms ease
+```
+
+### 11.2 Carousel Animations
+
+```css
+Slide transition:
+- Duration: 800ms
+- Easing: cubic-bezier(0.4, 0, 0.2, 1)
+- Property: opacity, transform
+
+Dot indicator active:
+- Pulse animation: 2s infinite
+- Scale: 1 → 1.1 → 1
+```
+
+---
+
+## 12. Validation Rules
+
+### 12.1 Client-Side Validation
+
+**Email:**
+- Format: RFC 5322 compliant
+- Real-time validation on blur
+- Error: "Please enter a valid email address"
+
+**Password:**
+- Min length: 8 characters
+- Max length: 128 characters
+- Must contain:
+  - 1 uppercase letter
+  - 1 lowercase letter
+  - 1 number
+  - 1 special character
+- Real-time strength indicator
+- Error messages:
+  - "Password must be at least 8 characters"
+  - "Include at least one uppercase letter"
+  - "Include at least one number"
+  - "Include at least one special character"
+
+**Name Fields:**
+- Min length: 2 characters
+- Max length: 50 characters
+- Only letters, spaces, hyphens
+- Error: "Please enter a valid name"
+
+**Verification Code:**
+- Exactly 6 digits
+- Auto-submit when complete
+- Error: "Invalid verification code"
+
+### 12.2 Form Submission
+
+**Loading States:**
+- Disable all inputs
+- Show spinner in button
+- Prevent multiple submissions
+
+**Error Handling:**
+- Display errors below relevant fields
+- Scroll to first error
+- Focus first error field
+- Generic error: Toast notification at top
+
+**Success Handling:**
+- Success message or redirect
+- Clear form if staying on page
+- Auto-redirect delay: 2 seconds
+
+---
+
+## 13. Accessibility Requirements
+
+### 13.1 ARIA Labels
+
+```html
+All inputs:
+- aria-label or associated label
+- aria-required="true"
+- aria-invalid="true/false"
+- aria-describedby for error messages
+
+Buttons:
+- aria-label for icon buttons
+- aria-busy="true" when loading
+
+Form:
+- role="form"
+- aria-labelledby for form heading
+```
+
+### 13.2 Keyboard Navigation
+
+- Tab order: Logical top-to-bottom
+- Enter: Submit form
+- Escape: Close modals/overlays
+- Arrow keys: Navigate carousel
+- Space: Toggle checkboxes
+
+### 13.3 Screen Reader Support
+
+- Announce form errors
+- Announce loading states
+- Announce success messages
+- Skip links for navigation
+- Descriptive link text
+
+### 13.4 Focus Management
+
+- Visible focus indicators
+- Focus trap in modals
+- Return focus after actions
+- Logical tab order
+
+---
+
+## 14. Responsive Breakpoints
+
+### 14.1 Desktop (>1024px)
+- 50/50 split layout
+- Full carousel height
+- Max form width: 480px
+
+### 14.2 Tablet (768px-1024px)
+- 40/60 split (carousel/form)
+- Reduced carousel padding
+- Form max width: 100%
+
+### 14.3 Mobile (<768px)
+- Stacked layout
+- Carousel: 40vh height (condensed)
+- Smaller text in carousel (32px headlines)
+- Form: Full width
+- Padding reduced: 24px
+- Social buttons: Stack vertically
+- Name fields: Stack vertically
+
+---
+
+## 15. Performance Considerations
+
+### 15.1 Image Optimization
+- Carousel images: WebP format
+- Sizes: 1920×1080 (desktop), 768×768 (tablet), 480×640 (mobile)
+- Lazy loading for non-visible slides
+- Preload first slide image
+
+### 15.2 Code Splitting
+- Separate bundle for auth module
+- Lazy load form components
+- Async validation functions
+
+### 15.3 Loading States
+- Show skeleton screens
+- Optimistic UI updates
+- Progressive enhancement
+
+---
+
+## 16. Error Messages
+
+### 16.1 User-Facing Errors
+
+```
+Email errors:
+- "Please enter a valid email address"
+- "This email is already registered"
+- "Email not found"
+
+Password errors:
+- "Password must be at least 8 characters"
+- "Password is incorrect"
+- "Passwords don't match"
+
+Verification errors:
+- "Invalid verification code"
+- "Verification code expired"
+- "Too many attempts. Please try again later"
+
+Network errors:
+- "Connection error. Please check your internet"
+- "Something went wrong. Please try again"
+
+Rate limit:
+- "Too many attempts. Please wait 15 minutes"
+```
+
+---
+
+## 17. Development Notes
+
+### 17.1 React Component Structure
+
+```
+src/
+├── features/
+│   └── auth/
+│       ├── components/
+│       │   ├── AuthLayout.jsx
+│       │   ├── FeatureCarousel.jsx
+│       │   ├── RegistrationForm.jsx
+│       │   ├── LoginForm.jsx
+│       │   ├── EmailVerificationForm.jsx
+│       │   ├── ForgotPasswordForm.jsx
+│       │   └── PasswordResetForm.jsx
+│       ├── hooks/
+│       │   ├── useAuth.js
+│       │   └── useFormValidation.js
+│       └── services/
+│           └── authService.js
+```
+
+### 17.2 State Management
+
+```javascript
+// Auth context state
+{
+  user: null,
+  isAuthenticated: false,
+  isLoading: false,
+  error: null,
+  currentForm: 'registration' // or 'login', 'verify', etc.
+}
+```
+
+### 17.3 API Integration
+
+```javascript
+// Registration
+POST /api/auth/register/
+Body: { email, password, first_name, last_name }
+
+// Login
+POST /api/auth/login/
+Body: { email, password }
+
+// Email verification
+POST /api/auth/verify-email/
+Body: { code }
+
+// Password reset request
+POST /api/auth/password-reset/
+Body: { email }
+
+// Password reset confirm
+POST /api/auth/password-reset-confirm/
+Body: { token, new_password }
+```
+
+---
+
+## 18. Testing Requirements
+
+### 18.1 Unit Tests
+- Form validation functions
+- Password strength calculator
+- Email format validator
+
+### 18.2 Integration Tests
+- Registration flow
+- Login flow
+- Password reset flow
+- Email verification flow
+- Social auth (mock)
+
+### 18.3 E2E Tests
+- Complete registration journey
+- Login and logout
+- Password reset from email
+- Form validation errors
+- Responsive layout
+
+---
+
+## 19. Brand Integration
+
+### 19.1 Logo Usage
+- Primary logo: Full color on light backgrounds
+- White logo: On dark or photo backgrounds
+- Minimum size: 120px width
+- Clear space: Logo height × 0.5 on all sides
+
+### 19.2 Imagery Guidelines
+- Use warm, authentic pet photos
+- Show diverse pet species
+- Include people with pets (not just pets alone)
+- Natural lighting preferred
+- Avoid stock photo "look"
+- Show real emotions and connections
+
+### 19.3 Tone & Voice
+- Friendly and approachable
+- Compassionate and caring
+- Trustworthy and professional
+- Avoid corporate/cold language
+- Use "we" and "you" (conversational)
+
+---
+
+## 20. Implementation Checklist
+
+**Phase 1: Setup**
+- [ ] Create component structure
+- [ ] Setup routing
+- [ ] Configure authentication context
+- [ ] Setup form validation library
+- [ ] Import design tokens (colors, spacing, etc.)
+
+**Phase 2: Left Panel**
+- [ ] Build carousel component
+- [ ] Add slide content and images
+- [ ] Implement auto-rotation
+- [ ] Add manual navigation
+- [ ] Make responsive
+
+**Phase 3: Right Panel**
+- [ ] Build form container
+- [ ] Create registration form
+- [ ] Create login form
+- [ ] Create email verification form
+- [ ] Create forgot password form
+- [ ] Create password reset form
+- [ ] Implement form switching
+
+**Phase 4: Integration**
+- [ ] Connect to API endpoints
+- [ ] Implement error handling
+- [ ] Add loading states
+- [ ] Setup JWT token management
+- [ ] Implement social auth
+
+**Phase 5: Polish**
+- [ ] Add animations
+- [ ] Test all states
+- [ ] Accessibility audit
+- [ ] Responsive testing
+- [ ] Performance optimization
+- [ ] Cross-browser testing
+
+---
+
+## 21. Future Enhancements
+
+**Phase 2 Features:**
+- Two-factor authentication (SMS/app)
+- Biometric login (fingerprint/face)
+- Social profile import
+- Progressive registration (minimal info first)
+- Magic link login (passwordless)
+- Account recovery options
+- Session management dashboard
+
+---
+
+This specification provides complete guidance for designing and implementing the authentication experience for PetCircle, ensuring consistency, usability, and alignment with brand values.
