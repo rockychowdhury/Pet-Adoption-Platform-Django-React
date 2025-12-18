@@ -13,7 +13,7 @@ const NewMessageModal = ({ isOpen, onClose }) => {
     // Mock recent users / results
     const users = [
         { id: 1, name: 'Sarah Jenkins', role: 'Applicant', context: 'Applied to adopt Buddy', image: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=facearea&facepad=2&w=100&h=100&q=80' },
-        { id: 2, name: 'Paws Shelter', role: 'Shelter', context: 'Adoption Inquiry', image: 'https://images.unsplash.com/photo-1542596594-649edbc13630?auto=format&fit=facearea&facepad=2&w=100&h=100&q=80' },
+        { id: 2, name: 'Paws Rescue', role: 'Rescue', context: 'Adoption Inquiry', image: 'https://images.unsplash.com/photo-1542596594-649edbc13630?auto=format&fit=facearea&facepad=2&w=100&h=100&q=80' },
         { id: 3, name: 'Mike Ross', role: 'Pet Owner', context: 'Owner of Luna', image: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=facearea&facepad=2&w=100&h=100&q=80' },
     ];
 

@@ -53,15 +53,15 @@ const ListingModerationPage = () => {
         <div className="p-8">
             <div className="flex justify-between items-center mb-8">
                 <div>
-                    <h1 className="text-3xl font-bold text-gray-900">Listing Moderation</h1>
-                    <p className="text-gray-500 mt-1">Review and manage pet listings.</p>
+                    <h1 className="text-3xl font-bold text-text-primary">Listing Moderation</h1>
+                    <p className="text-text-secondary mt-1">Review and manage pet listings.</p>
                 </div>
                 <div className="flex gap-2">
                     {['pending_review', 'active', 'rejected'].map(status => (
                         <button
                             key={status}
                             onClick={() => setStatusFilter(status)}
-                            className={`px-4 py-2 rounded-full text-sm font-bold capitalize transition ${statusFilter === status ? 'bg-brand-primary text-white' : 'bg-white text-gray-600 border hover:bg-gray-50'
+                            className={`px-4 py-2 rounded-full text-sm font-bold capitalize transition ${statusFilter === status ? 'bg-brand-primary text-text-inverted' : 'bg-bg-surface text-text-secondary border border-border hover:bg-bg-secondary'
                                 }`}
                         >
                             {status.replace('_', ' ')}
@@ -74,7 +74,7 @@ const ListingModerationPage = () => {
                 {listings && listings.length > 0 ? (
                     listings.map(listing => (
                         <Card key={listing.id} className="p-6 flex flex-col md:flex-row gap-6">
-                            <div className="w-full md:w-48 h-48 bg-gray-100 rounded-xl overflow-hidden shrink-0">
+                            <div className="w-full md:w-48 h-48 bg-bg-secondary rounded-xl overflow-hidden shrink-0">
                                 <img
                                     src={listing.photo_url || 'https://via.placeholder.com/300?text=No+Image'}
                                     alt={listing.pet_name || listing.name}
@@ -85,8 +85,8 @@ const ListingModerationPage = () => {
                             <div className="flex-1">
                                 <div className="flex justify-between items-start mb-2">
                                     <div>
-                                        <h3 className="text-xl font-bold text-gray-900">{listing.pet_name || listing.name}</h3>
-                                        <p className="text-sm text-gray-500 capitalize">{listing.species} • {listing.breed} • {listing.age} months</p>
+                                        <h3 className="text-xl font-bold text-text-primary">{listing.pet_name || listing.name}</h3>
+                                        <p className="text-sm text-text-secondary capitalize">{listing.species} • {listing.breed} • {listing.age} months</p>
                                     </div>
                                     <Badge variant={
                                         listing.status === 'active' ? 'success' :
@@ -96,13 +96,13 @@ const ListingModerationPage = () => {
                                     </Badge>
                                 </div>
 
-                                <p className="text-gray-600 text-sm mb-4 line-clamp-3">
+                                <p className="text-text-secondary text-sm mb-4 line-clamp-3">
                                     {listing.rehoming_story || listing.description}
                                 </p>
 
-                                <div className="flex flex-wrap gap-4 text-xs text-gray-500 mb-6">
-                                    <span className="bg-gray-100 px-2 py-1 rounded">Fee: ${listing.adoption_fee}</span>
-                                    <span className="bg-gray-100 px-2 py-1 rounded">Owner Verified: {listing.owner_verified ? 'Yes' : 'No'}</span>
+                                <div className="flex flex-wrap gap-4 text-xs text-text-tertiary mb-6">
+                                    <span className="bg-bg-secondary px-2 py-1 rounded">Fee: ${listing.adoption_fee}</span>
+                                    <span className="bg-bg-secondary px-2 py-1 rounded">Owner Verified: {listing.owner_verified ? 'Yes' : 'No'}</span>
                                     {/* Additional info can go here */}
                                 </div>
 
@@ -140,8 +140,8 @@ const ListingModerationPage = () => {
                         </Card>
                     ))
                 ) : (
-                    <div className="text-center py-12 bg-gray-50 rounded-xl border border-dashed">
-                        <p className="text-gray-500">No listings found with status "{statusFilter.replace('_', ' ')}".</p>
+                    <div className="text-center py-12 bg-bg-surface rounded-xl border border-dashed border-border">
+                        <p className="text-text-tertiary">No listings found with status "{statusFilter.replace('_', ' ')}".</p>
                     </div>
                 )}
             </div>

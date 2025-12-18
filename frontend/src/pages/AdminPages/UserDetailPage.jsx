@@ -59,7 +59,7 @@ const UserDetailPage = () => {
                 </Button>
                 <div className="flex flex-col md:flex-row justify-between items-start gap-6">
                     <div className="flex items-center gap-6">
-                        <div className="w-24 h-24 rounded-full bg-gray-200 overflow-hidden border-4 border-white shadow-sm">
+                        <div className="w-24 h-24 rounded-full bg-bg-secondary overflow-hidden border-4 border-bg-surface shadow-sm">
                             <img src={user.avatar} alt={user.name} className="w-full h-full object-cover" />
                         </div>
                         <div>
@@ -89,7 +89,7 @@ const UserDetailPage = () => {
                         <button
                             key={tab.id}
                             onClick={() => setActiveTab(tab.id)}
-                            className={`flex items-center gap-2 px-2 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id ? 'border-brand-primary text-brand-primary' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+                            className={`flex items-center gap-2 px-2 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.id ? 'border-brand-primary text-brand-primary' : 'border-transparent text-text-secondary hover:text-text-primary'}`}
                         >
                             <tab.icon size={16} />
                             {tab.label}
@@ -108,33 +108,33 @@ const UserDetailPage = () => {
                                 <h3 className="text-lg font-bold mb-4">Personal Information</h3>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Full Name</label>
+                                        <label className="block text-xs font-bold text-text-tertiary uppercase mb-1">Full Name</label>
                                         <p className="font-medium">{user.name}</p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Username</label>
+                                        <label className="block text-xs font-bold text-text-tertiary uppercase mb-1">Username</label>
                                         <p className="font-medium">@{user.username}</p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Email Address</label>
+                                        <label className="block text-xs font-bold text-text-tertiary uppercase mb-1">Email Address</label>
                                         <div className="flex items-center gap-2">
                                             <p className="font-medium">{user.email}</p>
-                                            {user.verifications.email && <CheckCircle size={14} className="text-green-500" />}
+                                            {user.verifications.email && <CheckCircle size={14} className="text-status-success" />}
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Phone Number</label>
+                                        <label className="block text-xs font-bold text-text-tertiary uppercase mb-1">Phone Number</label>
                                         <div className="flex items-center gap-2">
                                             <p className="font-medium">{user.phone}</p>
-                                            {user.verifications.phone && <CheckCircle size={14} className="text-green-500" />}
+                                            {user.verifications.phone && <CheckCircle size={14} className="text-status-success" />}
                                         </div>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Role</label>
+                                        <label className="block text-xs font-bold text-text-tertiary uppercase mb-1">Role</label>
                                         <p className="font-medium">{user.role}</p>
                                     </div>
                                     <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Joined Date</label>
+                                        <label className="block text-xs font-bold text-text-tertiary uppercase mb-1">Joined Date</label>
                                         <p className="font-medium">{user.joinDate}</p>
                                     </div>
                                 </div>
@@ -142,7 +142,7 @@ const UserDetailPage = () => {
 
                             <Card className="p-6">
                                 <h3 className="text-lg font-bold mb-4">Account Notes</h3>
-                                <textarea className="w-full p-3 border border-gray-300 rounded-lg text-sm" rows="3" placeholder="Add administrative notes about this user..."></textarea>
+                                <textarea className="w-full p-3 border border-border rounded-lg text-sm bg-bg-surface text-text-primary" rows="3" placeholder="Add administrative notes about this user..."></textarea>
                                 <div className="mt-3 text-right">
                                     <Button size="sm" variant="primary">Save Note</Button>
                                 </div>
@@ -154,14 +154,14 @@ const UserDetailPage = () => {
                         <Card className="p-6">
                             <h3 className="text-lg font-bold mb-6">Verification Request Queue</h3>
                             {user.verifications.identity === 'Pending' ? (
-                                <div className="border border-orange-200 bg-orange-50 rounded-xl p-4">
+                                <div className="border border-status-warning/20 bg-status-warning/10 rounded-xl p-4">
                                     <div className="flex items-start gap-4">
-                                        <div className="p-3 bg-white rounded-lg border border-orange-100 shadow-sm">
-                                            <Shield className="text-orange-500" size={24} />
+                                        <div className="p-3 bg-bg-surface rounded-lg border border-status-warning/20 shadow-sm">
+                                            <Shield className="text-status-warning" size={24} />
                                         </div>
                                         <div className="flex-1">
-                                            <h4 className="font-bold text-gray-800">Identity Verification</h4>
-                                            <p className="text-sm text-gray-600 mb-2">Submitted ID Document on Dec 12, 2023</p>
+                                            <h4 className="font-bold text-text-primary">Identity Verification</h4>
+                                            <p className="text-sm text-text-secondary mb-2">Submitted ID Document on Dec 12, 2023</p>
                                             <div className="flex gap-2 mt-3">
                                                 <Button size="sm" variant="primary">Review Document</Button>
                                                 <Button size="sm" variant="outline">Reject</Button>
@@ -170,7 +170,7 @@ const UserDetailPage = () => {
                                     </div>
                                 </div>
                             ) : (
-                                <p className="text-gray-500">No pending verification requests.</p>
+                                <p className="text-text-tertiary">No pending verification requests.</p>
                             )}
                         </Card>
                     )}
@@ -179,22 +179,22 @@ const UserDetailPage = () => {
                 {/* Sidebar Stats */}
                 <div className="space-y-6">
                     <Card className="p-6">
-                        <h3 className="text-sm font-bold text-gray-500 uppercase mb-4">User Statistics</h3>
+                        <h3 className="text-sm font-bold text-text-tertiary uppercase mb-4">User Statistics</h3>
                         <div className="space-y-4">
-                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span className="text-gray-600">Applications</span>
+                            <div className="flex justify-between items-center py-2 border-b border-border">
+                                <span className="text-text-secondary">Applications</span>
                                 <span className="font-bold">{user.stats.applications}</span>
                             </div>
-                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span className="text-gray-600">Adoptions</span>
+                            <div className="flex justify-between items-center py-2 border-b border-border">
+                                <span className="text-text-secondary">Adoptions</span>
                                 <span className="font-bold">{user.stats.adoptions}</span>
                             </div>
-                            <div className="flex justify-between items-center py-2 border-b border-gray-100">
-                                <span className="text-gray-600">Reviews</span>
+                            <div className="flex justify-between items-center py-2 border-b border-border">
+                                <span className="text-text-secondary">Reviews</span>
                                 <span className="font-bold">{user.stats.reviews}</span>
                             </div>
                             <div className="flex justify-between items-center py-2">
-                                <span className="text-gray-600">Reports</span>
+                                <span className="text-text-secondary">Reports</span>
                                 <span className="font-bold">{user.stats.reports}</span>
                             </div>
                         </div>

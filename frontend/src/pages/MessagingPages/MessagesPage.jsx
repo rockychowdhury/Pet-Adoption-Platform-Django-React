@@ -81,7 +81,7 @@ const MessagesPage = () => {
     };
 
     return (
-        <div className="flex h-[calc(100vh-64px)] bg-[#FDFBF7] overflow-hidden">
+        <div className="flex h-[calc(100vh-64px)] bg-bg-primary overflow-hidden">
             {/* Sidebar (List) */}
             <div className={`${id ? 'hidden md:flex' : 'flex'} w-full md:w-auto h-full border-r border-border`}>
                 <ConversationList
@@ -100,8 +100,8 @@ const MessagesPage = () => {
                     />
                 ) : (
                     // Empty State
-                    <div className="flex-1 flex flex-col items-center justify-center text-text-secondary bg-[#FDFBF7]">
-                        <div className="w-32 h-32 bg-yellow-100 rounded-full flex items-center justify-center mb-6 text-yellow-500 animate-pulse-slow">
+                    <div className="flex-1 flex flex-col items-center justify-center text-text-secondary bg-bg-primary">
+                        <div className="w-32 h-32 bg-brand-primary/10 rounded-full flex items-center justify-center mb-6 text-brand-primary animate-pulse-slow">
                             <MessageSquare size={48} />
                         </div>
                         <h2 className="text-2xl font-bold text-text-primary mb-2 font-merriweather">Your Messages</h2>
