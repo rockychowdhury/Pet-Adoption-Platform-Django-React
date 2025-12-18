@@ -42,8 +42,8 @@ const ForgotPasswordPage = () => {
                     <>
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2 font-logo">Reset Password</h1>
-                            <p className="text-gray-500">
+                            <h1 className="text-3xl font-bold text-text-primary mb-2 font-logo">Reset Password</h1>
+                            <p className="text-text-secondary">
                                 Enter your email and we'll send you a reset link
                             </p>
                         </div>
@@ -56,7 +56,7 @@ const ForgotPasswordPage = () => {
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 placeholder="Email Address"
-                                startIcon={<Mail size={20} className="text-gray-400" />}
+                                startIcon={<Mail size={20} className="text-text-tertiary" />}
                                 error={error}
                                 required
                             />
@@ -77,15 +77,15 @@ const ForgotPasswordPage = () => {
                         {/* Success State */}
                         <div className="text-center">
                             <div className="flex justify-center mb-6">
-                                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-full bg-status-success/10 flex items-center justify-center">
                                     <CheckCircle size={32} className="text-status-success" />
                                 </div>
                             </div>
 
-                            <h1 className="text-2xl font-bold text-gray-900 mb-2 font-logo">Check your email!</h1>
-                            <p className="text-gray-500 mb-8">
+                            <h1 className="text-2xl font-bold text-text-primary mb-2 font-logo">Check your email!</h1>
+                            <p className="text-text-secondary mb-8">
                                 We sent password reset instructions to<br />
-                                <span className="font-medium text-gray-900">{email}</span>
+                                <span className="font-medium text-text-primary">{email}</span>
                             </p>
 
                             <Link to="/login">

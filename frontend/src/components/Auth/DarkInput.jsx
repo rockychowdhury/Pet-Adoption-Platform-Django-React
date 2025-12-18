@@ -33,9 +33,9 @@ const DarkInput = forwardRef(({
 
     // Standard Border Logic
     if (error) {
-        inputClasses += " border border-red-300 bg-red-50 text-red-900 placeholder-red-300 focus:ring-1 focus:ring-red-500";
+        inputClasses += " border border-status-error bg-status-error/10 text-status-error placeholder-status-error/50 focus:ring-1 focus:ring-status-error";
     } else {
-        inputClasses += " border border-gray-200 bg-gray-50 text-gray-900 placeholder-gray-400 focus:bg-white focus:border-gray-900 focus:ring-1 focus:ring-gray-900";
+        inputClasses += " border border-border bg-bg-surface text-text-primary placeholder-text-tertiary focus:bg-bg-surface focus:border-brand-primary focus:ring-1 focus:ring-brand-primary";
     }
 
     const finalClasses = `${inputClasses} ${className}`.trim();
@@ -43,7 +43,7 @@ const DarkInput = forwardRef(({
     return (
         <div className="w-full relative">
             {startIcon && (
-                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10 text-gray-400">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none z-10 text-text-tertiary">
                     {startIcon}
                 </div>
             )}
@@ -71,7 +71,7 @@ const DarkInput = forwardRef(({
             />
 
             {success && (
-                <p className="text-green-600 text-xs mt-1.5 font-medium">
+                <p className="text-status-success text-xs mt-1.5 font-medium">
                     {success}
                 </p>
             )}

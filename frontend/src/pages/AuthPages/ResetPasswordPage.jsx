@@ -102,8 +102,8 @@ const ResetPasswordPage = () => {
                     <>
                         {/* Header */}
                         <div className="text-center mb-8">
-                            <h1 className="text-3xl font-bold text-gray-900 mb-2 font-logo">New Password</h1>
-                            <p className="text-gray-500">
+                            <h1 className="text-3xl font-bold text-text-primary mb-2 font-logo">New Password</h1>
+                            <p className="text-text-secondary">
                                 Your new password must be different from previous passwords
                             </p>
                         </div>
@@ -119,14 +119,14 @@ const ResetPasswordPage = () => {
                                         value={formData.password}
                                         onChange={handleChange}
                                         placeholder="New Password"
-                                        startIcon={<Lock size={20} className="text-gray-400" />}
+                                        startIcon={<Lock size={20} className="text-text-tertiary" />}
 
                                         required
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
                                         aria-label={showPassword ? 'Hide password' : 'Show password'}
                                     >
                                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -145,13 +145,13 @@ const ResetPasswordPage = () => {
                                         value={formData.confirmPassword}
                                         onChange={handleChange}
                                         placeholder="Confirm Password"
-                                        startIcon={<Lock size={20} className="text-gray-400" />}
+                                        startIcon={<Lock size={20} className="text-text-tertiary" />}
                                         required
                                     />
                                     <button
                                         type="button"
                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
                                         aria-label={showConfirmPassword ? 'Hide password' : 'Show password'}
                                     >
                                         {showConfirmPassword ? <EyeOff size={20} /> : <Eye size={20} />}
@@ -183,17 +183,17 @@ const ResetPasswordPage = () => {
                         {/* Success State */}
                         <div className="text-center">
                             <div className="flex justify-center mb-6">
-                                <div className="w-16 h-16 rounded-full bg-green-50 flex items-center justify-center">
+                                <div className="w-16 h-16 rounded-full bg-status-success/10 flex items-center justify-center">
                                     <CheckCircle size={32} className="text-status-success" />
                                 </div>
                             </div>
 
-                            <h1 className="text-2xl font-bold text-gray-900 mb-2 font-logo">Success!</h1>
-                            <p className="text-gray-500 mb-6">
+                            <h1 className="text-2xl font-bold text-text-primary mb-2 font-logo">Success!</h1>
+                            <p className="text-text-secondary mb-6">
                                 Your password has been reset successfully
                             </p>
 
-                            <p className="text-sm text-gray-400 mb-6">
+                            <p className="text-sm text-text-tertiary mb-6">
                                 Redirecting to login in 3 seconds...
                             </p>
 

@@ -8,14 +8,14 @@ import Input from '../../components/common/Form/Input';
 import Checkbox from '../../components/common/Form/Checkbox';
 import useAdoption from '../../hooks/useAdoption';
 
-const AdopterProfileSetupPage = () => {
+const AdoptionProfileSetupPage = () => {
     const navigate = useNavigate();
     const [step, setStep] = useState(1);
-    const { useGetAdopterProfile, useUpdateAdopterProfile } = useAdoption();
+    const { useGetAdoptionProfile, useUpdateAdoptionProfile } = useAdoption();
 
     // Fetch existing profile
-    const { data: existingProfile, isLoading } = useGetAdopterProfile();
-    const updateProfileMutation = useUpdateAdopterProfile();
+    const { data: existingProfile, isLoading } = useGetAdoptionProfile();
+    const updateProfileMutation = useUpdateAdoptionProfile();
 
     // Form State
     const [formData, setFormData] = useState({
@@ -122,7 +122,7 @@ const AdopterProfileSetupPage = () => {
                 id: existingProfile?.id,
                 data: payload
             });
-            toast.success("Adopter Profile Saved!");
+            toast.success("Adoption Profile Saved!");
             navigate('/dashboard/profile'); // Redirect to profile view
         } catch (error) {
             console.error(error);
@@ -257,7 +257,7 @@ const AdopterProfileSetupPage = () => {
                 {formData.hasCurrentPets === 'Yes' && (
                     <div className="space-y-4">
                         {formData.currentPets.map((pet, idx) => (
-                            <div key={idx} className="p-4 bg-gray-50 rounded-xl border border-gray-100 relative group">
+                            <div key={idx} className="p-4 bg-bg-secondary rounded-xl border border-border relative group">
                                 <div className="grid grid-cols-3 gap-4">
                                     <select
                                         value={pet.species}
@@ -283,7 +283,7 @@ const AdopterProfileSetupPage = () => {
                                 </div>
                                 <button
                                     onClick={() => removePet(idx)}
-                                    className="text-xs text-red-500 hover:underline mt-2"
+                                    className="text-xs text-status-error hover:underline mt-2"
                                 >
                                     Remove
                                 </button>
@@ -322,13 +322,13 @@ const AdopterProfileSetupPage = () => {
                         ></textarea>
                     </div>
                 )}
-                <div className="bg-orange-50 p-4 rounded-xl border border-orange-100">
-                    <label className="block text-sm font-bold text-orange-900 mb-2">Have you ever surrendered a pet?</label>
+                <div className="bg-status-warning/10 p-4 rounded-xl border border-status-warning/20">
+                    <label className="block text-sm font-bold text-status-warning mb-2">Have you ever surrendered a pet?</label>
                     <div className="flex gap-4 mb-3">
                         {['Yes', 'No'].map(opt => (
                             <label key={opt} className="flex items-center gap-2 cursor-pointer">
                                 <input type="radio" name="surrendered" value={opt} checked={formData.surrendered === opt} onChange={(e) => handleInputChange('surrendered', e.target.value)} />
-                                <span className="text-orange-800">{opt}</span>
+                                <span className="text-status-warning">{opt}</span>
                             </label>
                         ))}
                     </div>
@@ -336,7 +336,7 @@ const AdopterProfileSetupPage = () => {
                         <textarea
                             value={formData.surrenderContext}
                             onChange={(e) => handleInputChange('surrenderContext', e.target.value)}
-                            className="w-full h-20 p-3 rounded-lg border border-orange-200 outline-none resize-none bg-white"
+                            className="w-full h-20 p-3 rounded-lg border border-status-warning/30 outline-none resize-none bg-bg-surface"
                         ></textarea>
                     )}
                 </div>
@@ -413,9 +413,9 @@ const AdopterProfileSetupPage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-12 px-4">
+        <div className="min-h-screen bg-bg-primary py-12 px-4">
             <div className="max-w-4xl mx-auto mb-12 text-center">
-                <h1 className="text-3xl font-bold text-text-primary mb-2">Create Your Adopter Profile</h1>
+                <h1 className="text-3xl font-bold text-text-primary mb-2">Create Your Adoption Profile</h1>
                 <p className="text-text-secondary">Complete your profile to apply for pet adoptions</p>
             </div>
 
@@ -423,15 +423,15 @@ const AdopterProfileSetupPage = () => {
             <div className="max-w-3xl mx-auto mb-12">
                 <div className="flex justify-between relative">
                     {/* Line */}
-                    <div className="absolute top-1/2 left-0 w-full h-1 bg-gray-200 -z-10 -translate-y-1/2 rounded-full"></div>
+                    <div className="absolute top-1/2 left-0 w-full h-1 bg-border -z-10 -translate-y-1/2 rounded-full"></div>
                     <div className="absolute top-1/2 left-0 h-1 bg-brand-primary -z-10 -translate-y-1/2 rounded-full transition-all duration-500" style={{ width: `${((step - 1) / (STEPS.length - 1)) * 100}%` }}></div>
 
                     {STEPS.map((s, i) => (
-                        <div key={s.id} className="flex flex-col items-center gap-2 bg-[#FDFBF7] px-2">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= s.id ? 'bg-brand-primary text-white shadow-lg scale-110' : 'bg-white border-2 border-gray-200 text-gray-400'}`}>
+                        <div key={s.id} className="flex flex-col items-center gap-2 bg-bg-primary px-2">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-300 ${step >= s.id ? 'bg-brand-primary text-text-inverted shadow-lg scale-110' : 'bg-bg-surface border-2 border-border text-text-tertiary'}`}>
                                 {step > s.id ? <CheckCircle size={20} /> : s.icon}
                             </div>
-                            <span className={`text-xs font-bold transition-colors ${step >= s.id ? 'text-brand-primary' : 'text-gray-400'}`}>{s.title}</span>
+                            <span className={`text-xs font-bold transition-colors ${step >= s.id ? 'text-brand-primary' : 'text-text-tertiary'}`}>{s.title}</span>
                         </div>
                     ))}
                 </div>
@@ -476,4 +476,4 @@ const AdopterProfileSetupPage = () => {
     );
 };
 
-export default AdopterProfileSetupPage;
+export default AdoptionProfileSetupPage;

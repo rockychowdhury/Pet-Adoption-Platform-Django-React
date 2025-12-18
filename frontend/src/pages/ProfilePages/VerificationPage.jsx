@@ -66,19 +66,19 @@ const VerificationPage = () => {
                         </div>
                         <ul className="space-y-3 text-sm text-text-secondary mb-6">
                             <li className="flex gap-2">
-                                <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+                                <CheckCircle size={16} className="text-status-success flex-shrink-0" />
                                 <span>Boost your profile visibility</span>
                             </li>
                             <li className="flex gap-2">
-                                <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+                                <CheckCircle size={16} className="text-status-success flex-shrink-0" />
                                 <span>Higher acceptance rate for applications</span>
                             </li>
                             <li className="flex gap-2">
-                                <CheckCircle size={16} className="text-green-500 flex-shrink-0" />
+                                <CheckCircle size={16} className="text-status-success flex-shrink-0" />
                                 <span>Access to emergency vet advice</span>
                             </li>
                         </ul>
-                        <div className="p-4 bg-blue-50 rounded-xl border border-blue-100 text-xs text-blue-800">
+                        <div className="p-4 bg-status-info/10 rounded-xl border border-status-info/20 text-xs text-status-info">
                             <p className="font-bold mb-1">Privacy Guarantee</p>
                             Your documents are encrypted and only used for verification. They are never shared publicly.
                         </div>
@@ -96,7 +96,7 @@ const VerificationPage = () => {
                                         <p className="font-bold text-text-primary">Email Address</p>
                                         <p className="text-sm text-text-secondary">sarah.jenkins@example.com</p>
                                     </div>
-                                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center gap-1">
+                                    <span className="px-3 py-1 bg-status-success/10 text-status-success text-xs font-bold rounded-full flex items-center gap-1">
                                         <CheckCircle size={12} /> Verified
                                     </span>
                                 </div>
@@ -105,7 +105,7 @@ const VerificationPage = () => {
                                         <p className="font-bold text-text-primary">Phone Number</p>
                                         <p className="text-sm text-text-secondary">+1 (555) 123-4567</p>
                                     </div>
-                                    <span className="px-3 py-1 bg-green-100 text-green-700 text-xs font-bold rounded-full flex items-center gap-1">
+                                    <span className="px-3 py-1 bg-status-success/10 text-status-success text-xs font-bold rounded-full flex items-center gap-1">
                                         <CheckCircle size={12} /> Verified
                                     </span>
                                 </div>
@@ -196,7 +196,7 @@ const VerificationPage = () => {
 
                     {step === 4 && (
                         <Card className="p-12 text-center">
-                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-6">
+                            <div className="w-20 h-20 bg-status-success/10 rounded-full flex items-center justify-center text-status-success mx-auto mb-6">
                                 <CheckCircle size={40} />
                             </div>
                             <h2 className="text-2xl font-bold text-text-primary mb-3">Submission Received!</h2>

@@ -88,10 +88,10 @@ const VerifyEmailPage = () => {
         <AuthSplitLayout carousel={<FeatureCarousel />}>
             <div className="w-full max-w-md mx-auto">
                 <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-2 font-logo">Verify Your Email</h1>
-                    <p className="text-gray-500">
+                    <h1 className="text-3xl font-bold text-text-primary mb-2 font-logo">Verify Your Email</h1>
+                    <p className="text-text-secondary">
                         We sent a verification code to <br />
-                        <span className="font-medium text-gray-900">{email}</span>
+                        <span className="font-medium text-text-primary">{email}</span>
                     </p>
                 </div>
 
@@ -118,7 +118,7 @@ const VerifyEmailPage = () => {
                 </DarkButton>
 
                 {/* Resend Link */}
-                <div className="text-center text-sm text-gray-500 mb-4">
+                <div className="text-center text-sm text-text-secondary mb-4">
                     <span>Didn't receive the code? </span>
                     {canResend ? (
                         <button
@@ -129,7 +129,7 @@ const VerifyEmailPage = () => {
                             Resend
                         </button>
                     ) : (
-                        <span className="text-gray-400">
+                        <span className="text-text-tertiary">
                             Resend in {resendTimer}s
                         </span>
                     )}
@@ -137,9 +137,9 @@ const VerifyEmailPage = () => {
 
                 {/* Helper Text */}
                 <div className="text-center">
-                    <p className="text-xs text-gray-400">
+                    <p className="text-xs text-text-tertiary">
                         Check your spam folder or{' '}
-                        <Link to="/register" className="text-gray-900 font-bold hover:underline transition-colors">
+                        <Link to="/register" className="text-text-primary font-bold hover:underline transition-colors">
                             use a different email
                         </Link>
                     </p>

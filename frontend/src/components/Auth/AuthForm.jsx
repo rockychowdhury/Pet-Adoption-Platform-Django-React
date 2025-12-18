@@ -122,10 +122,10 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
 
             {/* Header */}
             <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2 font-logo">
+                <h1 className="text-3xl font-bold text-text-primary mb-2 font-logo">
                     {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                 </h1>
-                <p className="text-gray-500">
+                <p className="text-text-secondary">
                     {mode === 'login'
                         ? 'Enter your details to access your account'
                         : 'Join our community of pet lovers today'}
@@ -160,7 +160,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Email Address"
-                    startIcon={<Mail size={20} className="text-gray-400" />}
+                    startIcon={<Mail size={20} className="text-text-tertiary" />}
                     error={fieldErrors.email}
                     required
                 />
@@ -172,7 +172,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                         value={formData.password}
                         onChange={handleChange}
                         placeholder={mode === 'register' ? "Create Password" : "Password"}
-                        startIcon={<Lock size={20} className="text-gray-400" />}
+                        startIcon={<Lock size={20} className="text-text-tertiary" />}
 
                         error={fieldErrors.password}
                         required
@@ -180,7 +180,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                     <button
                         type="button"
                         onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
                     >
                         {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -203,10 +203,10 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                             name="termsAccepted"
                             checked={formData.termsAccepted}
                             onChange={handleChange}
-                            className="mt-1 w-4 h-4 rounded border-gray-300 text-brand-primary focus:ring-brand-primary"
+                            className="mt-1 w-4 h-4 rounded border-border text-brand-primary focus:ring-brand-primary"
                         />
-                        <span className="text-sm text-gray-500">
-                            I agree to the <Link to="/terms" className="text-gray-900 font-bold hover:underline">Terms</Link> and <Link to="/privacy" className="text-gray-900 font-bold hover:underline">Privacy Policy</Link>
+                        <span className="text-sm text-text-secondary">
+                            I agree to the <Link to="/terms" className="text-text-primary font-bold hover:underline">Terms</Link> and <Link to="/privacy" className="text-text-primary font-bold hover:underline">Privacy Policy</Link>
                         </span>
                     </label>
                 )}
@@ -219,10 +219,10 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
 
                 <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">
-                        <div className="w-full border-t border-gray-200"></div>
+                        <div className="w-full border-t border-border"></div>
                     </div>
                     <div className="relative flex justify-center text-sm">
-                        <span className="px-2 bg-white text-gray-500">Or continue with</span>
+                        <span className="px-2 bg-bg-surface text-text-secondary">Or continue with</span>
                     </div>
                 </div>
 

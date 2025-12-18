@@ -99,9 +99,9 @@ const ProfilePage = () => {
     );
 
     const Badge = ({ type }) => {
-        if (type === 'verified') return <span className="p-1.5 bg-blue-100 text-blue-600 rounded-full" title="Verified Identity"><User size={12} /></span>;
-        if (type === 'service_provider') return <span className="p-1.5 bg-purple-100 text-purple-700 rounded-full" title="Service Provider"><Briefcase size={12} /></span>;
-        if (type === 'admin') return <span className="p-1.5 bg-red-100 text-red-700 rounded-full" title="Admin"><Shield size={12} /></span>;
+        if (type === 'verified') return <span className="p-1.5 bg-status-info/10 text-status-info rounded-full" title="Verified Identity"><User size={12} /></span>;
+        if (type === 'service_provider') return <span className="p-1.5 bg-brand-secondary/10 text-brand-secondary rounded-full" title="Service Provider"><Briefcase size={12} /></span>;
+        if (type === 'admin') return <span className="p-1.5 bg-status-error/10 text-status-error rounded-full" title="Admin"><Shield size={12} /></span>;
         return null;
     };
 
@@ -131,9 +131,9 @@ const ProfilePage = () => {
                                 {user.role === 'service_provider' && <Badge type="service_provider" />}
                                 {user.role === 'admin' && <Badge type="admin" />}
                             </div>
-                            <p className="text-gray-500 font-medium">{user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Pet Lover'}</p>
+                            <p className="text-text-secondary font-medium">{user.role ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : 'Pet Lover'}</p>
                             {user.location && (
-                                <div className="flex items-center text-sm text-gray-500 mt-1">
+                                <div className="flex items-center text-sm text-text-secondary mt-1">
                                     <MapPin size={14} className="mr-1" />
                                     {user.location}
                                 </div>
@@ -142,9 +142,9 @@ const ProfilePage = () => {
 
                         <div className="flex items-center gap-6 bg-bg-secondary px-6 py-3 rounded-2xl">
                             <StatItem label="Followers" value={user.followers_count || 0} />
-                            <div className="w-px h-8 bg-gray-300"></div>
+                            <div className="w-px h-8 bg-border"></div>
                             <StatItem label="Following" value={user.following_count || 0} />
-                            <div className="w-px h-8 bg-gray-300"></div>
+                            <div className="w-px h-8 bg-border"></div>
                             <StatItem label="Posts" value={0} /> {/* Placeholder for now */}
                         </div>
 
@@ -157,7 +157,7 @@ const ProfilePage = () => {
                     </div>
 
                     {message && (
-                        <div className={`mt-6 p-4 rounded-xl ${message.includes('success') ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
+                        <div className={`mt-6 p-4 rounded-xl ${message.includes('success') ? 'bg-status-success/10 text-status-success' : 'bg-status-error/10 text-status-error'}`}>
                             {message}
                         </div>
                     )}
@@ -189,7 +189,7 @@ const ProfilePage = () => {
                         <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+                                    <label className="block text-sm font-medium text-text-secondary mb-1">First Name</label>
                                     <input
                                         type="text"
                                         name="first_name"
@@ -199,7 +199,7 @@ const ProfilePage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+                                    <label className="block text-sm font-medium text-text-secondary mb-1">Last Name</label>
                                     <input
                                         type="text"
                                         name="last_name"
@@ -209,7 +209,7 @@ const ProfilePage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+                                    <label className="block text-sm font-medium text-text-secondary mb-1">Phone Number</label>
                                     <input
                                         type="text"
                                         name="phone_number"
@@ -219,7 +219,7 @@ const ProfilePage = () => {
                                     />
                                 </div>
                                 <div>
-                                    <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
+                                    <label className="block text-sm font-medium text-text-secondary mb-1">Photo URL</label>
                                     <input
                                         type="text"
                                         name="photoURL"
@@ -230,7 +230,7 @@ const ProfilePage = () => {
                                 </div>
                             </div>
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+                                <label className="block text-sm font-medium text-text-secondary mb-1">Bio</label>
                                 <textarea
                                     name="bio"
                                     rows="4"
@@ -257,20 +257,20 @@ const ProfilePage = () => {
                                     <div className="md:col-span-2 space-y-6">
                                         <div>
                                             <h3 className="text-lg font-bold text-natural mb-3">About Me</h3>
-                                            <p className="text-gray-600 leading-relaxed whitespace-pre-line">
+                                            <p className="text-text-secondary leading-relaxed whitespace-pre-line">
                                                 {user.bio || 'No bio added yet. Tell the community about yourself!'}
                                             </p>
                                         </div>
                                     </div>
                                     <div className="space-y-4">
                                         <div className="space-y-4">
-                                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Contact Info</h3>
+                                            <h3 className="text-sm font-bold text-text-tertiary uppercase tracking-wider">Contact Info</h3>
                                             <div className="space-y-3">
-                                                <div className="flex items-center text-gray-600">
+                                                <div className="flex items-center text-text-secondary">
                                                     <Mail size={18} className="mr-3 text-brand-secondary" />
                                                     <span className="text-sm">{user.email}</span>
                                                 </div>
-                                                <div className="flex items-center text-gray-600">
+                                                <div className="flex items-center text-text-secondary">
                                                     <Phone size={18} className="mr-3 text-brand-secondary" />
                                                     <span className="text-sm">{user.phone_number || 'Not provided'}</span>
                                                 </div>
@@ -278,8 +278,8 @@ const ProfilePage = () => {
                                         </div>
 
                                         {/* Role Management Section */}
-                                        <div className="space-y-4 pt-4 border-t border-gray-100">
-                                            <h3 className="text-sm font-bold text-gray-400 uppercase tracking-wider">Account Status</h3>
+                                        <div className="space-y-4 pt-4 border-t border-border">
+                                            <h3 className="text-sm font-bold text-text-tertiary uppercase tracking-wider">Account Status</h3>
                                             <div className="bg-bg-surface rounded-xl border border-border p-4">
                                                 <div className="flex items-center justify-between mb-2">
                                                     <span className="font-medium text-natural">Current Role</span>
@@ -289,8 +289,8 @@ const ProfilePage = () => {
                                                 {user.role === 'user' && (
                                                     <div className="mt-4">
                                                         {roleRequest ? (
-                                                            <div className="flex items-center text-sm text-yellow-600 bg-yellow-50 p-2 rounded-lg">
-                                                                <div className="w-2 h-2 rounded-full bg-yellow-500 mr-2 animate-pulse"></div>
+                                                            <div className="flex items-center text-sm text-status-warning bg-status-warning/10 p-2 rounded-lg">
+                                                                <div className="w-2 h-2 rounded-full bg-status-warning mr-2 animate-pulse"></div>
                                                                 Request for Service Provider status is Pending
                                                             </div>
                                                         ) : (
@@ -325,18 +325,18 @@ const ProfilePage = () => {
                                                     onClick={() => navigate(`/user/pets/${pet.id}`)}
                                                     className="bg-bg-surface rounded-2xl p-4 shadow-sm border border-border hover:shadow-md transition cursor-pointer card-hover"
                                                 >
-                                                    <div className="h-40 rounded-xl bg-gray-100 mb-4 overflow-hidden">
+                                                    <div className="h-40 rounded-xl bg-bg-secondary mb-4 overflow-hidden">
                                                         {pet.profile_photo ? (
                                                             <img src={pet.profile_photo} alt={pet.name} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            <div className="w-full h-full flex items-center justify-center text-gray-300">
+                                                            <div className="w-full h-full flex items-center justify-center text-text-tertiary">
                                                                 <span className="text-4xl">🐾</span>
                                                             </div>
                                                         )}
                                                     </div>
                                                     <div>
                                                         <h4 className="font-bold text-lg text-natural">{pet.name}</h4>
-                                                        <p className="text-sm text-gray-500">{pet.breed} • {pet.age} yrs</p>
+                                                        <p className="text-sm text-text-secondary">{pet.breed} • {pet.age} yrs</p>
                                                     </div>
                                                 </div>
                                             ))}
@@ -344,8 +344,8 @@ const ProfilePage = () => {
                                     ) : (
                                         <div className="text-center py-12 bg-bg-surface rounded-2xl border-2 border-dashed border-border">
                                             <div className="text-4xl mb-3">🐾</div>
-                                            <h3 className="text-lg font-bold text-gray-400">No pets added yet</h3>
-                                            <p className="text-gray-400 text-sm mt-1">Show off your furry friends to the community!</p>
+                                            <h3 className="text-lg font-bold text-text-tertiary">No pets added yet</h3>
+                                            <p className="text-text-tertiary text-sm mt-1">Show off your furry friends to the community!</p>
                                         </div>
                                     )}
                                 </div>
@@ -354,8 +354,8 @@ const ProfilePage = () => {
                             {activeTab === 'posts' && (
                                 <div className="text-center py-12">
                                     <div className="text-4xl mb-3">📝</div>
-                                    <h3 className="text-lg font-bold text-gray-400">No posts yet</h3>
-                                    <p className="text-gray-400 text-sm mt-1">Share your first update with the community!</p>
+                                    <h3 className="text-lg font-bold text-text-tertiary">No posts yet</h3>
+                                    <p className="text-text-tertiary text-sm mt-1">Share your first update with the community!</p>
                                 </div>
                             )}
                         </>

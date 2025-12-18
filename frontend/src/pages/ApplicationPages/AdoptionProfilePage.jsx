@@ -5,7 +5,7 @@ import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
 
-const AdopterProfilePage = () => {
+const AdoptionProfilePage = () => {
     // Mock Data simulating a completed profile
     const profile = {
         readinessScore: 85,
@@ -75,18 +75,18 @@ const AdopterProfilePage = () => {
     ];
 
     const getScoreColor = (score) => {
-        if (score >= 80) return 'text-green-500 border-green-500';
-        if (score >= 60) return 'text-yellow-500 border-yellow-500';
-        return 'text-orange-500 border-orange-500';
+        if (score >= 80) return 'text-status-success border-status-success';
+        if (score >= 60) return 'text-status-warning border-status-warning';
+        return 'text-status-error border-status-error';
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-12 px-4">
+        <div className="min-h-screen bg-bg-primary py-12 px-4">
             <div className="max-w-5xl mx-auto">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-text-primary">My Adopter Profile</h1>
+                        <h1 className="text-3xl font-bold text-text-primary">My Adoption Profile</h1>
                         <p className="text-text-secondary mt-1">Manage your information and view your readiness score</p>
                     </div>
                     <Link to="/adopter-profile/edit">
@@ -105,7 +105,7 @@ const AdopterProfilePage = () => {
                             <div className="relative w-40 h-40 mx-auto mb-6 flex items-center justify-center">
                                 {/* Simple SVG Circle Progress Mock */}
                                 <svg className="transform -rotate-90 w-full h-full">
-                                    <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-gray-100" />
+                                    <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" className="text-bg-secondary" />
                                     <circle cx="80" cy="80" r="70" stroke="currentColor" strokeWidth="10" fill="transparent" strokeDasharray="440" strokeDashoffset={440 - (440 * profile.readinessScore) / 100} className={`${getScoreColor(profile.readinessScore)} transition-all duration-1000`} strokeLinecap="round" />
                                 </svg>
                                 <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-center">
@@ -122,9 +122,9 @@ const AdopterProfilePage = () => {
                             </p>
 
                             <div className="mt-8 text-left space-y-4 pt-6 border-t border-border">
-                                <div className="flex justify-between text-sm"><span>Housing</span> <span className="font-bold text-green-600">Excellent</span></div>
-                                <div className="flex justify-between text-sm"><span>Experience</span> <span className="font-bold text-green-600">Great</span></div>
-                                <div className="flex justify-between text-sm"><span>Lifestyle</span> <span className="font-bold text-yellow-600">Good</span></div>
+                                <div className="flex justify-between text-sm"><span>Housing</span> <span className="font-bold text-status-success">Excellent</span></div>
+                                <div className="flex justify-between text-sm"><span>Experience</span> <span className="font-bold text-status-success">Great</span></div>
+                                <div className="flex justify-between text-sm"><span>Lifestyle</span> <span className="font-bold text-status-warning">Good</span></div>
                             </div>
                         </Card>
                     </div>
@@ -140,7 +140,7 @@ const AdopterProfilePage = () => {
                                         </div>
                                         <h3 className="font-bold text-lg text-text-primary">{section.title}</h3>
                                     </div>
-                                    <button className="text-gray-400 hover:text-brand-primary transition-colors">
+                                    <button className="text-text-tertiary hover:text-brand-primary transition-colors">
                                         <Edit2 size={16} />
                                     </button>
                                 </div>
@@ -162,4 +162,4 @@ const AdopterProfilePage = () => {
     );
 };
 
-export default AdopterProfilePage;
+export default AdoptionProfilePage;

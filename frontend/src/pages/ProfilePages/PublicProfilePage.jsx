@@ -86,8 +86,8 @@ const PublicProfilePage = () => {
 
     if (error) return (
         <div className="max-w-4xl mx-auto p-8 text-center">
-            <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-red-100 mb-4">
-                <AlertCircle className="text-red-500" size={32} />
+            <div className="inline-flex justify-center items-center w-16 h-16 rounded-full bg-status-error/10 mb-4">
+                <AlertCircle className="text-status-error" size={32} />
             </div>
             <h2 className="text-2xl font-bold text-gray-800 mb-2">User not found</h2>
             <p className="text-gray-600">The user you are looking for does not exist or has been removed.</p>
@@ -116,7 +116,7 @@ const PublicProfilePage = () => {
                                     className="w-32 h-32 rounded-full border-4 border-white shadow-lg object-cover"
                                 />
                                 {profile.is_verified && (
-                                    <div className="absolute bottom-2 right-2 bg-blue-500 text-white p-1.5 rounded-full border-2 border-white" title="Verified User">
+                                    <div className="absolute bottom-2 right-2 bg-brand-secondary text-white p-1.5 rounded-full border-2 border-white" title="Verified User">
                                         <Shield size={16} fill="currentColor" />
                                     </div>
                                 )}
@@ -196,8 +196,8 @@ const PublicProfilePage = () => {
                                     key={tab}
                                     onClick={() => setActiveTab(tab)}
                                     className={`flex-1 py-2.5 px-4 rounded-xl text-sm font-bold capitalize transition-all ${activeTab === tab
-                                            ? 'bg-brand-primary text-text-inverted shadow-md'
-                                            : 'text-text-secondary hover:bg-bg-secondary hover:text-text-primary'
+                                        ? 'bg-brand-primary text-text-inverted shadow-md'
+                                        : 'text-text-secondary hover:bg-bg-secondary hover:text-text-primary'
                                         }`}
                                 >
                                     {tab}
@@ -231,7 +231,7 @@ const PublicProfilePage = () => {
                                     <div className="bg-bg-surface p-4 rounded-2xl border border-border text-center">
                                         <div className="flex items-center justify-center gap-1">
                                             <span className="text-2xl font-bold text-brand-primary">{profile.stats.rating}</span>
-                                            <Star size={16} className="text-yellow-400 fill-current" />
+                                            <Star size={16} className="text-status-warning fill-current" />
                                         </div>
                                         <p className="text-xs font-semibold text-text-tertiary uppercase tracking-wider mt-1">Rating</p>
                                     </div>
@@ -282,7 +282,7 @@ const PublicProfilePage = () => {
                                             </div>
                                             <div className="flex gap-0.5">
                                                 {[...Array(5)].map((_, i) => (
-                                                    <Star key={i} size={14} className={`${i < review.rating ? 'text-yellow-400 fill-current' : 'text-gray-200'}`} />
+                                                    <Star key={i} size={14} className={`${i < review.rating ? 'text-status-warning fill-current' : 'text-gray-200'}`} />
                                                 ))}
                                             </div>
                                         </div>
