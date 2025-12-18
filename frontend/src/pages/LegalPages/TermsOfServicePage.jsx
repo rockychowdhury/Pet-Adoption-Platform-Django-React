@@ -19,6 +19,7 @@ const TermsOfServicePage = () => {
     const [activeSection, setActiveSection] = useState('acceptance');
     const contentRef = useRef(null);
     const [isDownloading, setIsDownloading] = useState(false);
+    const hasTriggeredDownload = useRef(false);
 
     const sections = [
         { id: 'acceptance', title: '1. Acceptance of Terms' },
@@ -45,6 +46,22 @@ const TermsOfServicePage = () => {
 
     const handleDownloadPDF = () => {
         setIsDownloading(true);
+        // Refresh with a download flag to ensure fresh server-side data
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('download', 'true');
+        window.location.href = currentUrl.toString();
+    };
+
+    const triggerDownload = () => {
+        if (hasTriggeredDownload.current) return;
+        hasTriggeredDownload.current = true;
+
+        setIsDownloading(true);
+
+        // Clean up URL immediately to prevent multiple triggers
+        const cleanUrl = window.location.protocol + "//" + window.location.host + window.location.pathname;
+        window.history.replaceState({ path: cleanUrl }, '', cleanUrl);
+
         const element = contentRef.current;
         const opt = {
             margin: [10, 10, 15, 10],
@@ -62,6 +79,11 @@ const TermsOfServicePage = () => {
 
     // Optional: Update active section on scroll
     useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('download') === 'true') {
+            triggerDownload();
+        }
+
         const handleScroll = () => {
             // Offset must exceed scroll-margin-top (scroll-mt-32 = 128px)
             const scrollPosition = window.scrollY + 160;
