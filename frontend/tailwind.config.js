@@ -45,6 +45,7 @@ export default {
       },
       fontFamily: {
         inter: ['Inter', 'sans-serif'],
+        jakarta: ['Plus Jakarta Sans', 'sans-serif'],
         poppins: ['Poppins', 'sans-serif'],
         logo: ['Concert One', 'sans-serif'],
         roboto: ['Roboto', 'sans-serif'],

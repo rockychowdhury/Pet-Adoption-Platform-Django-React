@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
-import { Menu, X, Bell, MessageSquare, User, LogOut, ChevronDown } from 'lucide-react';
+import { Menu, X, Bell, MessageSquare, User, LogOut, ChevronDown, Sun, Moon } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
+import { useTheme } from '../../context/ThemeContext';
 import Button from './Buttons/Button';
 import IconButton from './Buttons/IconButton';
 import Avatar from './Display/Avatar';
@@ -18,6 +19,7 @@ const Navbar = () => {
     const [authMode, setAuthMode] = useState('login');
 
     const { user, logout } = useAuth();
+    const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
 
@@ -39,7 +41,7 @@ const Navbar = () => {
 
     return (
         <>
-            <nav className="bg-white/80 backdrop-blur-md fixed top-0 left-0 w-full z-50 border-b border-gray-100 transition-all duration-300">
+            <nav className="bg-bg-surface/95 backdrop-blur-3xl fixed top-0 left-0 w-full z-50 border-b border-border/40 transition-all duration-500 shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center h-20">
 
@@ -49,7 +51,7 @@ const Navbar = () => {
                         </Link>
 
                         {/* Desktop Navigation - Center */}
-                        <div className="hidden md:flex items-center gap-1 bg-gray-100/50 p-1.5 rounded-full border border-gray-200/50 shadow-inner">
+                        <div className="hidden md:flex items-center gap-1 bg-bg-secondary/40 p-1.5 rounded-full transition-all duration-300">
                             <NavLink to="/" label="Home" active={isActive('/')} />
                             <NavLink to="/adopt" label="Find a Pet" active={isActive('/adopt')} />
                             <NavLink to="/services" label="Services" active={isActive('/services')} />
@@ -58,41 +60,54 @@ const Navbar = () => {
                         </div>
 
                         {/* Desktop Actions - Right */}
-                        <div className="hidden md:flex items-center gap-4">
+                        <div className="hidden md:flex items-center gap-3">
+                            {/* Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2.5 rounded-full bg-bg-secondary hover:bg-bg-secondary/80 text-text-secondary hover:text-text-primary transition-all duration-300"
+                                aria-label="Toggle theme"
+                            >
+                                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                            </button>
+
                             {user ? (
-                                <div className="flex items-center gap-4">
-                                    <IconButton
-                                        icon={<MessageSquare size={20} />}
-                                        variant="ghost"
-                                        label="Messages"
-                                        onClick={() => navigate('/messages')}
-                                        className="text-text-secondary hover:text-brand-primary hover:bg-brand-primary/5 transition-colors duration-300"
-                                    />
-                                    <IconButton
-                                        icon={<Bell size={20} />}
-                                        variant="ghost"
-                                        label="Notifications"
-                                        className="text-text-secondary hover:text-brand-primary hover:bg-brand-primary/5 transition-colors duration-300"
-                                    />
+                                <>
+                                    <div className="flex items-center gap-1.5 p-1 bg-bg-secondary/40 rounded-full border border-border/30">
+                                        <IconButton
+                                            icon={<MessageSquare size={19} />}
+                                            variant="ghost"
+                                            label="Messages"
+                                            onClick={() => navigate('/messages')}
+                                            className="text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-all duration-300 w-9 h-9"
+                                        />
+                                        <IconButton
+                                            icon={<Bell size={19} />}
+                                            variant="ghost"
+                                            label="Notifications"
+                                            className="text-text-secondary hover:text-text-primary hover:bg-bg-surface transition-all duration-300 w-9 h-9"
+                                        />
+                                    </div>
 
                                     {/* Profile Dropdown */}
                                     <div className="relative">
                                         <button
                                             onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                            className="flex items-center gap-3 pl-1 pr-3 py-1 rounded-full border border-gray-200 hover:border-brand-primary/30 hover:bg-gray-50 transition-all duration-300"
+                                            className="flex items-center gap-2.5 p-1 rounded-full hover:bg-bg-secondary transition-all duration-300 group hover:ring-2 hover:ring-brand-primary/20"
                                         >
-                                            <Avatar
-                                                initials={user.first_name ? user.first_name[0] : 'U'}
-                                                photoURL={user.photoURL}
-                                                size="sm"
-                                                className="w-8 h-8 text-sm"
-                                            />
-                                            <ChevronDown size={14} className={`text-text-secondary transition-transform duration-300 ${isProfileOpen ? 'rotate-180' : ''}`} />
+                                            <div className="relative flex-shrink-0">
+                                                <Avatar
+                                                    initials={user.first_name ? user.first_name[0] : 'U'}
+                                                    photoURL={user.photoURL}
+                                                    size="sm"
+                                                    className="w-8 h-8 text-sm border border-border/10 group-hover:border-brand-primary/30 transition-all duration-300 shadow-sm"
+                                                />
+                                            </div>
+                                            <ChevronDown size={14} className={`text-text-secondary transition-transform duration-300 mr-1.5 ${isProfileOpen ? 'rotate-180' : ''}`} />
                                         </button>
 
                                         {isProfileOpen && (
-                                            <div className="absolute right-0 mt-3 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 py-2 animate-fade-in origin-top-right z-50">
-                                                <div className="px-4 py-3 border-b border-gray-100">
+                                            <div className="absolute right-0 mt-3 w-56 bg-bg-surface rounded-2xl shadow-xl border border-border py-2 animate-fade-in origin-top-right z-50">
+                                                <div className="px-4 py-3 border-b border-border">
                                                     <p className="text-sm font-bold text-text-primary">{user.first_name} {user.last_name}</p>
                                                     <p className="text-xs text-text-secondary truncate">{user.email}</p>
                                                 </div>
@@ -102,15 +117,15 @@ const Navbar = () => {
                                                     <DropdownLink to="/dashboard/my-pets" icon={<User size={16} />} label="My Pets" />
                                                     <Link
                                                         to="/rehoming/create"
-                                                        className="flex items-center gap-3 px-4 py-2.5 mx-2 my-1 text-sm text-brand-primary bg-brand-primary/5 rounded-xl hover:bg-brand-primary/10 transition-colors duration-300 font-medium"
+                                                        className="flex items-center gap-3 px-4 py-2.5 mx-2 my-1 text-sm text-brand-primary bg-brand-primary/10 rounded-xl hover:bg-brand-primary/20 transition-all duration-300 font-bold"
                                                     >
                                                         List a Pet
                                                     </Link>
                                                 </div>
-                                                <div className="border-t border-gray-100 mt-1 pt-1">
+                                                <div className="border-t border-border mt-1 pt-1">
                                                     <button
                                                         onClick={handleLogout}
-                                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 transition-colors duration-300 text-left"
+                                                        className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-status-error hover:bg-status-error/10 transition-colors duration-300 text-left"
                                                     >
                                                         <LogOut size={16} />
                                                         Sign Out
@@ -119,7 +134,7 @@ const Navbar = () => {
                                             </div>
                                         )}
                                     </div>
-                                </div>
+                                </>
                             ) : (
                                 <div className="flex items-center gap-3">
                                     <Button
@@ -141,12 +156,21 @@ const Navbar = () => {
                         </div>
 
                         {/* Mobile Menu Button */}
-                        <div className="md:hidden">
+                        <div className="md:hidden flex items-center gap-2">
+                            {/* Mobile Theme Toggle */}
+                            <button
+                                onClick={toggleTheme}
+                                className="p-2 rounded-full bg-bg-secondary text-text-secondary"
+                                aria-label="Toggle theme"
+                            >
+                                {theme === 'dark' ? <Sun size={18} /> : <Moon size={18} />}
+                            </button>
                             <IconButton
                                 icon={isMenuOpen ? <X size={24} /> : <Menu size={24} />}
                                 variant="ghost"
                                 onClick={() => setIsMenuOpen(!isMenuOpen)}
                                 label="Menu"
+                                className="text-text-primary"
                             />
                         </div>
                     </div>
@@ -154,7 +178,7 @@ const Navbar = () => {
 
                 {/* Mobile Menu */}
                 {isMenuOpen && (
-                    <div className="md:hidden bg-white border-t border-gray-100 absolute w-full left-0 animate-slide-down shadow-xl h-screen">
+                    <div className="md:hidden bg-bg-surface border-t border-border absolute w-full left-0 animate-slide-down shadow-xl h-screen">
                         <div className="px-4 py-6 space-y-4">
                             <MobileNavLink to="/" label="Home" onClick={() => setIsMenuOpen(false)} active={isActive('/')} />
                             <MobileNavLink to="/adopt" label="Find a Pet" onClick={() => setIsMenuOpen(false)} active={isActive('/adopt')} />
@@ -162,13 +186,13 @@ const Navbar = () => {
                             <MobileNavLink to="/community" label="Community" onClick={() => setIsMenuOpen(false)} active={isActive('/community')} />
                             <MobileNavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} active={isActive('/about')} />
 
-                            <div className="border-t border-gray-100 my-4 pt-4">
+                            <div className="border-t border-border my-4 pt-4">
                                 {user ? (
                                     <>
                                         <MobileNavLink to="/dashboard" label="Dashboard" onClick={() => setIsMenuOpen(false)} active={isActive('/dashboard')} />
                                         <button
                                             onClick={handleLogout}
-                                            className="w-full text-left px-4 py-3 text-red-500 font-medium hover:bg-red-50 rounded-xl transition-colors duration-300"
+                                            className="w-full text-left px-4 py-3 text-status-error font-bold hover:bg-status-error/10 rounded-xl transition-all duration-300"
                                         >
                                             Sign Out
                                         </button>
@@ -195,7 +219,7 @@ const Navbar = () => {
                         </div>
                     </div>
                 )}
-            </nav>
+            </nav >
 
             <AuthModal
                 isOpen={isAuthModalOpen}
@@ -210,9 +234,9 @@ const Navbar = () => {
 const NavLink = ({ to, label, active }) => (
     <Link
         to={to}
-        className={`relative px-5 py-2 rounded-full text-sm font-bold transition-all duration-500 ease-out ${active
-            ? 'bg-white text-text-primary shadow-sm scale-100'
-            : 'text-text-secondary hover:text-text-primary hover:bg-white/60'
+        className={`relative px-5 py-2.5 rounded-full text-[11px] font-black uppercase tracking-[0.2em] transition-all duration-500 ease-out font-jakarta ${active
+            ? 'bg-brand-primary/10 text-brand-primary'
+            : 'text-text-secondary/70 hover:text-text-primary hover:bg-bg-secondary'
             }`}
     >
         {label}
@@ -223,9 +247,9 @@ const MobileNavLink = ({ to, label, onClick, active }) => (
     <Link
         to={to}
         onClick={onClick}
-        className={`block px-4 py-3 text-lg font-medium rounded-xl transition-all duration-300 ${active
-            ? 'bg-brand-primary/10 text-brand-primary font-bold'
-            : 'text-text-secondary hover:text-text-primary hover:bg-gray-50'
+        className={`block px-4 py-3 text-lg font-black rounded-xl transition-all duration-300 ${active
+            ? 'bg-bg-secondary text-text-primary'
+            : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
             }`}
     >
         {label}
@@ -235,7 +259,7 @@ const MobileNavLink = ({ to, label, onClick, active }) => (
 const DropdownLink = ({ to, icon, label }) => (
     <Link
         to={to}
-        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-gray-50 transition-colors duration-200"
+        className="flex items-center gap-3 px-4 py-2.5 text-sm text-text-secondary hover:text-text-primary hover:bg-bg-secondary transition-colors duration-200"
     >
         {icon}
         {label}

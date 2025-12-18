@@ -1,6 +1,6 @@
 import React from 'react';
 import HeroSection from '../../components/LandingPage/HeroSection';
-import FeaturedPets from '../../components/LandingPage/FeaturedPets';
+import TrustSection from '../../components/LandingPage/TrustSection';
 import FeaturesSection from '../../components/LandingPage/FeaturesSection';
 import HowItWorks from '../../components/LandingPage/HowItWorks';
 import Footer from '../../components/LandingPage/Footer';
@@ -24,7 +24,7 @@ const HomePage = () => {
                 {window.location.pathname === '/' && (
                     <>
                         <HeroSection />
-                        <FeaturedPets />
+                        <TrustSection />
                         <FeaturesSection />
                         <HowItWorks />
                     </>

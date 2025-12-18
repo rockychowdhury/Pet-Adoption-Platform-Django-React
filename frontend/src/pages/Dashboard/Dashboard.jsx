@@ -4,7 +4,7 @@ import { Link } from 'react-router';
 import useAPI from '../../hooks/useAPI';
 import { Clock, CheckCircle, XCircle, AlertCircle, Search, Plus, MessageSquare, Calendar, Phone, FileText, ChevronRight } from 'lucide-react';
 
-const AdopterDashboard = () => {
+const Dashboard = () => {
     const api = useAPI();
     const [activeTab, setActiveTab] = useState('applications');
 
@@ -95,11 +95,11 @@ const AdopterDashboard = () => {
                                                     Submitted {new Date(app.created_at).toLocaleDateString()} • {app.pet_breed || 'Breed Unknown'} • {app.pet_age ? `${app.pet_age} months` : 'Age Unknown'} • {app.owner_name || 'Owner'}
                                                 </p>
                                             </div>
-                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${app.status === 'pending' ? 'bg-orange-100 text-orange-700' :
-                                                app.status === 'approved' ? 'bg-green-100 text-green-700' :
-                                                    app.status === 'adopted' ? 'bg-purple-100 text-purple-700' :
-                                                        app.status === 'interview_scheduled' ? 'bg-blue-100 text-blue-700' :
-                                                            'bg-red-100 text-red-700'
+                                            <span className={`px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${app.status === 'pending' ? 'bg-status-warning/10 text-status-warning' :
+                                                app.status === 'approved' ? 'bg-status-success/10 text-status-success' :
+                                                    app.status === 'adopted' ? 'bg-brand-primary/10 text-brand-primary' :
+                                                        app.status === 'interview_scheduled' ? 'bg-status-info/10 text-status-info' :
+                                                            'bg-status-error/10 text-status-error'
                                                 }`}>
                                                 {app.status === 'pending' ? 'Pending Review' :
                                                     app.status === 'rejected' ? 'Not a Match' :
@@ -115,20 +115,20 @@ const AdopterDashboard = () => {
 
                                         {/* Feedback Section (if rejected) */}
                                         {app.status === 'rejected' && app.rejection_reason && (
-                                            <div className="bg-red-50 p-4 rounded-xl border border-red-100 mb-4">
-                                                <div className="flex items-center gap-2 text-red-600 mb-2">
+                                            <div className="bg-status-error/5 p-4 rounded-xl border border-status-error/10 mb-4">
+                                                <div className="flex items-center gap-2 text-status-error mb-2">
                                                     <AlertCircle size={14} />
-                                                    <p className="text-[10px] font-bold uppercase tracking-widest">Shelter Feedback</p>
+                                                    <p className="text-[10px] font-bold uppercase tracking-widest">Owner Feedback</p>
                                                 </div>
-                                                <p className="text-sm text-red-800 leading-relaxed">{app.rejection_reason}</p>
+                                                <p className="text-sm text-text-primary leading-relaxed">{app.rejection_reason}</p>
                                             </div>
                                         )}
 
                                         {/* Interview Invite Section */}
                                         {app.status === 'interview_scheduled' && interview && (
-                                            <div className="bg-blue-50 p-5 rounded-xl border border-blue-100 mb-4">
+                                            <div className="bg-status-info/10 p-5 rounded-xl border border-status-info/20 mb-4">
                                                 <div className="flex justify-between items-start">
-                                                    <div className="flex items-center gap-2 text-blue-700 mb-3">
+                                                    <div className="flex items-center gap-2 text-status-info mb-3">
                                                         <Calendar size={16} />
                                                         <p className="text-[10px] font-bold uppercase tracking-widest">Interview Invitation</p>
                                                     </div>
@@ -136,22 +136,22 @@ const AdopterDashboard = () => {
                                                         href={createCalendarUrl()}
                                                         target="_blank"
                                                         rel="noreferrer"
-                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-white border border-blue-200 rounded-lg text-xs font-bold text-blue-700 hover:bg-blue-50 transition"
+                                                        className="inline-flex items-center gap-1 px-3 py-1 bg-bg-surface border border-status-info/30 rounded-lg text-xs font-bold text-status-info hover:bg-status-info/20 transition"
                                                     >
                                                         <Plus size={12} /> Add to Calendar
                                                     </a>
                                                 </div>
                                                 <div className="space-y-2">
-                                                    <p className="text-sm text-blue-900 font-bold">
+                                                    <p className="text-sm text-text-primary font-bold">
                                                         Date: {new Date(interview.date_time).toLocaleString()}
                                                     </p>
                                                     {interview.location && (
                                                         <p className="text-sm">
-                                                            Location/Link: <a href={interview.location.startsWith('http') ? interview.location : '#'} target={interview.location.startsWith('http') ? "_blank" : "_self"} rel="noreferrer" className="text-blue-600 underline font-medium">{interview.location}</a>
+                                                            Location/Link: <a href={interview.location.startsWith('http') ? interview.location : '#'} target={interview.location.startsWith('http') ? "_blank" : "_self"} rel="noreferrer" className="text-brand-primary underline font-medium">{interview.location}</a>
                                                         </p>
                                                     )}
                                                     {interview.notes && (
-                                                        <p className="text-xs text-blue-800 italic">"{interview.notes}"</p>
+                                                        <p className="text-xs text-text-secondary italic">"{interview.notes}"</p>
                                                     )}
                                                 </div>
                                             </div>
@@ -209,4 +209,4 @@ const AdopterDashboard = () => {
     );
 };
 
-export default AdopterDashboard;
+export default Dashboard;

@@ -7,7 +7,7 @@ import aboutImage2 from '../../assets/about2.jpg';
 const AboutPage = () => {
     const stats = [
         { label: 'Pets Adopted', value: '15,000+', icon: Heart },
-        { label: 'Partner Shelters', value: '500+', icon: Home },
+        { label: 'Partner Rescues', value: '500+', icon: Home },
         { label: 'Success Rate', value: '98%', icon: Activity },
         { label: 'Support Available', value: '24/7', icon: Clock },
     ];
@@ -56,11 +56,11 @@ const AboutPage = () => {
             name: 'Ravi Patel',
             role: 'Head of Product',
             image: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=400&q=80',
-            description: 'Designs flows that make it easy to apply, chat with shelters, and stay informed.'
+            description: 'Designs flows that make it easy to apply, chat with owners, and stay informed.'
         },
         {
             name: 'Maria Lopez',
-            role: 'Shelter Partnerships',
+            role: 'Rescue Partnerships',
             image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=400&q=80',
             description: 'Supports rescues with dashboards, training, and heart-centered onboarding.'
         },
@@ -76,7 +76,7 @@ const AboutPage = () => {
 
     const testimonials = [
         {
-            text: "The chat with our shelter made us feel supported from day one. We knew exactly what to expect before Milo came home.",
+            text: "The chat with the owner made us feel supported from day one. We knew exactly what to expect before Milo came home.",
             author: "Jordan & Sam",
             role: "Adopted Milo, 2 y/o mixed breed",
             image: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=100&q=80"
@@ -84,7 +84,7 @@ const AboutPage = () => {
         {
             text: "Managing our pets and applications in one dashboard means we can spend more time caring for animals, not on spreadsheets.",
             author: "Bright Paws Rescue",
-            role: "Shelter partner since 2021",
+            role: 'Rescue partner since 2021',
             image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100&q=80"
         },
         {
@@ -337,7 +337,7 @@ const AboutPage = () => {
                     <div className="relative z-10 max-w-3xl mx-auto">
                         <h2 className="text-4xl md:text-5xl font-bold text-white mb-6 font-serif">Ready to Make a Difference?</h2>
                         <p className="text-white/80 text-lg md:text-xl mb-12 leading-relaxed font-light">
-                            Whether you're looking to adopt, share a pet's story, or support as a shelter partner, FurEver Home gives you everything you need to create more happy endings.
+                            Whether you're looking to adopt, share a pet's story, or support as a partner, FurEver Home gives you everything you need to create more happy endings.
                         </p>
 
                         <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">

@@ -29,22 +29,21 @@ const HeroSection = () => {
                     {/* #SAVELIFE Badge */}
                     <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-full w-fit shadow-sm mb-6">
                         <Sparkles className="text-brand-secondary fill-brand-secondary" size={20} />
-                        <span className="text-xs font-bold tracking-widest text-text-secondary uppercase">#SAVELIFE</span>
+                        <span className="text-[10px] font-black tracking-[0.2em] text-text-secondary uppercase">#SAVELIFE</span>
                     </div>
 
                     {/* Main Heading */}
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-text-primary leading-[1.1] mb-6 font-logo tracking-tight relative">
-                        Find Your Perfect <br />
-                        Pet <span className="text-brand-secondary relative inline-block">
-                            Companion
-                        </span> <br />
-                        Today
+                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-text-primary leading-[1.1] mb-6 font-logo tracking-tight relative">
+                        The Community- <br />
+                        Driven Pet <span className="text-brand-secondary relative inline-block">
+                            Network
+                        </span>
                     </h1>
 
                     {/* Subheading */}
                     <div className="mb-10 max-w-md relative">
-                        <p className="text-text-secondary text-lg leading-relaxed">
-                            Thousands of pets waiting for a loving home. Start your adoption journey now.
+                        <p className="text-text-secondary text-lg leading-relaxed font-medium">
+                            The safe, transparent, and direct way to rehome or adopt your next best friend.
                         </p>
                     </div>
 
@@ -56,17 +55,17 @@ const HeroSection = () => {
                             <img className="w-12 h-12 rounded-full border-2 border-bg-surface object-cover" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&w=100&q=80" alt="User" />
                         </div>
                         <div>
-                            <p className="font-bold text-text-primary text-lg">15M+</p>
-                            <p className="text-xs text-text-secondary">Active Shelters <br /> across the world</p>
+                            <p className="font-black text-text-primary text-xl font-jakarta leading-none mb-1">25K+</p>
+                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Verified Owners <br /> & Pet Lovers</p>
                         </div>
                     </div>
 
                     {/* CTA Buttons */}
                     <div className="flex gap-4">
-                        <button className="btn-primary px-8 py-4 rounded-full">
+                        <button className="btn-primary px-8 py-4 rounded-full font-black text-[13px] uppercase tracking-widest">
                             Adopt Now
                         </button>
-                        <button className="btn-outline px-8 py-4 rounded-full">
+                        <button className="btn-outline px-8 py-4 rounded-full font-black text-[13px] uppercase tracking-widest">
                             Join Us
                         </button>
                     </div>
@@ -81,12 +80,12 @@ const HeroSection = () => {
                     <div className="relative z-20 w-full max-w-2xl px-4 flex justify-center items-center">
 
                         {/* Layer 3: Floating Glass Card 1 (Top Right) - BEHIND Image */}
-                        <div className="absolute top-5 right-4 md:right-0 bg-white/95 backdrop-blur-md p-4 rounded-full shadow-lg border border-white/20 animate-float z-0 transform translate-x-1/2 flex items-center gap-2">
+                        <div className="absolute top-5 right-4 md:right-0 bg-white/95 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-white/20 animate-float z-0 transform translate-x-1/2 flex items-center gap-2">
                             <div className="w-4 h-4 bg-brand-secondary rounded-full flex items-center justify-center">
                                 <ShieldCheck size={12} className="text-white" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="text-xs font-bold text-text-secondary">Verified owners & listings</span>
+                                <span className="text-[11px] font-black text-text-secondary tracking-tight">Verified owners & listings</span>
                             </div>
                         </div>
 
@@ -98,13 +97,13 @@ const HeroSection = () => {
                         />
 
                         {/* Layer 4: Floating Glass Card 2 (Bottom Right) - IN FRONT OF Image */}
-                        <div className="absolute bottom-10 right-0 md:-right-6 bg-white p-4 rounded-2xl shadow-soft border border-border animate-float-delayed z-30 flex items-center gap-3">
-                            <div className="bg-brand-secondary/10 p-2.5 rounded-full text-brand-secondary">
+                        <div className="absolute bottom-10 right-0 md:-right-6 bg-white p-4 rounded-[32px] shadow-soft border border-border animate-float-delayed z-30 flex items-center gap-3">
+                            <div className="bg-brand-secondary/10 p-2.5 rounded-2xl text-brand-secondary">
                                 <Heart size={20} fill="currentColor" />
                             </div>
                             <div>
-                                <p className="text-xs text-text-secondary font-bold uppercase tracking-wider">100% Love</p>
-                                <p className="text-sm font-bold text-text-primary">Guaranteed</p>
+                                <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest leading-none mb-1">100% Love</p>
+                                <p className="text-[15px] font-black text-text-primary tracking-tight">Guaranteed Reach</p>
                             </div>
                         </div>
 
@@ -118,7 +117,7 @@ const HeroSection = () => {
                     <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
                         {[...Array(12)].map((_, i) => (
                             <div key={i} className="flex items-center gap-8 text-sm md:text-base font-bold tracking-widest uppercase">
-                                <span>ADOPT A PET • SAVE A LIFE • FIND LOVE</span>
+                                <span>COMMUNITY FIRST • DIRECT REHOMING • VERIFIED TRUST</span>
                                 <span>•</span>
                             </div>
                         ))}

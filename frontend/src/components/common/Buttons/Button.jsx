@@ -10,6 +10,7 @@ const Button = ({
     leftIcon,
     rightIcon,
     children,
+    type = 'button',
     className = '',
     ...props
 }) => {

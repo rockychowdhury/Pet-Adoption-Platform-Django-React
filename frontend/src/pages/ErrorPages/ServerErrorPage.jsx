@@ -14,7 +14,7 @@ const ServerErrorPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FFF8E7] flex flex-col font-inter relative overflow-hidden">
+        <div className="min-h-screen bg-bg-primary flex flex-col font-inter relative overflow-hidden">
             {/* ... header ... */}
             <header className="px-6 py-6 md:px-12 flex justify-between items-center z-20">
                 <Link to="/">
@@ -44,7 +44,7 @@ const ServerErrorPage = () => {
                     </div>
                 )}
 
-                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[15rem] md:text-[25rem] font-bold text-[#E8DFD0] select-none pointer-events-none z-0">
+                <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-[15rem] md:text-[25rem] font-bold text-bg-secondary select-none pointer-events-none z-0">
                     500
                 </div>
 
@@ -57,7 +57,7 @@ const ServerErrorPage = () => {
                                 className="w-full h-full object-cover"
                             />
                         </div>
-                        <div className="absolute -top-6 -left-6 w-14 h-14 md:w-16 md:h-16 bg-[#EF4444] text-white rounded-full flex items-center justify-center shadow-lg border-4 border-[#FFF8E7] animate-bounce-slow">
+                        <div className="absolute -top-6 -left-6 w-14 h-14 md:w-16 md:h-16 bg-status-error text-text-inverted rounded-full flex items-center justify-center shadow-lg border-4 border-bg-primary animate-bounce-slow">
                             <AlertTriangle size={28} strokeWidth={2.5} />
                         </div>
                     </div>
@@ -72,20 +72,20 @@ const ServerErrorPage = () => {
                     <div className="flex flex-col sm:flex-row items-center gap-4 w-full sm:w-auto">
                         <button
                             onClick={handleTryAgain}
-                            className="w-full sm:w-auto px-8 py-3 bg-[#2D2D2D] text-white rounded-full font-semibold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-lg hover:shadow-xl active:scale-95"
+                            className="w-full sm:w-auto px-8 py-3 bg-text-primary text-bg-primary rounded-full font-semibold flex items-center justify-center gap-2 hover:bg-black transition-all shadow-lg hover:shadow-xl active:scale-95"
                         >
                             <RefreshCcw size={18} />
                             Try Again
                         </button>
                         <Link
                             to="/"
-                            className="w-full sm:w-auto px-8 py-3 bg-transparent border-2 border-[#E5E7EB] text-text-primary rounded-full font-semibold flex items-center justify-center gap-2 hover:bg-[#F3F4F6] hover:border-[#D1D5DB] transition-all"
+                            className="w-full sm:w-auto px-8 py-3 bg-transparent border-2 border-border text-text-primary rounded-full font-semibold flex items-center justify-center gap-2 hover:bg-bg-secondary hover:border-text-tertiary transition-all"
                         >
                             Go to Homepage
                         </Link>
                     </div>
 
-                    <p className="mt-12 text-sm text-[#9CA3AF]">
+                    <p className="mt-12 text-sm text-text-tertiary">
                         If the problem persists, please <Link to="/contact" className="underline hover:text-text-primary transition-colors">contact support</Link>.
                     </p>
                 </div>

@@ -29,7 +29,7 @@ const Avatar = ({
     };
 
     return (
-        <div className={`relative inline-block ${className}`} {...props}>
+        <div className={`relative inline-block rounded-full ${className}`} {...props}>
             <div className={`relative overflow-hidden rounded-full ${sizes[size]} bg-brand-primary text-text-inverted flex items-center justify-center font-bold border-2 border-bg-surface shadow-sm`}>
                 {src ? (
                     <img src={src} alt={alt} className="w-full h-full object-cover" />

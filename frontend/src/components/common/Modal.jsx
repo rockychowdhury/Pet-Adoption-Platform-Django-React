@@ -16,8 +16,8 @@ const Modal = ({ isOpen, onClose, title, children }) => {
     if (!isOpen) return null;
 
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm transition-opacity duration-300">
-            <div className={`bg-white rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]`}>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-bg-overlay backdrop-blur-sm transition-opacity duration-300">
+            <div className={`bg-bg-surface rounded-3xl shadow-2xl w-full max-w-md relative overflow-hidden animate-fade-in-up flex flex-col max-h-[90vh]`}>
                 {title && (
                     <div className="flex justify-between items-center p-6 border-b border-border shrink-0">
                         <h3 className="text-2xl font-bold text-text-primary font-logo">{title}</h3>

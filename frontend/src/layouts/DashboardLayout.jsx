@@ -53,11 +53,11 @@ const DashboardLayout = () => {
             <aside className="w-72 bg-bg-surface border-r border-border hidden md:flex flex-col fixed h-full z-10">
                 {/* User header */}
                 <div className="px-6 pt-8 pb-6 flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 rounded-full bg-bg-secondary overflow-hidden border-4 border-bg-primary shadow-md">
+                    <div className="w-20 h-20 rounded-full bg-bg-secondary overflow-hidden border-4 border-bg-primary shadow-soft">
                         {user?.photoURL ? (
                             <img src={user.photoURL} alt={user.first_name} className="w-full h-full object-cover" />
                         ) : (
-                            <div className="w-full h-full flex items-center justify-center text-text-secondary font-bold text-xl">
+                            <div className="w-full h-full flex items-center justify-center text-text-secondary font-bold text-xl uppercase">
                                 {user?.first_name?.[0] || '?'}
                             </div>
                         )}
@@ -112,7 +112,7 @@ const DashboardLayout = () => {
                     </Link>
                     <button
                         onClick={handleLogout}
-                        className="flex items-center gap-2 text-xs font-bold text-status-error hover:text-red-600 transition w-full"
+                        className="flex items-center gap-2 text-xs font-bold text-status-error hover:opacity-80 transition w-full"
                     >
                         <LogOut size={16} />
                         Log Out

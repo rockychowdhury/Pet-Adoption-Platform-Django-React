@@ -11,50 +11,50 @@ const ContactPage = () => {
     };
 
     return (
-        <div className="bg-[#FFF8E7] min-h-screen font-inter text-text-primary py-12 md:py-20">
+        <div className="bg-bg-primary min-h-screen font-inter text-text-primary py-12 md:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="text-center mb-16">
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-[#2D2D2D]">Contact Us</h1>
-                    <p className="text-lg text-[#57534E]">
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4 font-serif text-text-primary">Contact Us</h1>
+                    <p className="text-lg text-text-secondary">
                         We're here to help! Send us a message and we'll respond within 24 hours.
                     </p>
                 </div>
 
                 <div className="grid lg:grid-cols-2 gap-8 items-start">
                     {/* Left Column: Contact Form */}
-                    <div className="bg-white rounded-[2rem] shadow-sm p-8 md:p-12 border border-[#F3F4F6]">
+                    <div className="bg-bg-surface rounded-[2rem] shadow-sm p-8 md:p-12 border border-border">
                         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                             {/* Full Name */}
                             <div>
-                                <label className="block text-sm font-bold text-[#2D2D2D] mb-2">Full Name</label>
+                                <label className="block text-sm font-bold text-text-primary mb-2">Full Name</label>
                                 <input
                                     type="text"
-                                    className={`w-full h-12 px-4 rounded-xl border ${errors.fullName ? 'border-red-500' : 'border-[#E5E7EB]'} bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#A68A6D]/20 focus:border-[#A68A6D] transition`}
+                                    className={`w-full h-12 px-4 rounded-xl border ${errors.fullName ? 'border-status-error' : 'border-border'} bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition`}
                                     placeholder="Enter your name"
                                     {...register("fullName", { required: true })}
                                 />
-                                {errors.fullName && <span className="text-red-500 text-xs mt-1">Required</span>}
+                                {errors.fullName && <span className="text-status-error text-xs mt-1">Required</span>}
                             </div>
 
                             {/* Email Address */}
                             <div>
-                                <label className="block text-sm font-bold text-[#2D2D2D] mb-2">Email Address</label>
+                                <label className="block text-sm font-bold text-text-primary mb-2">Email Address</label>
                                 <input
                                     type="email"
-                                    className={`w-full h-12 px-4 rounded-xl border ${errors.email ? 'border-red-500' : 'border-[#E5E7EB]'} bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#A68A6D]/20 focus:border-[#A68A6D] transition`}
+                                    className={`w-full h-12 px-4 rounded-xl border ${errors.email ? 'border-status-error' : 'border-border'} bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition`}
                                     placeholder="you@example.com"
                                     {...register("email", { required: true, pattern: /^\S+@\S+$/i })}
                                 />
-                                {errors.email && <span className="text-red-500 text-xs mt-1">Valid email required</span>}
+                                {errors.email && <span className="text-status-error text-xs mt-1">Valid email required</span>}
                             </div>
 
                             {/* Subject */}
                             <div>
-                                <label className="block text-sm font-bold text-[#2D2D2D] mb-2">Subject</label>
+                                <label className="block text-sm font-bold text-text-primary mb-2">Subject</label>
                                 <div className="relative">
                                     <select
-                                        className="w-full h-12 px-4 rounded-xl border border-[#E5E7EB] bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#A68A6D]/20 focus:border-[#A68A6D] transition appearance-none cursor-pointer"
+                                        className="w-full h-12 px-4 rounded-xl border border-border bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition appearance-none cursor-pointer"
                                         {...register("subject")}
                                     >
                                         <option value="General Inquiry">General Inquiry</option>
@@ -62,7 +62,7 @@ const ContactPage = () => {
                                         <option value="Rehoming Help">Rehoming Help</option>
                                         <option value="Technical Issue">Technical Issue</option>
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-500">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-text-secondary">
                                         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
                                     </div>
                                 </div>
@@ -70,24 +70,24 @@ const ContactPage = () => {
 
                             {/* Message */}
                             <div>
-                                <label className="block text-sm font-bold text-[#2D2D2D] mb-2">Message</label>
+                                <label className="block text-sm font-bold text-text-primary mb-2">Message</label>
                                 <textarea
-                                    className={`w-full p-4 rounded-xl border ${errors.message ? 'border-red-500' : 'border-[#E5E7EB]'} bg-[#FAFAFA] focus:outline-none focus:ring-2 focus:ring-[#A68A6D]/20 focus:border-[#A68A6D] transition h-40 resize-none`}
+                                    className={`w-full p-4 rounded-xl border ${errors.message ? 'border-status-error' : 'border-border'} bg-bg-secondary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition h-40 resize-none`}
                                     placeholder="How can we help you today? (Min 50 characters)"
                                     {...register("message", { required: true, minLength: 50 })}
                                 ></textarea>
-                                {errors.message && <span className="text-red-500 text-xs mt-1">Message is too short</span>}
+                                {errors.message && <span className="text-status-error text-xs mt-1">Message is too short</span>}
                             </div>
 
                             {/* Attachment (Optional) */}
                             <div>
-                                <label className="block text-sm font-bold text-[#2D2D2D] mb-2">Attachment (Optional)</label>
-                                <div className="border-2 border-dashed border-[#E6D4B9] rounded-xl bg-[#FFF8E7]/50 p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-[#FFF8E7] transition-colors group">
-                                    <div className="w-10 h-10 mb-3 text-[#A68A6D] group-hover:scale-110 transition-transform">
+                                <label className="block text-sm font-bold text-text-primary mb-2">Attachment (Optional)</label>
+                                <div className="border-2 border-dashed border-brand-primary/30 rounded-xl bg-bg-secondary/50 p-8 flex flex-col items-center justify-center text-center cursor-pointer hover:bg-bg-secondary transition-colors group">
+                                    <div className="w-10 h-10 mb-3 text-brand-primary group-hover:scale-110 transition-transform">
                                         <Upload size={40} strokeWidth={1.5} />
                                     </div>
-                                    <span className="text-sm font-medium text-[#A68A6D]">Click to upload or drag and drop</span>
-                                    <span className="text-xs text-[#A68A6D]/70 mt-1">Max file size: 5MB</span>
+                                    <span className="text-sm font-medium text-brand-primary">Click to upload or drag and drop</span>
+                                    <span className="text-xs text-brand-primary/70 mt-1">Max file size: 5MB</span>
                                     <input type="file" className="hidden" {...register("attachment")} />
                                 </div>
                             </div>
@@ -95,7 +95,7 @@ const ContactPage = () => {
                             {/* Submit Button */}
                             <button
                                 type="submit"
-                                className="w-full bg-[#2D2D2D] text-white font-bold py-4 rounded-xl hover:bg-black transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 mt-4"
+                                className="w-full bg-text-primary text-text-inverted font-bold py-4 rounded-xl hover:opacity-90 transition-all shadow-lg hover:shadow-xl active:scale-[0.98] flex items-center justify-center gap-2 mt-4"
                             >
                                 <span className="text-lg">Send Message</span>
                             </button>
@@ -105,7 +105,7 @@ const ContactPage = () => {
                     {/* Right Column: Info & Map */}
                     <div className="space-y-6">
                         {/* Contact Info Card */}
-                        <div className="bg-white rounded-[2rem] shadow-sm p-8 md:p-10 border border-[#F3F4F6] space-y-8">
+                        <div className="bg-bg-surface rounded-[2rem] shadow-sm p-8 md:p-10 border border-border space-y-8">
 
                             {/* Email */}
                             <ContactItem
@@ -141,11 +141,11 @@ const ContactPage = () => {
                             />
 
                             {/* Divider */}
-                            <div className="h-px bg-gray-100 my-6"></div>
+                            <div className="h-px bg-border my-6"></div>
 
                             {/* Follow Us */}
                             <div>
-                                <h4 className="font-bold text-[#2D2D2D] mb-4">Follow Us</h4>
+                                <h4 className="font-bold text-text-primary mb-4">Follow Us</h4>
                                 <div className="flex gap-4">
                                     <SocialButton icon={<Facebook size={18} />} />
                                     <SocialButton icon={<Twitter size={18} />} />
@@ -156,7 +156,7 @@ const ContactPage = () => {
                         </div>
 
                         {/* Map Card */}
-                        <div className="bg-white rounded-[2rem] shadow-sm p-2 border border-[#F3F4F6] h-64 overflow-hidden relative">
+                        <div className="bg-bg-surface rounded-[2rem] shadow-sm p-2 border border-border h-64 overflow-hidden relative">
                             <iframe
                                 title="Map of Dhaka"
                                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d233667.8223908687!2d90.27923710646989!3d23.780887456212758!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3755b8b087026b81%3A0x8fa563bbdd5904c2!2sDhaka!5e0!3m2!1sen!2sbd!4v1715000000000!5m2!1sen!2sbd"
@@ -178,12 +178,12 @@ const ContactPage = () => {
 // Helper Components
 const ContactItem = ({ icon, label, content }) => (
     <div className="flex items-start gap-4">
-        <div className="flex-shrink-0 w-12 h-12 bg-[#FFF8E7] rounded-full flex items-center justify-center text-[#A68A6D]">
+        <div className="flex-shrink-0 w-12 h-12 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary">
             {icon}
         </div>
         <div>
-            <h4 className="font-bold text-[#2D2D2D] text-lg mb-1">{label}</h4>
-            <div className="text-[#57534E] text-sm leading-relaxed font-medium">
+            <h4 className="font-bold text-text-primary text-lg mb-1">{label}</h4>
+            <div className="text-text-secondary text-sm leading-relaxed font-medium">
                 {content}
             </div>
         </div>
@@ -191,9 +191,10 @@ const ContactItem = ({ icon, label, content }) => (
 );
 
 const SocialButton = ({ icon }) => (
-    <a href="#" className="w-10 h-10 rounded-full border border-[#E5E7EB] flex items-center justify-center text-[#57534E] hover:bg-[#FFF8E7] hover:text-[#A68A6D] hover:border-[#A68A6D] transition-all">
+    <a href="#" className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-text-secondary hover:bg-brand-primary/10 hover:text-brand-primary hover:border-brand-primary transition-all">
         {icon}
     </a>
 );
 
 export default ContactPage;
+

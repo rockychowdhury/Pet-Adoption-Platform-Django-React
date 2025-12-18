@@ -115,8 +115,8 @@ const DesignSystem = () => {
                     activeTab={activeTab}
                     onChange={setActiveTab}
                     tabs={[
-                        { label: 'Tab 1', value: 'tab1', content: <div className="p-4 bg-white rounded">Content 1</div> },
-                        { label: 'Tab 2', value: 'tab2', content: <div className="p-4 bg-white rounded">Content 2</div> }
+                        { label: 'Tab 1', value: 'tab1', content: <div className="p-4 bg-bg-surface rounded">Content 1</div> },
+                        { label: 'Tab 2', value: 'tab2', content: <div className="p-4 bg-bg-surface rounded">Content 2</div> }
                     ]}
                 />
             </section>

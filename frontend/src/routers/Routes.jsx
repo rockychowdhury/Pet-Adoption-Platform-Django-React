@@ -9,7 +9,7 @@ import VerifyEmailPage from "../pages/AuthPages/VerifyEmailPage";
 import Navbar from "../components/common/Navbar";
 import DashboardLayout from "../layouts/DashboardLayout";
 import AuthPageLayout from "../layouts/AuthPageLayout";
-import AdopterDashboard from "../pages/Dashboard/AdopterDashboard";
+import Dashboard from "../pages/Dashboard/Dashboard";
 import useAuth from "../hooks/useAuth";
 import { Navigate } from "react-router";
 
@@ -39,8 +39,8 @@ import RehomingInterventionPage from "../pages/RehomingPages/RehomingInterventio
 import RehomingCreateListingPage from "../pages/RehomingPages/RehomingCreateListingPage";
 import RehomingListingDetailPage from "../pages/RehomingPages/RehomingListingDetailPage";
 import RehomingDashboardPage from "../pages/RehomingPages/RehomingDashboardPage";
-import AdopterProfileSetupPage from "../pages/ApplicationPages/AdopterProfileSetupPage";
-import AdopterProfilePage from "../pages/ApplicationPages/AdopterProfilePage";
+import AdoptionProfileSetupPage from "../pages/ApplicationPages/AdoptionProfileSetupPage";
+import AdoptionProfilePage from "../pages/ApplicationPages/AdoptionProfilePage";
 import ApplicationSubmitPage from "../pages/ApplicationPages/ApplicationSubmitPage";
 import MyApplicationsPage from "../pages/ApplicationPages/MyApplicationsPage";
 import ApplicationDetailPage from "../pages/ApplicationPages/ApplicationDetailPage";
@@ -173,8 +173,8 @@ const routes = [
             { path: '/adoptions/:id/review', element: <AdoptionReviewPage /> },
             { path: '/become-provider', element: <ServiceProviderRegistrationPage /> },
 
-            { path: '/applications/setup', element: <AdopterProfileSetupPage /> },
-            { path: '/applications/profile', element: <AdopterProfilePage /> },
+            { path: '/applications/setup', element: <AdoptionProfileSetupPage /> },
+            { path: '/applications/profile', element: <AdoptionProfilePage /> },
             { path: '/rehoming/listings/:id/apply', element: <ApplicationSubmitPage /> },
             { path: '/applications', element: <MyApplicationsPage /> },
             { path: '/applications/:id', element: <ApplicationDetailPage /> },
@@ -193,7 +193,7 @@ const routes = [
         element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
         children: [
             { path: '', element: <UserProfilePage /> }, // Dashboard Home -> User Profile
-            { path: 'applications', element: <AdopterDashboard /> },
+            { path: 'applications', element: <Dashboard /> },
             { path: 'profile', element: <UserProfilePage /> },
             { path: 'profile/settings', element: <ProfileSettingsPage /> },
             { path: 'profile/edit', element: <EditProfilePage /> },
