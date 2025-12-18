@@ -35,7 +35,13 @@ class UserPetSerializer(serializers.ModelSerializer):
     owner = PublicUserSerializer(read_only=True)
     class Meta:
         model = UserPet
-        fields = ['id', 'owner', 'name', 'species', 'breed', 'age', 'gender', 'bio', 'personality_traits', 'gotcha_day', 'profile_photo']
+        fields = [
+            'id', 'owner', 'name', 'species', 'breed', 
+            'birth_date', 'age', 'gender', 'description', 
+            'photos', 'profile_photo', 'is_active',
+            'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """Nested serializer for UserProfile model"""
