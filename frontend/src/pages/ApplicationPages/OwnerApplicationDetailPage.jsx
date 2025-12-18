@@ -32,7 +32,7 @@ const OwnerApplicationDetailPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-8 px-4">
+        <div className="min-h-screen bg-bg-primary py-8 px-4">
             <div className="max-w-6xl mx-auto">
                 <Button variant="ghost" className="mb-4 pl-0 hover:bg-transparent hover:text-brand-primary" onClick={() => navigate(-1)}>
                     <ChevronLeft size={16} className="mr-2" /> Back to Applications
@@ -47,10 +47,10 @@ const OwnerApplicationDetailPage = () => {
                             <div>
                                 <h1 className="text-3xl font-bold text-text-primary flex items-center gap-2">
                                     {applicant.name}
-                                    {applicant.verified && <Check size={20} className="text-blue-500 bg-blue-50 rounded-full p-0.5" />}
+                                    {applicant.verified && <Check size={20} className="text-status-info bg-status-info/10 rounded-full p-0.5" />}
                                 </h1>
                                 <p className="text-text-secondary">Member since {applicant.joined} • Verified Identity</p>
-                                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-green-50 text-green-700 text-sm font-bold border border-green-200">
+                                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-status-success/10 text-status-success text-sm font-bold border border-status-success/20">
                                     Readiness Score: {applicant.score}%
                                 </div>
                             </div>
@@ -61,7 +61,7 @@ const OwnerApplicationDetailPage = () => {
                             {/* Message */}
                             <div>
                                 <h2 className="text-xl font-bold text-text-primary mb-4 border-b border-border pb-2">Why John Wants to Adopt</h2>
-                                <p className="text-text-secondary leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 italic">
+                                <p className="text-text-secondary leading-relaxed bg-bg-secondary p-4 rounded-xl border border-border italic">
                                     "{applicant.details.message}"
                                 </p>
                             </div>
@@ -72,15 +72,15 @@ const OwnerApplicationDetailPage = () => {
                                     <Home size={18} className="text-brand-primary" /> Housing Information
                                 </h3>
                                 <div className="grid grid-cols-3 gap-4">
-                                    <div className="p-3 bg-white border border-border rounded-xl text-center">
+                                    <div className="p-3 bg-bg-surface border border-border rounded-xl text-center">
                                         <p className="text-xs text-text-tertiary uppercase font-bold">Type</p>
                                         <p className="font-bold">{applicant.details.housing.type}</p>
                                     </div>
-                                    <div className="p-3 bg-white border border-border rounded-xl text-center">
+                                    <div className="p-3 bg-bg-surface border border-border rounded-xl text-center">
                                         <p className="text-xs text-text-tertiary uppercase font-bold">Ownership</p>
                                         <p className="font-bold">{applicant.details.housing.ownership}</p>
                                     </div>
-                                    <div className="p-3 bg-white border border-border rounded-xl text-center">
+                                    <div className="p-3 bg-bg-surface border border-border rounded-xl text-center">
                                         <p className="text-xs text-text-tertiary uppercase font-bold">Yard</p>
                                         <p className="font-bold">{applicant.details.housing.yard}</p>
                                     </div>
@@ -98,7 +98,7 @@ const OwnerApplicationDetailPage = () => {
                                         <p className="text-sm"><strong>Children:</strong> {applicant.details.household.children}</p>
                                     </div>
                                     <div className="p-4 border border-border rounded-xl">
-                                        <p className="text-sm font-bold text-gray-500 mb-1">Current Pets</p>
+                                        <p className="text-sm font-bold text-text-secondary mb-1">Current Pets</p>
                                         <p className="font-medium">{applicant.details.household.pets}</p>
                                     </div>
                                 </div>
@@ -143,18 +143,18 @@ const OwnerApplicationDetailPage = () => {
                                         Requests More Info
                                     </Button>
 
-                                    <Button variant="ghost" className="w-full justify-center text-red-500 hover:bg-red-50 hover:text-red-600" onClick={() => setIsRejectModalOpen(true)}>
+                                    <Button variant="ghost" className="w-full justify-center text-status-error hover:bg-status-error/10 hover:text-status-error" onClick={() => setIsRejectModalOpen(true)}>
                                         Reject Application
                                     </Button>
                                 </div>
                             </Card>
 
-                            <div className="bg-blue-50 p-6 rounded-2xl border border-blue-100">
+                            <div className="bg-status-info/10 p-6 rounded-2xl border border-status-info/20">
                                 <div className="flex items-start gap-3">
-                                    <Shield className="text-blue-500 shrink-0 mt-1" size={20} />
+                                    <Shield className="text-status-info shrink-0 mt-1" size={20} />
                                     <div>
-                                        <p className="font-bold text-blue-900 text-sm mb-1">Safety Reminder</p>
-                                        <p className="text-xs text-blue-800 leading-relaxed">
+                                        <p className="font-bold text-status-info text-sm mb-1">Safety Reminder</p>
+                                        <p className="text-xs text-status-info leading-relaxed">
                                             Always meet in a public place for the first time. Bring a friend or family member along.
                                         </p>
                                     </div>
@@ -192,11 +192,11 @@ const OwnerApplicationDetailPage = () => {
             {/* Approve Modal */}
             <Modal isOpen={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)} title="Approve for Meet & Greet">
                 <div className="space-y-4">
-                    <div className="bg-green-50 p-4 rounded-xl border border-green-100 flex gap-3 text-green-800 text-sm">
+                    <div className="bg-status-success/10 p-4 rounded-xl border border-status-success/20 flex gap-3 text-status-success text-sm">
                         <Info className="shrink-0" size={18} />
                         <p>Your contact information will be shared with <strong>{applicant.name}</strong> to arrange a meeting.</p>
                     </div>
-                    <div className="p-4 bg-gray-50 rounded-xl border border-gray-100">
+                    <div className="p-4 bg-bg-secondary rounded-xl border border-border">
                         <p className="text-xs font-bold text-text-tertiary uppercase mb-2">Contact Info to Share</p>
                         <p className="font-bold">📞 (555) 123-4567</p>
                         <p className="font-bold">✉️ you@example.com</p>

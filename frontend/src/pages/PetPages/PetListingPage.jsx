@@ -63,22 +63,22 @@ const PetListingPage = () => {
     const activeFilters = getActiveFilters();
 
     return (
-        <div className="min-h-screen bg-[#FFFBF0] font-inter">
+        <div className="min-h-screen bg-bg-primary font-inter">
             {/* Page Header */}
-            <div className="bg-[#FFFBF0] pt-20 pb-12 px-4 sm:px-6 lg:px-8 text-center transition-all duration-300">
+            <div className="bg-bg-primary pt-20 pb-12 px-4 sm:px-6 lg:px-8 text-center transition-all duration-300">
                 {filters.search ? (
                     <div className="text-center animate-in fade-in slide-in-from-bottom-4">
-                        <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2 font-serif">
+                        <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2 font-serif">
                             Search results for: "{filters.search}"
                         </h1>
-                        <p className="text-gray-500 text-lg mb-8">
+                        <p className="text-text-secondary text-lg mb-8">
                             Found {pets.length} results matching your search
                         </p>
                     </div>
                 ) : (
                     <>
-                        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 font-serif">Find Your Perfect Companion</h1>
-                        <p className="text-gray-500 text-lg mb-8 max-w-2xl mx-auto">Browse pets looking for loving homes across the country</p>
+                        <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4 font-serif">Find Your Perfect Companion</h1>
+                        <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">Browse pets looking for loving homes across the country</p>
                     </>
                 )}
 
@@ -90,9 +90,9 @@ const PetListingPage = () => {
                         placeholder="Search by breed, name, or keyword..."
                         value={filters.search}
                         onChange={handleFilterChange}
-                        className="w-full h-16 pl-8 pr-16 rounded-full border border-gray-200 focus:ring-4 focus:ring-brand-primary/10 outline-none shadow-sm text-lg placeholder:text-gray-400 group-hover:border-brand-primary/50 transition-colors"
+                        className="w-full h-16 pl-8 pr-16 rounded-full border border-border focus:ring-4 focus:ring-brand-primary/10 outline-none shadow-sm text-lg placeholder:text-text-tertiary group-hover:border-brand-primary/50 transition-colors bg-bg-surface text-text-primary"
                     />
-                    <button className="absolute right-2 top-2 h-12 w-12 bg-[#9B8573] hover:bg-[#8A7565] text-white rounded-full flex items-center justify-center transition-colors shadow-md hover:shadow-lg transform active:scale-95">
+                    <button className="absolute right-2 top-2 h-12 w-12 bg-brand-primary hover:opacity-90 text-text-inverted rounded-full flex items-center justify-center transition-colors shadow-md hover:shadow-lg transform active:scale-95">
                         <Search size={24} />
                     </button>
                 </div>
@@ -113,19 +113,19 @@ const PetListingPage = () => {
 
                         {/* Results Header */}
                         <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-                            <span className="text-gray-500">Showing {pets.length} pets</span>
+                            <span className="text-text-secondary">Showing {pets.length} pets</span>
 
                             <div className="flex items-center gap-4">
-                                <div className="flex bg-white rounded-lg p-1 border border-gray-200">
+                                <div className="flex bg-bg-surface rounded-lg p-1 border border-border">
                                     <button
                                         onClick={() => setViewMode('grid')}
-                                        className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                                        className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-bg-secondary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'}`}
                                     >
                                         <LayoutGrid size={20} />
                                     </button>
                                     <button
                                         onClick={() => setViewMode('list')}
-                                        className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                                        className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-bg-secondary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'}`}
                                     >
                                         <ListIcon size={20} />
                                     </button>
@@ -135,7 +135,7 @@ const PetListingPage = () => {
                                     name="ordering"
                                     value={filters.ordering}
                                     onChange={handleFilterChange}
-                                    className="pl-4 pr-10 py-2.5 rounded-xl border border-gray-200 bg-white text-sm font-medium outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 appearance-none cursor-pointer"
+                                    className="pl-4 pr-10 py-2.5 rounded-xl border border-border bg-bg-surface text-sm font-medium outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 appearance-none cursor-pointer text-text-primary"
                                     style={{ backgroundImage: 'none' }}
                                 >
                                     <option value="-created_at">Newest First</option>
@@ -150,14 +150,14 @@ const PetListingPage = () => {
                         {activeFilters.length > 0 && (
                             <div className="flex flex-wrap gap-2 mb-6">
                                 {activeFilters.map(filter => (
-                                    <span key={filter.key} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white border border-gray-200 text-xs font-bold text-gray-700 shadow-sm">
+                                    <span key={filter.key} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bg-surface border border-border text-xs font-bold text-text-primary shadow-sm">
                                         {filter.label}
-                                        <button onClick={() => removeFilter(filter.key)} className="hover:text-red-500 transition-colors">
+                                        <button onClick={() => removeFilter(filter.key)} className="hover:text-status-error transition-colors">
                                             <X size={12} />
                                         </button>
                                     </span>
                                 ))}
-                                <button onClick={clearFilters} className="text-xs font-bold text-red-500 hover:underline px-2">
+                                <button onClick={clearFilters} className="text-xs font-bold text-status-error hover:underline px-2">
                                     Clear All
                                 </button>
                             </div>
@@ -175,12 +175,12 @@ const PetListingPage = () => {
                                 ))}
                             </div>
                         ) : (
-                            <div className="text-center py-20 bg-white rounded-[32px] border border-gray-100 shadow-sm">
-                                <div className="bg-gray-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Search size={40} className="text-gray-300" />
+                            <div className="text-center py-20 bg-bg-surface rounded-[32px] border border-border shadow-sm">
+                                <div className="bg-bg-secondary w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <Search size={40} className="text-text-tertiary" />
                                 </div>
-                                <h3 className="text-2xl font-bold text-gray-900 mb-2">No pets found</h3>
-                                <p className="text-gray-500 mb-8 max-w-md mx-auto">We couldn't find any pets matching your criteria. Try adjusting your filters or search terms.</p>
+                                <h3 className="text-2xl font-bold text-text-primary mb-2">No pets found</h3>
+                                <p className="text-text-secondary mb-8 max-w-md mx-auto">We couldn't find any pets matching your criteria. Try adjusting your filters or search terms.</p>
                                 <Button variant="secondary" onClick={clearFilters}>
                                     Clear all filters
                                 </Button>
@@ -190,7 +190,7 @@ const PetListingPage = () => {
                         {/* Load More Button (Mock Implementation) */}
                         {pets.length > 0 && (
                             <div className="mt-12 text-center">
-                                <button className="px-8 py-3 bg-white border border-gray-200 rounded-full font-bold text-gray-900 hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm">
+                                <button className="px-8 py-3 bg-bg-surface border border-border rounded-full font-bold text-text-primary hover:bg-bg-secondary hover:border-border transition-all shadow-sm">
                                     Load More Pets
                                 </button>
                             </div>

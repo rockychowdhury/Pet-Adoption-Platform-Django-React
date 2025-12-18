@@ -32,7 +32,7 @@ const ApplicationSubmitPage = () => {
     const isReady = message.length >= 50 && Object.values(agreements).every(Boolean);
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-12 px-4">
+        <div className="min-h-screen bg-bg-primary py-12 px-4">
             <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-3 gap-8">
 
                 {/* Main Content */}
@@ -43,12 +43,12 @@ const ApplicationSubmitPage = () => {
                     </div>
 
                     {/* Profile Review Card */}
-                    <Card className="p-6 border-l-4 border-l-green-500">
+                    <Card className="p-6 border-l-4 border-l-status-success">
                         <div className="flex justify-between items-start mb-4">
                             <div>
                                 <h3 className="font-bold text-lg text-text-primary">Your Adopter Profile</h3>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="px-2 py-0.5 rounded-md bg-green-100 text-green-700 text-xs font-bold">Readiness Score: 85%</span>
+                                    <span className="px-2 py-0.5 rounded-md bg-status-success/10 text-status-success text-xs font-bold">Readiness Score: 85%</span>
                                     <span className="text-xs text-text-tertiary">Excellent</span>
                                 </div>
                             </div>
@@ -60,9 +60,9 @@ const ApplicationSubmitPage = () => {
                     {/* Personalized Message */}
                     <div className="space-y-3">
                         <label className="block font-bold text-text-primary">
-                            Message to {pet.owner.name} <span className="text-red-500">*</span>
+                            Message to {pet.owner.name} <span className="text-status-error">*</span>
                         </label>
-                        <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800 mb-2">
+                        <div className="bg-status-info/10 p-4 rounded-xl text-sm text-status-info mb-2">
                             <p className="font-bold mb-1">Tips for a great application:</p>
                             <ul className="list-disc list-inside space-y-1 opacity-80">
                                 <li>Why is {pet.name} the right fit for you?</li>
@@ -82,7 +82,7 @@ const ApplicationSubmitPage = () => {
                     {/* Agreements */}
                     <div className="space-y-4 pt-6 border-t border-border">
                         <h3 className="font-bold text-text-primary">Commitment Statement</h3>
-                        <Card className="p-4 space-y-3 bg-gray-50 border-gray-100">
+                        <Card className="p-4 space-y-3 bg-bg-surface border-border">
                             <Checkbox
                                 label="I understand this application is not a guarantee of adoption."
                                 checked={agreements.guarantee}
@@ -121,7 +121,7 @@ const ApplicationSubmitPage = () => {
                 <div className="lg:col-span-1">
                     <div className="sticky top-24 space-y-6">
                         <Card className="overflow-hidden">
-                            <div className="h-48 bg-gray-100">
+                            <div className="h-48 bg-bg-secondary">
                                 <img src={pet.image} alt={pet.name} className="w-full h-full object-cover" />
                             </div>
                             <div className="p-6">
@@ -147,9 +147,9 @@ const ApplicationSubmitPage = () => {
                             </div>
                         </Card>
 
-                        <div className="bg-[#FFF9F2] p-6 rounded-2xl border border-[#FFE8CC] flex gap-3">
-                            <AlertCircle className="text-orange-500 shrink-0" />
-                            <p className="text-xs text-orange-800 leading-relaxed">
+                        <div className="bg-status-warning/10 p-6 rounded-2xl border border-status-warning/20 flex gap-3">
+                            <AlertCircle className="text-status-warning shrink-0" />
+                            <p className="text-xs text-status-warning leading-relaxed">
                                 <strong>Safety First:</strong> Never send money for a pet you haven't met. If asked for a deposit before meeting, please report the listing.
                             </p>
                         </div>

@@ -31,9 +31,9 @@ const OwnerApplicationReviewPage = () => {
     // We'll trust serializer has 'applicant' nested object.
 
     const getScoreColor = (score) => {
-        if (score >= 80) return 'text-green-600 bg-green-50 border-green-200';
-        if (score >= 60) return 'text-yellow-600 bg-yellow-50 border-yellow-200';
-        return 'text-orange-600 bg-orange-50 border-orange-200';
+        if (score >= 80) return 'text-status-success bg-status-success/10 border-status-success/20';
+        if (score >= 60) return 'text-status-warning bg-status-warning/10 border-status-warning/20';
+        return 'text-status-error bg-status-error/10 border-status-error/20';
     };
 
     const handleReject = (appId) => {
@@ -59,7 +59,7 @@ const OwnerApplicationReviewPage = () => {
     }
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-8 px-4">
+        <div className="min-h-screen bg-bg-primary py-8 px-4">
             <div className="max-w-5xl mx-auto">
                 {/* Header */}
                 <div className="mb-8">
@@ -82,8 +82,8 @@ const OwnerApplicationReviewPage = () => {
                                 key={status}
                                 onClick={() => setFilter(status)}
                                 className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${filter === status
-                                    ? 'bg-brand-primary text-white shadow-md'
-                                    : 'bg-white text-text-secondary hover:bg-gray-50 border border-border'
+                                    ? 'bg-brand-primary text-text-inverted shadow-md'
+                                    : 'bg-bg-surface text-text-secondary hover:bg-bg-secondary border border-border'
                                     }`}
                             >
                                 {status}
@@ -129,7 +129,7 @@ const OwnerApplicationReviewPage = () => {
                                             {/* Add more details if available in serializer */}
                                         </div>
 
-                                        <div className="bg-gray-50 p-3 rounded-xl border border-gray-100 mb-4">
+                                        <div className="bg-bg-secondary p-3 rounded-xl border border-border mb-4">
                                             <p className="text-sm text-text-secondary italic line-clamp-2">
                                                 "{app.message}"
                                                 <Link to={`/applications/${app.id}/review`} className="text-brand-primary font-bold ml-1 hover:underline not-italic">
@@ -146,7 +146,7 @@ const OwnerApplicationReviewPage = () => {
                                                 <MessageSquare size={16} className="mr-2" /> Message
                                             </Button>
                                             {app.status !== 'rejected' && (
-                                                <Button size="sm" variant="ghost" className="text-red-500 hover:bg-red-50 hover:text-red-600 ml-auto" onClick={() => handleReject(app.id)}>
+                                                <Button size="sm" variant="ghost" className="text-status-error hover:bg-status-error/10 hover:text-status-error ml-auto" onClick={() => handleReject(app.id)}>
                                                     <X size={16} className="mr-1" /> Quick Reject
                                                 </Button>
                                             )}
@@ -158,8 +158,8 @@ const OwnerApplicationReviewPage = () => {
                     })}
 
                     {filteredApps.length === 0 && (
-                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-border">
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4 text-gray-400">
+                        <div className="text-center py-20 bg-bg-surface rounded-3xl border border-dashed border-border">
+                            <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-text-tertiary">
                                 <MessageSquare size={32} />
                             </div>
                             <h3 className="text-lg font-bold text-text-primary">No applications found</h3>

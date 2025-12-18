@@ -5,10 +5,10 @@ const useAdoption = () => {
     const api = useAPI();
     const queryClient = useQueryClient();
 
-    // Get My Adopter Profile
-    const useGetAdopterProfile = () => {
+    // Get My Adoption Profile
+    const useGetAdoptionProfile = () => {
         return useQuery({
-            queryKey: ['adopterProfile'],
+            queryKey: ['adoptionProfile'],
             queryFn: async () => {
                 const response = await api.get('/adoption/adopter-profile/me/');
                 return response.data;
@@ -16,8 +16,8 @@ const useAdoption = () => {
         });
     };
 
-    // Create/Update Adopter Profile
-    const useUpdateAdopterProfile = () => {
+    // Create/Update Adoption Profile
+    const useUpdateAdoptionProfile = () => {
         return useMutation({
             mutationFn: async ({ id, data }) => {
                 // If ID exists, PATCH. If not, POST.
@@ -33,7 +33,7 @@ const useAdoption = () => {
                 }
             },
             onSuccess: () => {
-                queryClient.invalidateQueries(['adopterProfile']);
+                queryClient.invalidateQueries(['adoptionProfile']);
             },
         });
     };
@@ -82,8 +82,8 @@ const useAdoption = () => {
     // For now, let's stick to simple get.
 
     return {
-        useGetAdopterProfile,
-        useUpdateAdopterProfile,
+        useGetAdoptionProfile,
+        useUpdateAdoptionProfile,
         useSubmitApplication,
         useGetHasApplied,
         useGetMyApplications

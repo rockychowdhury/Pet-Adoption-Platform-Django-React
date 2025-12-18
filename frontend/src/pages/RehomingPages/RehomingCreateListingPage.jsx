@@ -18,6 +18,23 @@ const RehomingCreateListingPage = () => {
     // Fetch Active Intervention
     const { data: intervention, isLoading: isCheckingIntervention } = useGetActiveIntervention();
 
+    // Form Data State - simplified for prototype
+    const [formData, setFormData] = useState({
+        petId: 'new', // 'new' or existing ID
+        // Pet Details
+        name: '', species: 'Dog', breed: '', age: '', gender: 'Male',
+        // Medical
+        spayed: 'Yes', microchip: 'Yes', vaccinations: 'Up to date', medications: '', conditions: [],
+        // Behavior
+        energy: 3, kids: 'Yes', dogs: 'Yes', cats: 'Unknown', houseTrained: 'Yes', aggression: 'No',
+        // Story
+        story: '',
+        // Photos
+        photos: [],
+        // Terms
+        includedItems: [], timeline: '', experience: 'Some pet experience preferred'
+    });
+
     React.useEffect(() => {
         if (!isCheckingIntervention) {
             // Logic:
@@ -39,23 +56,6 @@ const RehomingCreateListingPage = () => {
     if (isCheckingIntervention) {
         return <div className="min-h-screen flex items-center justify-center">Checking eligibility...</div>;
     }
-
-    // Form Data State - simplified for prototype
-    const [formData, setFormData] = useState({
-        petId: 'new', // 'new' or existing ID
-        // Pet Details
-        name: '', species: 'Dog', breed: '', age: '', gender: 'Male',
-        // Medical
-        spayed: 'Yes', microchip: 'Yes', vaccinations: 'Up to date', medications: '', conditions: [],
-        // Behavior
-        energy: 3, kids: 'Yes', dogs: 'Yes', cats: 'Unknown', houseTrained: 'Yes', aggression: 'No',
-        // Story
-        story: '',
-        // Photos
-        photos: [],
-        // Terms
-        fee: 50, includedItems: [], timeline: '', experience: 'Some pet experience preferred'
-    });
 
     const STEPS = [
         { id: 1, title: 'Pet Details' },
@@ -93,7 +93,7 @@ const RehomingCreateListingPage = () => {
                         <input type="radio" name="petId" value="new" checked={formData.petId === 'new'} onChange={handleInputChange} />
                         <span className="font-bold">Add New Pet Profile</span>
                     </label>
-                    <label className="flex items-center gap-3 p-4 border rounded-xl cursor-pointer hover:border-brand-primary bg-gray-50 opacity-60">
+                    <label className="flex items-center gap-3 p-4 border rounded-xl cursor-pointer hover:border-brand-primary bg-bg-secondary opacity-60">
                         <input type="radio" name="petId" value="1" disabled />
                         <span>Max (Existing - Demo)</span>
                     </label>
@@ -174,7 +174,7 @@ const RehomingCreateListingPage = () => {
                         type="range" min="1" max="5"
                         value={formData.energy}
                         onChange={(e) => setFormData(prev => ({ ...prev, energy: e.target.value }))}
-                        className="flex-1 accent-brand-primary h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                        className="flex-1 accent-brand-primary h-2 bg-border rounded-lg appearance-none cursor-pointer"
                     />
                     <span className="text-xs font-bold text-text-tertiary">High Energy</span>
                 </div>
@@ -192,18 +192,18 @@ const RehomingCreateListingPage = () => {
                 ))}
             </div>
 
-            <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
-                <div className="flex items-center gap-2 font-bold text-yellow-800 mb-2">
+            <div className="bg-status-warning/10 border border-status-warning/20 rounded-xl p-4">
+                <div className="flex items-center gap-2 font-bold text-status-warning mb-2">
                     <AlertTriangle size={18} />
                     Aggression History
                 </div>
-                <p className="text-xs text-yellow-700 mb-3">Honesty is required by law and for safety. Has this pet ever bitten a person or animal?</p>
+                <p className="text-xs text-status-warning mb-3">Honesty is required by law and for safety. Has this pet ever bitten a person or animal?</p>
                 <div className="flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer font-bold">
                         <input type="radio" name="aggression" value="No" checked={formData.aggression === 'No'} onChange={handleInputChange} />
                         No
                     </label>
-                    <label className="flex items-center gap-2 cursor-pointer font-bold text-red-600">
+                    <label className="flex items-center gap-2 cursor-pointer font-bold text-status-error">
                         <input type="radio" name="aggression" value="Yes" checked={formData.aggression === 'Yes'} onChange={handleInputChange} />
                         Yes
                     </label>
@@ -215,7 +215,7 @@ const RehomingCreateListingPage = () => {
     const renderStory = () => (
         <Card className="p-8 space-y-4">
             <h2 className="text-xl font-bold">Rehoming Story</h2>
-            <div className="bg-blue-50 p-4 rounded-xl text-sm text-blue-800 flex gap-3">
+            <div className="bg-status-info/10 p-4 rounded-xl text-sm text-status-info flex gap-3">
                 <Info className="flex-shrink-0" size={20} />
                 <div>
                     <p className="font-bold mb-1">Tips for a great story:</p>
@@ -244,7 +244,10 @@ const RehomingCreateListingPage = () => {
                 {formData.photos.map((src, idx) => (
                     <div key={idx} className="relative aspect-square rounded-xl overflow-hidden group border border-border">
                         <img src={src} className="w-full h-full object-cover" alt="Upload" />
-                        <button className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <button
+                            type="button"
+                            className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
                             <X size={12} />
                         </button>
                     </div>
@@ -262,19 +265,7 @@ const RehomingCreateListingPage = () => {
         <Card className="p-8 space-y-6">
             <h2 className="text-xl font-bold">Adoption Terms</h2>
 
-            <div className="space-y-4">
-                <div className="flex justify-between font-bold">
-                    <label>Adoption Fee</label>
-                    <span className="text-brand-primary">${formData.fee}</span>
-                </div>
-                <input
-                    type="range" min="0" max="300" step="10"
-                    value={formData.fee}
-                    onChange={(e) => setFormData(prev => ({ ...prev, fee: parseInt(e.target.value) }))}
-                    className="w-full accent-brand-primary"
-                />
-                <p className="text-xs text-text-secondary">Adoption fees help ensure committed adopters.</p>
-            </div>
+
 
             <div className="space-y-2">
                 <label className="block text-sm font-bold text-text-primary">Included Items</label>
@@ -294,15 +285,15 @@ const RehomingCreateListingPage = () => {
 
     const renderReview = () => (
         <div className="space-y-6">
-            <Card className="p-8 text-center bg-green-50 border-green-200">
-                <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4 text-green-600">
+            <Card className="p-8 text-center bg-status-success/10 border-status-success/20">
+                <div className="w-16 h-16 bg-status-success/20 rounded-full flex items-center justify-center mx-auto mb-4 text-status-success">
                     <Check size={32} />
                 </div>
-                <h2 className="text-2xl font-bold text-green-900 mb-2">Ready to Submit?</h2>
-                <p className="text-green-800">Your listing for <strong>{formData.name || 'your pet'}</strong> is ready for review.</p>
+                <h2 className="text-2xl font-bold text-status-success mb-2">Ready to Submit?</h2>
+                <p className="text-status-success">Your listing for <strong>{formData.name || 'your pet'}</strong> is ready for review.</p>
             </Card>
 
-            <div className="flex items-center gap-3 p-4 bg-white rounded-xl border border-border">
+            <div className="flex items-center gap-3 p-4 bg-bg-surface rounded-xl border border-border">
                 <Checkbox />
                 <span className="text-xs font-bold text-text-primary">I verify that all information is accurate and honest to the best of my knowledge.</span>
             </div>
@@ -310,20 +301,20 @@ const RehomingCreateListingPage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] pb-20">
+        <div className="min-h-screen bg-bg-primary pb-20">
             {/* Sticky Progress Header */}
-            <div className="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-border shadow-sm">
+            <div className="sticky top-0 z-30 bg-bg-surface/80 backdrop-blur-md border-b border-border shadow-sm">
                 <div className="max-w-7xl mx-auto px-4 overflow-x-auto scrollbar-hide">
                     <div className="flex items-center h-16 min-w-max">
                         {STEPS.map((step, idx) => (
                             <div key={step.id} className="flex items-center">
-                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${currentStep === step.id ? 'bg-brand-primary text-white font-bold' : currentStep > step.id ? 'text-green-600 font-bold' : 'text-text-tertiary'}`}>
-                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep === step.id ? 'border-white' : currentStep > step.id ? 'border-green-600 bg-green-600 text-white' : 'border-current'}`}>
+                                <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full transition-colors ${currentStep === step.id ? 'bg-brand-primary text-text-inverted font-bold' : currentStep > step.id ? 'text-status-success font-bold' : 'text-text-tertiary'}`}>
+                                    <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs border ${currentStep === step.id ? 'border-text-inverted' : currentStep > step.id ? 'border-status-success bg-status-success text-text-inverted' : 'border-current'}`}>
                                         {currentStep > step.id ? <Check size={12} /> : step.id}
                                     </div>
                                     <span>{step.title}</span>
                                 </div>
-                                {idx < STEPS.length - 1 && <div className="w-8 h-px bg-gray-200 mx-2"></div>}
+                                {idx < STEPS.length - 1 && <div className="w-8 h-px bg-border mx-2"></div>}
                             </div>
                         ))}
                     </div>
@@ -344,6 +335,7 @@ const RehomingCreateListingPage = () => {
 
                     <div className="flex justify-between pt-6 border-t border-border">
                         <Button
+                            type="button"
                             variant="outline"
                             onClick={prevStep}
                             disabled={currentStep === 1}
@@ -353,13 +345,13 @@ const RehomingCreateListingPage = () => {
                         </Button>
 
                         <div className="flex gap-4">
-                            <Button variant="ghost">Save Draft</Button>
+                            <Button type="button" variant="ghost">Save Draft</Button>
                             {currentStep < STEPS.length ? (
-                                <Button variant="primary" onClick={nextStep}>
+                                <Button type="button" variant="primary" onClick={nextStep}>
                                     Next: {STEPS[currentStep].title} <ChevronRight size={18} className="ml-2" />
                                 </Button>
                             ) : (
-                                <Button variant="primary" onClick={() => {
+                                <Button type="button" variant="primary" onClick={() => {
                                     toast.success("Listing Submitted Successfully!");
                                     navigate('/rehoming/manage');
                                 }}>

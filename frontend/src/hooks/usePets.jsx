@@ -37,11 +37,36 @@ const usePets = () => {
     const useCreatePet = () => {
         return useMutation({
             mutationFn: async (petData) => {
-                const response = await api.post('/pets/', petData);
+                const response = await api.post('/user/pets/', petData); // Ensure correct endpoint
                 return response.data;
             },
             onSuccess: () => {
-                queryClient.invalidateQueries(['pets']);
+                queryClient.invalidateQueries(['myPets']);
+            },
+        });
+    };
+
+    // Update Pet (e.g. for status toggle)
+    const useUpdatePet = () => {
+        return useMutation({
+            mutationFn: async ({ id, data }) => {
+                const response = await api.patch(`/user/pets/${id}/`, data);
+                return response.data;
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries(['myPets']);
+            },
+        });
+    };
+
+    // Delete Pet
+    const useDeletePet = () => {
+        return useMutation({
+            mutationFn: async (id) => {
+                await api.delete(`/user/pets/${id}/`);
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries(['myPets']);
             },
         });
     };
@@ -61,6 +86,8 @@ const usePets = () => {
         useGetPets,
         useGetPet,
         useCreatePet,
+        useUpdatePet,
+        useDeletePet,
         useGetUserPets
     };
 };

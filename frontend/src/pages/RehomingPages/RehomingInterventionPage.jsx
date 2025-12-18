@@ -150,13 +150,13 @@ const RehomingInterventionPage = () => {
     // Step 2: Resources
     const renderStep2 = () => (
         <div className="space-y-8 max-w-3xl mx-auto">
-            <div className="bg-blue-50 border border-blue-100 rounded-2xl p-6 flex gap-4">
-                <div className="p-3 bg-blue-100 rounded-full h-fit text-blue-600">
+            <div className="bg-status-info/10 border border-status-info/20 rounded-2xl p-6 flex gap-4">
+                <div className="p-3 bg-status-info/20 rounded-full h-fit text-status-info">
                     <Lightbulb size={24} />
                 </div>
                 <div>
-                    <h3 className="text-lg font-bold text-blue-900 mb-2">Did you know?</h3>
-                    <p className="text-blue-800 text-sm leading-relaxed">
+                    <h3 className="text-lg font-bold text-status-info mb-2">Did you know?</h3>
+                    <p className="text-status-info text-sm leading-relaxed">
                         Many rehoming situations can be resolved with the right support. Based on your reason <strong>"{formData.reason}"</strong>, we've curated these resources for you.
                     </p>
                 </div>
@@ -165,21 +165,21 @@ const RehomingInterventionPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Resources Cards logic can be same as before */}
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                    <div className="p-2 w-12 h-12 rounded-xl bg-purple-100 text-purple-600 flex items-center justify-center mb-4 group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                    <div className="p-2 w-12 h-12 rounded-xl bg-brand-secondary/10 text-brand-secondary flex items-center justify-center mb-4 group-hover:bg-brand-secondary group-hover:text-text-inverted transition-colors">
                         <BookOpen size={24} />
                     </div>
                     <h4 className="font-bold text-text-primary mb-2">Expert Guides</h4>
                     <p className="text-sm text-text-secondary mb-4">Read our comprehensive guides on overcoming challenges.</p>
                 </Card>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                    <div className="p-2 w-12 h-12 rounded-xl bg-green-100 text-green-600 flex items-center justify-center mb-4 group-hover:bg-green-600 group-hover:text-white transition-colors">
+                    <div className="p-2 w-12 h-12 rounded-xl bg-status-success/10 text-status-success flex items-center justify-center mb-4 group-hover:bg-status-success group-hover:text-text-inverted transition-colors">
                         <HeartHandshake size={24} />
                     </div>
                     <h4 className="font-bold text-text-primary mb-2">Community Support</h4>
                     <p className="text-sm text-text-secondary mb-4">Connect with local groups and fosters.</p>
                 </Card>
                 <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                    <div className="p-2 w-12 h-12 rounded-xl bg-orange-100 text-orange-600 flex items-center justify-center mb-4 group-hover:bg-orange-600 group-hover:text-white transition-colors">
+                    <div className="p-2 w-12 h-12 rounded-xl bg-status-warning/10 text-status-warning flex items-center justify-center mb-4 group-hover:bg-status-warning group-hover:text-text-inverted transition-colors">
                         <Info size={24} />
                     </div>
                     <h4 className="font-bold text-text-primary mb-2">Professional Help</h4>
@@ -258,7 +258,7 @@ const RehomingInterventionPage = () => {
     );
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-12 px-4">
+        <div className="min-h-screen bg-bg-primary py-12 px-4">
             <div className="max-w-4xl mx-auto">
                 <div className="mb-12">
                     <h1 className="text-3xl font-bold text-center text-text-primary mb-2">Before You Rehome...</h1>
@@ -268,11 +268,11 @@ const RehomingInterventionPage = () => {
                 <div className="flex justify-center items-center gap-4 mb-12">
                     {[1, 2, 3].map(i => (
                         <div key={i} className="flex items-center">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step >= i ? 'bg-brand-primary text-white' : 'bg-gray-200 text-gray-500'
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step >= i ? 'bg-brand-primary text-text-inverted' : 'bg-bg-secondary text-text-tertiary'
                                 }`}>
                                 {step > i ? <CheckCircle size={20} /> : i}
                             </div>
-                            {i < 3 && <div className={`w-16 h-1 bg-gray-200 mx-2 ${step > i ? 'bg-brand-primary' : ''}`}></div>}
+                            {i < 3 && <div className={`w-16 h-1 bg-bg-secondary mx-2 ${step > i ? 'bg-brand-primary' : ''}`}></div>}
                         </div>
                     ))}
                 </div>

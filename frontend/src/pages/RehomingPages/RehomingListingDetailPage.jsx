@@ -65,7 +65,7 @@ const RehomingListingDetailPage = () => {
     const prevImage = () => setCurrentImage((prev) => (prev - 1 + listing.pet.photos.length) % listing.pet.photos.length);
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] pb-20">
+        <div className="min-h-screen bg-bg-primary pb-20">
             {/* Breadcrumb / Nav */}
             <div className="max-w-7xl mx-auto px-4 py-6">
                 <Link to="/browse" className="text-sm font-bold text-text-tertiary hover:text-brand-primary flex items-center gap-1">
@@ -130,9 +130,9 @@ const RehomingListingDetailPage = () => {
                             { label: 'Weight', value: listing.pet.weight },
                             { label: 'Energy', value: 'High Energy' }, // simplified
                         ].map(stat => (
-                            <div key={stat.label} className="bg-[#FFF9F2] p-4 rounded-xl border border-[#FFE8CC]">
-                                <p className="text-[10px] uppercase font-bold text-[#B5823B] tracking-wider mb-1">{stat.label}</p>
-                                <p className="font-bold text-[#5D554D]">{stat.value}</p>
+                            <div key={stat.label} className="bg-bg-secondary p-4 rounded-xl border border-border">
+                                <p className="text-[10px] uppercase font-bold text-brand-primary tracking-wider mb-1">{stat.label}</p>
+                                <p className="font-bold text-text-primary">{stat.value}</p>
                             </div>
                         ))}
                     </div>
@@ -149,19 +149,19 @@ const RehomingListingDetailPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-4 gap-x-8">
                             <div className="flex justify-between items-center py-2 border-b border-border">
                                 <span className="font-medium text-text-secondary">Good with Kids</span>
-                                {listing.pet.behavior.kids ? <span className="text-green-600 font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-red-500 font-bold flex items-center gap-1"><X size={16} /> No</span>}
+                                {listing.pet.behavior.kids ? <span className="text-status-success font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-status-error font-bold flex items-center gap-1"><X size={16} /> No</span>}
                             </div>
                             <div className="flex justify-between items-center py-2 border-b border-border">
                                 <span className="font-medium text-text-secondary">Good with Dogs</span>
-                                {listing.pet.behavior.dogs ? <span className="text-green-600 font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-red-500 font-bold flex items-center gap-1"><X size={16} /> No</span>}
+                                {listing.pet.behavior.dogs ? <span className="text-status-success font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-status-error font-bold flex items-center gap-1"><X size={16} /> No</span>}
                             </div>
                             <div className="flex justify-between items-center py-2 border-b border-border">
                                 <span className="font-medium text-text-secondary">Good with Cats</span>
-                                {listing.pet.behavior.cats ? <span className="text-green-600 font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-red-500 font-bold flex items-center gap-1"><X size={16} /> No</span>}
+                                {listing.pet.behavior.cats ? <span className="text-status-success font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-status-error font-bold flex items-center gap-1"><X size={16} /> No</span>}
                             </div>
                             <div className="flex justify-between items-center py-2 border-b border-border">
                                 <span className="font-medium text-text-secondary">House Trained</span>
-                                {listing.pet.behavior.houseTrained ? <span className="text-green-600 font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-red-500 font-bold flex items-center gap-1"><X size={16} /> No</span>}
+                                {listing.pet.behavior.houseTrained ? <span className="text-status-success font-bold flex items-center gap-1"><Check size={16} /> Yes</span> : <span className="text-status-error font-bold flex items-center gap-1"><X size={16} /> No</span>}
                             </div>
                         </div>
                     </Card>
@@ -172,7 +172,7 @@ const RehomingListingDetailPage = () => {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                             <div>
                                 <p className="text-sm font-bold text-text-tertiary mb-1">Vaccinations</p>
-                                <p className="font-bold text-green-600 flex items-center gap-2"><Check size={16} /> {listing.pet.medical.vaccinations}</p>
+                                <p className="font-bold text-status-success flex items-center gap-2"><Check size={16} /> {listing.pet.medical.vaccinations}</p>
                             </div>
                             <div>
                                 <p className="text-sm font-bold text-text-tertiary mb-1">Spayed / Neutered</p>
@@ -190,20 +190,20 @@ const RehomingListingDetailPage = () => {
                     </Card>
 
                     {/* Adoption Terms */}
-                    <Card className="p-8 bg-[#F0FDF4] border-green-200">
-                        <h3 className="text-xl font-bold text-green-900 mb-6">Adoption Details</h3>
+                    <Card className="p-8 bg-status-success/10 border-status-success/20">
+                        <h3 className="text-xl font-bold text-status-success mb-6">Adoption Details</h3>
                         <div className="flex flex-col md:flex-row gap-8">
                             <div>
-                                <p className="text-xs font-bold text-green-700 uppercase tracking-wider mb-2">Adoption Fee</p>
-                                <p className="text-4xl font-bold text-green-800">${listing.pet.adoption.fee}</p>
-                                <p className="text-xs text-green-600 mt-1">Covers care costs</p>
+                                <p className="text-xs font-bold text-status-success uppercase tracking-wider mb-2">Adoption Fee</p>
+                                <p className="text-4xl font-bold text-status-success">${listing.pet.adoption.fee}</p>
+                                <p className="text-xs text-status-success mt-1">Covers care costs</p>
                             </div>
-                            <div className="h-px md:h-auto w-full md:w-px bg-green-200"></div>
+                            <div className="h-px md:h-auto w-full md:w-px bg-status-success/20"></div>
                             <div>
-                                <p className="text-xs font-bold text-green-700 uppercase tracking-wider mb-2">Included Items</p>
+                                <p className="text-xs font-bold text-status-success uppercase tracking-wider mb-2">Included Items</p>
                                 <div className="flex flex-wrap gap-2">
                                     {listing.pet.adoption.includes.map(item => (
-                                        <span key={item} className="bg-white text-green-800 px-3 py-1 rounded-full text-xs font-bold shadow-sm">{item}</span>
+                                        <span key={item} className="bg-bg-surface text-status-success px-3 py-1 rounded-full text-xs font-bold shadow-sm">{item}</span>
                                     ))}
                                 </div>
                             </div>
@@ -218,10 +218,10 @@ const RehomingListingDetailPage = () => {
                         <div className="flex justify-between items-center mb-6">
                             <span className="text-3xl font-bold text-text-primary">${listing.pet.adoption.fee}</span>
                             <div className="flex gap-2">
-                                <button className="p-2 rounded-full hover:bg-red-50 hover:text-red-500 transition-colors border border-border">
+                                <button className="p-2 rounded-full hover:bg-status-error/10 hover:text-status-error transition-colors border border-border">
                                     <Heart size={20} />
                                 </button>
-                                <button className="p-2 rounded-full hover:bg-gray-50 transition-colors border border-border">
+                                <button className="p-2 rounded-full hover:bg-bg-secondary transition-colors border border-border">
                                     <Share2 size={20} />
                                 </button>
                             </div>
@@ -251,20 +251,20 @@ const RehomingListingDetailPage = () => {
                     </div>
 
                     {/* Safety Tips */}
-                    <div className="bg-[#F8FAFC] p-6 rounded-3xl border border-slate-200">
-                        <div className="flex items-center gap-2 mb-4 text-slate-700">
+                    <div className="bg-bg-secondary p-6 rounded-3xl border border-border">
+                        <div className="flex items-center gap-2 mb-4 text-text-primary">
                             <Shield size={20} />
                             <h4 className="font-bold">Safety Tips</h4>
                         </div>
-                        <ul className="space-y-3 text-sm text-slate-600">
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5"></div> Meet in public places</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5"></div> Bring a friend along</li>
-                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-slate-400 mt-1.5"></div> Never send money beforehand</li>
+                        <ul className="space-y-3 text-sm text-text-secondary">
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-text-tertiary mt-1.5"></div> Meet in public places</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-text-tertiary mt-1.5"></div> Bring a friend along</li>
+                            <li className="flex gap-2"><div className="w-1.5 h-1.5 rounded-full bg-text-tertiary mt-1.5"></div> Never send money beforehand</li>
                         </ul>
                     </div>
 
                     <div className="text-center">
-                        <button className="text-xs font-bold text-text-tertiary hover:text-red-500 flex items-center justify-center gap-1 mx-auto">
+                        <button className="text-xs font-bold text-text-tertiary hover:text-status-error flex items-center justify-center gap-1 mx-auto">
                             <Flag size={12} /> Report this listing
                         </button>
                     </div>

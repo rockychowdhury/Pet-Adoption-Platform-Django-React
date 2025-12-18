@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import useAPI from './useAPI';
 
 const useRehoming = () => {
@@ -21,7 +21,6 @@ const useRehoming = () => {
     };
 
     const useGetActiveIntervention = () => {
-        const { useQuery } = require('@tanstack/react-query'); // Importing inside to avoid top-level issues if any
         return useQuery({
             queryKey: ['activeIntervention'],
             queryFn: async () => {

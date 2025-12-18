@@ -52,7 +52,7 @@ const MyApplicationsPage = () => {
     const filteredApps = filter === 'All' ? applications : applications.filter(app => app.status.includes(filter) || (filter === 'Approved' && app.status.includes('Meet')));
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] py-12 px-4">
+        <div className="min-h-screen bg-bg-primary py-12 px-4">
             <div className="max-w-4xl mx-auto">
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-text-primary">My Applications</h1>
@@ -66,8 +66,8 @@ const MyApplicationsPage = () => {
                             key={status}
                             onClick={() => setFilter(status)}
                             className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${filter === status
-                                    ? 'bg-brand-primary text-white shadow-md'
-                                    : 'bg-white text-text-secondary hover:bg-gray-50 border border-border'
+                                ? 'bg-brand-primary text-text-inverted shadow-md'
+                                : 'bg-bg-surface text-text-secondary hover:bg-bg-secondary border border-border'
                                 }`}
                         >
                             {status}
@@ -100,7 +100,7 @@ const MyApplicationsPage = () => {
                                         <Badge variant={getStatusVariant(app.status)}>{app.status}</Badge>
 
                                         {app.unreadMessages > 0 && (
-                                            <span className="flex items-center gap-1 text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-md animate-pulse">
+                                            <span className="flex items-center gap-1 text-xs font-bold text-status-info bg-status-info/10 px-2 py-1 rounded-md animate-pulse">
                                                 <MessageCircle size={12} /> {app.unreadMessages} new message{app.unreadMessages > 1 ? 's' : ''}
                                             </span>
                                         )}
@@ -120,7 +120,7 @@ const MyApplicationsPage = () => {
                     ))}
 
                     {filteredApps.length === 0 && (
-                        <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-border">
+                        <div className="text-center py-20 bg-bg-surface rounded-3xl border border-dashed border-border">
                             <h3 className="text-lg font-bold text-text-primary">No applications found</h3>
                             <p className="text-text-secondary mt-1">Try changing your filters or browse more pets.</p>
                         </div>

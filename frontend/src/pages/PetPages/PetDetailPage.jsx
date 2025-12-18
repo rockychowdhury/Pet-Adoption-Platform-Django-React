@@ -55,7 +55,7 @@ const PetDetailPage = () => {
     });
 
     if (isLoading) return (
-        <div className="flex justify-center items-center h-screen bg-[#FDFBF7]">
+        <div className="flex justify-center items-center h-screen bg-bg-primary">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-brand-primary"></div>
         </div>
     );
@@ -69,7 +69,7 @@ const PetDetailPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] pb-20">
+        <div className="min-h-screen bg-bg-primary pb-20">
             {/* Using the specific creamy background color from the UI image */}
 
             {/* Nav / Breadcrumbs */}
@@ -78,7 +78,7 @@ const PetDetailPage = () => {
                     FurEver Home
                 </Link>
                 <div className="flex gap-4">
-                    <button className="p-2 rounded-full bg-white shadow-sm hover:shadow-md transition">
+                    <button className="p-2 rounded-full bg-bg-surface shadow-sm hover:shadow-md transition">
                         <Share2 size={20} className="text-text-secondary" />
                     </button>
                     <img src={pet.owner.avatar} alt="User" className="w-10 h-10 rounded-full border border-border" />
@@ -139,23 +139,23 @@ const PetDetailPage = () => {
 
                     {/* Info Cards */}
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="bg-[#FDf7ED] p-4 rounded-xl">
-                            <p className="text-[10px] font-bold text-[#A69D92] uppercase tracking-wider mb-1">Age</p>
-                            <p className="text-lg font-bold text-[#5D554D]">{pet.age_years} Years {pet.age_months} Months</p>
+                        <div className="bg-bg-secondary p-4 rounded-xl">
+                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Age</p>
+                            <p className="text-lg font-bold text-text-primary">{pet.age_years} Years {pet.age_months} Months</p>
                         </div>
-                        <div className="bg-[#FDf7ED] p-4 rounded-xl">
-                            <p className="text-[10px] font-bold text-[#A69D92] uppercase tracking-wider mb-1">Gender</p>
-                            <p className="text-lg font-bold text-[#5D554D]">{pet.gender}</p>
+                        <div className="bg-bg-secondary p-4 rounded-xl">
+                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Gender</p>
+                            <p className="text-lg font-bold text-text-primary">{pet.gender}</p>
                         </div>
-                        <div className="bg-[#FDf7ED] p-4 rounded-xl">
-                            <p className="text-[10px] font-bold text-[#A69D92] uppercase tracking-wider mb-1">Status</p>
-                            <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#E5F7EB] text-[#2F9E44] text-xs font-bold">
+                        <div className="bg-bg-secondary p-4 rounded-xl">
+                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Status</p>
+                            <div className="inline-flex items-center px-2 py-0.5 rounded-full bg-status-success/10 text-status-success text-xs font-bold">
                                 {pet.status}
                             </div>
                         </div>
-                        <div className="bg-[#FDf7ED] p-4 rounded-xl">
-                            <p className="text-[10px] font-bold text-[#A69D92] uppercase tracking-wider mb-1">Added On</p>
-                            <p className="text-lg font-bold text-[#5D554D]">{new Date(pet.added_on).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
+                        <div className="bg-bg-secondary p-4 rounded-xl">
+                            <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Added On</p>
+                            <p className="text-lg font-bold text-text-primary">{new Date(pet.added_on).toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })}</p>
                         </div>
                     </div>
 
@@ -170,15 +170,15 @@ const PetDetailPage = () => {
                     {/* Action Buttons */}
                     <div className="flex flex-wrap gap-4 pt-4">
                         <Link to={`/pets/edit/${pet.id}`}>
-                            <Button variant="primary" className="bg-[#2D2D2D] hover:bg-black text-white px-8 py-3 rounded-full flex items-center gap-2">
+                            <Button variant="primary" className="px-8 py-3 rounded-full flex items-center gap-2">
                                 <span className="text-sm font-bold">Edit Profile</span>
                             </Button>
                         </Link>
-                        <Button variant="outline" className="border border-border bg-white hover:bg-gray-50 text-text-primary px-8 py-3 rounded-full flex items-center gap-2">
+                        <Button variant="outline" className="border border-border bg-bg-surface hover:bg-bg-secondary text-text-primary px-8 py-3 rounded-full flex items-center gap-2">
                             <span className="text-sm font-bold">Create Rehoming Listing</span>
                         </Button>
                         <div className="flex-1 text-right">
-                            <Button variant="danger" className="bg-red-50 hover:bg-red-100 text-red-600 px-8 py-3 rounded-full flex items-center gap-2 ml-auto">
+                            <Button variant="danger" className="bg-status-error/10 hover:bg-status-error/20 text-status-error px-8 py-3 rounded-full flex items-center gap-2 ml-auto">
                                 <span className="text-sm font-bold">Delete Profile</span>
                             </Button>
                         </div>
@@ -188,13 +188,13 @@ const PetDetailPage = () => {
                 {/* Right Column: Sidebar Cards */}
                 <div className="space-y-6">
                     {/* Owner Profile Card */}
-                    <div className="bg-white rounded-3xl p-6 shadow-sm border border-border">
+                    <div className="bg-bg-surface rounded-3xl p-6 shadow-sm border border-border">
                         <h3 className="text-lg font-bold text-text-primary mb-6">Owner Profile</h3>
                         <div className="flex items-center gap-4 mb-6">
                             <img src={pet.owner.avatar} alt={pet.owner.name} className="w-16 h-16 rounded-full object-cover" />
                             <div>
                                 <h4 className="font-bold text-lg text-text-primary">{pet.owner.name}</h4>
-                                <span className="bg-[#FFF4E5] text-[#B5823B] text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">{pet.owner.role}</span>
+                                <span className="bg-brand-secondary/10 text-brand-secondary text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wider">{pet.owner.role}</span>
                             </div>
                         </div>
                         <div className="flex justify-between text-center pb-6 border-b border-border mb-4">
@@ -218,13 +218,13 @@ const PetDetailPage = () => {
 
                     {/* Rehoming Status Card */}
                     {pet.rehoming_status.is_rehoming && (
-                        <div className="bg-white rounded-3xl p-0 shadow-sm border border-border overflow-hidden">
-                            <div className="p-6 border-b border-border bg-[#FFF9F2]">
+                        <div className="bg-bg-surface rounded-3xl p-0 shadow-sm border border-border overflow-hidden">
+                            <div className="p-6 border-b border-border bg-bg-secondary">
                                 <h3 className="text-lg font-bold text-text-primary">Rehoming Listing</h3>
                             </div>
                             <div className="p-6 space-y-4">
                                 <div className="flex justify-between items-center">
-                                    <span className="bg-[#FFEDD5] text-[#C2410C] text-[10px] font-bold px-2 py-1 rounded-full uppercase">Being Rehomed</span>
+                                    <span className="bg-status-warning/10 text-status-warning text-[10px] font-bold px-2 py-1 rounded-full uppercase">Being Rehomed</span>
                                     <span className="text-xs text-text-tertiary">Posted {pet.rehoming_status.posted_ago}</span>
                                 </div>
 
@@ -236,7 +236,7 @@ const PetDetailPage = () => {
                                 </div>
 
                                 <Link to="/dashboard/rehoming/manage" className="block w-full">
-                                    <Button variant="outline" className="w-full justify-center bg-white hover:bg-gray-50 border border-border">
+                                    <Button variant="outline" className="w-full justify-center bg-bg-surface hover:bg-bg-secondary border border-border">
                                         View Listing Dashboard
                                     </Button>
                                 </Link>

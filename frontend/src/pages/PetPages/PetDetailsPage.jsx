@@ -32,10 +32,10 @@ const PetDetailsPage = () => {
                                 className="w-full h-full object-cover"
                             />
                             <div className="absolute top-6 right-6 flex gap-3">
-                                <button className="w-12 h-12 bg-bg-surface/30 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white hover:text-red-500 transition-all shadow-lg">
+                                <button className="w-12 h-12 bg-bg-surface/30 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white hover:text-status-error transition-all shadow-lg">
                                     <Heart size={24} fill="none" />
                                 </button>
-                                <button className="w-12 h-12 bg-bg-surface/30 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white hover:text-blue-500 transition-all shadow-lg">
+                                <button className="w-12 h-12 bg-bg-surface/30 backdrop-blur-md rounded-full flex items-center justify-center text-white hover:bg-white hover:text-brand-primary transition-all shadow-lg">
                                     <Share2 size={24} />
                                 </button>
                             </div>
@@ -48,9 +48,9 @@ const PetDetailsPage = () => {
                                     <h1 className="text-5xl font-bold text-text-primary font-logo mb-2">{pet.name}</h1>
                                     <p className="text-xl text-text-secondary font-medium">{pet.breed} • Large</p>
                                 </div>
-                                <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest ${pet.status === 'available' ? 'bg-green-500 text-white' :
-                                        pet.status === 'pending' ? 'bg-orange-500 text-white' :
-                                            'bg-gray-500 text-white'
+                                <span className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-widest ${pet.status === 'available' ? 'bg-status-success text-white' :
+                                    pet.status === 'pending' ? 'bg-status-warning text-white' :
+                                        'bg-text-tertiary text-white'
                                     }`}>
                                     ● {pet.status}
                                 </span>
@@ -84,7 +84,7 @@ const PetDetailsPage = () => {
                             </div>
 
                             {pet.is_vaccinated && (
-                                <div className="flex items-center gap-3 p-4 bg-green-500/10 rounded-xl text-green-600 mb-8 w-fit">
+                                <div className="flex items-center gap-3 p-4 bg-status-success/10 rounded-xl text-status-success mb-8 w-fit">
                                     <CheckCircle size={20} className="fill-current" />
                                     <span className="font-bold text-sm">Vaccinated & Healthy</span>
                                 </div>
@@ -124,7 +124,7 @@ const PetDetailsPage = () => {
 
                             <div className="bg-bg-primary rounded-2xl p-4 mb-8">
                                 <div className="flex gap-4 items-start">
-                                    <div className="w-10 h-10 rounded-full bg-gray-300 flex-shrink-0"></div>
+                                    <div className="w-10 h-10 rounded-full bg-bg-secondary flex-shrink-0"></div>
                                     <div className="flex-grow">
                                         <input
                                             type="text"
@@ -144,7 +144,7 @@ const PetDetailsPage = () => {
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-orange-100 flex items-center justify-center text-[10px] font-bold text-orange-600">AL</div>
+                                            <div className="w-6 h-6 rounded-full bg-brand-secondary/10 flex items-center justify-center text-[10px] font-bold text-brand-secondary">AL</div>
                                             <span className="text-sm font-bold text-text-primary">Alex L.</span>
                                         </div>
                                         <span className="text-xs text-text-secondary">2 hours ago</span>
@@ -163,7 +163,7 @@ const PetDetailsPage = () => {
                                 <div>
                                     <div className="flex justify-between items-center mb-2">
                                         <div className="flex items-center gap-2">
-                                            <div className="w-6 h-6 rounded-full bg-blue-100 flex items-center justify-center text-[10px] font-bold text-blue-600">MJ</div>
+                                            <div className="w-6 h-6 rounded-full bg-brand-primary/10 flex items-center justify-center text-[10px] font-bold text-brand-primary">MJ</div>
                                             <span className="text-sm font-bold text-text-primary">Maria J.</span>
                                         </div>
                                         <span className="text-xs text-text-secondary">Yesterday</span>
@@ -204,7 +204,7 @@ const PetDetailsPage = () => {
                             <p className="text-text-secondary text-xs mb-6">Chat directly with {pet.name}'s caretakers.</p>
 
                             <div className="flex items-center gap-4 mb-6">
-                                <div className="w-12 h-12 rounded-full bg-gray-300"></div>
+                                <div className="w-12 h-12 rounded-full bg-bg-secondary"></div>
                                 <div>
                                     <h4 className="font-bold text-text-primary text-sm">Sunny Paws Rescue</h4>
                                     <p className="text-xs text-text-secondary">San Diego, CA</p>
@@ -212,7 +212,7 @@ const PetDetailsPage = () => {
                             </div>
 
                             <div className="flex flex-wrap gap-2 mb-6">
-                                <span className="px-3 py-1 bg-orange-50 text-orange-600 rounded-full text-[10px] font-bold">Avg. response &lt; 2 hrs</span>
+                                <span className="px-3 py-1 bg-status-warning/10 text-status-warning rounded-full text-[10px] font-bold">Avg. response &lt; 2 hrs</span>
                                 <span className="px-3 py-1 bg-bg-primary text-text-secondary rounded-full text-[10px] font-bold">Open today • 10am–6pm</span>
                             </div>
 

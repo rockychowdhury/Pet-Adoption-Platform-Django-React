@@ -35,10 +35,10 @@ const RehomingDashboardPage = () => {
 
     const getStatusStyle = (status) => {
         switch (status) {
-            case 'Active': return 'bg-green-100 text-green-700';
-            case 'Pending Review': return 'bg-yellow-100 text-yellow-700';
-            case 'Adopted': return 'bg-blue-100 text-blue-700';
-            default: return 'bg-gray-100 text-gray-600';
+            case 'Active': return 'bg-status-success/10 text-status-success';
+            case 'Pending Review': return 'bg-status-warning/10 text-status-warning';
+            case 'Adopted': return 'bg-status-info/10 text-status-info';
+            default: return 'bg-bg-secondary text-text-secondary';
         }
     };
 
@@ -63,8 +63,8 @@ const RehomingDashboardPage = () => {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-4 py-2 rounded-full text-sm font-bold whitespace-nowrap transition-colors ${filter === status
-                            ? 'bg-brand-primary text-white shadow-md'
-                            : 'bg-white text-text-secondary hover:bg-gray-50 border border-border'
+                            ? 'bg-brand-primary text-text-inverted shadow-md'
+                            : 'bg-bg-surface text-text-secondary hover:bg-bg-secondary border border-border'
                             }`}
                     >
                         {status} {status === 'All' && `(${listings.length})`}
@@ -120,7 +120,7 @@ const RehomingDashboardPage = () => {
                             <Button variant="outline" className="w-full justify-center">Edit</Button>
 
                             <div className="md:mt-auto pt-2 flex justify-center gap-4 md:justify-end text-text-tertiary">
-                                <button className="hover:text-red-500 transition-colors" title="Delete"><Trash2 size={18} /></button>
+                                <button className="hover:text-status-error transition-colors" title="Delete"><Trash2 size={18} /></button>
                                 <button className="hover:text-text-primary transition-colors" title="Archive"><Archive size={18} /></button>
                             </div>
                         </div>
@@ -128,8 +128,8 @@ const RehomingDashboardPage = () => {
                 ))}
 
                 {listings.length === 0 && (
-                    <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-border">
-                        <div className="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-4">
+                    <div className="text-center py-20 bg-bg-surface rounded-3xl border border-dashed border-border">
+                        <div className="mx-auto w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center text-text-tertiary mb-4">
                             <Plus size={32} />
                         </div>
                         <h3 className="text-lg font-bold text-text-primary">No listings found</h3>
