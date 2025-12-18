@@ -1,4 +1,5 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { ShieldCheck, History, HeartHandshake, Sparkles, CheckCircle } from 'lucide-react';
 import star from '../../assets/star.png';
 
@@ -24,6 +25,27 @@ const TrustSection = () => {
         }
     ];
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.15
+            }
+        }
+    };
+
+    const cardVariants = {
+        hidden: { opacity: 0, y: 40 },
+        visible: {
+            opacity: 1, y: 0,
+            transition: {
+                duration: 0.8,
+                ease: [0.22, 1, 0.36, 1]
+            }
+        }
+    };
+
     return (
         <section className="py-24 bg-bg-primary relative overflow-hidden">
             {/* Background Decorative Blur */}
@@ -31,7 +53,13 @@ const TrustSection = () => {
 
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Header */}
-                <div className="text-center mb-20 relative">
+                <motion.div
+                    initial={{ opacity: 0, y: 30 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8 }}
+                    className="text-center mb-20 relative"
+                >
                     <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-bg-secondary border border-border/50 rounded-full text-brand-primary text-[10px] font-black uppercase tracking-[0.2em] mb-8 shadow-sm">
                         <Sparkles size={12} className="fill-current" />
                         The PetCircle Difference
@@ -42,10 +70,12 @@ const TrustSection = () => {
                             Built on Trust,<br />
                             <span className="text-brand-primary">Driven by Community</span>
                         </h2>
-                        <img
+                        <motion.img
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 15, repeat: Infinity, ease: "linear" }}
                             src={star}
                             alt=""
-                            className="absolute -top-12 -right-16 w-12 h-12 animate-spin-slow opacity-60 hidden md:block"
+                            className="absolute -top-12 -right-16 w-12 h-12 opacity-60 hidden md:block"
                             style={{ filter: 'brightness(0)' }}
                         />
                     </div>
@@ -53,12 +83,22 @@ const TrustSection = () => {
                     <p className="text-text-secondary text-xl max-w-2xl mx-auto leading-relaxed font-medium opacity-80 mt-4">
                         We're moving beyond traditional shelters to create a safer, more transparent way for pet lovers to connect and care for animals.
                     </p>
-                </div>
+                </motion.div>
 
                 {/* Trust Cards Grid */}
-                <div className="grid md:grid-cols-3 gap-8 lg:gap-12">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true, margin: "-100px" }}
+                    className="grid md:grid-cols-3 gap-8 lg:gap-12"
+                >
                     {trustCards.map((card, idx) => (
-                        <div key={idx} className="group relative bg-bg-white p-12 rounded-[56px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] hover:shadow-[0_48px_96px_-24px_rgba(0,0,0,0.08)] border border-border/40 transition-all duration-700 hover:-translate-y-3 flex flex-col items-center text-center">
+                        <motion.div
+                            key={idx}
+                            variants={cardVariants}
+                            className="group relative bg-bg-white p-12 rounded-[56px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] hover:shadow-[0_48px_96px_-24px_rgba(0,0,0,0.08)] border border-border/40 transition-all duration-300 hover:-translate-y-3 flex flex-col items-center text-center"
+                        >
                             <div className="mb-10 p-6 rounded-[32px] bg-bg-secondary group-hover:bg-brand-primary/10 group-hover:scale-110 transition-all duration-700 flex items-center justify-center">
                                 {React.cloneElement(card.icon, { size: 36, strokeWidth: 1.5 })}
                             </div>
@@ -80,12 +120,18 @@ const TrustSection = () => {
                                     <CheckCircle size={22} strokeWidth={2} />
                                 </div>
                             )}
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
+                </motion.div>
 
                 {/* Bottom Highlight */}
-                <div className="mt-32 p-12 md:p-20 bg-[#638C7D] rounded-[64px] relative overflow-hidden group shadow-2xl shadow-brand-primary/10">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95 }}
+                    whileInView={{ opacity: 1, scale: 1 }}
+                    viewport={{ once: true, margin: "-100px" }}
+                    transition={{ duration: 0.8 }}
+                    className="mt-32 p-12 md:p-20 bg-[#638C7D] rounded-[64px] relative overflow-hidden group shadow-2xl shadow-brand-primary/10"
+                >
                     <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white opacity-5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 group-hover:scale-125 transition-transform duration-1000"></div>
 
                     <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
@@ -120,7 +166,7 @@ const TrustSection = () => {
                             </div>
                         </div>
                     </div>
-                </div>
+                </motion.div>
             </div>
         </section>
     );

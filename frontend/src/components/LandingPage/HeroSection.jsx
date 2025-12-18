@@ -1,155 +1,232 @@
 import React from 'react';
 import { Link } from 'react-router';
+import { motion } from 'framer-motion';
 import bannerImg from '../../assets/bannerimg.png';
 import catImg from '../../assets/cat.png';
 import star from '../../assets/star.png';
 import stars from '../../assets/stars.png';
-import { Heart, ShieldCheck, MessageCircle, Sparkles } from 'lucide-react';
+import { Heart, ShieldCheck, MessageCircle, Sparkles, Star } from 'lucide-react';
 
 const HeroSection = () => {
+    // Animation Variants
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.15,
+                delayChildren: 0.2,
+            },
+        },
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 30 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.8, ease: [0.22, 1, 0.36, 1] },
+        },
+    };
+
     return (
-        <section className="relative w-full min-h-screen flex flex-col lg:flex-row overflow-hidden font-inter bg-bg-primary transition-colors duration-300">
+        <section className="relative w-full min-h-screen flex flex-col lg:flex-row overflow-hidden font-jakarta bg-bg-primary transition-colors duration-300">
 
             {/* Background Split (Visual only) */}
             <div className="absolute top-0 right-0 w-full lg:w-1/2 h-full bg-bg-secondary z-0">
                 {/* Abstract Background Shapes for Depth */}
-                <div className="absolute top-20 right-20 w-64 h-64 bg-white/20 rounded-full blur-3xl"></div>
-                <div className="absolute bottom-20 left-20 w-80 h-80 bg-bg-secondary/10 rounded-full blur-3xl"></div>
+                <div className="absolute top-20 right-20 w-64 h-64 bg-brand-primary/5 rounded-full blur-3xl"></div>
+                <div className="absolute bottom-20 left-20 w-80 h-80 bg-brand-secondary/5 rounded-full blur-3xl"></div>
             </div>
 
             {/* Content Container */}
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row h-full items-center min-h-screen">
 
                 {/* Left Side */}
-                <div className="w-full lg:w-1/2 flex flex-col justify-center py-12 lg:py-0 relative">
+                <motion.div
+                    initial="hidden"
+                    animate="visible"
+                    variants={containerVariants}
+                    className="w-full lg:w-1/2 flex flex-col lg:space-y-8 justify-center py-12 lg:py-0 relative"
+                >
                     {/* Decorative Stars Left */}
-                    <img src={stars} alt="stars" className="absolute top-1/4 -left-12 w-16 h-16 opacity-40" style={{ filter: 'brightness(0)' }} />
-
+                    <motion.img
+                        variants={itemVariants}
+                        src={stars}
+                        alt="stars"
+                        className="absolute top-1/4 -left-12 w-16 h-16 opacity-30 pointer-events-none"
+                        style={{ filter: 'brightness(0)' }}
+                    />
 
                     {/* #SAVELIFE Badge */}
-                    <div className="inline-flex items-center gap-2 px-4 py-2 bg-white border border-border rounded-full w-fit shadow-sm mb-6">
-                        <Sparkles className="text-brand-secondary fill-brand-secondary" size={20} />
-                        <span className="text-[10px] font-black tracking-[0.2em] text-text-secondary uppercase">#SAVELIFE</span>
-                    </div>
+                    <motion.div
+                        variants={itemVariants}
+                        className="inline-flex items-center gap-2 px-5 py-2.5 bg-bg-surface border border-border/50 rounded-full w-fit shadow-sm mb-4"
+                    >
+                        <Sparkles className="text-brand-secondary fill-brand-secondary" size={16} />
+                        <span className="text-[10px] font-black tracking-[0.2em] text-text-secondary uppercase">#SAVEPETS</span>
+                    </motion.div>
 
                     {/* Main Heading */}
-                    <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black text-text-primary leading-[1.1] mb-6 font-logo tracking-tight relative">
-                        The Community- <br />
-                        Driven Pet <span className="text-brand-secondary relative inline-block">
-                            Network
-                        </span>
-                    </h1>
+                    <motion.h1
+                        variants={itemVariants}
+                        className="text-5xl sm:text-6xl lg:text-[94px] font-black text-text-primary leading-[0.9] mb-8 font-logo tracking-tighter relative"
+                    >
+                        The Community <br />
+                        <span className="text-brand-primary relative inline-block">
+                            Driven
+                        </span> Pet Network
+                    </motion.h1>
 
                     {/* Subheading */}
-                    <div className="mb-10 max-w-md relative">
-                        <p className="text-text-secondary text-lg leading-relaxed font-medium">
-                            The safe, transparent, and direct way to rehome or adopt your next best friend.
+                    <motion.div
+                        variants={itemVariants}
+                        className="mb-10 max-w-lg relative"
+                    >
+                        <p className="text-text-secondary text-xl font-jakarta leading-relaxed font-medium opacity-80">
+                            A warm, trusted space where pet lovers meet, share stories, and save lives through the power of community.
                         </p>
-                    </div>
+                    </motion.div>
 
                     {/* Social Proof */}
-                    <div className="flex items-center gap-4 mb-12">
+                    <motion.div
+                        variants={itemVariants}
+                        className="flex items-center gap-6 mb-12"
+                    >
                         <div className="flex -space-x-4">
-                            <img className="w-12 h-12 rounded-full border-2 border-bg-surface object-cover" src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=100&q=80" alt="User" />
-                            <img className="w-12 h-12 rounded-full border-2 border-bg-surface object-cover" src="https://images.unsplash.com/photo-1580489944761-15a19d654956?auto=format&fit=crop&w=100&q=80" alt="User" />
-                            <img className="w-12 h-12 rounded-full border-2 border-bg-surface object-cover" src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?auto=format&fit=crop&w=100&q=80" alt="User" />
+                            {[1, 2, 3].map((i) => (
+                                <img
+                                    key={i}
+                                    className="w-14 h-14 rounded-full border-4 border-bg-surface object-cover shadow-lg"
+                                    src={`https://i.pravatar.cc/100?img=${i + 20}`}
+                                    alt="User"
+                                />
+                            ))}
                         </div>
                         <div>
-                            <p className="font-black text-text-primary text-xl font-jakarta leading-none mb-1">25K+</p>
-                            <p className="text-[10px] font-black text-text-secondary uppercase tracking-[0.2em]">Verified Owners <br /> & Pet Lovers</p>
+                            <div className="flex items-center gap-1 mb-1">
+                                {[...Array(5)].map((_, i) => (
+                                    <Star key={i} size={14} className="fill-brand-secondary text-brand-secondary" />
+                                ))}
+                            </div>
+                            <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em]">25K+ Verified Pet Lovers</p>
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* CTA Buttons */}
-                    <div className="flex gap-4">
-                        <button className="btn-primary px-8 py-4 rounded-full font-black text-[13px] uppercase tracking-widest">
-                            Adopt Now
+                    <motion.div
+                        variants={itemVariants}
+                        className="flex flex-wrap gap-5"
+                    >
+                        <button className="px-10 py-5 bg-brand-primary text-text-inverted rounded-full font-black text-xs uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-brand-primary/20">
+                            Find a Pet
                         </button>
-                        <button className="btn-outline px-8 py-4 rounded-full font-black text-[13px] uppercase tracking-widest">
-                            Join Us
+                        <button className="px-10 py-5 bg-bg-surface text-text-primary border border-border/60 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-bg-secondary transition-all duration-300">
+                            Join Community
                         </button>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
-                {/* Right Side - Enhanced with Depth */}
-                <div className="w-full lg:w-1/2 flex items-center justify-center relative h-full perspective-1000">
-                    {/* Floating Stars Right - More subtle placement */}
-                    <img src={star} alt="star" className="absolute top-10 right-10 w-8 h-8 animate-spin-slow opacity-80" />
+                {/* Right Side - Refined & Static */}
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.95, x: 20 }}
+                    animate={{ opacity: 1, scale: 1, x: 0 }}
+                    transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
+                    className="w-full lg:w-1/2 flex items-center justify-center relative h-full mt-12 lg:mt-0"
+                >
+                    {/* Layered Content Container */}
+                    <div className="relative w-full max-w-2xl px-4 flex justify-center items-center">
 
-                    {/* Main Image Container with Layering */}
-                    <div className="relative z-20 w-full max-w-2xl px-4 flex justify-center items-center">
+                        {/* Elegant Decorative Elements (Behind) */}
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[80%] bg-brand-primary/5 rounded-[100px] blur-[100px] -z-10 rotate-12"></div>
 
-                        {/* Layer 3: Floating Glass Card 1 (Top Right) - BEHIND Image */}
-                        <div className="absolute top-5 right-4 md:right-0 bg-white/95 backdrop-blur-md px-6 py-3 rounded-full shadow-lg border border-white/20 animate-float z-0 transform translate-x-1/2 flex items-center gap-2">
-                            <div className="w-4 h-4 bg-brand-secondary rounded-full flex items-center justify-center">
-                                <ShieldCheck size={12} className="text-white" />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="text-[11px] font-black text-text-secondary tracking-tight">Verified owners & listings</span>
-                            </div>
+                        {/* Main Image */}
+                        <div className="relative group">
+                            {/* Overlay for Dark Mode contrast */}
+                            <div className="absolute inset-0 bg-black/5 dark:bg-black/40 mix-blend-multiply rounded-[100px] z-20 pointer-events-none opacity-0 dark:opacity-100 transition-opacity duration-500"></div>
+
+                            <motion.img
+                                initial={{ y: 20, opacity: 0 }}
+                                animate={{ y: 0, opacity: 1 }}
+                                transition={{ duration: 1.2, delay: 0.4 }}
+                                src={bannerImg}
+                                alt="Happy Pets"
+                                className="w-full h-auto object-contain drop-shadow-[0_40px_80px_rgba(0,0,0,0.15)] max-h-[75vh] relative z-10"
+                            />
                         </div>
 
-                        {/* Layer 1: Main Banner Image */}
-                        <img
-                            src={bannerImg}
-                            alt="Happy Pets"
-                            className="w-full h-auto object-contain drop-shadow-2xl max-h-[75vh] relative z-10"
-                        />
-
-                        {/* Layer 4: Floating Glass Card 2 (Bottom Right) - IN FRONT OF Image */}
-                        <div className="absolute bottom-10 right-0 md:-right-6 bg-white p-4 rounded-[32px] shadow-soft border border-border animate-float-delayed z-30 flex items-center gap-3">
-                            <div className="bg-brand-secondary/10 p-2.5 rounded-2xl text-brand-secondary">
-                                <Heart size={20} fill="currentColor" />
+                        {/* Top Accent: Verified Badge */}
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1, duration: 0.8 }}
+                            className="absolute -top-14 right-0 md:right-12 bg-bg-surface/90 backdrop-blur-xl p-5 rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-border/50 z-20 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-500"
+                        >
+                            <div className="w-12 h-12 bg-brand-secondary/10 rounded-2xl flex items-center justify-center text-brand-secondary">
+                                <ShieldCheck size={24} />
                             </div>
                             <div>
-                                <p className="text-[10px] text-text-secondary font-black uppercase tracking-widest leading-none mb-1">100% Love</p>
-                                <p className="text-[15px] font-black text-text-primary tracking-tight">Guaranteed Reach</p>
+                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.1em] mb-1">Safety First</p>
+                                <p className="text-sm font-black text-text-primary tracking-tight">Verified Community</p>
                             </div>
-                        </div>
+                        </motion.div>
 
+                        {/* Bottom Accent: Community Love */}
+                        <motion.div
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 1.2, duration: 0.8 }}
+                            className="absolute -bottom-12 left-0 md:left-14 bg-bg-surface/90 backdrop-blur-xl p-5 rounded-[32px] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.1)] border border-border/50 z-20 flex items-center gap-4 hover:-translate-y-1 transition-transform duration-500"
+                        >
+                            <div className="w-12 h-12 bg-brand-primary/10 rounded-2xl flex items-center justify-center text-brand-primary">
+                                <Heart size={24} fill="currentColor" />
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-black text-text-tertiary uppercase tracking-[0.2em] mb-1">100% Love</p>
+                                <p className="text-sm font-black text-text-primary tracking-tight">Direct Rehoming</p>
+                            </div>
+                        </motion.div>
+
+                        {/* Decorative Star */}
+                        <motion.img
+                            animate={{ rotate: 360 }}
+                            transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+                            src={star}
+                            alt=""
+                            className="absolute -top-12 -right-6 w-12 h-12 opacity-40 hidden md:block dark:invert transition-all duration-300"
+                            style={{ filter: 'brightness(0)' }}
+                        />
                     </div>
-                </div>
+                </motion.div>
             </div>
 
             {/* Modern Scrolling Marquee Banner */}
-            <div className="absolute bottom-8 left-0 w-full z-30 transform -rotate-1 origin-bottom-left">
-                <div className="bg-brand-primary text-text-inverted py-3 overflow-hidden shadow-2xl">
+            <motion.div
+                initial={{ opacity: 0, y: 50 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 1 }}
+                className="absolute bottom-10 left-0 w-full z-30 transform -rotate-1 origin-bottom-left"
+            >
+                <div className="bg-brand-primary text-text-inverted py-4 overflow-hidden shadow-2xl">
                     <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
                         {[...Array(12)].map((_, i) => (
-                            <div key={i} className="flex items-center gap-8 text-sm md:text-base font-bold tracking-widest uppercase">
-                                <span>COMMUNITY FIRST • DIRECT REHOMING • VERIFIED TRUST</span>
-                                <span>•</span>
+                            <div key={i} className="flex items-center gap-12 text-[11px] font-black tracking-[0.4em] uppercase">
+                                <span>COMMUNITY FIRST</span>
+                                <span className="opacity-30">•</span>
+                                <span>DIRECT REHOMING</span>
+                                <span className="opacity-30">•</span>
+                                <span>VERIFIED TRUST</span>
+                                <span className="opacity-30">•</span>
                             </div>
                         ))}
                     </div>
                 </div>
-            </div>
+            </motion.div>
 
             {/* Custom Animation Styles */}
             <style jsx>{`
-                .animate-spin-slow {
-                    animation: spin 10s linear infinite;
-                }
-                @keyframes spin {
-                    from { transform: rotate(0deg); }
-                    to { transform: rotate(360deg); }
-                }
-                .animate-float {
-                    animation: float 6s ease-in-out infinite;
-                }
-                .animate-float-delayed {
-                    animation: float 6s ease-in-out infinite 3s;
-                }
-                @keyframes float {
-                    0% { transform: translateY(0px); }
-                    50% { transform: translateY(-15px); }
-                    100% { transform: translateY(0px); }
-                }
-                .perspective-1000 {
-                    perspective: 1000px;
-                }
                 .animate-marquee {
-                    animation: marquee 30s linear infinite;
+                    animation: marquee 40s linear infinite;
                 }
                 @keyframes marquee {
                     0% { transform: translateX(0); }
@@ -161,3 +238,4 @@ const HeroSection = () => {
 };
 
 export default HeroSection;
+

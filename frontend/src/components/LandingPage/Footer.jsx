@@ -1,17 +1,46 @@
 import React from 'react';
+import { motion } from 'framer-motion';
 import { Facebook, Twitter, Instagram, Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router';
 
 const Footer = () => {
+    const containerVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                duration: 0.8,
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 10 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: { duration: 0.5 }
+        }
+    };
+
     return (
         <footer className="bg-bg-secondary text-text-primary pt-24 pb-12 font-jakarta overflow-hidden relative">
             {/* Background Decor */}
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-primary/5 rounded-full blur-[120px] -z-10"></div>
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-secondary/5 rounded-full blur-[120px] -z-10"></div>
+
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16">
+                <motion.div
+                    variants={containerVariants}
+                    initial="hidden"
+                    whileInView="visible"
+                    viewport={{ once: true }}
+                    className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 mb-16"
+                >
                     {/* Brand Column */}
-                    <div className="space-y-8">
+                    <motion.div variants={itemVariants} className="space-y-8">
                         <Link to="/" className="inline-block transition-transform hover:scale-105 active:scale-95">
                             <h3 className="text-4xl font-black font-logo text-text-primary tracking-tight">
                                 Pet<span className="text-brand-primary">Circle</span>
@@ -25,10 +54,10 @@ const Footer = () => {
                             <SocialIcon icon={<Facebook size={20} />} href="#" />
                             <SocialIcon icon={<Twitter size={20} />} href="#" />
                         </div>
-                    </div>
+                    </motion.div>
 
                     {/* Quick Links */}
-                    <div>
+                    <motion.div variants={itemVariants}>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary mb-10">Navigation</h4>
                         <ul className="space-y-5 text-[13px] font-black uppercase tracking-widest text-text-secondary">
                             <li><FooterLink to="/adopt">Find a Pet</FooterLink></li>
@@ -36,10 +65,10 @@ const Footer = () => {
                             <li><FooterLink to="/services">Pet Services</FooterLink></li>
                             <li><FooterLink to="/community">Community Feed</FooterLink></li>
                         </ul>
-                    </div>
+                    </motion.div>
 
                     {/* Resources */}
-                    <div>
+                    <motion.div variants={itemVariants}>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary mb-10">Resources</h4>
                         <ul className="space-y-5 text-[13px] font-black uppercase tracking-widest text-text-secondary">
                             <li><FooterLink to="/how-it-works">How It Works</FooterLink></li>
@@ -47,10 +76,10 @@ const Footer = () => {
                             <li><FooterLink to="/about">About Us</FooterLink></li>
                             <li><FooterLink to="/contact">Contact Support</FooterLink></li>
                         </ul>
-                    </div>
+                    </motion.div>
 
                     {/* Legal */}
-                    <div>
+                    <motion.div variants={itemVariants}>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-secondary/50 mb-8">Legal</h4>
                         <ul className="space-y-4 text-sm font-bold text-text-secondary">
                             <li><FooterLink to="/terms">Terms of Service</FooterLink></li>
@@ -58,14 +87,20 @@ const Footer = () => {
                             <li><FooterLink to="/safety">Safety Guidelines</FooterLink></li>
                             <li><FooterLink to="/cookie-policy">Cookie Policy</FooterLink></li>
                         </ul>
-                    </div>
-                </div>
+                    </motion.div>
+                </motion.div>
 
-                <div className="border-t border-border/40 pt-12 text-center">
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 1, delay: 0.5 }}
+                    className="border-t border-border/40 pt-12 text-center"
+                >
                     <p className="text-text-tertiary text-[10px] font-black uppercase tracking-[0.3em]">
                         &copy; {new Date().getFullYear()} PetCircle. Crafted with <span className="text-brand-primary mx-1">♥</span> for all companions.
                     </p>
-                </div>
+                </motion.div>
             </div>
         </footer>
     );
@@ -89,3 +124,4 @@ const FooterLink = ({ to, children }) => (
 );
 
 export default Footer;
+

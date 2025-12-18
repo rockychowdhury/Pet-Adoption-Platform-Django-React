@@ -24,8 +24,8 @@ const HomePage = () => {
                 {window.location.pathname === '/' && (
                     <>
                         <HeroSection />
-                        <TrustSection />
                         <FeaturesSection />
+                        <TrustSection />
                         <HowItWorks />
                     </>
                 )}
