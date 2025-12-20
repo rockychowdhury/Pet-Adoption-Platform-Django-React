@@ -71,79 +71,83 @@ const ListingModerationPage = () => {
             </div>
 
             <div className="grid grid-cols-1 gap-6">
-                {listings && listings.length > 0 ? (
-                    listings.map(listing => (
-                        <Card key={listing.id} className="p-6 flex flex-col md:flex-row gap-6">
-                            <div className="w-full md:w-48 h-48 bg-bg-secondary rounded-xl overflow-hidden shrink-0">
-                                <img
-                                    src={listing.photo_url || 'https://via.placeholder.com/300?text=No+Image'}
-                                    alt={listing.pet_name || listing.name}
-                                    className="w-full h-full object-cover"
-                                />
-                            </div>
+                {(() => {
+                    const listingsList = Array.isArray(listings) ? listings : (listings?.results || []);
+                    if (listingsList.length > 0) {
+                        return listingsList.map(listing => (
+                            <Card key={listing.id} className="p-6 flex flex-col md:flex-row gap-6">
+                                <div className="w-full md:w-48 h-48 bg-bg-secondary rounded-xl overflow-hidden shrink-0">
+                                    <img
+                                        src={listing.photo_url || 'https://via.placeholder.com/300?text=No+Image'}
+                                        alt={listing.pet_name || listing.name}
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
 
-                            <div className="flex-1">
-                                <div className="flex justify-between items-start mb-2">
-                                    <div>
-                                        <h3 className="text-xl font-bold text-text-primary">{listing.pet_name || listing.name}</h3>
-                                        <p className="text-sm text-text-secondary capitalize">{listing.species} • {listing.breed} • {listing.age} months</p>
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-start mb-2">
+                                        <div>
+                                            <h3 className="text-xl font-bold text-text-primary">{listing.pet_name || listing.name}</h3>
+                                            <p className="text-sm text-text-secondary capitalize">{listing.species} • {listing.breed} • {listing.age} months</p>
+                                        </div>
+                                        <Badge variant={
+                                            listing.status === 'active' ? 'success' :
+                                                listing.status === 'rejected' ? 'error' : 'warning'
+                                        }>
+                                            {listing.status.replace('_', ' ')}
+                                        </Badge>
                                     </div>
-                                    <Badge variant={
-                                        listing.status === 'active' ? 'success' :
-                                            listing.status === 'rejected' ? 'error' : 'warning'
-                                    }>
-                                        {listing.status.replace('_', ' ')}
-                                    </Badge>
+
+                                    <p className="text-text-secondary text-sm mb-4 line-clamp-3">
+                                        {listing.rehoming_story || listing.description}
+                                    </p>
+
+                                    <div className="flex flex-wrap gap-4 text-xs text-text-tertiary mb-6">
+                                        <span className="bg-bg-secondary px-2 py-1 rounded">Fee: ${listing.adoption_fee}</span>
+                                        <span className="bg-bg-secondary px-2 py-1 rounded">Owner Verified: {listing.owner_verified ? 'Yes' : 'No'}</span>
+                                        {/* Additional info can go here */}
+                                    </div>
+
+                                    <div className="flex gap-3">
+                                        <Button
+                                            size="sm"
+                                            variant="outline"
+                                            onClick={() => navigate(`/pets/${listing.id}`)}
+                                        >
+                                            <Eye size={16} className="mr-2" /> View Details
+                                        </Button>
+
+                                        {listing.status === 'pending_review' && (
+                                            <>
+                                                <Button
+                                                    size="sm"
+                                                    variant="success"
+                                                    onClick={() => approveMutation.mutate(listing.id)}
+                                                    disabled={approveMutation.isLoading}
+                                                >
+                                                    <Check size={16} className="mr-2" /> Approve
+                                                </Button>
+                                                <Button
+                                                    size="sm"
+                                                    variant="danger"
+                                                    onClick={() => rejectMutation.mutate(listing.id)}
+                                                    disabled={rejectMutation.isLoading}
+                                                >
+                                                    <X size={16} className="mr-2" /> Reject
+                                                </Button>
+                                            </>
+                                        )}
+                                    </div>
                                 </div>
-
-                                <p className="text-text-secondary text-sm mb-4 line-clamp-3">
-                                    {listing.rehoming_story || listing.description}
-                                </p>
-
-                                <div className="flex flex-wrap gap-4 text-xs text-text-tertiary mb-6">
-                                    <span className="bg-bg-secondary px-2 py-1 rounded">Fee: ${listing.adoption_fee}</span>
-                                    <span className="bg-bg-secondary px-2 py-1 rounded">Owner Verified: {listing.owner_verified ? 'Yes' : 'No'}</span>
-                                    {/* Additional info can go here */}
-                                </div>
-
-                                <div className="flex gap-3">
-                                    <Button
-                                        size="sm"
-                                        variant="outline"
-                                        onClick={() => navigate(`/pets/${listing.id}`)}
-                                    >
-                                        <Eye size={16} className="mr-2" /> View Details
-                                    </Button>
-
-                                    {listing.status === 'pending_review' && (
-                                        <>
-                                            <Button
-                                                size="sm"
-                                                variant="success"
-                                                onClick={() => approveMutation.mutate(listing.id)}
-                                                disabled={approveMutation.isLoading}
-                                            >
-                                                <Check size={16} className="mr-2" /> Approve
-                                            </Button>
-                                            <Button
-                                                size="sm"
-                                                variant="danger"
-                                                onClick={() => rejectMutation.mutate(listing.id)}
-                                                disabled={rejectMutation.isLoading}
-                                            >
-                                                <X size={16} className="mr-2" /> Reject
-                                            </Button>
-                                        </>
-                                    )}
-                                </div>
-                            </div>
-                        </Card>
-                    ))
-                ) : (
-                    <div className="text-center py-12 bg-bg-surface rounded-xl border border-dashed border-border">
-                        <p className="text-text-tertiary">No listings found with status "{statusFilter.replace('_', ' ')}".</p>
-                    </div>
-                )}
+                            </Card>
+                        ));
+                    }
+                    return (
+                        <div className="text-center py-12 bg-bg-surface rounded-xl border border-dashed border-border">
+                            <p className="text-text-tertiary">No listings found with status "{statusFilter.replace('_', ' ')}".</p>
+                        </div>
+                    );
+                })()}
             </div>
         </div>
     );
