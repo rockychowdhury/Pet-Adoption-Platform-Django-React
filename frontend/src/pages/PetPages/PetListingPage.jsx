@@ -1,224 +1,529 @@
-import React, { useState } from 'react';
-import { Search, LayoutGrid, List as ListIcon, Loader2, X } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Search, LayoutGrid, List as ListIcon, Loader2, X, SlidersHorizontal, Sparkles, MapPin, Calendar, ChevronDown } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
 import usePets from '../../hooks/usePets';
+import NoResults from '../../components/common/Feedback/NoResults';
 import CreatePetModal from '../../components/Pet/CreatePetModal';
 import FilterSidebar from '../../components/Pet/FilterSidebar';
 import PetCard from '../../components/Pet/PetCard';
 import Button from '../../components/common/Buttons/Button';
-import { Link } from 'react-router-dom';
+import LocationPickerModal from '../../components/Pet/LocationPickerModal';
+import SortDropdown from '../../components/Pet/SortDropdown';
 
 const PetListingPage = () => {
     const api = useAPI();
     const { user } = useAuth();
     const { useGetPets } = usePets();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
+    const [page, setPage] = useState(1);
 
     // View State
-    const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+    const [viewMode, setViewMode] = useState('grid');
 
-    // Filter State
+    const [searchParams, setSearchParams] = useSearchParams();
+
+    const [suggestedLocation, setSuggestedLocation] = useState(null);
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
+
+    // Initial Filter State from URL
     const [filters, setFilters] = useState({
-        search: '',
+        search: searchParams.get('search') || '',
         species: '',
         breed: '',
         gender: '',
-        age_min: '',
-        age_max: '',
-        ordering: '-created_at'
+        age_range: '',
+        size: '',
+        urgency_level: '',
+        good_with_cats: '',
+        good_with_dogs: '',
+        good_with_children: '',
+        house_trained: '',
+        special_needs: '',
+        verified_owner: '',
+        verified_identity: '',
+        verified_vet: '',
+        max_fee: 300,
+        energy_level: '',
+        location: searchParams.get('location') || '',
+        radius: parseInt(searchParams.get('radius')) || 50,
+        ordering: '-published_at'
     });
 
-    const { data: pets = [], isLoading: loading, refetch } = useGetPets(filters);
+    const [allPets, setAllPets] = useState([]);
+
+    // Filter out radius if no location is provided to avoid empty results
+    const fetchFilters = { ...filters };
+    if (!fetchFilters.location) {
+        delete fetchFilters.radius;
+    }
+
+    const { data, isLoading: loading, refetch } = useGetPets({ ...fetchFilters, page });
+
+    const totalCount = data?.count || 0;
+    const hasNextPage = !!data?.next;
+
+    // IP-Based Location Detection on Mount
+    useEffect(() => {
+        const detectLocation = async () => {
+            // Only detect if no location is currently set in filters
+            if (!filters.location && !searchParams.get('location')) {
+                try {
+                    // Using ipwho.is as a fallback since ipapi.co blocked the request (403)
+                    const response = await fetch('https://ipwho.is/');
+                    if (!response.ok) throw new Error('Location detection failed');
+                    const data = await response.json();
+
+                    if (data.success && data.city && data.region_code) {
+                        const locationString = `${data.city}, ${data.region_code}`;
+                        setSuggestedLocation(locationString);
+                    }
+                } catch (error) {
+                    console.error("Auto-location detection error:", error);
+                }
+            }
+        };
+
+        detectLocation();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []); // Run once on mount
+
+    const handleLocationSelect = (locationData) => {
+        const { name, radius } = locationData;
+
+        // Update URL params
+        const newParams = new URLSearchParams(searchParams);
+        newParams.set('location', name);
+        newParams.set('radius', radius);
+        setSearchParams(newParams);
+
+        // Modal will close via prop
+        setIsLocationModalOpen(false);
+    };
+
+    // Synchronize API data with local state
+    useEffect(() => {
+        if (data?.results) {
+            if (page === 1) {
+                // For a fresh page 1 load, we replace the entire list
+                setAllPets(data.results);
+            } else {
+                // For subsequent pages, we append
+                setAllPets(prev => {
+                    const existingIds = new Set(prev.map(p => p.id));
+                    const newPets = data.results.filter(p => !existingIds.has(p.id));
+                    return [...prev, ...newPets];
+                });
+            }
+        } else if (!loading && page === 1 && data && !data.results?.length) {
+            // Explicitly clear if API returns empty for page 1
+            setAllPets([]);
+        }
+    }, [data, page, loading]);
+
+    // Synchronize filters with URL changes (for navbar search)
+    useEffect(() => {
+        const search = searchParams.get('search') || '';
+        const location = searchParams.get('location') || '';
+        const radius = parseInt(searchParams.get('radius')) || 50;
+
+        if (search !== filters.search || location !== filters.location || radius !== filters.radius) {
+            setFilters(prev => ({
+                ...prev,
+                search,
+                location,
+                radius
+            }));
+            setAllPets([]);
+            setPage(1);
+        }
+    }, [searchParams]);
+    const handleSortChange = (value) => {
+        setFilters(prev => ({ ...prev, ordering: value }));
+        setAllPets([]);
+        setPage(1);
+    };
 
     const handleFilterChange = (e) => {
-        setFilters({ ...filters, [e.target.name]: e.target.value });
+        const { name, value, type, checked } = e.target;
+        let val;
+
+        if (type === 'checkbox') {
+            val = checked ? 'true' : '';
+        } else if (type === 'radio') {
+            // Toggle behavior: if already selected, clear it
+            val = filters[name] === value ? '' : value;
+        } else {
+            val = value;
+        }
+
+        setFilters(prev => ({
+            ...prev,
+            [name]: val
+        }));
+
+        // Synchronously reset results when filters change
+        setAllPets([]);
+        setPage(1);
+
+        // Sync important filters to URL for SEO/Sharing
+        if (['search', 'location', 'radius'].includes(name)) {
+            const newParams = new URLSearchParams(searchParams);
+            if (val) newParams.set(name, val);
+            else newParams.delete(name);
+            setSearchParams(newParams);
+        }
     };
 
     const clearFilters = () => {
+        // Check if any filter is actually active
+        const hasActiveFilters = Object.keys(filters).some(key => {
+            if (key === 'max_fee') return filters[key] < 300;
+            if (key === 'radius') return filters[key] !== 50;
+            if (key === 'ordering') return filters[key] !== '-published_at';
+            return filters[key] !== '';
+        });
+
+        if (!hasActiveFilters) {
+            setSearchParams({});
+            return;
+        }
+
         setFilters({
             search: '',
             species: '',
             breed: '',
             gender: '',
-            age_min: '',
-            age_max: '',
-            ordering: '-created_at'
+            age_range: '',
+            size: '',
+            urgency_level: '',
+            good_with_cats: '',
+            good_with_dogs: '',
+            good_with_children: '',
+            house_trained: '',
+            special_needs: '',
+            verified_owner: '',
+            verified_identity: '',
+            verified_vet: '',
+            max_fee: 300,
+            energy_level: '',
+            location: '',
+            radius: 50,
+            ordering: '-published_at'
         });
+        setAllPets([]);
+        setPage(1);
+        setSearchParams({}); // CRITICAL: Clear URL as well
     };
+
 
     const removeFilter = (key) => {
-        setFilters({ ...filters, [key]: '' });
+        // Update URL if key is synced
+        if (['search', 'location', 'radius'].includes(key)) {
+            const newParams = new URLSearchParams(searchParams);
+            newParams.delete(key);
+            setSearchParams(newParams);
+        }
+
+        // Synchronously reset results
+        setAllPets([]);
+        setPage(1);
+
+        // Special handling for max_fee to reset to default, not empty
+        if (key === 'max_fee') {
+            setFilters(prev => ({ ...prev, [key]: 300 }));
+        } else {
+            setFilters(prev => ({ ...prev, [key]: '' }));
+        }
     };
 
-    // Helper to get active filters for display
     const getActiveFilters = () => {
         const active = [];
         if (filters.species) active.push({ key: 'species', label: `Species: ${filters.species}` });
-        if (filters.gender) active.push({ key: 'gender', label: `Gender: ${filters.gender === 'male' ? 'Male' : 'Female'}` });
+        if (filters.gender) active.push({ key: 'gender', label: `Gender: ${filters.gender}` });
+        if (filters.size) active.push({ key: 'size', label: `Size: ${filters.size.toUpperCase()}` });
+        if (filters.urgency_level) active.push({ key: 'urgency_level', label: `Urgency: ${filters.urgency_level}` });
         if (filters.search) active.push({ key: 'search', label: `Search: "${filters.search}"` });
+        if (filters.location) active.push({ key: 'location', label: `Near: ${filters.location}` });
+        if (filters.age_range) active.push({ key: 'age_range', label: `Age: ${filters.age_range.replace(/_/g, ' ')}` });
+        if (filters.max_fee < 300) active.push({ key: 'max_fee', label: `Max Fee: $${filters.max_fee}` });
+        if (filters.house_trained === 'true') active.push({ key: 'house_trained', label: 'House-trained' });
+        if (filters.special_needs === 'true') active.push({ key: 'special_needs', label: 'Special Needs' });
+        if (filters.verified_owner === 'true') active.push({ key: 'verified_owner', label: 'Verified Owner' });
+        if (filters.verified_identity === 'true') active.push({ key: 'verified_identity', label: 'Verified Identity' });
+        if (filters.verified_vet === 'true') active.push({ key: 'verified_vet', label: 'Verified Vet' });
         return active;
     };
 
     const activeFilters = getActiveFilters();
 
+    const containerVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.1
+            }
+        }
+    };
+
+    const itemVariants = {
+        hidden: { opacity: 0, y: 20 },
+        visible: { opacity: 1, y: 0 }
+    };
+
     return (
-        <div className="min-h-screen bg-bg-primary font-inter">
-            {/* Page Header */}
-            <div className="bg-bg-primary pt-20 pb-12 px-4 sm:px-6 lg:px-8 text-center transition-all duration-300">
-                {filters.search ? (
-                    <div className="text-center animate-in fade-in slide-in-from-bottom-4">
-                        <h1 className="text-3xl md:text-4xl font-bold text-text-primary mb-2 font-serif">
-                            Search results for: "{filters.search}"
-                        </h1>
-                        <p className="text-text-secondary text-lg mb-8">
-                            Found {pets.length} results matching your search
-                        </p>
-                    </div>
-                ) : (
-                    <>
-                        <h1 className="text-4xl md:text-5xl font-bold text-text-primary mb-4 font-serif">Find Your Perfect Companion</h1>
-                        <p className="text-text-secondary text-lg mb-8 max-w-2xl mx-auto">Browse pets looking for loving homes across the country</p>
-                    </>
-                )}
+        <div className="min-h-screen bg-bg-primary font-jakarta">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-40 pt-12">
+                <div className="flex flex-col xl:flex-row gap-16 py-12">
 
-                {/* Large Search Bar */}
-                <div className="max-w-3xl mx-auto relative group">
-                    <input
-                        type="text"
-                        name="search"
-                        placeholder="Search by breed, name, or keyword..."
-                        value={filters.search}
-                        onChange={handleFilterChange}
-                        className="w-full h-16 pl-8 pr-16 rounded-full border border-border focus:ring-4 focus:ring-brand-primary/10 outline-none shadow-sm text-lg placeholder:text-text-tertiary group-hover:border-brand-primary/50 transition-colors bg-bg-surface text-text-primary"
-                    />
-                    <button className="absolute right-2 top-2 h-12 w-12 bg-brand-primary hover:opacity-90 text-text-inverted rounded-full flex items-center justify-center transition-colors shadow-md hover:shadow-lg transform active:scale-95">
-                        <Search size={24} />
-                    </button>
-                </div>
-            </div>
+                    {/* Filter Sidebar */}
+                    <aside className="hidden xl:block w-80 shrink-0">
+                        <div className="sticky top-32 max-h-[calc(100vh-9rem)] overflow-y-auto pr-2 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                            <FilterSidebar
+                                filters={filters}
+                                onFilterChange={handleFilterChange}
+                                onClearFilters={clearFilters}
+                            />
+                        </div>
+                    </aside>
 
-            <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 pb-20">
-                <div className="flex flex-col lg:flex-row gap-8">
-
-                    {/* Left Sidebar */}
-                    <FilterSidebar
-                        filters={filters}
-                        onFilterChange={handleFilterChange}
-                        onClearFilters={clearFilters}
-                    />
-
-                    {/* Main Content */}
+                    {/* Main Results Area */}
                     <div className="flex-1">
 
-                        {/* Results Header */}
-                        <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-                            <span className="text-text-secondary">Showing {pets.length} pets</span>
-
-                            <div className="flex items-center gap-4">
-                                <div className="flex bg-bg-surface rounded-lg p-1 border border-border">
-                                    <button
-                                        onClick={() => setViewMode('grid')}
-                                        className={`p-2 rounded-md transition-colors ${viewMode === 'grid' ? 'bg-bg-secondary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'}`}
-                                    >
-                                        <LayoutGrid size={20} />
-                                    </button>
-                                    <button
-                                        onClick={() => setViewMode('list')}
-                                        className={`p-2 rounded-md transition-colors ${viewMode === 'list' ? 'bg-bg-secondary text-text-primary' : 'text-text-tertiary hover:text-text-secondary'}`}
-                                    >
-                                        <ListIcon size={20} />
-                                    </button>
+                        {/* Results Header Bar */}
+                        <div className="flex flex-col gap-6 mb-8">
+                            <div className="flex flex-wrap items-center justify-between gap-4">
+                                <div>
+                                    <h1 className="text-2xl font-bold text-[#1F2937] mb-1">
+                                        All Pets
+                                    </h1>
+                                    <h3 className="text-[13px] font-bold text-[#9CA3AF] uppercase tracking-wider">
+                                        Showing {allPets.length} of {totalCount} results
+                                    </h3>
                                 </div>
 
-                                <select
-                                    name="ordering"
-                                    value={filters.ordering}
-                                    onChange={handleFilterChange}
-                                    className="pl-4 pr-10 py-2.5 rounded-xl border border-border bg-bg-surface text-sm font-medium outline-none focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 appearance-none cursor-pointer text-text-primary"
-                                    style={{ backgroundImage: 'none' }}
-                                >
-                                    <option value="-created_at">Newest First</option>
-                                    <option value="created_at">Oldest First</option>
-                                    <option value="age">Youngest First</option>
-                                    <option value="-age">Oldest First</option>
-                                </select>
+                                {/* Center Location Display */}
+                                {filters.location ? (
+                                    <button
+                                        onClick={() => setIsLocationModalOpen(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-brand-primary/5 rounded-full border border-brand-primary/10 hover:bg-brand-primary/10 transition-colors group"
+                                    >
+                                        <MapPin size={16} className="text-brand-primary" />
+                                        <span className="text-sm font-bold text-[#1F2937]">{filters.location}</span>
+                                        <span className="text-[10px] text-text-tertiary ml-1 group-hover:text-text-secondary">({filters.radius} mi)</span>
+                                    </button>
+                                ) : suggestedLocation ? (
+                                    <div className="flex items-center gap-2 px-4 py-2 bg-amber-50 rounded-full border border-amber-100 animate-in fade-in zoom-in duration-300">
+                                        <div className="flex items-center gap-1.5 text-amber-700">
+                                            <MapPin size={14} />
+                                            <span className="text-xs font-bold">Near {suggestedLocation}?</span>
+                                        </div>
+                                        <div className="w-px h-4 bg-amber-200 mx-1"></div>
+                                        <button
+                                            onClick={() => handleLocationSelect({ name: suggestedLocation, radius: 50 })}
+                                            className="text-[10px] font-black uppercase text-amber-700 hover:text-amber-900 transition-colors"
+                                        >
+                                            Use
+                                        </button>
+                                        <button
+                                            onClick={() => setIsLocationModalOpen(true)}
+                                            className="text-[10px] font-black uppercase text-amber-700/60 hover:text-amber-900 transition-colors"
+                                        >
+                                            Change
+                                        </button>
+                                    </div>
+                                ) : (
+                                    <button
+                                        onClick={() => setIsLocationModalOpen(true)}
+                                        className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-full border border-gray-100 hover:bg-gray-100 transition-colors text-gray-500"
+                                    >
+                                        <MapPin size={16} />
+                                        <span className="text-sm font-medium">Set Location</span>
+                                    </button>
+                                )}
+
+                                <div className="flex items-center gap-3">
+                                    {/* Sorting Dropdown */}
+                                    <SortDropdown
+                                        currentSort={filters.ordering}
+                                        onSortChange={handleSortChange}
+                                    />
+
+
+                                    {/* View Mode Switcher */}
+                                    <div className="flex bg-[#F3F4F6] p-1 rounded-lg">
+                                        <button
+                                            onClick={() => setViewMode('grid')}
+                                            className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#1F2937] shadow-sm' : 'text-[#9CA3AF] hover:text-[#4B5563]'}`}
+                                        >
+                                            <LayoutGrid size={18} />
+                                        </button>
+                                        <button
+                                            onClick={() => setViewMode('list')}
+                                            className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#1F2937] shadow-sm' : 'text-[#9CA3AF] hover:text-[#4B5563]'}`}
+                                        >
+                                            <ListIcon size={18} />
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* Active Filter Badges */}
+                            <AnimatePresence>
+                                {activeFilters.length > 0 && (
+                                    <motion.div
+                                        initial={{ opacity: 0, y: -10 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        exit={{ opacity: 0, y: -10 }}
+                                        className="flex flex-wrap gap-2"
+                                    >
+                                        {activeFilters.map(filter => (
+                                            <button
+                                                key={filter.key}
+                                                onClick={() => removeFilter(filter.key)}
+                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-md bg-white border border-gray-100 text-[12px] font-medium text-[#4B5563] hover:border-gray-200 hover:bg-gray-50 transition-all shadow-sm group"
+                                            >
+                                                {filter.label}
+                                                <X size={14} className="text-gray-400 group-hover:text-gray-600" />
+                                            </button>
+                                        ))}
+                                        {activeFilters.length > 1 && (
+                                            <button
+                                                onClick={clearFilters}
+                                                className="text-[12px] font-bold text-[#EF4444] hover:text-[#DC2626] transition-colors px-2 self-center uppercase tracking-wider"
+                                            >
+                                                Reset All
+                                            </button>
+                                        )}
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
                         </div>
 
-                        {/* Active Filters */}
-                        {activeFilters.length > 0 && (
-                            <div className="flex flex-wrap gap-2 mb-6">
-                                {activeFilters.map(filter => (
-                                    <span key={filter.key} className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-bg-surface border border-border text-xs font-bold text-text-primary shadow-sm">
-                                        {filter.label}
-                                        <button onClick={() => removeFilter(filter.key)} className="hover:text-status-error transition-colors">
-                                            <X size={12} />
+                        {/* Results States */}
+                        {loading && allPets.length === 0 ? (
+                            <div className="grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
+                                {[1, 2, 3, 4, 5, 6].map(i => (
+                                    <div key={i} className="bg-bg-secondary/40 h-[500px] rounded-[48px] animate-pulse border border-border/10"></div>
+                                ))}
+                            </div>
+                        ) : allPets.length > 0 ? (
+                            <>
+                                <motion.div
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className={`grid gap-12 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3' : 'grid-cols-1'}`}
+                                >
+                                    {allPets.map(pet => (
+                                        <motion.div key={pet.id} variants={itemVariants}>
+                                            <PetCard pet={pet} viewMode={viewMode} />
+                                        </motion.div>
+                                    ))}
+                                </motion.div>
+
+                                {hasNextPage && (
+                                    <div className="mt-20 text-center">
+                                        <button
+                                            onClick={() => setPage(p => p + 1)}
+                                            disabled={loading}
+                                            className="px-16 py-6 bg-bg-surface border border-border/20 rounded-full font-logo uppercase tracking-widest text-[10px] shadow-lg hover:border-brand-primary/40 transition-all active:scale-95 disabled:opacity-50"
+                                        >
+                                            {loading ? <Loader2 className="animate-spin" /> : 'Explore More Results'}
                                         </button>
-                                    </span>
-                                ))}
-                                <button onClick={clearFilters} className="text-xs font-bold text-status-error hover:underline px-2">
-                                    Clear All
-                                </button>
-                            </div>
-                        )}
-
-                        {/* Pet Grid */}
-                        {loading ? (
-                            <div className="flex items-center justify-center py-20">
-                                <Loader2 size={40} className="animate-spin text-brand-primary" />
-                            </div>
-                        ) : pets.length > 0 ? (
-                            <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3' : 'grid-cols-1'}`}>
-                                {pets.map(pet => (
-                                    <PetCard key={pet.id} pet={pet} viewMode={viewMode} />
-                                ))}
-                            </div>
+                                    </div>
+                                )}
+                            </>
                         ) : (
-                            <div className="text-center py-20 bg-bg-surface rounded-[32px] border border-border shadow-sm">
-                                <div className="bg-bg-secondary w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6">
-                                    <Search size={40} className="text-text-tertiary" />
-                                </div>
-                                <h3 className="text-2xl font-bold text-text-primary mb-2">No pets found</h3>
-                                <p className="text-text-secondary mb-8 max-w-md mx-auto">We couldn't find any pets matching your criteria. Try adjusting your filters or search terms.</p>
-                                <Button variant="secondary" onClick={clearFilters}>
-                                    Clear all filters
-                                </Button>
-                            </div>
+                            <NoResults
+                                title="No companions found"
+                                description="Try adjusting your filters or searching in a different area to find more friends."
+                                onReset={clearFilters}
+                                backgroundText="EMPTY"
+                                icon={Search}
+                            />
                         )}
-
-                        {/* Load More Button (Mock Implementation) */}
-                        {pets.length > 0 && (
-                            <div className="mt-12 text-center">
-                                <button className="px-8 py-3 bg-bg-surface border border-border rounded-full font-bold text-text-primary hover:bg-bg-secondary hover:border-border transition-all shadow-sm">
-                                    Load More Pets
-                                </button>
-                            </div>
-                        )}
-
                     </div>
                 </div>
-            </div>
+            </div >
 
-            {/* Admin/Shelter Action - Floating Button or Header Action if needed */}
-            {(user?.role === 'shelter' || user?.role === 'admin') && (
-                <div className="fixed bottom-8 right-8 z-20">
-                    <Button
-                        variant="primary"
-                        onClick={() => setIsCreateModalOpen(true)}
-                        className="shadow-xl rounded-full py-4 px-6 flex items-center gap-2"
+            {/* Mobile Filter Overlay - Upgraded */}
+            < AnimatePresence >
+                {isFilterMobileOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[100] lg:hidden"
                     >
-                        + List Pet
-                    </Button>
-                </div>
-            )}
+                        <div className="absolute inset-0 bg-black/80 backdrop-blur-3xl" onClick={() => setIsFilterMobileOpen(false)}></div>
+                        <motion.div
+                            initial={{ x: '100%' }}
+                            animate={{ x: 0 }}
+                            exit={{ x: '100%' }}
+                            transition={{ type: 'spring', damping: 30, stiffness: 200 }}
+                            className="absolute right-0 top-0 bottom-0 w-full max-w-lg bg-bg-primary shadow-2xl overflow-y-auto"
+                        >
+                            <div className="p-8 border-b border-border/10 flex items-center justify-between sticky top-0 bg-bg-primary/80 backdrop-blur-xl z-20">
+                                <div>
+                                    <h2 className="text-3xl font-logo font-black tracking-tighter uppercase leading-none">Filters</h2>
+                                    <p className="text-[10px] font-black uppercase tracking-widest text-text-tertiary mt-1">Refine Listings</p>
+                                </div>
+                                <button onClick={() => setIsFilterMobileOpen(false)} className="w-12 h-12 flex items-center justify-center bg-bg-secondary rounded-2xl hover:bg-status-error hover:text-white transition-all">
+                                    <X size={24} strokeWidth={3} />
+                                </button>
+                            </div>
+                            <div className="p-8">
+                                <FilterSidebar
+                                    filters={filters}
+                                    onFilterChange={handleFilterChange}
+                                    onClearFilters={() => { clearFilters(); setIsFilterMobileOpen(false); }}
+                                />
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence >
+
+            {/* Admin Floating Action - Premium Stylized */}
+            {
+                (user?.role === 'shelter' || user?.role === 'admin') && (
+                    <motion.div
+                        initial={{ scale: 0, rotate: -45 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        whileHover={{ scale: 1.15, rotate: 10 }}
+                        transition={{ type: 'spring', stiffness: 260, damping: 20 }}
+                        className="fixed bottom-12 right-12 z-50"
+                    >
+                        <button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            className="w-20 h-20 bg-brand-primary text-text-inverted rounded-[28px] flex items-center justify-center shadow-[0_20px_50px_rgba(91,138,114,0.4)] hover:shadow-brand-primary/60 transition-all border-8 border-bg-surface overflow-hidden relative group"
+                        >
+                            <div className="absolute inset-0 bg-gradient-to-tr from-black/20 to-transparent"></div>
+                            <span className="text-4xl font-black relative z-10 group-hover:scale-125 transition-transform">+</span>
+                        </button>
+                    </motion.div>
+                )
+            }
+
 
             <CreatePetModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSuccess={refetch}
             />
-        </div>
+
+            <LocationPickerModal
+                isOpen={isLocationModalOpen}
+                onClose={() => setIsLocationModalOpen(false)}
+                onSelect={handleLocationSelect}
+                initialRadius={filters.radius}
+            />
+        </div >
     );
 };
 
