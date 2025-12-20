@@ -21,10 +21,12 @@ const UserManagementPage = () => {
 
     const fetchRequests = async () => {
         try {
-            const response = await api.get('/users/role-requests/');
-            setRoleRequests(response.data);
+            const response = await api.get('/user/role-requests/'); // Corrected endpoint if needed, but keeping consistent
+            const data = response.data;
+            setRoleRequests(Array.isArray(data) ? data : (data?.results || []));
         } catch (error) {
             console.error("Failed to fetch requests", error);
+            setRoleRequests([]);
         }
     };
 
