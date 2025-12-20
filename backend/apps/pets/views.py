@@ -1,6 +1,7 @@
 from rest_framework import generics, permissions
 from rest_framework.exceptions import PermissionDenied
 from django.utils import timezone
+from django.db.models import Q
 from .models import RehomingListing
 from .serializers import (
     PetListSerializer,
@@ -38,12 +39,14 @@ class PetListCreateView(generics.ListCreateAPIView):
             # Public only sees ACTIVE pets
             queryset = queryset.filter(status='active')
             
-        # Filtering
+        # Basic Filtering
         species = self.request.query_params.get('species')
         breed = self.request.query_params.get('breed')
         age_min = self.request.query_params.get('age_min')
         age_max = self.request.query_params.get('age_max')
         gender = self.request.query_params.get('gender')
+        size = self.request.query_params.get('size')
+        urgency = self.request.query_params.get('urgency_level')
         search_query = self.request.query_params.get('search')
         
         if species:
@@ -52,14 +55,59 @@ class PetListCreateView(generics.ListCreateAPIView):
             queryset = queryset.filter(breed__icontains=breed)
         if gender:
             queryset = queryset.filter(gender__iexact=gender)
-        if age_min:
-            queryset = queryset.filter(age_months__gte=int(age_min) * 12)
-        if age_max:
-            queryset = queryset.filter(age_months__lte=int(age_max) * 12)
+        if size:
+            queryset = queryset.filter(size__iexact=size)
+        if urgency:
+            queryset = queryset.filter(urgency_level__iexact=urgency)
             
-        # Search (Name, Breed, Description)
+        # Categorical Age Filtering
+        age_range = self.request.query_params.get('age_range')
+        if age_range:
+            if age_range == 'under_6_months':
+                queryset = queryset.filter(age_months__lt=6)
+            elif age_range == '6_12_months':
+                queryset = queryset.filter(age_months__gte=6, age_months__lte=12)
+            elif age_range == '1_3_years':
+                queryset = queryset.filter(age_months__gt=12, age_months__lte=36)
+            elif age_range == '3_10_years':
+                queryset = queryset.filter(age_months__gt=36, age_months__lte=120)
+            elif age_range == '10_plus_years':
+                queryset = queryset.filter(age_months__gt=120)
+
+        # Adoption Fee
+        max_fee = self.request.query_params.get('max_fee')
+        if max_fee:
+            queryset = queryset.filter(adoption_fee__lte=float(max_fee))
+
+        # Energy Level
+        energy_level = self.request.query_params.get('energy_level')
+        if energy_level:
+            queryset = queryset.filter(behavioral_profile__energy_level=int(energy_level))
+
+        # Compatibility & Training
+        house_trained = self.request.query_params.get('house_trained')
+        if house_trained == 'true':
+            queryset = queryset.filter(behavioral_profile__house_trained='yes')
+
+        special_needs = self.request.query_params.get('special_needs')
+        if special_needs == 'true':
+            queryset = queryset.filter(behavioral_profile__special_needs='yes')
+
+        # Verification Statuses
+        verified_owner = self.request.query_params.get('verified_owner')
+        if verified_owner == 'true':
+            queryset = queryset.filter(pet_owner__pet_owner_verified=True)
+
+        verified_identity = self.request.query_params.get('verified_identity')
+        if verified_identity == 'true':
+            queryset = queryset.filter(pet_owner__verified_identity=True)
+
+        verified_vet = self.request.query_params.get('verified_vet')
+        if verified_vet == 'true':
+            queryset = queryset.filter(is_vet_verified=True)
+            
+        # Search (Name, Breed, Description, City)
         if search_query:
-            from django.db.models import Q
             queryset = queryset.filter(
                 Q(pet_name__icontains=search_query) | 
                 Q(breed__icontains=search_query) | 
@@ -67,23 +115,22 @@ class PetListCreateView(generics.ListCreateAPIView):
                 Q(location_city__icontains=search_query)
             )
 
-        # JSON Filtering (Behavioral Profile)
+        # JSON Filtering (Behavioral Profile - Compatibility)
         good_with_cats = self.request.query_params.get('good_with_cats')
         good_with_dogs = self.request.query_params.get('good_with_dogs')
         good_with_children = self.request.query_params.get('good_with_children')
         
-        if good_with_cats:
-            # Check if json contains {"good_with_cats": "yes"} or similar
-            # MVP Filter: manual iteration if DB doesn't support deep JSON lookup easily
-            # But recent Django/SQLite supports it. Let's try standard lookup first or fallback.
-            # Assuming structure: strict 'yes'/'no'
-            queryset = queryset.filter(behavioral_profile__good_with_cats=True)
+        if good_with_cats == 'true':
+            queryset = queryset.filter(behavioral_profile__good_with_cats='yes')
             
-        if good_with_dogs:
-            queryset = queryset.filter(behavioral_profile__good_with_dogs=True)
+        if good_with_dogs == 'true':
+            queryset = queryset.filter(behavioral_profile__good_with_dogs='yes')
             
-        if good_with_children:
-            queryset = queryset.filter(behavioral_profile__good_with_kids=True) # Field name might vary, checking model would be ideal. Assuming 'good_with_kids' based on common patterns or 'good_with_children'
+        if good_with_children == 'true':
+            queryset = queryset.filter(
+                Q(behavioral_profile__good_with_kids='yes') | 
+                Q(behavioral_profile__good_with_children='yes')
+            )
 
         # Location Filtering (Radius)
         lat = self.request.query_params.get('lat')
@@ -96,8 +143,6 @@ class PetListCreateView(generics.ListCreateAPIView):
                 user_lng = float(lng)
                 radius_val = float(radius)
                 
-                # In-memory filtering for MVP (efficient enough for <1000 items)
-                # Ideally use PostGIS for prod scale
                 from math import radians, cos, sin, asin, sqrt
 
                 def haversine(lon1, lat1, lon2, lat2):
@@ -109,13 +154,6 @@ class PetListCreateView(generics.ListCreateAPIView):
                     r = 3956 # Miles
                     return c * r
 
-                # Evaluate queryset to list to filter
-                # Note: This breaks pagination if pagination is done at DB level.
-                # But generic APIView paginates at the end. 
-                # Wait, ListCreateAPIView paginates based on 'queryset' attribute or get_queryset result.
-                # If I return a list, standard pagination might fail if it expects a queryset.
-                # I should gather IDs of matching items and filter queryset by ID list.
-                
                 matches = []
                 for pet in queryset:
                     if pet.location_lat and pet.location_lng:
@@ -129,12 +167,18 @@ class PetListCreateView(generics.ListCreateAPIView):
                 pass # Ignore invalid lat/lng
 
         # Sorting
-        ordering = self.request.query_params.get('ordering', '-created_at')
-        allowed_ordering = ['age', '-age', 'created_at', '-created_at', 'name', '-name']
+        ordering = self.request.query_params.get('ordering', '-published_at')
+        allowed_ordering = [
+            'age_months', '-age_months', 
+            'published_at', '-published_at', 
+            'pet_name', '-pet_name',
+            'created_at', '-created_at',
+            'adoption_fee', '-adoption_fee'
+        ]
         if ordering in allowed_ordering:
             queryset = queryset.order_by(ordering)
         else:
-            queryset = queryset.order_by('-created_at')
+            queryset = queryset.order_by('-published_at')
             
         return queryset
 
