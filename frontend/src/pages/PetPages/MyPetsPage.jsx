@@ -22,8 +22,8 @@ const MyPetsPage = () => {
 
     // Filtering Logic
     const filteredPets = useMemo(() => {
-        if (!pets) return [];
-        return pets.filter(pet => {
+        const petsList = Array.isArray(pets) ? pets : (pets?.results || []);
+        return petsList.filter(pet => {
             // Tab Filter based on is_active boolean
             if (activeTab === 'Active' && !pet.is_active) return false;
             if (activeTab === 'Inactive' && pet.is_active) return false;
