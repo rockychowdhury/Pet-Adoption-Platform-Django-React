@@ -21,9 +21,10 @@ const OwnerApplicationReviewPage = () => {
 
     // Filter applications for THIS pet
     const applications = useMemo(() => {
-        if (!allApplications || !id) return [];
+        const appsList = Array.isArray(allApplications) ? allApplications : (allApplications?.results || []);
+        if (!appsList || !id) return [];
         // Ensure we match pet ID (string vs int check)
-        return allApplications.filter(app => String(app.pet) === String(id) || String(app.pet.id) === String(id));
+        return appsList.filter(app => String(app.pet) === String(id) || String(app.pet?.id) === String(id));
     }, [allApplications, id]);
 
     // Mock Scoring Logic (Backend doesn't send score yet? Or check model)
