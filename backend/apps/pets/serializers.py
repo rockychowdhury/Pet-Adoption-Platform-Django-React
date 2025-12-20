@@ -18,6 +18,8 @@ class PetSerializer(serializers.ModelSerializer):
 class PetListSerializer(serializers.ModelSerializer):
     """List view serializer for browsing listings"""
     owner_name = serializers.CharField(source='pet_owner.full_name', read_only=True)
+    owner_verified_identity = serializers.BooleanField(source='pet_owner.verified_identity', read_only=True)
+    owner_verified_pet_owner = serializers.BooleanField(source='pet_owner.pet_owner_verified', read_only=True)
     age_display = serializers.CharField(read_only=True)
     main_photo = serializers.SerializerMethodField()
     
@@ -26,7 +28,9 @@ class PetListSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'pet_name', 'species', 'breed', 'main_photo', 'status', 
             'gender', 'age_display', 'location_city', 'location_state',
-            'owner_name', 'urgency_level', 'published_at'
+            'owner_name', 'owner_verified_identity', 'owner_verified_pet_owner',
+            'urgency_level', 'published_at', 'adoption_fee', 'is_vet_verified',
+            'behavioral_profile', 'rehoming_story'
         ]
     
     def get_main_photo(self, obj):
