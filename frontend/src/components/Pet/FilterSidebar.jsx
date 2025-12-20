@@ -1,173 +1,229 @@
 import React, { useState } from 'react';
-import { Filter, MapPin, X, Check } from 'lucide-react';
-import Button from '../common/Buttons/Button';
+import {
+    X,
+    Check,
+    ShieldCheck,
+    Dog,
+    Cat,
+    Rabbit,
+    ChevronDown,
+    ChevronUp
+} from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+
+const FilterSection = ({ title, children, isOpen: defaultOpen = true }) => {
+    const [isOpen, setIsOpen] = useState(defaultOpen);
+
+    return (
+        <div className="border-b border-gray-100 last:border-0 py-6">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="flex items-center justify-between w-full group mb-4"
+            >
+                <h3 className="text-[13px] font-bold uppercase tracking-widest text-[#4B5563] group-hover:text-[#1F2937] transition-colors">{title}</h3>
+                <div className={`p-1 rounded-full transition-all ${isOpen ? 'bg-gray-100 text-[#1F2937]' : 'text-[#6B7280] group-hover:bg-gray-50'}`}>
+                    {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                </div>
+            </button>
+            <AnimatePresence initial={false}>
+                {isOpen && (
+                    <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.2, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                    >
+                        {children}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
-    // Mock counts for species
     const speciesOptions = [
-        { id: 'dog', label: 'Dogs', count: 120 },
-        { id: 'cat', label: 'Cats', count: 85 },
-        { id: 'rabbit', label: 'Rabbits', count: 12 },
-        { id: 'bird', label: 'Birds', count: 8 },
-        { id: 'other', label: 'Other', count: 5 },
+        { id: 'dog', label: 'Dogs', Icon: Dog },
+        { id: 'cat', label: 'Cats', Icon: Cat },
+        { id: 'rabbit', label: 'Rabbits', Icon: Rabbit },
+    ];
+
+    const ageOptions = [
+        { id: 'under_6_months', label: 'Under 6 months' },
+        { id: '6_12_months', label: '6 months - 1 year' },
+        { id: '1_3_years', label: '1 - 2 years' },
+        { id: '3_10_years', label: '2 - 5 years' },
+        { id: '10_plus_years', label: '5+ years' },
     ];
 
     const sizeOptions = [
-        { id: 'small', label: 'Small', sub: '(0-25 lbs)' },
-        { id: 'medium', label: 'Medium', sub: '(26-60 lbs)' },
-        { id: 'large', label: 'Large', sub: '(61-100 lbs)' },
-        { id: 'xlarge', label: 'Extra Large', sub: '(101 lbs+)' },
+        { id: 'xs', label: 'XS' },
+        { id: 's', label: 'S' },
+        { id: 'm', label: 'M' },
+        { id: 'l', label: 'L' },
+        { id: 'xl', label: 'XL' },
     ];
 
-    const personalityOptions = [
-        'Good with Kids', 'Good with Dogs', 'Good with Cats', 'House Trained', 'Hypoallergenic'
+    const compatibilityOptions = [
+        { id: 'good_with_children', label: 'Good with children' },
+        { id: 'good_with_dogs', label: 'Good with dogs' },
+        { id: 'good_with_cats', label: 'Good with cats' },
+        { id: 'house_trained', label: 'House-trained' },
+    ];
+
+    const verificationOptions = [
+        { id: 'verified_vet', label: 'Vet verified' },
+        { id: 'verified_identity', label: 'Identity verified' },
     ];
 
     return (
-        <div className="w-full lg:w-80 shrink-0 space-y-8">
+        <div className="w-full max-w-[320px] bg-bg-primary px-2 font-sans">
             {/* Header */}
-            <div className="flex items-center justify-between lg:hidden mb-4">
-                <h2 className="text-lg font-bold flex items-center gap-2 text-text-primary">
-                    <Filter size={20} /> Filters
-                </h2>
-                <button onClick={onClearFilters} className="text-sm text-brand-primary font-medium">Reset</button>
-            </div>
-
-            {/* Location Filter */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-text-primary">Location</h3>
-                </div>
-                <div className="relative mb-4">
-                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" size={18} />
-                    <input
-                        type="text"
-                        placeholder="Enter Zip Code"
-                        className="w-full pl-10 pr-4 py-3 bg-bg-secondary border border-border rounded-xl text-sm focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all text-text-primary placeholder:text-text-tertiary"
-                    />
-                </div>
-                <div className="space-y-2">
-                    <div className="flex justify-between text-xs font-medium text-text-secondary">
-                        <span>Distance</span>
-                        <span>50 miles</span>
-                    </div>
-                    <input type="range" className="w-full h-1.5 bg-bg-secondary rounded-full appearance-none cursor-pointer accent-brand-primary" />
-                </div>
-                <button className="w-full mt-4 text-sm font-bold text-brand-primary flex items-center justify-center gap-2 py-2 hover:bg-brand-primary/5 rounded-xl transition-colors">
-                    <MapPin size={16} /> Use my location
+            <div className="flex items-center justify-between mb-2 px-2 pt-1 pb-4 border-b border-gray-100">
+                <h2 className="text-[20px] font-bold text-[#1F2937]">Filters</h2>
+                <button
+                    onClick={onClearFilters}
+                    className="text-[11px] font-bold uppercase tracking-widest text-[#EF4444] hover:text-[#DC2626] transition-colors"
+                >
+                    Clear All
                 </button>
             </div>
 
-            {/* Species Filter */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <h3 className="font-bold text-text-primary mb-4">Type of Pet</h3>
-                <div className="space-y-3">
-                    {speciesOptions.map(option => (
-                        <label key={option.id} className="flex items-center justify-between group cursor-pointer">
-                            <div className="flex items-center gap-3">
-                                <div className={`w-5 h-5 rounded-md border flex items-center justify-center transition-colors ${filters.species === option.id ? 'bg-brand-primary border-brand-primary' : 'border-border group-hover:border-brand-primary'}`}>
-                                    {filters.species === option.id && <Check size={14} className="text-text-inverted" />}
+            <div className="px-2">
+                {/* Species */}
+                <FilterSection title="Species">
+                    <div className="space-y-3 pb-2 pt-1">
+                        {speciesOptions.map(option => (
+                            <label key={option.id} className="flex items-center justify-between cursor-pointer group">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${filters.species === option.id ? 'bg-[#2D5A41] text-white shadow-md' : 'bg-[#F3F4F6] text-[#374151] group-hover:bg-gray-200'}`}>
+                                        <option.Icon size={20} />
+                                    </div>
+                                    <span className={`text-[14px] font-medium ${filters.species === option.id ? 'text-[#1F2937] font-bold' : 'text-[#374151]'}`}>
+                                        {option.label}
+                                    </span>
                                 </div>
-                                <input
-                                    type="radio"
-                                    name="species"
-                                    value={option.id}
-                                    checked={filters.species === option.id}
-                                    onChange={onFilterChange}
-                                    className="hidden"
-                                />
-                                <span className="text-text-secondary font-medium group-hover:text-text-primary">{option.label}</span>
-                            </div>
-                            <span className="text-xs font-bold text-text-tertiary bg-bg-secondary px-2 py-1 rounded-full">{option.count}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            {/* Age Filter */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <h3 className="font-bold text-text-primary mb-4">Age</h3>
-                <div className="grid grid-cols-2 gap-2 mb-4">
-                    {['Puppy', 'Young', 'Adult', 'Senior'].map(age => (
-                        <button key={age} className="py-2 px-3 border border-border rounded-xl text-sm font-medium hover:border-brand-primary hover:text-brand-primary transition-colors text-text-secondary">
-                            {age}
-                        </button>
-                    ))}
-                </div>
-                <div className="space-y-4 pt-2 border-t border-border">
-                    <div className="flex justify-between text-xs font-medium text-text-secondary">
-                        <span>Min Age</span>
-                        <span>Max Age</span>
+                                <div className="relative">
+                                    <input
+                                        type="radio"
+                                        name="species"
+                                        value={option.id}
+                                        checked={filters.species === option.id}
+                                        onChange={onFilterChange}
+                                        className="sr-only"
+                                    />
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${filters.species === option.id ? 'border-[#2D5A41]' : 'border-gray-200'}`}>
+                                        {filters.species === option.id && <div className="w-2.5 h-2.5 rounded-full bg-[#2D5A41]" />}
+                                    </div>
+                                </div>
+                            </label>
+                        ))}
                     </div>
-                    <div className="flex gap-4">
-                        <input type="number" placeholder="0" className="w-full px-3 py-2 bg-bg-secondary border border-border rounded-lg text-sm text-center text-text-primary placeholder:text-text-tertiary" />
-                        <span className="text-text-tertiary self-center">-</span>
-                        <input type="number" placeholder="20" className="w-full px-3 py-2 bg-bg-secondary border border-border rounded-lg text-sm text-center text-text-primary placeholder:text-text-tertiary" />
+                </FilterSection>
+
+                {/* Age Range */}
+                <FilterSection title="Age Range">
+                    <div className="space-y-3 pb-2">
+                        {ageOptions.map(option => (
+                            <label key={option.id} className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 p-2 rounded-lg -mx-2 transition-colors">
+                                <div className="relative">
+                                    <input
+                                        type="radio"
+                                        name="age_range"
+                                        value={option.id}
+                                        checked={filters.age_range === option.id}
+                                        onChange={onFilterChange}
+                                        className="sr-only"
+                                    />
+                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${filters.age_range === option.id ? 'border-[#2D5A41]' : 'border-gray-200 group-hover:border-gray-300'}`}>
+                                        {filters.age_range === option.id && <div className="w-2.5 h-2.5 rounded-full bg-[#2D5A41]" />}
+                                    </div>
+                                </div>
+                                <span className={`text-[14px] font-medium ${filters.age_range === option.id ? 'text-[#1F2937]' : 'text-[#374151]'}`}>
+                                    {option.label}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                </FilterSection>
+
+                {/* Size */}
+                <FilterSection title="Size">
+                    <div className="flex gap-2 pb-2">
+                        {sizeOptions.map(option => (
+                            <button
+                                key={option.id}
+                                onClick={() => onFilterChange({ target: { name: 'size', value: filters.size === option.id ? '' : option.id } })}
+                                className={`flex-1 py-2.5 rounded-lg text-[12px] font-bold border transition-all ${filters.size === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-md transform scale-105' : 'bg-[#F9FAFB] text-[#374151] border-gray-100 hover:border-gray-200 hover:bg-gray-50'}`}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
+                    </div>
+                </FilterSection>
+
+                {/* Compatibility */}
+                <FilterSection title="Compatibility">
+                    <div className="space-y-4 pb-2">
+                        {compatibilityOptions.map(option => (
+                            <label key={option.id} className="flex items-center justify-between cursor-pointer group">
+                                <span className="text-[14px] font-medium text-[#374151] group-hover:text-[#1F2937] transition-colors">{option.label}</span>
+                                <div className="relative cursor-pointer">
+                                    <input
+                                        type="checkbox"
+                                        name={option.id}
+                                        checked={filters[option.id] === 'true'}
+                                        onChange={onFilterChange}
+                                        className="sr-only"
+                                    />
+                                    <div className={`w-11 h-6 rounded-full transition-all duration-300 ease-in-out relative ${filters[option.id] === 'true' ? 'bg-[#2D5A41]' : 'bg-gray-200'}`}>
+                                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ease-in-out transform ${filters[option.id] === 'true' ? 'translate-x-5' : ''}`} />
+                                    </div>
+                                </div>
+                            </label>
+                        ))}
+                    </div>
+                </FilterSection>
+
+                {/* Verification */}
+                <FilterSection title="Verification">
+                    <div className="space-y-3 pb-2">
+                        {verificationOptions.map(option => (
+                            <label key={option.id} className="flex items-center gap-3 cursor-pointer group bg-gray-50/50 p-2.5 rounded-lg border border-transparent hover:border-gray-100 transition-all">
+                                <div className="relative">
+                                    <input
+                                        type="checkbox"
+                                        name={option.id}
+                                        checked={filters[option.id] === 'true'}
+                                        onChange={onFilterChange}
+                                        className="sr-only"
+                                    />
+                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${filters[option.id] === 'true' ? 'bg-[#2D5A41] border-[#2D5A41]' : 'bg-white border-gray-200 group-hover:border-gray-300'}`}>
+                                        {filters[option.id] === 'true' && <Check size={12} className="text-white stroke-[4]" />}
+                                    </div>
+                                </div>
+                                <span className={`text-[14px] font-medium ${filters[option.id] === 'true' ? 'text-[#1F2937]' : 'text-[#374151]'}`}>
+                                    {option.label}
+                                </span>
+                            </label>
+                        ))}
+                    </div>
+                </FilterSection>
+
+                <div className="pt-2 pb-8">
+                    <div className="bg-amber-50/80 rounded-2xl p-5 flex gap-4 border border-amber-100/50">
+                        <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shrink-0 shadow-sm">
+                            <ShieldCheck size={18} className="text-[#92400E]" />
+                        </div>
+                        <div>
+                            <h4 className="text-[12px] font-bold text-[#92400E] uppercase mb-1">Adopt Safely</h4>
+                            <p className="text-[10px] font-medium text-[#92400E]/80 leading-snug">
+                                Never send money before meeting a pet in person.
+                            </p>
+                        </div>
                     </div>
                 </div>
-            </div>
-
-            {/* Size Filter */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <h3 className="font-bold text-text-primary mb-4">Size</h3>
-                <div className="space-y-3">
-                    {sizeOptions.map(size => (
-                        <label key={size.id} className="flex items-center gap-3 cursor-pointer group">
-                            <div className="w-5 h-5 rounded-md border border-border group-hover:border-brand-primary flex items-center justify-center"></div>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-medium text-text-secondary">{size.label}</span>
-                                <span className="text-xs text-text-tertiary">{size.sub}</span>
-                            </div>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            {/* Personality Filter */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <h3 className="font-bold text-text-primary mb-4">Personality</h3>
-                <div className="space-y-3">
-                    {personalityOptions.map((trait, i) => (
-                        <label key={i} className="flex items-center gap-3 cursor-pointer group">
-                            <div className="w-5 h-5 rounded-md border border-border group-hover:border-brand-primary flex items-center justify-center"></div>
-                            <span className="text-sm font-medium text-text-secondary">{trait}</span>
-                        </label>
-                    ))}
-                </div>
-            </div>
-
-            {/* Adoption Fee Filter */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-bold text-text-primary">Adoption Fee</h3>
-                    <span className="text-xs font-bold text-brand-primary">$0 - $500+</span>
-                </div>
-                <input type="range" className="w-full h-1.5 bg-bg-secondary rounded-full appearance-none cursor-pointer accent-brand-primary" />
-            </div>
-
-            {/* More Filters (Collapsible) */}
-            <div className="bg-bg-surface p-6 rounded-[24px] border border-border shadow-sm">
-                <h3 className="font-bold text-text-primary mb-4">More Options</h3>
-                <div className="space-y-3">
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <div className="w-5 h-5 rounded-md border border-border flex items-center justify-center"></div>
-                        <span className="text-sm font-medium text-text-secondary">Special Needs</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <div className="w-5 h-5 rounded-md border border-border flex items-center justify-center"></div>
-                        <span className="text-sm font-medium text-text-secondary">Microchipped Only</span>
-                    </label>
-                    <label className="flex items-center gap-3 cursor-pointer group">
-                        <div className="w-5 h-5 rounded-md border border-border flex items-center justify-center"></div>
-                        <span className="text-sm font-medium text-text-secondary">Fully Vaccinated</span>
-                    </label>
-                </div>
-            </div>
-
-            {/* Mobile Actions */}
-            <div className="lg:hidden grid grid-cols-2 gap-4 sticky bottom-0 bg-bg-surface p-4 border-t border-border -mx-4 -mb-4 shadow-lg z-10">
-                <Button variant="outline" onClick={onClearFilters}>Clear All</Button>
-                <Button variant="primary">Apply Filters</Button>
             </div>
         </div>
     );
