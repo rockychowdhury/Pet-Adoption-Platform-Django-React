@@ -1,224 +1,230 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React from 'react';
 import {
-    Heart, MapPin, Calendar, CircleDot, Scale,
-    MoreVertical, Edit3, Trash2, Archive,
-    CheckCircle, XCircle
+    Heart, MapPin, Clock, Sparkles, ShieldCheck,
+    Home, Share2, LayoutGrid, List as ListIcon,
+    Calendar, CheckCircle2, Info
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import usePets from '../../hooks/usePets';
+import { motion } from 'framer-motion';
 
-const PetCard = ({ pet, viewMode = 'grid', variant = 'listing' }) => {
+const PetCard = ({ pet, viewMode = 'grid' }) => {
+    // Basic data extraction with fallbacks
     const {
         id,
-        name,
-        pet_name,
-        breed = 'Unknown',
-        age_display = 'Unknown',
-        gender = 'Unknown',
-        weight = 'N/A',
-        location_city = 'No Location',
+        pet_name = 'Unnamed Pet',
+        species = 'Pet',
+        breed = 'Mixed Breed',
+        main_photo,
+        age_display = 'Young',
+        location_city = 'Nearby',
         location_state = '',
-        distance = '',
-        photos = [],
-        profile_photo,
-        description = "No description available.",
-        personality_traits = [],
-        is_active,
-        isSaved = false
+        urgency_level = 'flexible',
+        adoption_fee = '0',
+        is_vet_verified = false,
+        owner_verified_identity = false,
+        behavioral_profile = {},
+        rehoming_story = ''
     } = pet;
 
-    const displayName = name || pet_name || 'Unnamed Pet';
-    const mainImage = profile_photo || (photos.length > 0 ? photos[0] : 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=600&q=80');
+    const isUrgent = urgency_level === 'immediate';
+    const photoUrl = main_photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80';
 
-    // Menu State
-    const [showMenu, setShowMenu] = useState(false);
-    const menuRef = useRef(null);
+    // Personality tags from behavioral profile
+    const personalityTags = Object.entries(behavioral_profile || {})
+        .filter(([key, value]) => (key === 'energy_level' || value === 'yes') && key !== 'house_trained')
+        .map(([key, value]) => {
+            if (key === 'energy_level') return value >= 4 ? 'High Energy' : value <= 2 ? 'Calm' : 'Moderate Energy';
+            return key.replace(/_/g, ' ').replace('good with ', '');
+        })
+        .slice(0, 3);
 
-    // Hooks
-    const { useUpdatePet, useDeletePet } = usePets();
-    const updatePet = useUpdatePet();
-    const deletePet = useDeletePet();
-
-    // Close menu on click outside
-    useEffect(() => {
-        const handleClickOutside = (event) => {
-            if (menuRef.current && !menuRef.current.contains(event.target)) {
-                setShowMenu(false);
-            }
-        };
-        document.addEventListener('mousedown', handleClickOutside);
-        return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, []);
-
-    // Actions
-    const handleToggleStatus = (e) => {
-        e.preventDefault();
-        updatePet.mutate({
-            id,
-            data: { is_active: !is_active }
-        });
-        setShowMenu(false);
-    };
-
-    const handleDelete = (e) => {
-        e.preventDefault();
-        if (window.confirm('Are you sure you want to delete this profile? This cannot be undone.')) {
-            deletePet.mutate(id);
-        }
-    };
-
-    // --- RENDERERS ---
-
-    const renderGrid = () => (
-        <div className="group relative bg-white dark:bg-gray-800 rounded-3xl p-3 shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700 flex flex-col h-full">
-            {/* Image Container */}
-            <div className="relative aspect-square overflow-hidden rounded-[1.2rem] bg-gray-100 dark:bg-gray-900 mb-4">
+    const GridView = () => (
+        <motion.div
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="group bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col"
+        >
+            {/* Image Container with Overlay */}
+            <div className="relative aspect-[4/3] overflow-hidden">
                 <img
-                    src={mainImage}
-                    alt={displayName}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    src={photoUrl}
+                    alt={pet_name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
 
-                {/* Status Badge (Profile Mode) */}
-                {variant === 'profile' && (
-                    <div className={`absolute top-3 left-3 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider backdrop-blur-md shadow-sm border border-white/10 ${is_active
-                            ? 'bg-emerald-500/90 text-white'
-                            : 'bg-gray-500/90 text-white'
-                        }`}>
-                        {is_active ? 'Active' : 'Archived'}
+                {/* Gradient Overlay for Text Readability */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent" />
+
+                {/* Top Badges */}
+                <div className="absolute top-3 left-3">
+                    {isUrgent && (
+                        <div className="px-3 py-1 bg-[#EF4444] text-white text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 shadow-sm">
+                            <Clock size={12} strokeWidth={3} /> Urgent
+                        </div>
+                    )}
+                </div>
+
+                {/* Heart Button */}
+                <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-[#EF4444] transition-all group/heart shadow-sm">
+                    <Heart size={18} className="transition-all" />
+                </button>
+
+                {/* Name & Location Overlay */}
+                <div className="absolute bottom-4 left-4 right-4">
+                    <h3 className="text-2xl font-bold text-white mb-0.5">{pet_name}</h3>
+                    <div className="flex items-center gap-1.5 text-white/90 text-[13px] font-medium">
+                        <MapPin size={14} className="text-white/70" /> {location_city}, {location_state || 'USA'}
                     </div>
-                )}
+                </div>
+            </div>
 
-                {/* Listing: Heart Button */}
-                {variant === 'listing' && (
-                    <button className="absolute top-3 right-3 p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-orange-500 transition-all border border-white/20">
-                        <Heart size={16} fill={isSaved ? "currentColor" : "none"} />
-                    </button>
-                )}
+            {/* Content Area */}
+            <div className="p-5 flex-1 flex flex-col gap-4">
+                <div className="flex justify-between items-start">
+                    <div>
+                        <p className="text-[11px] font-bold text-[#4B5563] uppercase tracking-wider mb-1">
+                            {breed || species}
+                        </p>
+                        <p className="text-[13px] text-[#9CA3AF] font-medium">
+                            {age_display} • {pet.gender || 'Unknown'}
+                        </p>
+                    </div>
+                    <div className="text-right">
+                        <p className="text-[14px] font-bold text-[#2D5A41]">
+                            ${parseFloat(adoption_fee || 0).toFixed(0)} Fee
+                        </p>
+                    </div>
+                </div>
 
-                {/* Profile: Actions Menu */}
-                {variant === 'profile' && (
-                    <div className="absolute top-3 right-3" ref={menuRef}>
-                        <button
-                            onClick={(e) => { e.preventDefault(); setShowMenu(!showMenu); }}
-                            className="p-2 rounded-full bg-white/30 backdrop-blur-md text-white hover:bg-white hover:text-gray-900 transition-all border border-white/20 shadow-sm"
-                        >
-                            <MoreVertical size={16} />
-                        </button>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2">
+                    {personalityTags.length > 0 ? personalityTags.map(tag => (
+                        <span key={tag} className="px-3 py-1 bg-[#F3F4F6] text-[11px] font-medium text-[#4B5563] rounded-md">
+                            {tag}
+                        </span>
+                    )) : (
+                        <span className="px-3 py-1 bg-[#F3F4F6] text-[11px] font-medium text-[#4B5563] rounded-md">
+                            Loving Companion
+                        </span>
+                    )}
+                </div>
 
-                        {showMenu && (
-                            <div className="absolute right-0 mt-2 w-40 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1.5 z-50 animate-in fade-in zoom-in-95 duration-200 origin-top-right">
-                                <Link
-                                    to={`/dashboard/pets/edit/${id}`}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full text-left"
-                                >
-                                    <Edit3 size={14} /> Edit Profile
-                                </Link>
-                                <button
-                                    onClick={handleToggleStatus}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors w-full text-left"
-                                >
-                                    {is_active ? <Archive size={14} /> : <CheckCircle size={14} />}
-                                    {is_active ? 'Archive' : 'Activate'}
-                                </button>
-                                <div className="h-px bg-gray-100 dark:bg-gray-700 my-1" />
-                                <button
-                                    onClick={handleDelete}
-                                    className="flex items-center gap-2 px-4 py-2 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors w-full text-left font-medium"
-                                >
-                                    <Trash2 size={14} /> Delete
-                                </button>
+                {/* Story Snippet */}
+                <p className="text-[13px] text-[#9CA3AF] font-medium line-clamp-2 leading-relaxed">
+                    {rehoming_story || `${pet_name} is a wonderful companion looking for a forever home. Extremely friendly and ready to join your family.`}
+                </p>
+
+                {/* Verification & Button */}
+                <div className="mt-auto pt-2 space-y-4">
+                    <div className="flex gap-4">
+                        {is_vet_verified && (
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#2D5A41]">
+                                <ShieldCheck size={14} /> Vet Verified
+                            </div>
+                        )}
+                        {owner_verified_identity && (
+                            <div className="flex items-center gap-1.5 text-[11px] font-bold text-[#2D5A41]">
+                                <ShieldCheck size={14} /> ID Verified
                             </div>
                         )}
                     </div>
-                )}
-            </div>
 
-            {/* Content */}
-            <div className="px-1 flex-1 flex flex-col">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white leading-tight mb-1">{displayName}</h3>
-                        <p className="text-sm font-medium text-gray-400">{breed}</p>
-                    </div>
-                </div>
-
-                {/* Stats Row */}
-                <div className="flex items-center gap-3 mt-4 mb-4">
-                    <div className="px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center gap-1.5 border border-gray-100 dark:border-gray-700">
-                        <Calendar size={12} className="text-gray-400" />
-                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{age_display}</span>
-                    </div>
-                    <div className="px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center gap-1.5 border border-gray-100 dark:border-gray-700">
-                        <Scale size={12} className="text-gray-400" />
-                        <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{weight} lb</span>
-                    </div>
-                    {gender && (
-                        <div className="px-2.5 py-1.5 rounded-lg bg-gray-50 dark:bg-gray-700/50 flex items-center gap-1.5 border border-gray-100 dark:border-gray-700">
-                            <CircleDot size={12} className="text-gray-400" />
-                            <span className="text-xs font-semibold text-gray-600 dark:text-gray-300">{gender}</span>
-                        </div>
-                    )}
-                </div>
-
-                {/* Location */}
-                <div className="flex items-center gap-1.5 text-xs font-medium text-gray-400 mb-4">
-                    <MapPin size={12} />
-                    {location_city}, {location_state} {distance && <span className="opacity-60">({distance})</span>}
-                </div>
-
-                {/* Traits (Bottom) */}
-                <div className="mt-auto pt-4 border-t border-dashed border-gray-100 dark:border-gray-700 flex gap-2 overflow-hidden">
-                    {personality_traits.slice(0, 3).map((trait, i) => (
-                        <span key={i} className="text-[10px] font-bold uppercase tracking-wide text-gray-500 bg-gray-50 px-2 py-1 rounded-md">
-                            {trait}
-                        </span>
-                    ))}
-                    {personality_traits.length > 3 && (
-                        <span className="text-[10px] font-bold text-gray-400 px-1 py-1">+{personality_traits.length - 3}</span>
-                    )}
+                    <Link
+                        to={`/pets/${id}`}
+                        className="flex items-center justify-center w-full py-3 bg-[#2D5A41] text-white rounded-lg font-bold text-[14px] hover:bg-[#234532] transition-colors shadow-sm"
+                    >
+                        View {pet_name}'s Story
+                    </Link>
                 </div>
             </div>
-        </div>
+        </motion.div>
     );
 
-    const renderList = () => (
-        <div className="group bg-white dark:bg-gray-800 rounded-3xl p-4 shadow-sm hover:shadow-lg transition-all border border-gray-100 dark:border-gray-700 flex gap-6 items-center">
-            <div className="relative w-32 h-32 rounded-2xl overflow-hidden bg-gray-100 dark:bg-gray-900 shrink-0">
-                <img src={mainImage} alt={displayName} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-            </div>
+    const ListView = () => (
+        <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            className="group flex flex-col lg:flex-row bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 h-full lg:h-64"
+        >
+            <div className="relative w-full lg:w-64 h-64 lg:h-full overflow-hidden shrink-0">
+                <img
+                    src={photoUrl}
+                    alt={pet_name}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
 
-            <div className="flex-1 min-w-0">
-                <div className="flex justify-between items-start">
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">{displayName}</h3>
-                        <p className="text-sm text-gray-400 font-medium">{breed} • {age_display}</p>
-                    </div>
-                    {/* Action Menu (Replicated for List View) */}
-                    {variant === 'profile' && (
-                        <div className="relative" ref={menuRef}>
-                            <button
-                                onClick={(e) => { e.preventDefault(); setShowMenu(!showMenu); }}
-                                className="p-2 rounded-full hover:bg-gray-50 dark:hover:bg-gray-700 text-gray-400 hover:text-gray-900 transition-colors"
-                            >
-                                <MoreVertical size={18} />
-                            </button>
-                            {/* ... (Menu Dropdown - same as above, omitted for brevity but should be functional) ... */}
-                            {showMenu && (
-                                <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-gray-800 rounded-xl shadow-xl border border-gray-100 dark:border-gray-700 py-1 z-50">
-                                    <Link to={`/dashboard/pets/edit/${id}`} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50"><Edit3 size={14} /> Edit</Link>
-                                    <button onClick={handleToggleStatus} className="flex items-center gap-3 px-4 py-2.5 text-sm text-gray-600 hover:bg-gray-50 w-full text-left"><Archive size={14} /> {is_active ? 'Archive' : 'Activate'}</button>
-                                    <button onClick={handleDelete} className="flex items-center gap-3 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 w-full text-left"><Trash2 size={14} /> Delete</button>
-                                </div>
-                            )}
+                {/* Top Badges */}
+                <div className="absolute top-4 left-4">
+                    {isUrgent && (
+                        <div className="px-3 py-1 bg-[#EF4444] text-white text-[10px] font-bold uppercase tracking-wider rounded-full flex items-center gap-1.5 shadow-sm">
+                            <Clock size={12} strokeWidth={3} /> Urgent
                         </div>
                     )}
                 </div>
             </div>
-        </div>
+
+            <div className="flex-1 p-6 flex flex-col justify-between">
+                <div>
+                    <div className="flex justify-between items-start mb-4">
+                        <div>
+                            <div className="flex items-center gap-3 mb-1">
+                                <h3 className="text-3xl font-bold text-[#1F2937] leading-none">{pet_name}</h3>
+                                {owner_verified_identity && (
+                                    <ShieldCheck size={20} className="text-[#2D5A41]" />
+                                )}
+                            </div>
+                            <p className="text-[13px] font-bold text-[#4B5563] uppercase tracking-wider">
+                                {breed} • {age_display}
+                            </p>
+                        </div>
+                        <div className="text-right">
+                            <p className="text-2xl font-bold text-[#2D5A41]">${parseFloat(adoption_fee || 0).toFixed(0)}</p>
+                            <p className="text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest">Adoption Fee</p>
+                        </div>
+                    </div>
+
+                    <p className="text-[14px] text-[#4B5563] font-medium line-clamp-2 leading-relaxed mb-4">
+                        {rehoming_story || `A wonderful companion searching for a forever family who will cherish them. Health checked and ready for their next adventure.`}
+                    </p>
+
+                    <div className="flex flex-wrap gap-4 items-center text-[12px] font-medium text-[#9CA3AF]">
+                        <div className="flex items-center gap-1.5">
+                            <MapPin size={16} className="text-[#9CA3AF]" /> {location_city}, {location_state || 'USA'}
+                        </div>
+                        {behavioral_profile?.house_trained === 'yes' && (
+                            <div className="flex items-center gap-1.5">
+                                <Home size={16} className="text-[#9CA3AF]" /> House-trained
+                            </div>
+                        )}
+                        {personalityTags.length > 0 && (
+                            <div className="flex items-center gap-1.5">
+                                <Sparkles size={16} className="text-[#9CA3AF]" /> {personalityTags[0]}
+                            </div>
+                        )}
+                    </div>
+                </div>
+
+                <div className="flex items-center gap-4 mt-6 pt-5 border-t border-gray-50">
+                    <Link
+                        to={`/pets/${id}`}
+                        className="px-8 py-3 bg-[#2D5A41] text-white rounded-lg font-bold text-[13px] hover:bg-[#234532] transition-colors"
+                    >
+                        View Details
+                    </Link>
+                    <div className="flex gap-2 ml-auto">
+                        <button className="p-3 bg-gray-50 text-gray-400 rounded-lg hover:text-[#EF4444] hover:bg-gray-100 transition-all border border-transparent">
+                            <Heart size={20} />
+                        </button>
+                        <button className="p-3 bg-gray-50 text-gray-400 rounded-lg hover:text-[#2D5A41] hover:bg-gray-100 transition-all border border-transparent text-[#4B5563]">
+                            <Share2 size={20} />
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </motion.div>
     );
 
-    return viewMode === 'grid' ? renderGrid() : renderList();
+    return viewMode === 'grid' ? <GridView /> : <ListView />;
 };
 
 export default PetCard;
