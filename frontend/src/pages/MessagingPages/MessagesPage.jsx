@@ -26,9 +26,10 @@ const MessagesPage = () => {
 
     // Transform conversations for List Component
     const formattedConversations = useMemo(() => {
-        if (!conversationsData || !user) return [];
+        const conversationsList = Array.isArray(conversationsData) ? conversationsData : (conversationsData?.results || []);
+        if (conversationsList.length === 0 || !user) return [];
 
-        return conversationsData.map(c => {
+        return conversationsList.map(c => {
             // Filter by ID instead of email because PublicUserSerializer doesn't expose email
             const otherParticipant = c.participants?.find(p => p.id !== user.id) || c.participants?.[0] || { first_name: 'Unknown' };
             const lastMsg = c.last_message;
@@ -59,7 +60,9 @@ const MessagesPage = () => {
         const convMeta = formattedConversations.find(c => c.id === activeId);
         if (!convMeta) return null;
 
-        const formattedMessages = messagesData?.map(msg => ({
+        const messagesList = Array.isArray(messagesData) ? messagesData : (messagesData?.results || []);
+
+        const formattedMessages = messagesList.map(msg => ({
             id: msg.id,
             text: msg.text,
             sender: msg.sender.email === user.email ? 'You' : 'Them', // Check email or ID
