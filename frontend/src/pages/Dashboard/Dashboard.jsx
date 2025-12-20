@@ -12,8 +12,8 @@ const Dashboard = () => {
     const { data: applications = [], isLoading } = useQuery({
         queryKey: ['myApplications'],
         queryFn: async () => {
-            const res = await api.get('/adoption/');
-            return Array.isArray(res.data) ? res.data : [];
+            const res = await api.get('/adoption/applications/'); // Standardized endpoint
+            return Array.isArray(res.data) ? res.data : (res.data.results || []);
         }
     });
 
