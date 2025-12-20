@@ -1,3 +1,4 @@
+@import 'leaflet/dist/leaflet.css';
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -10,7 +11,7 @@
     ======================================== */
 
     /* Background Colors */
-    --color-bg-primary: #FAFAF8;
+    --color-bg-primary: #FDFBF7;
     /* Off-white - Main background */
     --color-bg-secondary: #F5F3EF;
     /* Warm stone - Cards, sections */
@@ -33,8 +34,8 @@
     /* Brand Colors */
     --color-brand-primary: #5B8A72;
     /* Sage Green - Primary actions */
-    --color-brand-secondary: #C98B6B;
-    /* Warm Terracotta - Accents */
+    --color-brand-secondary: #f29d4a;
+    /* Champagne Gold - Accents */
     --color-brand-accent: #E8D5C4;
     /* Soft Beige - Highlights */
 
@@ -63,7 +64,7 @@
     /* ========================================
        DARK MODE - Sage & Stone Theme
        Deep, calm, modern dark palette
-    ======================================== */
+     ======================================== */
 
     /* Background Colors */
     --color-bg-primary: #121212;
@@ -89,8 +90,8 @@
     /* Brand Colors */
     --color-brand-primary: #6BBFA3;
     /* Muted Aqua - Primary actions */
-    --color-brand-secondary: #C98B6B;
-    /* Warm Terracotta - Accents (Fixed) */
+    --color-brand-secondary: #D4A373;
+    /* Champagne Gold - Accents (Fixed) */
     --color-brand-accent: #3D5A4C;
     /* Deep Sage - Highlights */
 
