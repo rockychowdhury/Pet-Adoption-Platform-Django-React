@@ -156,6 +156,18 @@ class RehomingListing(models.Model):
         default=UrgencyLevel.FLEXIBLE,
         verbose_name="Urgency"
     )
+
+    # Added from Spec
+    adoption_fee = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00,
+        help_text="Adoption fee in USD"
+    )
+    is_vet_verified = models.BooleanField(
+        default=False,
+        help_text="Has the pet been verified by a veterinarian?"
+    )
     
     # Adopter Preferences
     adopter_experience_required = models.CharField(
