@@ -17,7 +17,6 @@ const usePets = () => {
                 const response = await api.get(`/pets/?${params.toString()}`);
                 return response.data;
             },
-            keepPreviousData: true,
         });
     };
 
