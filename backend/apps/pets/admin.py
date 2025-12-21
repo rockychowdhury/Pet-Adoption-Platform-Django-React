@@ -1,8 +1,7 @@
 from django.contrib import admin
 
 # Register your models here.
-from .models import RehomingListing, PetDocument
+from .models import PetProfile
 
-admin.site.register(RehomingListing)
-admin.site.register(PetDocument)
+admin.site.register(PetProfile)
 
