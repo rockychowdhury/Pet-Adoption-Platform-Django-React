@@ -78,7 +78,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
     ];
 
     return (
-        <div className="w-full max-w-[320px] bg-bg-primary px-2 font-sans">
+        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 p-6">
             {/* Header */}
             <div className="flex items-center justify-between mb-2 px-2 pt-1 pb-4 border-b border-gray-100">
                 <h2 className="text-[20px] font-bold text-[#1F2937]">Filters</h2>
@@ -145,6 +145,32 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                                 </span>
                             </label>
                         ))}
+                    </div>
+                </FilterSection>
+
+                {/* Adoption Fee */}
+                <FilterSection title="Adoption Fee">
+                    <div className="px-1 pb-4">
+                        <div className="flex justify-between items-center mb-4">
+                            <span className="text-[13px] text-[#4B5563] font-medium">Max Price</span>
+                            <span className="text-[14px] font-bold text-[#2D5A41]">
+                                {filters.max_fee ? `$${filters.max_fee}` : 'Any'}
+                            </span>
+                        </div>
+                        <input
+                            type="range"
+                            name="max_fee"
+                            min="0"
+                            max="500"
+                            step="10"
+                            value={filters.max_fee || 500}
+                            onChange={onFilterChange}
+                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5A41]"
+                        />
+                        <div className="flex justify-between mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
+                            <span>$0</span>
+                            <span>$500+</span>
+                        </div>
                     </div>
                 </FilterSection>
 
