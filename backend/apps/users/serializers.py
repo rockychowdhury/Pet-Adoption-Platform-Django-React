@@ -4,7 +4,8 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import AuthenticationFailed
-from .models import UserPet, UserProfile, VerificationDocument, RoleRequest
+from .models import UserProfile, VerificationDocument, RoleRequest, AdopterProfile
+from apps.pets.models import PetProfile
 
 User = get_user_model()
 
@@ -34,17 +35,17 @@ class PublicUserSerializer(serializers.ModelSerializer):
 class UserPetSerializer(serializers.ModelSerializer):
     owner = PublicUserSerializer(read_only=True)
     class Meta:
-        model = UserPet
+        model = PetProfile
         fields = [
             'id', 'owner', 'name', 'species', 'breed', 
-            'birth_date', 'age', 'age_display', 'gender', 'weight', 'size',
-            'personality_traits', 'fun_facts', 'gotcha_day',
-            'is_vaccinated', 'is_spayed_neutered', 
-            'has_aggression_history', 'aggression_details',
+            'birth_date', 'age', 'gender', 'weight', 'size_category',
+            'personality_traits', 'health_status', 'medical_history',
+            'is_spayed_neutered', 'is_vaccinated', 'microchip_number',
+            'aggression_history', 'aggression_details',
             'description', 'photos', 'profile_photo', 'is_active',
             'created_at', 'updated_at'
         ]
-        read_only_fields = ['created_at', 'updated_at']
+        read_only_fields = ['created_at', 'updated_at', 'owner']
 
 class UserProfileSerializer(serializers.ModelSerializer):
     """Nested serializer for UserProfile model"""
@@ -57,6 +58,12 @@ class VerificationDocumentSerializer(serializers.ModelSerializer):
         model = VerificationDocument
         fields = ['id', 'document_type', 'document_url', 'status', 'admin_notes', 'reviewed_at', 'created_at']
         read_only_fields = ['status', 'admin_notes', 'reviewed_at', 'created_at']
+
+class AdopterProfileSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdopterProfile
+        fields = '__all__'
+        read_only_fields = ['readiness_score', 'created_at', 'updated_at']
 
 class RoleRequestSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
@@ -146,5 +153,3 @@ class UserSerializer(serializers.ModelSerializer):
             'can_create_listing', 'account_status',
             'user_pets', 'profile', 'verification_documents'
         ]
-
-
