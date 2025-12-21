@@ -1,10 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Search, LayoutGrid, List as ListIcon, Loader2, X, SlidersHorizontal, Sparkles, MapPin, Calendar, ChevronDown } from 'lucide-react';
+import {
+    Search, LayoutGrid, List as ListIcon, Loader2, X, SlidersHorizontal, Sparkles, MapPin, Calendar, CheckCircle2, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, ChevronDown
+} from 'lucide-react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
-import usePets from '../../hooks/usePets';
+// import usePets from '../../hooks/usePets';
+import useRehoming from '../../hooks/useRehoming';
 import NoResults from '../../components/common/Feedback/NoResults';
 import CreatePetModal from '../../components/Pet/CreatePetModal';
 import FilterSidebar from '../../components/Pet/FilterSidebar';
@@ -16,7 +19,7 @@ import SortDropdown from '../../components/Pet/SortDropdown';
 const PetListingPage = () => {
     const api = useAPI();
     const { user } = useAuth();
-    const { useGetPets } = usePets();
+    const { useGetListings } = useRehoming();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
     const [page, setPage] = useState(1);
@@ -46,7 +49,7 @@ const PetListingPage = () => {
         verified_owner: '',
         verified_identity: '',
         verified_vet: '',
-        max_fee: 300,
+        max_fee: '',
         energy_level: '',
         location: searchParams.get('location') || '',
         radius: parseInt(searchParams.get('radius')) || 50,
@@ -61,7 +64,7 @@ const PetListingPage = () => {
         delete fetchFilters.radius;
     }
 
-    const { data, isLoading: loading, refetch } = useGetPets({ ...fetchFilters, page });
+    const { data, isLoading: loading, refetch } = useGetListings({ ...fetchFilters, page });
 
     const totalCount = data?.count || 0;
     const hasNextPage = !!data?.next;
@@ -78,7 +81,7 @@ const PetListingPage = () => {
                     const data = await response.json();
 
                     if (data.success && data.city && data.region_code) {
-                        const locationString = `${data.city}, ${data.region_code}`;
+                        const locationString = `${data.city}, ${data.region_code} `;
                         setSuggestedLocation(locationString);
                     }
                 } catch (error) {
@@ -107,17 +110,7 @@ const PetListingPage = () => {
     // Synchronize API data with local state
     useEffect(() => {
         if (data?.results) {
-            if (page === 1) {
-                // For a fresh page 1 load, we replace the entire list
-                setAllPets(data.results);
-            } else {
-                // For subsequent pages, we append
-                setAllPets(prev => {
-                    const existingIds = new Set(prev.map(p => p.id));
-                    const newPets = data.results.filter(p => !existingIds.has(p.id));
-                    return [...prev, ...newPets];
-                });
-            }
+            setAllPets(data.results);
         } else if (!loading && page === 1 && data && !data.results?.length) {
             // Explicitly clear if API returns empty for page 1
             setAllPets([]);
@@ -181,7 +174,7 @@ const PetListingPage = () => {
     const clearFilters = () => {
         // Check if any filter is actually active
         const hasActiveFilters = Object.keys(filters).some(key => {
-            if (key === 'max_fee') return filters[key] < 300;
+            if (key === 'max_fee') return filters[key] !== '';
             if (key === 'radius') return filters[key] !== 50;
             if (key === 'ordering') return filters[key] !== '-published_at';
             return filters[key] !== '';
@@ -208,7 +201,8 @@ const PetListingPage = () => {
             verified_owner: '',
             verified_identity: '',
             verified_vet: '',
-            max_fee: 300,
+            verified_vet: '',
+            max_fee: '',
             energy_level: '',
             location: '',
             radius: 50,
@@ -234,7 +228,7 @@ const PetListingPage = () => {
 
         // Special handling for max_fee to reset to default, not empty
         if (key === 'max_fee') {
-            setFilters(prev => ({ ...prev, [key]: 300 }));
+            setFilters(prev => ({ ...prev, [key]: '' }));
         } else {
             setFilters(prev => ({ ...prev, [key]: '' }));
         }
@@ -242,14 +236,14 @@ const PetListingPage = () => {
 
     const getActiveFilters = () => {
         const active = [];
-        if (filters.species) active.push({ key: 'species', label: `Species: ${filters.species}` });
-        if (filters.gender) active.push({ key: 'gender', label: `Gender: ${filters.gender}` });
-        if (filters.size) active.push({ key: 'size', label: `Size: ${filters.size.toUpperCase()}` });
-        if (filters.urgency_level) active.push({ key: 'urgency_level', label: `Urgency: ${filters.urgency_level}` });
+        if (filters.species) active.push({ key: 'species', label: `Species: ${filters.species} ` });
+        if (filters.gender) active.push({ key: 'gender', label: `Gender: ${filters.gender} ` });
+        if (filters.size) active.push({ key: 'size', label: `Size: ${filters.size.toUpperCase()} ` });
+        if (filters.urgency_level) active.push({ key: 'urgency_level', label: `Urgency: ${filters.urgency_level} ` });
         if (filters.search) active.push({ key: 'search', label: `Search: "${filters.search}"` });
-        if (filters.location) active.push({ key: 'location', label: `Near: ${filters.location}` });
-        if (filters.age_range) active.push({ key: 'age_range', label: `Age: ${filters.age_range.replace(/_/g, ' ')}` });
-        if (filters.max_fee < 300) active.push({ key: 'max_fee', label: `Max Fee: $${filters.max_fee}` });
+        if (filters.location) active.push({ key: 'location', label: `Near: ${filters.location} ` });
+        if (filters.age_range) active.push({ key: 'age_range', label: `Age: ${filters.age_range.replace(/_/g, ' ')} ` });
+        if (filters.max_fee) active.push({ key: 'max_fee', label: `Max Fee: $${filters.max_fee} ` });
         if (filters.house_trained === 'true') active.push({ key: 'house_trained', label: 'House-trained' });
         if (filters.special_needs === 'true') active.push({ key: 'special_needs', label: 'Special Needs' });
         if (filters.verified_owner === 'true') active.push({ key: 'verified_owner', label: 'Verified Owner' });
@@ -358,13 +352,13 @@ const PetListingPage = () => {
                                     <div className="flex bg-[#F3F4F6] p-1 rounded-lg">
                                         <button
                                             onClick={() => setViewMode('grid')}
-                                            className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-white text-[#1F2937] shadow-sm' : 'text-[#9CA3AF] hover:text-[#4B5563]'}`}
+                                            className={`p - 2 rounded - md transition - all ${viewMode === 'grid' ? 'bg-white text-[#1F2937] shadow-sm' : 'text-[#9CA3AF] hover:text-[#4B5563]'} `}
                                         >
                                             <LayoutGrid size={18} />
                                         </button>
                                         <button
                                             onClick={() => setViewMode('list')}
-                                            className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-white text-[#1F2937] shadow-sm' : 'text-[#9CA3AF] hover:text-[#4B5563]'}`}
+                                            className={`p - 2 rounded - md transition - all ${viewMode === 'list' ? 'bg-white text-[#1F2937] shadow-sm' : 'text-[#9CA3AF] hover:text-[#4B5563]'} `}
                                         >
                                             <ListIcon size={18} />
                                         </button>
@@ -406,7 +400,7 @@ const PetListingPage = () => {
 
                         {/* Results States */}
                         {loading && allPets.length === 0 ? (
-                            <div className="grid gap-12 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
+                            <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
                                 {[1, 2, 3, 4, 5, 6].map(i => (
                                     <div key={i} className="bg-bg-secondary/40 h-[500px] rounded-[48px] animate-pulse border border-border/10"></div>
                                 ))}
@@ -417,7 +411,7 @@ const PetListingPage = () => {
                                     variants={containerVariants}
                                     initial="hidden"
                                     animate="visible"
-                                    className={`grid gap-12 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3' : 'grid-cols-1'}`}
+                                    className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3' : 'grid-cols-1'} `}
                                 >
                                     {allPets.map(pet => (
                                         <motion.div key={pet.id} variants={itemVariants}>
@@ -426,14 +420,88 @@ const PetListingPage = () => {
                                     ))}
                                 </motion.div>
 
-                                {hasNextPage && (
-                                    <div className="mt-20 text-center">
+                                {/* Pagination Components */}
+                                {totalCount > 24 && (
+                                    <div className="mt-16 flex items-center justify-center gap-3">
+                                        {/* Previous Button */}
                                         <button
-                                            onClick={() => setPage(p => p + 1)}
-                                            disabled={loading}
-                                            className="px-16 py-6 bg-bg-surface border border-border/20 rounded-full font-logo uppercase tracking-widest text-[10px] shadow-lg hover:border-brand-primary/40 transition-all active:scale-95 disabled:opacity-50"
+                                            onClick={() => {
+                                                setPage(p => Math.max(1, p - 1));
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                            disabled={page === 1 || loading}
+                                            className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
                                         >
-                                            {loading ? <Loader2 className="animate-spin" /> : 'Explore More Results'}
+                                            <ChevronLeft size={18} />
+                                        </button>
+
+                                        {/* Page Numbers */}
+                                        <div className="flex items-center gap-2 bg-white px-2 py-1 rounded-full border border-gray-100 shadow-sm mx-2">
+                                            {[...Array(Math.ceil(totalCount / 24))].map((_, idx) => {
+                                                const pageNum = idx + 1;
+                                                // Simple logic to show limited pages if too many (basic implementation for now)
+                                                // Showing all if < 7, else complex logic needed.
+                                                // For now, let's just show current, first, last context or simple scrollable list if huge.
+                                                // Assuming reasonable count for MVP.
+                                                if (Math.ceil(totalCount / 24) > 7) {
+                                                    // Show 1, ..., current-1, current, current+1, ..., last
+                                                    if (
+                                                        pageNum === 1 ||
+                                                        pageNum === Math.ceil(totalCount / 24) ||
+                                                        (pageNum >= page - 1 && pageNum <= page + 1)
+                                                    ) {
+                                                        return (
+                                                            <button
+                                                                key={pageNum}
+                                                                onClick={() => {
+                                                                    setPage(pageNum);
+                                                                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                                }}
+                                                                className={`w-8 h-8 flex items-center justify-center rounded-full text-[13px] font-bold transition-all ${page === pageNum
+                                                                    ? 'bg-[#2D5A41] text-white shadow-md scale-110'
+                                                                    : 'text-gray-500 hover:bg-gray-50'
+                                                                    } `}
+                                                            >
+                                                                {pageNum}
+                                                            </button>
+                                                        );
+                                                    } else if (
+                                                        (pageNum === 2 && page > 3) ||
+                                                        (pageNum === Math.ceil(totalCount / 24) - 1 && page < Math.ceil(totalCount / 24) - 2)
+                                                    ) {
+                                                        return <span key={pageNum} className="text-gray-300 text-[10px]">...</span>;
+                                                    }
+                                                    return null;
+                                                }
+
+                                                return (
+                                                    <button
+                                                        key={pageNum}
+                                                        onClick={() => {
+                                                            setPage(pageNum);
+                                                            window.scrollTo({ top: 0, behavior: 'smooth' });
+                                                        }}
+                                                        className={`w-8 h-8 flex items-center justify-center rounded-full text-[13px] font-bold transition-all ${page === pageNum
+                                                            ? 'bg-[#2D5A41] text-white shadow-md scale-110'
+                                                            : 'text-gray-500 hover:bg-gray-50'
+                                                            } `}
+                                                    >
+                                                        {pageNum}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {/* Next Button */}
+                                        <button
+                                            onClick={() => {
+                                                setPage(p => p + 1);
+                                                window.scrollTo({ top: 0, behavior: 'smooth' });
+                                            }}
+                                            disabled={!hasNextPage || loading}
+                                            className="w-10 h-10 flex items-center justify-center rounded-full bg-white border border-gray-200 text-gray-500 hover:bg-gray-50 hover:text-gray-900 hover:border-gray-300 transition-all disabled:opacity-30 disabled:cursor-not-allowed shadow-sm"
+                                        >
+                                            <ChevronRight size={18} />
                                         </button>
                                     </div>
                                 )}
