@@ -7,14 +7,17 @@ from django.contrib.auth import get_user_model
 from django.utils import timezone
 from django.db import transaction
 
-from apps.pets.models import RehomingListing, PetDocument
-from apps.users.models import PetProfile, UserProfile, VerificationDocument
-from apps.adoption.models import AdoptionApplication, AdopterProfile
-from apps.messaging.models import Conversation, Message, MessageRestriction
-from apps.rehoming.models import RehomingIntervention, ListingReview
-from apps.reviews.models import AdoptionReview
+from apps.pets.models import PetProfile
+from apps.users.models import UserProfile, VerificationDocument, AdopterProfile
+from apps.rehoming.models import (
+    RehomingListing, AdoptionApplication, AdoptionContract, 
+    RehomingIntervention, AdoptionReview
+)
+from apps.messaging.models import Conversation, Message
 from apps.services.models import ServiceProvider, FosterService, VeterinaryClinic, TrainerService, ServiceReview
-from apps.admin_panel.models import UserReport, LegalAgreement, PlatformMetrics, ModerationAction
+from apps.admin_panel.models import UserReport, ModerationAction
+from apps.analytics.models import PlatformAnalytics
+from apps.notifications.models import Notification
 
 User = get_user_model()
 
@@ -112,7 +115,7 @@ class Command(BaseCommand):
                 last_name=self.random_lastname(),
                 username=f'petowner{i+1}',
                 phone_number=self.random_phone(),
-                role=User.UserRole.PET_OWNER,
+                role=User.UserRole.USER,
                 location_city=random.choice(cities),
                 location_state=random.choice(states),
                 location_country='USA',
@@ -137,9 +140,10 @@ class Command(BaseCommand):
                 last_name=self.random_lastname(),
                 username=f'adopter{i+1}',
                 phone_number=self.random_phone(),
-                role=User.UserRole.ADOPTER,
+                role=User.UserRole.USER,
                 location_city=random.choice(cities),
                 location_state=random.choice(states),
+                zip_code=self.random_zip(),
                 email_verified=True,
                 phone_verified=True,
                 is_active=True
@@ -172,17 +176,15 @@ class Command(BaseCommand):
         admin_count = max(2, int(count * 0.04))
         for i in range(admin_count):
             email = f'admin{i+1}@example.com'
-            user = User.objects.create_user(
+            user = User.objects.create_superuser(
                 email=email,
                 password='password123',
                 first_name='Admin',
                 last_name=f'User{i+1}',
                 username=f'admin{i+1}',
                 role=User.UserRole.ADMIN,
-                is_staff=True,
                 email_verified=True,
                 phone_verified=True,
-                is_active=True
             )
             users.append(user)
         
@@ -190,7 +192,7 @@ class Command(BaseCommand):
 
     def create_pet_profiles(self, users):
         """Create pet profiles for pet owners"""
-        pet_owners = [u for u in users if u.role == User.UserRole.PET_OWNER]
+        pet_owners = [u for u in users if u.role == User.UserRole.USER]
         profiles = []
         species_options = ['dog', 'cat', 'rabbit', 'bird', 'other']
         
@@ -215,7 +217,7 @@ class Command(BaseCommand):
 
     def create_rehoming_listings(self, users, pet_profiles, count):
         """Create rehoming listings"""
-        pet_owners = [u for u in users if u.role == User.UserRole.PET_OWNER and u.can_create_listing]
+        pet_owners = [u for u in users if u.role == User.UserRole.USER and u.can_create_listing]
         if not pet_owners:
             return []
         
@@ -246,10 +248,10 @@ class Command(BaseCommand):
                 pet_name=pet.name if pet else self.random_pet_name(),
                 species=pet.species if pet else random.choice(['dog', 'cat', 'rabbit']),
                 breed=pet.breed if pet else self.random_breed(),
-                age_months=random.randint(6, 180),
+                age=random.randint(1, 15),
                 gender=random.choice(['male', 'female']),
                 weight=Decimal(str(random.uniform(5, 100))),
-                size=random.choice(['xs', 'small', 'medium', 'large', 'xl']),
+                size_category=random.choice(['xs', 'small', 'medium', 'large', 'xl']),
                 medical_history={
                     'spayed_neutered': random.choice(['yes', 'no', 'scheduled']),
                     'microchipped': random.choice([True, False]),
@@ -265,8 +267,7 @@ class Command(BaseCommand):
                     'house_trained': random.choice(['yes', 'mostly', 'no']),
                 },
                 aggression_disclosed=True,
-                aggression_to_people=random.choice([False, False, False, True]),
-                aggression_to_animals=random.choice([False, False, True]),
+                aggression_details="Some aggression history notes.",
                 rehoming_story=self.random_rehoming_story(),
                 photos=[f'https://placekitten.com/600/400?{random.randint(1,1000)}' for _ in range(random.randint(5, 10))],
                 adoption_fee=Decimal(str(random.choice([0, 50, 100, 150, 200, 250]))),
@@ -340,7 +341,7 @@ class Command(BaseCommand):
 
     def create_adoption_applications(self, users, listings, count):
         """Create adoption applications with adopter profiles"""
-        adopters = [u for u in users if u.role == User.UserRole.ADOPTER]
+        adopters = [u for u in users if u.role == User.UserRole.USER]
         active_listings = [l for l in listings if l.status == 'active']
         
         if not adopters or not active_listings:
@@ -377,7 +378,7 @@ class Command(BaseCommand):
                     'num_adults': random.randint(1, 4),
                     'num_children': random.randint(0, 3),
                     'activity_level': random.randint(1, 5),
-                    'exercise_commitment_hours': Decimal(str(random.uniform(0.5, 3))),
+                    'exercise_commitment': random.randint(1, 3),
                     'travel_frequency': random.choice(['rarely', 'monthly', 'weekly']),
                     'why_adopt': 'I have always loved animals and want to provide a loving home.',
                     'work_schedule': '9-5 weekdays, remote 2 days/week'
@@ -387,10 +388,10 @@ class Command(BaseCommand):
             
             app = AdoptionApplication.objects.create(
                 applicant=adopter,
-                pet=listing,
+                listing=listing,
                 adopter_profile=adopter_profile,
-                message=self.random_application_message(),
-                readiness_score=adopter_profile.readiness_score,
+                application_message=self.random_application_message(),
+                match_score=adopter_profile.readiness_score,
                 status=random.choice(statuses)
             )
             applications.append(app)
@@ -405,23 +406,30 @@ class Command(BaseCommand):
         
         for app in applications[:min(len(applications), 50)]:
             # Create conversation
-            conversation, _ = Conversation.objects.get_or_create(
-                participant_1=app.applicant,
-                participant_2=app.pet.pet_owner
-            )
+            p1 = app.applicant
+            p2 = app.listing.pet_owner
             
+            # Find existing or create new
+            conversation = Conversation.objects.filter(participants=p1).filter(participants=p2).first()
+            if not conversation:
+                conversation = Conversation.objects.create(conversation_type='direct')
+                conversation.participants.add(p1, p2)
+
             # Create 3-10 messages per conversation
             num_messages = random.randint(3, 10)
             for i in range(num_messages):
-                sender = random.choice([app.applicant, app.pet.pet_owner])
+                sender = random.choice([p1, p2])
                 msg = Message.objects.create(
                     conversation=conversation,
                     sender=sender,
-                    text=self.random_message_text(),
-                    is_read=random.choice([True, False]),
+                    content=self.random_message_text(),
+                    # is_read handled via MessageReceipt
                     created_at=timezone.now() - timedelta(days=random.randint(0, 30))
                 )
                 messages.append(msg)
+                
+                # Update last message
+                conversation.update_last_message(msg)
         
         return messages
 
@@ -435,7 +443,7 @@ class Command(BaseCommand):
             # Pet owner reviews adopter
             review = AdoptionReview.objects.create(
                 application=app,
-                reviewer=app.pet.pet_owner,
+                reviewer=app.listing.pet_owner,
                 reviewee=app.applicant,
                 reviewer_role='pet_owner',
                 rating_overall=random.randint(3, 5),
@@ -443,13 +451,14 @@ class Command(BaseCommand):
                 rating_preparation=random.randint(3, 5),
                 review_text="Great adopter, very responsible and caring!",
                 would_recommend=True,
-                pet_name=app.pet.pet_name
+                tags=['responsive', 'friendly'],
+                # pet_name is not on AdoptionReview model in seed, wait model?
             )
             reviews.append(review)
         
         # Service reviews
         for provider in providers[:min(len(providers), 20)]:
-            reviewer = random.choice([u for u in User.objects.all() if u.role == User.UserRole.PET_OWNER][:10])
+            reviewer = random.choice([u for u in User.objects.all() if u.role == User.UserRole.USER][:10])
             try:
                 review = ServiceReview.objects.create(
                     provider=provider,
@@ -476,10 +485,12 @@ class Command(BaseCommand):
         for reporter in reporters:
             if listings:
                 listing = random.choice(listings)
+                from django.contrib.contenttypes.models import ContentType
+                listing_content_type = ContentType.objects.get_for_model(RehomingListing)
                 report = UserReport.objects.create(
                     reporter=reporter,
                     reported_user=listing.pet_owner,
-                    reported_content_type='listing',
+                    reported_content_type=listing_content_type,
                     reported_content_id=listing.id,
                     report_type=random.choice(['spam', 'misrepresentation', 'inappropriate']),
                     description="This listing seems suspicious.",
