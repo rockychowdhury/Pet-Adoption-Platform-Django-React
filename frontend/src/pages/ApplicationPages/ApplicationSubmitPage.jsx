@@ -1,7 +1,11 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, AlertCircle, Lightbulb, MapPin, Calendar, ArrowRight } from 'lucide-react';
+import { useQuery, useMutation } from '@tanstack/react-query';
+import { CheckCircle, AlertCircle, ArrowRight } from 'lucide-react';
 import { toast } from 'react-toastify';
+import useAPI from '../../hooks/useAPI';
+import usePets from '../../hooks/usePets';
+import useAuth from '../../hooks/useAuth';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Checkbox from '../../components/common/Form/Checkbox';
@@ -9,18 +13,26 @@ import Checkbox from '../../components/common/Form/Checkbox';
 const ApplicationSubmitPage = () => {
     const { id } = useParams(); // Listing ID
     const navigate = useNavigate();
+    const api = useAPI();
+    const { user } = useAuth();
+    const { useGetPet } = usePets();
 
-    // Mock Data
-    const pet = {
-        name: 'Bella',
-        image: 'https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&w=400&q=80',
-        breed: 'Golden Retriever',
-        owner: {
-            name: 'Alex Morgan',
-            avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?fit=facearea&facepad=2&w=100&h=100&q=80'
+    // Fetch Pet Data
+    const { data: pet, isLoading: petLoading, isError } = useGetPet(id);
+
+    // Fetch Adopter Profile
+    const { data: profile, isLoading: profileLoading } = useQuery({
+        queryKey: ['adopterProfile', 'me'],
+        queryFn: async () => {
+            try {
+                const res = await api.get('/adoption/adopter-profile/me/');
+                return res.data;
+            } catch (err) {
+                return null;
+            }
         },
-        fee: 50
-    };
+        retry: false
+    });
 
     const [message, setMessage] = useState('');
     const [agreements, setAgreements] = useState({
@@ -29,7 +41,49 @@ const ApplicationSubmitPage = () => {
         accurate: false
     });
 
+    const submitMutation = useMutation({
+        mutationFn: async (payload) => {
+            return await api.post('/adoption/applications/', payload);
+        },
+        onSuccess: () => {
+            toast.success("Application Submitted Successfully!");
+            navigate('/dashboard/applications');
+        },
+        onError: (err) => {
+            console.error(err);
+            toast.error(err.response?.data?.detail || "Failed to submit application.");
+        }
+    });
+
+    if (petLoading || profileLoading) return <div className="p-12 text-center">Loading...</div>;
+    if (isError || !pet) return <div className="p-12 text-center text-red-500">Pet listing not found.</div>;
+
+    // Redirect if no profile
+    if (!profile && !profileLoading) {
+        return (
+            <div className="min-h-screen bg-bg-primary py-12 px-4 flex items-center justify-center">
+                <Card className="max-w-md p-8 text-center">
+                    <AlertCircle size={48} className="mx-auto text-brand-primary mb-4" />
+                    <h2 className="text-2xl font-bold mb-2">Profile Required</h2>
+                    <p className="text-text-secondary mb-6">You need to complete your Adopter Profile before applying for a pet.</p>
+                    <Button variant="primary" onClick={() => navigate('/dashboard/applications/setup')}>
+                        Create Adopter Profile
+                    </Button>
+                </Card>
+            </div>
+        );
+    }
+
     const isReady = message.length >= 50 && Object.values(agreements).every(Boolean);
+
+    const handleSubmit = () => {
+        if (!isReady) return;
+        submitMutation.mutate({
+            pet: pet.id,
+            message: message,
+            custom_answers: {} // Placeholder for custom questions if implemented
+        });
+    };
 
     return (
         <div className="min-h-screen bg-bg-primary py-12 px-4">
@@ -38,8 +92,8 @@ const ApplicationSubmitPage = () => {
                 {/* Main Content */}
                 <div className="lg:col-span-2 space-y-8">
                     <div>
-                        <h1 className="text-3xl font-bold text-text-primary mb-2">Apply to Adopt {pet.name}</h1>
-                        <p className="text-text-secondary">Take the next step in bringing {pet.name} home.</p>
+                        <h1 className="text-3xl font-bold text-text-primary mb-2">Apply to Adopt {pet.pet_name}</h1>
+                        <p className="text-text-secondary">Take the next step in bringing {pet.pet_name} home.</p>
                     </div>
 
                     {/* Profile Review Card */}
@@ -48,24 +102,26 @@ const ApplicationSubmitPage = () => {
                             <div>
                                 <h3 className="font-bold text-lg text-text-primary">Your Adopter Profile</h3>
                                 <div className="flex items-center gap-2 mt-1">
-                                    <span className="px-2 py-0.5 rounded-md bg-status-success/10 text-status-success text-xs font-bold">Readiness Score: 85%</span>
-                                    <span className="text-xs text-text-tertiary">Excellent</span>
+                                    <span className={`px-2 py-0.5 rounded-md text-xs font-bold ${profile.readiness_score >= 80 ? 'bg-status-success/10 text-status-success' : 'bg-status-warning/10 text-status-warning'
+                                        }`}>
+                                        Readiness Score: {profile.readiness_score}%
+                                    </span>
                                 </div>
                             </div>
-                            <Button variant="outline" size="sm">Review Profile</Button>
+                            <Button variant="outline" size="sm" onClick={() => navigate('/dashboard/applications/setup')}>Edit Profile</Button>
                         </div>
-                        <p className="text-sm text-text-secondary">Your profile details (Housing, Lifestyle, Experience) will be shared with {pet.owner.name} automatically.</p>
+                        <p className="text-sm text-text-secondary">Your profile details (Housing, Lifestyle, Experience) will be shared with {pet.owner_name} automatically.</p>
                     </Card>
 
                     {/* Personalized Message */}
                     <div className="space-y-3">
                         <label className="block font-bold text-text-primary">
-                            Message to {pet.owner.name} <span className="text-status-error">*</span>
+                            Message to {pet.owner_name} <span className="text-status-error">*</span>
                         </label>
                         <div className="bg-status-info/10 p-4 rounded-xl text-sm text-status-info mb-2">
                             <p className="font-bold mb-1">Tips for a great application:</p>
                             <ul className="list-disc list-inside space-y-1 opacity-80">
-                                <li>Why is {pet.name} the right fit for you?</li>
+                                <li>Why is {pet.pet_name} the right fit for you?</li>
                                 <li>How will you handle their specific needs?</li>
                                 <li>Share a bit about your daily routine.</li>
                             </ul>
@@ -74,7 +130,7 @@ const ApplicationSubmitPage = () => {
                             value={message}
                             onChange={(e) => setMessage(e.target.value)}
                             className="w-full h-48 p-4 rounded-xl border border-border focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none shadow-sm"
-                            placeholder={`Hi ${pet.owner.name}, I'd love to adopt ${pet.name} because...`}
+                            placeholder={`Hi ${pet.owner_name}, I'd love to adopt ${pet.pet_name} because...`}
                         ></textarea>
                         <p className="text-right text-xs text-text-tertiary">{message.length} characters (min 50)</p>
                     </div>
@@ -105,11 +161,9 @@ const ApplicationSubmitPage = () => {
                         <Button
                             variant="primary"
                             className="flex-1 py-4 text-lg shadow-lg"
-                            disabled={!isReady}
-                            onClick={() => {
-                                toast.success("Application Submitted!");
-                                navigate('/applications');
-                            }}
+                            disabled={!isReady || submitMutation.isPending}
+                            isLoading={submitMutation.isPending}
+                            onClick={handleSubmit}
                         >
                             Submit Application
                         </Button>
@@ -122,26 +176,46 @@ const ApplicationSubmitPage = () => {
                     <div className="sticky top-24 space-y-6">
                         <Card className="overflow-hidden">
                             <div className="h-48 bg-bg-secondary">
-                                <img src={pet.image} alt={pet.name} className="w-full h-full object-cover" />
+                                <img
+                                    src={pet.main_photo || (pet.photos && pet.photos[0]) || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1'}
+                                    alt={pet.pet_name}
+                                    className="w-full h-full object-cover"
+                                />
                             </div>
                             <div className="p-6">
-                                <h2 className="text-2xl font-bold text-text-primary mb-1">{pet.name}</h2>
+                                <h2 className="text-2xl font-bold text-text-primary mb-1">{pet.pet_name}</h2>
                                 <p className="text-text-secondary font-medium mb-4">{pet.breed}</p>
 
                                 <div className="flex items-center gap-3 mb-6 pb-6 border-b border-border">
-                                    <img src={pet.owner.avatar} alt={pet.owner.name} className="w-10 h-10 rounded-full" />
+                                    <div className="w-10 h-10 rounded-full bg-gray-200 overflow-hidden">
+                                        {pet.pet_owner_avatar ? (
+                                            <img src={pet.pet_owner_avatar} alt={pet.owner_name} className="w-full h-full object-cover" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-gray-400 text-xs">IMG</div>
+                                        )}
+                                    </div>
                                     <div>
                                         <p className="text-xs text-text-tertiary uppercase font-bold">Listed By</p>
-                                        <p className="font-bold text-text-primary text-sm">{pet.owner.name}</p>
+                                        <p className="font-bold text-text-primary text-sm">{pet.owner_name || 'Pet Owner'}</p>
                                     </div>
                                 </div>
 
-                                <div className="flex justify-between items-center mb-2">
-                                    <span className="text-sm font-medium text-text-secondary">Adoption Fee</span>
-                                    <span className="font-bold text-brand-primary">${pet.fee}</span>
-                                </div>
+                                {pet.adoption_fee && parseInt(pet.adoption_fee) > 0 ? (
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm font-medium text-text-secondary">Adoption Fee</span>
+                                        <span className="font-bold text-brand-primary">${pet.adoption_fee}</span>
+                                    </div>
+                                ) : (
+                                    <div className="flex justify-between items-center mb-2">
+                                        <span className="text-sm font-medium text-text-secondary">Adoption Fee</span>
+                                        <span className="font-bold text-brand-primary">None</span>
+                                    </div>
+                                )}
 
-                                <button className="w-full mt-4 text-brand-primary text-sm font-bold hover:underline flex items-center justify-center">
+                                <button
+                                    onClick={() => navigate(`/pets/${id}`)}
+                                    className="w-full mt-4 text-brand-primary text-sm font-bold hover:underline flex items-center justify-center"
+                                >
                                     View Full Listing <ArrowRight size={16} className="ml-1" />
                                 </button>
                             </div>

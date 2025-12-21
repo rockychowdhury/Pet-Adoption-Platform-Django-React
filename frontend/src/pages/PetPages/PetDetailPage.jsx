@@ -293,6 +293,7 @@ const PetDetailPage = () => {
                                     <Button
                                         variant="secondary"
                                         className="w-full py-6 rounded-3xl bg-white text-brand-primary hover:bg-brand-secondary hover:text-white transition-all font-logo font-black uppercase tracking-[0.2em] shadow-xl hover:shadow-2xl"
+                                        onClick={() => navigate(`/rehoming/listings/${id}/apply`)}
                                     >
                                         Adopt {pet_name}
                                     </Button>

@@ -6,6 +6,7 @@ import useAPI from '../../hooks/useAPI';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Avatar from '../../components/common/Display/Avatar';
+import PetCard from '../../components/Pet/PetCard';
 import {
   MapPin, Calendar, CheckCircle, Phone, Mail, Edit2,
   Star, Shield, MessageSquare, ChevronRight, Share2, MoreHorizontal
@@ -25,14 +26,20 @@ const UserProfilePage = () => {
     }
   });
 
-  // Fetch listings (summary) - Mock for now or real endpoint if available
-  const listings = [];
+  // Fetch listings (summary)
+  const { data: listings = [] } = useQuery({
+    queryKey: ['myListings'],
+    queryFn: async () => {
+      const res = await api.get('/pets/?owner=me&status=active');
+      return res.data.results || res.data;
+    }
+  });
 
   return (
-    <div className="max-w-6xl mx-auto space-y-8">
+    <div className="max-w-6xl mx-auto space-y-8 pb-20">
       {/* 1. Header Section */}
       <div className="relative mb-20">
-        {/* Banner/Cover - Using a gradient placeholder or user cover if available */}
+        {/* Banner/Cover */}
         <div className="h-64 rounded-3xl bg-gradient-to-r from-brand-primary/20 to-brand-secondary/20 relative overflow-hidden">
           <img
             src="https://images.unsplash.com/photo-1450778869180-41d0601e046e?auto=format&fit=crop&q=80&w=2000"
@@ -82,7 +89,6 @@ const UserProfilePage = () => {
                     <div className="flex items-center gap-2 ml-2">
                       <span className="p-1 bg-status-success/10 text-status-success rounded-full" title="Verified Identity"><Shield size={14} /></span>
                       <span className="p-1 bg-brand-secondary/10 text-brand-secondary rounded-full" title="Phone Verified"><Phone size={14} /></span>
-                      {/* <span className="p-1 bg-yellow-100 text-yellow-600 rounded-full" title="Top Adopter"><Star size={14} /></span> */}
                     </div>
                   </div>
                 </div>
@@ -102,11 +108,11 @@ const UserProfilePage = () => {
               <div className="flex gap-8 mt-6 border-t border-border pt-6">
                 <div>
                   <span className="block text-xl font-bold text-text-primary">{pets.length}</span>
-                  <span className="text-xs text-text-tertiary font-bold tracking-wider uppercase">Pets</span>
+                  <span className="text-xs text-text-tertiary font-bold tracking-wider uppercase">My Pets</span>
                 </div>
                 <div>
-                  <span className="block text-xl font-bold text-text-primary">0</span>
-                  <span className="text-xs text-text-tertiary font-bold tracking-wider uppercase">Adoptions</span>
+                  <span className="block text-xl font-bold text-text-primary">{listings.length}</span>
+                  <span className="text-xs text-text-tertiary font-bold tracking-wider uppercase">Listings</span>
                 </div>
                 <div>
                   <div className="flex items-center gap-1">
@@ -118,12 +124,12 @@ const UserProfilePage = () => {
               </div>
 
               {/* Navigation Tabs */}
-              <div className="flex gap-8 mt-6">
+              <div className="flex gap-8 mt-6 overflow-x-auto">
                 {['About', 'Pets', 'Listings', 'Reviews'].map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActiveTab(tab.toLowerCase())}
-                    className={`pb-3 text-sm font-bold tracking-wide uppercase transition-all ${activeTab === tab.toLowerCase()
+                    className={`pb-3 text-sm font-bold tracking-wide uppercase transition-all whitespace-nowrap ${activeTab === tab.toLowerCase()
                       ? 'text-brand-primary border-b-2 border-brand-primary'
                       : 'text-text-tertiary hover:text-text-primary'
                       }`}
@@ -144,74 +150,133 @@ const UserProfilePage = () => {
         <div className="lg:col-span-2 space-y-8">
 
           {/* About Me Section */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-text-primary font-serif">About Me</h2>
-              <Link to="/dashboard/profile/edit" className="text-xs font-bold text-brand-primary uppercase tracking-wider hover:underline">Edit</Link>
+          {activeTab === 'about' && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-text-primary font-serif">About Me</h2>
+                <Link to="/dashboard/profile/edit" className="text-xs font-bold text-brand-primary uppercase tracking-wider hover:underline">Edit</Link>
+              </div>
+              <div className="bg-bg-surface p-8 rounded-[2rem] shadow-sm border border-transparent hover:border-brand-primary/20 transition-colors">
+                <p className="text-text-secondary leading-relaxed">
+                  {user?.profile?.bio || (
+                    <span className="italic text-text-tertiary">
+                      Hi! I'm {user?.first_name}, a lifelong animal lover. I haven't written my bio yet, but I'm excited to be part of the PetCircle community!
+                    </span>
+                  )}
+                </p>
+              </div>
             </div>
-            <div className="bg-bg-surface p-8 rounded-[2rem] shadow-sm border border-transparent hover:border-brand-primary/20 transition-colors">
-              <p className="text-text-secondary leading-relaxed">
-                {user?.profile?.bio || (
-                  <span className="italic text-text-tertiary">
-                    Hi! I'm {user?.first_name}, a lifelong animal lover. I haven't written my bio yet, but I'm excited to be part of the PetCircle community!
-                  </span>
-                )}
-              </p>
-            </div>
-          </div>
+          )}
 
           {/* My Pets Section */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-text-primary font-serif">My Pets</h2>
-              <Link to="/dashboard/my-pets" className="text-xs font-bold text-brand-primary uppercase tracking-wider hover:underline">View All</Link>
-            </div>
+          {(activeTab === 'about' || activeTab === 'pets') && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-text-primary font-serif">My Pets</h2>
+                <Link to="/dashboard/my-pets" className="text-xs font-bold text-brand-primary uppercase tracking-wider hover:underline">View All</Link>
+              </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {pets.slice(0, 2).map(pet => (
-                <Link key={pet.id} to={`/pets/${pet.id}`} className="group">
-                  <div className="bg-bg-surface p-3 rounded-[1.5rem] shadow-sm hover:shadow-lg transition-all border border-transparent hover:border-brand-primary/20">
-                    <div className="h-48 rounded-[1rem] overflow-hidden mb-3 relative">
-                      <img src={pet.image || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=800"} alt={pet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
-                      <span className="absolute top-3 left-3 bg-status-success/10 text-status-success text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
-                        {pet.status || 'Active'}
-                      </span>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {pets.length > 0 ? pets.slice(0, activeTab === 'pets' ? undefined : 2).map(pet => (
+                  <Link key={pet.id} to={`/pets/${pet.id}`} className="group">
+                    <div className="bg-bg-surface p-3 rounded-[1.5rem] shadow-sm hover:shadow-lg transition-all border border-transparent hover:border-brand-primary/20">
+                      <div className="h-48 rounded-[1rem] overflow-hidden mb-3 relative">
+                        <img src={pet.image || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80&w=800"} alt={pet.name} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                        <span className="absolute top-3 left-3 bg-status-success/10 text-status-success text-[10px] font-bold px-2 py-1 rounded-lg uppercase tracking-wider">
+                          {pet.status || 'Active'}
+                        </span>
+                      </div>
+                      <div className="px-1">
+                        <h3 className="text-lg font-bold text-text-primary font-serif">{pet.pet_name}</h3>
+                        <p className="text-xs text-text-tertiary font-medium">{pet.breed} • {pet.age_display || 'Age Unknown'}</p>
+                      </div>
                     </div>
-                    <div className="px-1">
-                      <h3 className="text-lg font-bold text-text-primary font-serif">{pet.pet_name}</h3>
-                      <p className="text-xs text-text-tertiary font-medium">{pet.breed} • {pet.age_display || 'Age Unknown'}</p>
-                    </div>
+                  </Link>
+                )) : (
+                  <div className="col-span-2 text-center py-8 bg-bg-surface rounded-[2rem] border border-dashed border-border">
+                    <p className="text-text-secondary mb-2">You haven't added any pets yet.</p>
+                    <Link to="/dashboard/pets/create" className="text-brand-primary font-bold hover:underline">Add your first pet</Link>
                   </div>
-                </Link>
-              ))}
+                )}
 
-              {/* Add Pet Card (Mini) */}
-              <Link to="/dashboard/pets/create" className="bg-bg-secondary rounded-[1.5rem] p-3 border-2 border-dashed border-brand-primary/20 hover:border-brand-primary hover:bg-brand-primary/5 transition-all flex flex-col items-center justify-center min-h-[200px] gap-2 group">
-                <div className="w-10 h-10 bg-bg-surface rounded-full flex items-center justify-center text-brand-primary shadow-sm group-hover:scale-110 transition-transform">
-                  <CheckCircle size={20} />
-                </div>
-                <span className="text-sm font-bold text-brand-primary">Add Another Pet</span>
-              </Link>
+                {/* Add Pet Card (Mini) - Only show on 'pets' tab or if user has few pets */}
+                {(activeTab === 'pets' || pets.length > 0) && (
+                  <Link to="/dashboard/pets/create" className="bg-bg-secondary rounded-[1.5rem] p-3 border-2 border-dashed border-brand-primary/20 hover:border-brand-primary hover:bg-brand-primary/5 transition-all flex flex-col items-center justify-center min-h-[200px] gap-2 group">
+                    <div className="w-10 h-10 bg-bg-surface rounded-full flex items-center justify-center text-brand-primary shadow-sm group-hover:scale-110 transition-transform">
+                      <CheckCircle size={20} />
+                    </div>
+                    <span className="text-sm font-bold text-brand-primary">Add Another Pet</span>
+                  </Link>
+                )}
+              </div>
             </div>
-          </div>
+          )}
 
           {/* Recent Listings */}
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <h2 className="text-xl font-bold text-text-primary font-serif">Recent Listings</h2>
-              {/* <Link to="/dashboard/listings" className="text-xs font-bold text-[#A68A6D] uppercase tracking-wider hover:underline">View All</Link> */}
-            </div>
-            {listings.length > 0 ? (
-              <div>{/* Listings List */}</div>
-            ) : (
-              <div className="bg-bg-surface p-6 rounded-[2rem] border border-dashed border-border text-center">
-                <p className="text-text-tertiary mb-4">No active listings.</p>
-                <Link to="/rehoming/create">
-                  <Button size="sm" variant="outline">Create Listing</Button>
-                </Link>
+          {(activeTab === 'about' || activeTab === 'listings') && (
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-text-primary font-serif">Active Listings</h2>
+                {/* <Link to="/dashboard/listings" className="text-xs font-bold text-[#A68A6D] uppercase tracking-wider hover:underline">View All</Link> */}
               </div>
-            )}
-          </div>
+              {listings.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {listings.slice(0, activeTab === 'listings' ? undefined : 2).map(pet => (
+                    <div key={pet.id} className="h-[420px]">
+                      <PetCard pet={pet} viewMode="grid" />
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="bg-bg-surface p-8 rounded-[2rem] border border-dashed border-border text-center">
+                  <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-text-tertiary">
+                    <Share2 size={24} />
+                  </div>
+                  <p className="text-text-tertiary mb-4">No active listings at the moment.</p>
+                  <Link to="/rehoming/create">
+                    <Button size="sm" variant="outline">Create Listing</Button>
+                  </Link>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Reviews Tab */}
+          {activeTab === 'reviews' && (
+            <div className="space-y-6">
+              <div className="flex justify-between items-center">
+                <h2 className="text-xl font-bold text-text-primary font-serif">Reviews</h2>
+              </div>
+              {/* Placeholder Reviews */}
+              <div className="bg-bg-surface p-6 rounded-[2rem] border border-border">
+                <div className="flex items-start gap-4 mb-6 pb-6 border-b border-border last:border-0 last:mb-0 last:pb-0">
+                  <Avatar initials="JD" className="w-10 h-10 bg-blue-100 text-blue-600" />
+                  <div>
+                    <h4 className="font-bold text-text-primary">John Doe</h4>
+                    <div className="flex items-center gap-1 text-xs text-text-tertiary mb-2">
+                      <span>Oct 12, 2023</span>
+                      <span>•</span>
+                      <div className="flex text-status-warning"><Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /></div>
+                    </div>
+                    <p className="text-text-secondary text-sm">"Great experience adopting from {user?.first_name}! Very responsive and caring."</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4">
+                  <Avatar initials="AS" className="w-10 h-10 bg-green-100 text-green-600" />
+                  <div>
+                    <h4 className="font-bold text-text-primary">Alice Smith</h4>
+                    <div className="flex items-center gap-1 text-xs text-text-tertiary mb-2">
+                      <span>Sep 05, 2023</span>
+                      <span>•</span>
+                      <div className="flex text-status-warning"><Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /> <Star size={10} fill="currentColor" /></div>
+                    </div>
+                    <p className="text-text-secondary text-sm">"The process was smooth and the pet was exactly as described."</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
         </div>
 
         {/* Right Column (Sidebar) */}
@@ -283,7 +348,7 @@ const UserProfilePage = () => {
               ))}
             </div>
 
-            <Button variant="ghost" className="w-full text-text-primary font-bold text-sm">
+            <Button variant="ghost" className="w-full text-text-primary font-bold text-sm" onClick={() => setActiveTab('reviews')}>
               Read All Reviews
             </Button>
           </div>

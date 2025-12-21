@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Check, ChevronRight, ChevronLeft, Upload, AlertTriangle, Dog, Cat, Bird, Info, Camera, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Card from '../../components/common/Layout/Card';
@@ -8,32 +8,71 @@ import Input from '../../components/common/Form/Input';
 import Checkbox from '../../components/common/Form/Checkbox';
 
 import useRehoming from '../../hooks/useRehoming';
+import useAPI from '../../hooks/useAPI'; // Added useAPI
 import { useQuery } from '@tanstack/react-query';
 
 const RehomingCreateListingPage = () => {
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams(); // Added searchParams
+    const editId = searchParams.get('edit'); // Check for edit param
+    const api = useAPI(); // Instantiated api
+
     const [currentStep, setCurrentStep] = useState(1);
     const { useGetActiveIntervention } = useRehoming();
 
     // Fetch Active Intervention
     const { data: intervention, isLoading: isCheckingIntervention } = useGetActiveIntervention();
 
-    // Form Data State - simplified for prototype
+    // Form Data State
     const [formData, setFormData] = useState({
-        petId: 'new', // 'new' or existing ID
-        // Pet Details
+        petId: 'new',
         name: '', species: 'Dog', breed: '', age: '', gender: 'Male',
-        // Medical
         spayed: 'Yes', microchip: 'Yes', vaccinations: 'Up to date', medications: '', conditions: [],
-        // Behavior
         energy: 3, kids: 'Yes', dogs: 'Yes', cats: 'Unknown', houseTrained: 'Yes', aggression: 'No',
-        // Story
         story: '',
-        // Photos
         photos: [],
-        // Terms
         includedItems: [], timeline: '', experience: 'Some pet experience preferred'
     });
+
+    // Fetch Listing Logic if Edit Mode
+    const { data: existingListing } = useQuery({
+        queryKey: ['listing', editId],
+        queryFn: async () => {
+            const res = await api.get(`/pets/${editId}/`);
+            return res.data;
+        },
+        enabled: !!editId
+    });
+
+    // Populate Form on Load
+    useEffect(() => {
+        if (existingListing) {
+            setFormData({
+                petId: existingListing.id,
+                name: existingListing.pet_name || '',
+                species: existingListing.species || 'Dog',
+                breed: existingListing.breed || '',
+                age: existingListing.age_display || '',
+                gender: existingListing.gender ? existingListing.gender.charAt(0).toUpperCase() + existingListing.gender.slice(1) : 'Male',
+                spayed: existingListing.medical_history?.spayed_neutered === 'yes' ? 'Yes' : 'No',
+                microchip: existingListing.medical_history?.microchipped ? 'Yes' : 'No',
+                vaccinations: existingListing.medical_history?.vaccinations_up_to_date === 'yes' ? 'Up to date' : 'No',
+                medications: existingListing.medical_history?.current_medications?.join(', ') || '',
+                conditions: [], // Map if needed
+                energy: existingListing.behavioral_profile?.energy_level || 3,
+                kids: existingListing.behavioral_profile?.good_with_kids || 'Unknown',
+                dogs: existingListing.behavioral_profile?.good_with_dogs || 'Unknown',
+                cats: existingListing.behavioral_profile?.good_with_cats || 'Unknown',
+                houseTrained: existingListing.behavioral_profile?.house_trained === 'yes' ? 'Yes' : 'No',
+                aggression: existingListing.aggression_disclosed ? 'Yes' : 'No',
+                story: existingListing.rehoming_story || '',
+                photos: existingListing.photos || [],
+                includedItems: existingListing.included_items || [],
+                timeline: existingListing.timeline_adoption_date || '',
+                experience: existingListing.adopter_experience_required || ''
+            });
+        }
+    }, [existingListing]);
 
     React.useEffect(() => {
         if (!isCheckingIntervention) {

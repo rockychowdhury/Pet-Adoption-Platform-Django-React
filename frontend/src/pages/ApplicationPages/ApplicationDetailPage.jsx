@@ -1,172 +1,317 @@
 import React, { useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { Check, Clock, User, MessageCircle, Phone, Calendar, ChevronLeft, Send } from 'lucide-react';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+    ChevronLeft, Calendar, User, Mail, Phone, MapPin,
+    CheckCircle, XCircle, Clock, MessageSquare, AlertTriangle,
+    Home, Briefcase, Dog, Heart
+} from 'lucide-react';
+import { toast } from 'react-toastify';
+import useAPI from '../../hooks/useAPI';
+import useAuth from '../../hooks/useAuth';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
+import Modal from '../../components/common/Modal';
 
 const ApplicationDetailPage = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const api = useAPI();
+    const { user } = useAuth();
+    const queryClient = useQueryClient();
 
-    // Mock Data
-    const application = {
-        id: id,
-        status: 'Info Requested',
-        pet: {
-            name: 'Luna',
-            image: 'https://images.unsplash.com/photo-1513245543132-31f507417b26?auto=format&fit=crop&w=400&q=80',
-            breed: 'Siamese',
-            price: 75
+    // Modal States
+    const [isActionModalOpen, setIsActionModalOpen] = useState(false);
+    const [actionType, setActionType] = useState(null); // 'approve_meet', 'reject', 'withdraw'
+    const [actionNote, setActionNote] = useState('');
+
+    const { data: application, isLoading, error } = useQuery({
+        queryKey: ['application', id],
+        queryFn: async () => {
+            const res = await api.get(`/adoption/applications/${id}/`);
+            return res.data;
+        }
+    });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: async ({ status, notes, rejection_reason }) => {
+            return await api.post(`/adoption/applications/${id}/update_status/`, {
+                status,
+                owner_notes: notes,
+                rejection_reason
+            });
         },
-        owner: { name: 'Sarah Jenkins', phone: '(555) 123-4567', email: 'sarah.j@example.com' },
-        timeline: [
-            { id: 1, title: 'Application Submitted', date: 'Oct 24, 10:30 AM', icon: <Check size={14} />, status: 'completed' },
-            { id: 2, title: 'Under Review', date: 'Oct 24, 2:15 PM', icon: <User size={14} />, status: 'completed' },
-            { id: 3, title: 'Information Requested', date: 'Oct 25, 9:00 AM', icon: <MessageCircle size={14} />, status: 'current' },
-            { id: 4, title: 'Meet & Greet', date: 'Pending', icon: <Calendar size={14} />, status: 'upcoming' },
-            { id: 5, title: 'Final Decision', date: 'Pending', icon: <Check size={14} />, status: 'upcoming' }
-        ],
-        message: "I've had Siamese cats before and I have a large fenced yard...",
-        messages: [
-            { id: 1, sender: 'Sarah (Owner)', text: "Hi! Thanks for applying. Do you have a vet reference?", time: "Yesterday 9:00 AM" }
-        ]
+        onSuccess: () => {
+            queryClient.invalidateQueries(['application', id]);
+            toast.success("Status updated successfully");
+            setIsActionModalOpen(false);
+            setActionNote('');
+        },
+        onError: () => toast.error("Failed to update status")
+    });
+
+    if (isLoading) return <div className="p-12 text-center">Loading details...</div>;
+    if (error || !application) return <div className="p-12 text-center text-red-500">Application not found.</div>;
+
+    const isOwner = application.pet_owner_id === user?.id;
+    const isApplicant = application.applicant_id === user?.id;
+
+    const handleActionSubmit = () => {
+        if (actionType === 'reject') {
+            updateStatusMutation.mutate({ status: 'rejected', rejection_reason: actionNote });
+        } else if (actionType === 'approve_meet') {
+            // Usually this would be a schedule event, but simplified for now
+            updateStatusMutation.mutate({ status: 'approved_meet_greet', notes: actionNote });
+        } else if (actionType === 'adopted') {
+            updateStatusMutation.mutate({ status: 'adopted', notes: actionNote });
+        }
+    };
+
+    const StatusTimeline = () => {
+        const steps = [
+            { status: 'pending_review', label: 'Under Review' },
+            { status: 'info_requested', label: 'Info Requested' },
+            { status: 'approved_meet_greet', label: 'Meet & Greet' },
+            { status: 'adopted', label: 'Adopted' }
+        ];
+
+        const currentIdx = steps.findIndex(s => s.status === application.status) !== -1
+            ? steps.findIndex(s => s.status === application.status)
+            : (application.status === 'rejected' ? -1 : 0);
+
+        return (
+            <div className="flex items-center justify-between relative mb-8 px-4">
+                <div className="absolute left-0 top-1/2 w-full h-1 bg-gray-100 -z-10 rounded-full"></div>
+                {steps.map((step, idx) => {
+                    // Logic is simplified; if rejected, show red X. If matched, green check.
+                    let isActive = currentIdx >= idx;
+                    let isCurrent = application.status === step.status;
+
+                    if (application.status === 'rejected') isActive = false;
+
+                    return (
+                        <div key={idx} className="flex flex-col items-center gap-2 bg-bg-primary px-2">
+                            <div className={`w-8 h-8 rounded-full flex items-center justify-center border-2 transition-colors ${isActive ? 'bg-brand-primary border-brand-primary text-white' : 'bg-white border-gray-300 text-gray-300'
+                                }`}>
+                                {isActive ? <CheckCircle size={16} /> : <div className="w-2 h-2 rounded-full bg-current" />}
+                            </div>
+                            <span className={`text-xs font-bold ${isCurrent ? 'text-brand-primary' : 'text-text-tertiary'}`}>
+                                {step.label}
+                            </span>
+                        </div>
+                    );
+                })}
+            </div>
+        );
     };
 
     return (
-        <div className="min-h-screen bg-bg-primary py-8 px-4">
-            <div className="max-w-6xl mx-auto">
-                <div className="mb-6">
-                    <Button variant="ghost" className="mb-4 pl-0 hover:bg-transparent hover:text-brand-primary" onClick={() => window.history.back()}>
-                        <ChevronLeft size={16} className="mr-2" /> Back to My Applications
-                    </Button>
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                        <div>
-                            <h1 className="text-3xl font-bold text-text-primary flex items-center gap-3">
-                                Application for {application.pet.name}
-                                <Badge variant="info">Info Requested</Badge>
-                            </h1>
-                            <p className="text-text-secondary mt-1">Application ID: #{id} • Last updated 2 hours ago</p>
+        <div className="min-h-screen bg-bg-secondary/30 py-8 px-4 font-sans text-text-primary">
+            <div className="max-w-5xl mx-auto">
+                <Button onClick={() => navigate('/dashboard/applications')} variant="ghost" className="mb-6 pl-0 hover:bg-transparent">
+                    <ChevronLeft size={20} className="mr-1" /> Back to Application List
+                </Button>
+
+                {/* Header Card */}
+                <Card className="p-6 mb-6 border-l-4 border-l-brand-primary shadow-sm bg-white">
+                    <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                        <div className="flex items-center gap-4">
+                            <div className="w-16 h-16 rounded-xl bg-gray-100 overflow-hidden">
+                                {application.pet_image ? (
+                                    <img src={application.pet_image} alt="Pet" className="w-full h-full object-cover" />
+                                ) : (
+                                    <PawPrint className="m-auto text-gray-300" />
+                                )}
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-black font-logo text-text-primary">
+                                    Application for {application.pet_name}
+                                </h1>
+                                <p className="text-text-secondary font-medium">
+                                    Status: <span className="font-bold text-brand-primary uppercase tracking-wide">{application.status.replace('_', ' ')}</span>
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Timeline */}
-                        <Card className="p-8">
-                            <h2 className="font-bold text-lg mb-6">Status Timeline</h2>
-                            <div className="space-y-6 relative">
-                                {/* Line */}
-                                <div className="absolute left-[15px] top-2 bottom-2 w-0.5 bg-border"></div>
-
-                                {application.timeline.map((item) => (
-                                    <div key={item.id} className="relative flex gap-4">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 border-2 ${item.status === 'completed' ? 'bg-status-success/10 border-status-success text-status-success' :
-                                            item.status === 'current' ? 'bg-status-info/10 border-status-info text-status-info' :
-                                                'bg-bg-secondary border-border text-text-tertiary'
-                                            }`}>
-                                            {item.icon}
-                                        </div>
-                                        <div className="pt-1">
-                                            <p className={`font-bold text-sm ${item.status === 'upcoming' ? 'text-text-tertiary' : 'text-text-primary'}`}>{item.title}</p>
-                                            <p className="text-xs text-text-tertiary">{item.date}</p>
-                                        </div>
-                                    </div>
-                                ))}
+                        {/* Actions for Owner */}
+                        {isOwner && application.status === 'pending_review' && (
+                            <div className="flex gap-2">
+                                <Button
+                                    variant="outline"
+                                    className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300"
+                                    onClick={() => { setActionType('reject'); setIsActionModalOpen(true); }}
+                                >
+                                    Reject
+                                </Button>
+                                <Button
+                                    variant="primary"
+                                    onClick={() => { setActionType('approve_meet'); setIsActionModalOpen(true); }}
+                                >
+                                    Request Meet & Greet
+                                </Button>
                             </div>
-                        </Card>
+                        )}
 
-                        {/* Application Content */}
-                        <Card className="p-8 space-y-6">
-                            <h2 className="font-bold text-lg">Your Application Details</h2>
-
-                            <div className="bg-bg-surface p-4 rounded-xl border border-border">
-                                <h3 className="text-xs font-bold text-text-tertiary uppercase mb-2">Your Initial Message</h3>
-                                <p className="text-text-secondary italic">"{application.message}"</p>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-3 border border-border rounded-lg">
-                                    <p className="text-xs text-text-tertiary font-bold uppercase">Readiness Score</p>
-                                    <p className="font-bold text-status-success">85% (Excellent)</p>
-                                </div>
-                                <div className="p-3 border border-border rounded-lg">
-                                    <p className="text-xs text-text-tertiary font-bold uppercase">Submitted</p>
-                                    <p className="font-bold text-text-primary">Oct 24, 2023</p>
-                                </div>
-                            </div>
-                        </Card>
+                        {isOwner && application.status === 'approved_meet_greet' && (
+                            <Button variant="primary" onClick={() => { setActionType('adopted'); setIsActionModalOpen(true); }}>
+                                Mark as Adopted
+                            </Button>
+                        )}
                     </div>
 
-                    {/* Sidebar */}
-                    <div className="lg:col-span-1 space-y-6">
-                        {/* Pet Card */}
-                        <Card className="overflow-hidden">
-                            <div className="h-40 bg-bg-secondary relative">
-                                <img src={application.pet.image} alt={application.pet.name} className="w-full h-full object-cover" />
-                                <div className="absolute bottom-0 left-0 w-full bg-gradient-to-t from-black/60 to-transparent p-4">
-                                    <h3 className="text-white font-bold text-xl">{application.pet.name}</h3>
-                                    <p className="text-white/80 text-sm">{application.pet.breed}</p>
-                                </div>
-                            </div>
-                            <div className="p-4 bg-white">
-                                <p className="text-xs text-text-tertiary uppercase font-bold mb-2">Listed By</p>
-                                <div className="flex items-center gap-3 mb-4">
-                                    <div className="w-10 h-10 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary font-bold">
-                                        {application.owner.name[0]}
-                                    </div>
-                                    <div>
-                                        <p className="font-bold text-text-primary text-sm">{application.owner.name}</p>
-                                        <p className="text-xs text-text-secondary">Owner</p>
-                                    </div>
-                                </div>
+                    <div className="mt-8">
+                        <StatusTimeline />
+                    </div>
+                </Card>
 
-                                {application.status === 'Approved' && (
-                                    <div className="space-y-2 mb-4 p-3 bg-status-success/5 rounded-lg text-sm border border-status-success/20">
-                                        <div className="flex items-center gap-2 text-status-success">
-                                            <Phone size={14} /> {application.owner.phone}
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    {/* Left Column: Application Details */}
+                    <div className="lg:col-span-2 space-y-6">
+
+                        {/* Message */}
+                        <Card className="p-6">
+                            <h2 className="text-lg font-bold mb-4 flex items-center gap-2">
+                                <MessageSquare size={20} className="text-brand-primary" />
+                                Personal Message
+                            </h2>
+                            <p className="text-text-secondary leading-relaxed whitespace-pre-wrap">
+                                {application.message}
+                            </p>
+                        </Card>
+
+                        {/* Adopter Profile Snapshot (Visible to Owner, or Applicant's own view) */}
+                        {application.adopter_profile ? (
+                            <Card className="p-6">
+                                <h2 className="text-lg font-bold mb-6 flex items-center gap-2">
+                                    <User size={20} className="text-brand-primary" />
+                                    Adopter Profile Snapshot
+                                </h2>
+
+                                <div className="grid md:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <div className="flex items-start gap-3">
+                                            <Home className="text-gray-400 mt-1" size={18} />
+                                            <div>
+                                                <p className="text-xs text-text-tertiary uppercase font-bold">Living Situation</p>
+                                                <p className="font-medium capitalize">{application.adopter_profile.housing_type} • {application.adopter_profile.own_or_rent}</p>
+                                                <p className="text-sm text-text-secondary capitalize">{application.adopter_profile.yard_type.replace('_', ' ')}</p>
+                                            </div>
                                         </div>
-                                        <div className="flex items-center gap-2 text-status-success">
-                                            <MessageCircle size={14} /> {application.owner.email}
+
+                                        <div className="flex items-start gap-3">
+                                            <Briefcase className="text-gray-400 mt-1" size={18} />
+                                            <div>
+                                                <p className="text-xs text-text-tertiary uppercase font-bold">Lifestyle</p>
+                                                <p className="font-medium">{application.adopter_profile.work_schedule}</p>
+                                                <p className="text-sm text-text-secondary">Activity Lvl: {application.adopter_profile.activity_level}/5</p>
+                                            </div>
                                         </div>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex items-start gap-3">
+                                            <Dog className="text-gray-400 mt-1" size={18} />
+                                            <div>
+                                                <p className="text-xs text-text-tertiary uppercase font-bold">Experience</p>
+                                                <p className="font-medium">
+                                                    Pets: {application.adopter_profile.current_pets?.length || 0}
+                                                </p>
+                                                <p className="text-sm text-text-secondary">
+                                                    {Object.entries(application.adopter_profile.pet_experience || {}).map(([k, v]) => `${k} (${v}y)`).join(', ')}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-start gap-3">
+                                            <Heart className="text-gray-400 mt-1" size={18} />
+                                            <div>
+                                                <p className="text-xs text-text-tertiary uppercase font-bold">Why Adopt?</p>
+                                                <p className="text-sm text-text-secondary line-clamp-3">
+                                                    {application.adopter_profile.why_adopt}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </Card>
+                        ) : (
+                            <Card className="p-6 bg-gray-50 border-dashed text-center text-text-secondary">
+                                No profile snapshot available.
+                            </Card>
+                        )}
+
+                    </div>
+
+                    {/* Right Column: Key Info & Actions */}
+                    <div className="space-y-6">
+                        {/* Status Card */}
+                        <Card className="p-6 bg-brand-primary/5 border-brand-primary/10">
+                            <h3 className="text-sm font-bold text-text-tertiary uppercase tracking-wider mb-4">Application Info</h3>
+                            <div className="space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-text-secondary">Applied On</span>
+                                    <span className="font-bold">{new Date(application.created_at).toLocaleDateString()}</span>
+                                </div>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-text-secondary">Match Score</span>
+                                    <Badge variant={application.readiness_score > 70 ? 'success' : 'warning'}>
+                                        {application.readiness_score}%
+                                    </Badge>
+                                </div>
+                                {application.rejection_reason && (
+                                    <div className="pt-4 border-t border-brand-primary/10">
+                                        <span className="text-xs font-bold text-red-600 uppercase block mb-1">Rejection Reason</span>
+                                        <p className="text-sm text-red-700 bg-red-50 p-2 rounded-lg">
+                                            {application.rejection_reason}
+                                        </p>
                                     </div>
                                 )}
-
-                                <Button className="w-full justify-center">View Full Listing</Button>
                             </div>
                         </Card>
 
-                        {/* Recent Messages */}
-                        <Card className="p-4 flex flex-col h-[400px]">
-                            <h3 className="font-bold text-text-primary mb-4 flex items-center gap-2">
-                                <MessageCircle size={18} /> Messages
-                            </h3>
-
-                            <div className="flex-1 overflow-y-auto space-y-4 pr-2 mb-4">
-                                {application.messages.map(msg => (
-                                    <div key={msg.id} className="bg-bg-secondary rounded-xl rounded-tl-none p-3 max-w-[90%]">
-                                        <p className="text-xs font-bold text-text-primary mb-1">{msg.sender}</p>
-                                        <p className="text-sm text-text-secondary">{msg.text}</p>
-                                        <p className="text-[10px] text-text-tertiary mt-1 text-right">{msg.time}</p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    placeholder="Type a reply..."
-                                    className="w-full pl-4 pr-10 py-3 rounded-full border border-border bg-bg-surface focus:bg-white focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
-                                />
-                                <button className="absolute right-2 top-2 p-1.5 bg-brand-primary text-white rounded-full hover:bg-brand-secondary transition-colors">
-                                    <Send size={16} />
-                                </button>
-                            </div>
-                        </Card>
                     </div>
                 </div>
             </div>
+
+            {/* Action Modal */}
+            <Modal
+                isOpen={isActionModalOpen}
+                onClose={() => setIsActionModalOpen(false)}
+                title={
+                    actionType === 'reject' ? 'Reject Application' :
+                        actionType === 'approve_meet' ? 'Approve for Meet & Greet' :
+                            'Mark as Adopted'
+                }
+            >
+                <div className="space-y-4">
+                    <p className="text-text-secondary">
+                        {actionType === 'reject'
+                            ? "Are you sure you want to reject this application? Please provide a reason."
+                            : actionType === 'approve_meet'
+                                ? "Great! You are approving this applicant for a Meet & Greet. Use the notes to suggest times or locations."
+                                : "Congratulations! Confirming this adoption will close the listing and reject other pending applications."}
+                    </p>
+
+                    <textarea
+                        className="w-full h-32 p-3 border border-border rounded-xl focus:ring-2 focus:ring-brand-primary outline-none"
+                        placeholder={actionType === 'reject' ? "Reason for rejection..." : "Add a note..."}
+                        value={actionNote}
+                        onChange={(e) => setActionNote(e.target.value)}
+                    />
+
+                    <div className="flex justify-end gap-3">
+                        <Button variant="ghost" onClick={() => setIsActionModalOpen(false)}>Cancel</Button>
+                        <Button
+                            variant={actionType === 'reject' ? 'destructive' : 'primary'}
+                            isLoading={updateStatusMutation.isPending}
+                            onClick={handleActionSubmit}
+                        >
+                            Confirm
+                        </Button>
+                    </div>
+                </div>
+            </Modal>
         </div>
     );
 };
