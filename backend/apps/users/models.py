@@ -29,6 +29,7 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     class UserRole(models.TextChoices):
         ADMIN                   = 'admin', _('Admin')
+        MODERATOR               = 'moderator', _('Moderator')
         SERVICE_PROVIDER        = 'service_provider', _('Service Provider')
         USER                    = 'user', _('User')
 
@@ -51,6 +52,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     location_state          = models.CharField(max_length=100, blank=True, null=True)
     location_country        = models.CharField(max_length=100, default='USA')
     zip_code                = models.CharField(max_length=10, blank=True, null=True, help_text="Postal code for precise location matching")
+    latitude                = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude               = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
     # Verification Fields (PetCircle trust system)
     email_verified          = models.BooleanField(default=False)
@@ -123,94 +126,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 
 
-class PetProfile(models.Model):
-    """
-    Pet profile model for user's pets.
-    Can be linked to rehoming listings or used as social pet profiles.
-    """
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pet_profiles')
-    name = models.CharField(max_length=100)
-    species = models.CharField(
-        max_length=50,
-        choices=[
-            ('dog', 'Dog'),
-            ('cat', 'Cat'),
-            ('rabbit', 'Rabbit'),
-            ('bird', 'Bird'),
-            ('other', 'Other'),
-        ]
-    )
-    breed = models.CharField(max_length=100, blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True, help_text="Pet's birth date")
-    age = models.PositiveIntegerField(help_text="Age in years (if birth date unknown)", blank=True, null=True)
-    gender = models.CharField(
-        max_length=10,
-        choices=[('male', 'Male'), ('female', 'Female'), ('unknown', 'Unknown')],
-        blank=True,
-        null=True
-    )
-    
-    # Physical Attributes
-    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Weight in lbs")
-    size = models.CharField(
-        max_length=10,
-        choices=[
-            ('xs', 'Extra Small'),
-            ('s', 'Small'),
-            ('m', 'Medium'),
-            ('l', 'Large'),
-            ('xl', 'Extra Large'),
-        ],
-        blank=True,
-        null=True
-    )
-
-    # Community & Personality Features
-    personality_traits = models.JSONField(default=list, blank=True, help_text="e.g., playful, calm, energetic")
-    fun_facts = models.TextField(blank=True, null=True, help_text="Fun facts or quirks about the pet")
-    gotcha_day = models.DateField(blank=True, null=True, help_text="Adoption anniversary")
-
-    # Health & Safety (Critical for Rehoming)
-    is_vaccinated = models.BooleanField(default=False)
-    is_spayed_neutered = models.BooleanField(default=False)
-    has_aggression_history = models.BooleanField(default=False, help_text="Mandatory disclosure for safety")
-    aggression_details = models.TextField(blank=True, null=True, help_text="Required if aggression history is True")
-
-    description = models.TextField(max_length=500, blank=True, null=True, help_text="Short description (500 char max)")
-    photos = models.JSONField(default=list, blank=True, help_text="Array of photo URLs (up to 5 photos)")
-    profile_photo = models.URLField(blank=True, null=True, help_text="Main profile photo URL")
-    
-    # Status
-    is_active = models.BooleanField(default=True, help_text="Pet profile status: active, inactive, deceased")
-    
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-
-    class Meta:
-        verbose_name = "Pet Profile"
-        verbose_name_plural = "Pet Profiles"
-        ordering = ['-created_at']
-
-    def __str__(self):
-        return f"{self.name} ({self.owner.email})"
-    
-    @property
-    def age_display(self):
-        """Calculate and display age"""
-        if self.birth_date:
-            from django.utils import timezone
-            today = timezone.now().date()
-            years = today.year - self.birth_date.year
-            if today.month < self.birth_date.month or (today.month == self.birth_date.month and today.day < self.birth_date.day):
-                years -= 1
-            return f"{years} year{'s' if years != 1 else ''}"
-        elif self.age:
-            return f"{self.age} year{'s' if self.age != 1 else ''}"
-        return "Unknown"
-
-
-# Keep UserPet as alias for backward compatibility
-UserPet = PetProfile
 
 
 class UserProfile(models.Model):
@@ -292,6 +207,70 @@ class VerificationDocument(models.Model):
         ordering = ['-created_at']
 
 
+class AdopterProfile(models.Model):
+    """
+    Extended profile for pet adopters.
+    Stores preferences, experience, and household details.
+    """
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='adopter_profile')
+    
+    # Housing & Lifestyle
+    housing_type = models.CharField(max_length=50, choices=[
+        ('house', 'House'), ('apartment', 'Apartment'), ('condo', 'Condo'), ('other', 'Other')
+    ])
+    own_or_rent = models.CharField(max_length=10, choices=[('own', 'Own'), ('rent', 'Rent')])
+    landlord_approval = models.BooleanField(default=False)
+    landlord_document = models.FileField(upload_to='verification/landlord/', blank=True, null=True)
+    yard_type = models.CharField(max_length=50, choices=[
+        ('fenced', 'Fenced'), ('unfenced', 'Unfenced'), ('none', 'None')
+    ], blank=True, null=True)
+    yard_size = models.CharField(max_length=50, blank=True, null=True)
+    
+    # Household
+    num_adults = models.IntegerField(default=1)
+    num_children = models.IntegerField(default=0)
+    children_ages = models.JSONField(default=list, blank=True)
+    
+    # Pet Experience
+    current_pets = models.JSONField(default=list, blank=True, help_text="Details of current pets")
+    pet_experience = models.JSONField(default=dict, blank=True, help_text="Past ownership experience")
+    
+    # Schedule & Activity
+    work_schedule = models.CharField(max_length=100, blank=True, null=True)
+    hours_away_daily = models.IntegerField(blank=True, null=True)
+    activity_level = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], default=3)
+    exercise_commitment = models.IntegerField(blank=True, null=True, help_text="Hours/day for exercise")
+    travel_frequency = models.CharField(max_length=50, choices=[
+        ('rarely', 'Rarely'), ('monthly', 'Monthly'), ('weekly', 'Weekly')
+    ], default='rarely')
+    
+    # References
+    references = models.JSONField(default=list, blank=True)
+    veterinarian_reference = models.JSONField(blank=True, null=True)
+    why_adopt = models.TextField(help_text="Essay on why adopting")
+    
+    readiness_score = models.IntegerField(default=0, help_text="Auto-calculated score (0-100)")
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    def __str__(self):
+        return f"Adopter Profile for {self.user.email}"
+    
+    def calculate_readiness_score(self):
+        # Placeholder logic for readiness score
+        score = 50
+        if self.housing_type == 'house' and self.yard_type == 'fenced':
+            score += 20
+        if self.own_or_rent == 'own':
+            score += 10
+        if hasattr(self.user, 'profile') and self.user.profile.verification_badges.get('identity_verified'):
+            score += 20
+        self.readiness_score = min(score, 100)
+        self.save()
+
+
+# RoleRequest model kept as is
 class RoleRequest(models.Model):
     """
     Model for users to request a role change (e.g., to Service Provider).
