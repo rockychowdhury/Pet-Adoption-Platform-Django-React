@@ -435,6 +435,80 @@ class TrainerService(models.Model):
         return int(((self.max_clients - self.current_client_count) / self.max_clients) * 100)
 
 
+from apps.pets.models import PetProfile
+
+
+class ServiceBooking(models.Model):
+    """
+    Booking/reservation system for foster care and potentially other services.
+    """
+    BOOKING_TYPE_CHOICES = (
+        ('short_term', 'Short Term'),
+        ('medium_term', 'Medium Term'),
+        ('long_term', 'Long Term'),
+        ('respite', 'Respite Care'),
+    )
+    
+    STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('confirmed', 'Confirmed'),
+        ('in_progress', 'In Progress'),
+        ('completed', 'Completed'),
+        ('cancelled', 'Cancelled'),
+    )
+    
+    PAYMENT_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('partial', 'Partial'),
+        ('paid', 'Paid'),
+        ('refunded', 'Refunded'),
+    )
+    
+    provider = models.ForeignKey(FosterService, on_delete=models.CASCADE, related_name='bookings')
+    client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_bookings')
+    pet = models.ForeignKey(PetProfile, on_delete=models.CASCADE, related_name='foster_bookings')
+    
+    booking_type = models.CharField(max_length=50, choices=BOOKING_TYPE_CHOICES)
+    
+    start_date = models.DateField()
+    end_date = models.DateField()
+    
+    daily_rate = models.DecimalField(max_digits=6, decimal_places=2)
+    deposit_paid = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    
+    special_requirements = models.TextField(blank=True, null=True)
+    
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    cancellation_reason = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['provider', 'status']),
+            models.Index(fields=['start_date', 'end_date']),
+        ]
+        ordering = ['-created_at']
+        
+    def __str__(self):
+        return f"Booking for {self.pet.name} with {self.provider.provider.business_name}"
+        
+    @property
+    def total_days(self):
+        """Calculate duration days"""
+        if self.start_date and self.end_date:
+            delta = self.end_date - self.start_date
+            return max(1, delta.days)
+        return 0
+        
+    @property
+    def total_cost(self):
+        """Calculate total cost"""
+        return self.daily_rate * self.total_days
+
+
 class ServiceReview(models.Model):
     """
     Enhanced service review with detailed rating categories matching spec.
