@@ -5,19 +5,34 @@ from apps.users.serializers import PublicUserSerializer
 class FosterServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = FosterService
-        fields = ['capacity', 'current_count', 'accepted_species', 'housing_conditions']
+        fields = [
+            'capacity', 'current_count', 'current_availability', 
+            'species_accepted', 'environment_details', 'care_standards',
+            'daily_rate', 'weekly_discount', 'monthly_rate',
+            'photos', 'video_url'
+        ]
 
 class VeterinaryClinicSerializer(serializers.ModelSerializer):
     class Meta:
         model = VeterinaryClinic
-        fields = ['emergency_services', 'hours_of_operation']
+        fields = [
+            'clinic_type', 'services_offered', 'species_treated',
+            'hours_of_operation', 'pricing_info', 'amenities',
+            'emergency_services', 'photos'
+        ]
 
 class ServiceReviewSerializer(serializers.ModelSerializer):
     reviewer = PublicUserSerializer(read_only=True)
+    rating = serializers.IntegerField(source='rating_overall', read_only=True)
+    comment = serializers.CharField(source='review_text', read_only=True)
     
     class Meta:
         model = ServiceReview
-        fields = ['id', 'provider', 'reviewer', 'rating', 'comment', 'created_at']
+        fields = [
+            'id', 'provider', 'reviewer', 'rating', 'comment', 
+            'rating_communication', 'rating_cleanliness', 'rating_quality', 'rating_value',
+            'service_type', 'verified_client', 'created_at'
+        ]
         read_only_fields = ['provider', 'reviewer', 'created_at']
 
 class ServiceProviderSerializer(serializers.ModelSerializer):
@@ -25,24 +40,32 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
     reviews = ServiceReviewSerializer(many=True, read_only=True)
     foster_details = FosterServiceSerializer(required=False)
     vet_details = VeterinaryClinicSerializer(required=False)
-    avg_rating = serializers.SerializerMethodField()
-    review_count = serializers.IntegerField(source='reviews.count', read_only=True)
+    
+    avg_rating = serializers.FloatField(read_only=True)
+    reviews_count = serializers.IntegerField(source='review_count', read_only=True)
+    is_verified = serializers.SerializerMethodField()
+    distance = serializers.SerializerMethodField()
     
     class Meta:
         model = ServiceProvider
         fields = [
             'id', 'user', 'business_name', 'provider_type', 'description', 'website',
-            'location_city', 'location_state', 'location_lat', 'location_lng',
-            'services_offered', 'is_verified', 'reviews', 'foster_details', 'vet_details',
-            'avg_rating', 'review_count', 'created_at'
+            'city', 'state', 'zip_code', 'latitude', 'longitude',
+            'phone', 'email', 'license_number', 'verification_status',
+            'photos', 'services_offered', 
+            'is_verified', 'reviews', 'reviews_count', 'avg_rating', 'distance',
+            'foster_details', 'vet_details',
+            'created_at'
         ]
-        read_only_fields = ['user', 'is_verified', 'created_at']
+        read_only_fields = ['user', 'created_at', 'avg_rating', 'reviews_count']
         
-    def get_avg_rating(self, obj):
-        reviews = obj.reviews.all()
-        if not reviews:
-            return 0
-        return sum(r.rating for r in reviews) / len(reviews)
+    def get_is_verified(self, obj):
+        return obj.verification_status == 'verified'
+
+    def get_distance(self, obj):
+        # Placeholder for distance calculation if context has user location
+        # This will be handled by the view with annotate normally, but good to have the field exist
+        return getattr(obj, 'distance', None)
         
     def create(self, validated_data):
         foster_data = validated_data.pop('foster_details', None)
@@ -73,3 +96,4 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
             VeterinaryClinic.objects.update_or_create(provider=instance, defaults=vet_data)
             
         return instance
+
