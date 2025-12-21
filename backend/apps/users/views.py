@@ -1,5 +1,6 @@
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import AnonRateThrottle
@@ -10,10 +11,11 @@ from rest_framework import viewsets, permissions
 from apps.users.permissions import IsOwnerOrReadOnly
 from .serializers import (
     UserRegistrationSerializer, UserUpdateSerializer, UserSerializer, 
-    UserPetSerializer, PublicUserSerializer, VerificationDocumentSerializer, RoleRequestSerializer
+    UserPetSerializer, PublicUserSerializer, VerificationDocumentSerializer, RoleRequestSerializer, AdopterProfileSerializer
 )
 from .utils import send_verification_email, send_password_reset_email
-from .models import UserPet, VerificationDocument, RoleRequest
+from .models import VerificationDocument, RoleRequest, AdopterProfile
+from apps.pets.models import PetProfile
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
@@ -427,8 +429,8 @@ class UserPetViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         user = self.request.user
         if user.is_authenticated:
-            return UserPet.objects.filter(owner=user).order_by('-created_at')
-        return UserPet.objects.none()
+            return PetProfile.objects.filter(owner=user).order_by('-created_at')
+        return PetProfile.objects.none()
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
@@ -492,4 +494,27 @@ class RoleRequestViewSet(viewsets.ModelViewSet):
                 user.role = instance.requested_role
                 user.save()
         
+        
         return response
+
+class AdopterProfileViewSet(viewsets.ModelViewSet):
+    serializer_class = AdopterProfileSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        # Users can manage their own profile
+        return AdopterProfile.objects.filter(user=self.request.user)
+
+    def perform_create(self, serializer):
+        # One profile per user
+        if AdopterProfile.objects.filter(user=self.request.user).exists():
+            raise ValidationError("You already have an adopter profile.")
+        serializer.save(user=self.request.user)
+    
+    @action(detail=False, methods=['get'])
+    def me(self, request):
+        profile = AdopterProfile.objects.filter(user=request.user).first()
+        if not profile:
+            return Response({"detail": "No profile found."}, status=status.HTTP_404_NOT_FOUND)
+        serializer = self.get_serializer(profile)
+        return Response(serializer.data)
