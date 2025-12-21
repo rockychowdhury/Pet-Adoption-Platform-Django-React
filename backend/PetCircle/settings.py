@@ -87,7 +87,9 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.pets',
     'apps.rehoming',
-    # 'apps.community',  # REMOVED: Community/social features not part of PetCircle MVP
+    'apps.community',
+    'apps.notifications',
+    'apps.analytics',
     'apps.messaging',
     'apps.adoption',
     'apps.reviews',
