@@ -14,8 +14,6 @@ const useRehoming = () => {
             },
             onSuccess: (data) => {
                 // Determine recommendation from data if possible, or just log
-                // The backend determines the recommendation (keep vs rehome)
-                // The UI should adapt based on this.
             },
         });
     };
@@ -28,7 +26,6 @@ const useRehoming = () => {
                     const response = await api.get('/rehoming/intervention/active_intervention/');
                     return response.data;
                 } catch (error) {
-                    // 404 means no active intervention
                     if (error.response && error.response.status === 404) return null;
                     throw error;
                 }
@@ -37,9 +34,24 @@ const useRehoming = () => {
         });
     };
 
+    const useGetListings = (filters = {}) => {
+        return useQuery({
+            queryKey: ['rehomingListings', filters],
+            queryFn: async () => {
+                const params = new URLSearchParams();
+                Object.keys(filters).forEach(key => {
+                    if (filters[key]) params.append(key, filters[key]);
+                });
+                const response = await api.get(`/rehoming/listings/?${params.toString()}`);
+                return response.data;
+            },
+        });
+    };
+
     return {
         useSubmitIntervention,
-        useGetActiveIntervention
+        useGetActiveIntervention,
+        useGetListings
     };
 };
 
