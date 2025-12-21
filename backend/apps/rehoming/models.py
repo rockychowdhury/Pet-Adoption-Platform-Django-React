@@ -1,214 +1,353 @@
 from django.db import models
+from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 from django.utils import timezone
 from datetime import timedelta
+from decimal import Decimal
 
 User = get_user_model()
 
 class RehomingIntervention(models.Model):
     """
-    Pre-rehoming intervention questionnaire to help owners explore alternatives.
-    Implements 48-hour optional cooling period before listing creation.
+    Pre-rehoming questionnaire responses.
     """
     REASON_CHOICES = (
-        ('moving', 'Moving/Housing Restrictions'),
+        ('moving', 'Moving'),
         ('allergies', 'Allergies'),
-        ('financial', 'Financial Hardship'),
-        ('time', 'Time Constraints'),
+        ('financial', 'Financial Issues'),
         ('behavioral', 'Behavioral Issues'),
-        ('health', 'Health Issues (Owner)'),
-        ('too_many', 'Too Many Pets'),
+        ('no_time', 'No Time'),
         ('other', 'Other'),
     )
+    
     URGENCY_CHOICES = (
         ('immediate', 'Immediate'),
-        ('1_month', '1 Month'),
-        ('3_months', '3 Months'),
+        ('one_month', 'Within 1 Month'),
+        ('three_months', 'Within 3 Months'),
         ('flexible', 'Flexible'),
     )
-    
+
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rehoming_interventions')
-    reason_category = models.CharField(max_length=20, choices=REASON_CHOICES)
-    reason_text = models.TextField(help_text="Detailed explanation for rehoming (500+ words)")
+    reason_category = models.CharField(max_length=100, choices=REASON_CHOICES)
+    reason_text = models.TextField(help_text="Detailed explanation of reason for rehoming")
     urgency_level = models.CharField(max_length=20, choices=URGENCY_CHOICES)
     
-    # Store resources shown to the user based on their reason
-    resources_viewed = models.JSONField(default=list, blank=True, help_text="List of resource types shown")
+    resources_viewed = models.JSONField(default=list, blank=True)
+    resources_acknowledged = models.BooleanField(default=False)
     
-    # Cooling Period (48 hours optional)
-    cooling_period_end = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When the 48-hour cooling period ends (optional)"
-    )
+    cooling_period_started = models.DateTimeField(null=True, blank=True)
+    cooling_period_completed = models.BooleanField(default=False)
+    proceeded_to_listing = models.BooleanField(default=False)
     
-    # Timestamps
-    acknowledged_at = models.DateTimeField(
-        null=True,
-        blank=True,
-        help_text="When user acknowledged viewing intervention resources"
-    )
+    acknowledged_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:
-        verbose_name = "Rehoming Intervention"
-        verbose_name_plural = "Rehoming Interventions"
-        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['user']),
+            models.Index(fields=['created_at']),
+        ]
 
     def __str__(self):
-        return f"{self.user.email} - {self.get_reason_category_display()}"
-    
-    @property
-    def can_proceed(self):
-        """Check if cooling period has passed and user can proceed to create listing"""
-        if not self.cooling_period_end:
-            return True  # No cooling period set
-        return timezone.now() >= self.cooling_period_end
-    
-    def set_cooling_period(self, hours=48):
-        """Set cooling period from now"""
-        self.cooling_period_end = timezone.now() + timedelta(hours=hours)
-        self.save()
-        return self.cooling_period_end
-    
-    @property
-    def time_remaining(self):
-        """Get remaining time in cooling period"""
-        if not self.cooling_period_end:
-            return None
-        if self.can_proceed:
-            return timedelta(0)
-        return self.cooling_period_end - timezone.now()
+        return f"Intervention for {self.user.email} - {self.reason_category}"
 
 
-class ListingReview(models.Model):
+class RehomingListing(models.Model):
     """
-    Tracks the moderation status of a pet rehoming listing.
-    Admins review listings before they go public to ensure safety and quality.
+    Pets available for adoption.
     """
-    STATUS_CHOICES = (
-        ('pending', 'Pending Review'),
-        ('approved', 'Approved'),
-        ('rejected', 'Rejected'),
-        ('changes_requested', 'Changes Requested'),
-    )
+    class ListingStatus(models.TextChoices):
+        DRAFT = 'draft', _('Draft')
+        PENDING_REVIEW = 'pending_review', _('Pending Review')
+        ACTIVE = 'active', _('Active')
+        ON_HOLD = 'on_hold', _('On Hold')
+        ADOPTED = 'adopted', _('Adopted')
+        EXPIRED = 'expired', _('Expired')
+        REJECTED = 'rejected', _('Rejected')
+
+    class UrgencyLevel(models.TextChoices):
+        IMMEDIATE = 'immediate', _('Immediate')
+        ONE_MONTH = '1_month', _('Within 1 Month')
+        THREE_MONTHS = '3_months', _('Within 3 Months')
+        FLEXIBLE = 'flexible', _('Flexible')
+        
+    class PrivacyLevel(models.TextChoices):
+        PUBLIC = 'public', _('Public')
+        VERIFIED_ONLY = 'verified_only', _('Verified Members Only')
+        PRIVATE = 'private', _('Private')
+
+    pet_owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='rehoming_listings')
+    intervention = models.ForeignKey(RehomingIntervention, on_delete=models.CASCADE, null=True, blank=True)
+    pet_profile = models.ForeignKey('pets.PetProfile', on_delete=models.SET_NULL, null=True, blank=True, related_name='rehoming_listings')
     
-    # Reference to RehomingListing in pets app
-    pet = models.OneToOneField('pets.RehomingListing', on_delete=models.CASCADE, related_name='listing_review')
+    pet_name = models.CharField(max_length=100)
+    species = models.CharField(max_length=50, choices=[('dog','Dog'), ('cat','Cat'), ('rabbit','Rabbit'), ('bird','Bird'), ('other','Other')])
+    breed = models.CharField(max_length=100, blank=True, null=True)
+    age = models.IntegerField(blank=True, null=True, help_text="Age in years")
+    gender = models.CharField(max_length=10, choices=[('male','Male'), ('female','Female'), ('unknown','Unknown')])
+    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True)
+    size_category = models.CharField(max_length=20, choices=[('xs','XS'), ('small','Small'), ('medium','Medium'), ('large','Large'), ('xl','XL')])
+    color_markings = models.TextField(blank=True, null=True)
     
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
-    admin_feedback = models.TextField(
-        blank=True,
-        null=True,
-        help_text="Feedback for the user if changes are requested"
-    )
-    internal_notes = models.TextField(blank=True, null=True, help_text="Internal notes for admins")
+    medical_history = models.JSONField(default=dict, blank=True)
+    behavioral_profile = models.JSONField(default=dict, blank=True)
     
-    # Automated Checks (JSON structure)
-    # {
-    #   "required_fields_complete": boolean,
-    #   "photos_quality": boolean,
-    #   "vaccination_records": boolean,
-    #   "no_contact_info_in_text": boolean,
-    #   "fee_within_limits": boolean,
-    #   "account_verified": boolean
-    # }
-    automated_checks = models.JSONField(
-        default=dict,
-        blank=True,
-        help_text="Results of automated quality checks"
-    )
+    aggression_disclosed = models.BooleanField(default=False)
+    aggression_details = models.TextField(blank=True, null=True)
     
-    quality_score = models.IntegerField(
-        default=0,
-        help_text="Overall quality score 0-100 based on automated checks"
-    )
+    rehoming_reason = models.CharField(max_length=100, blank=True, null=True)
+    rehoming_story = models.TextField(help_text="Full story")
+    ideal_home = models.TextField(blank=True, null=True)
     
-    # Red Flags (JSON array)
-    # ["multiple_listings_short_time", "suspected_breeding", "contradictory_info", "price_anomaly"]
-    red_flags = models.JSONField(
-        default=list,
-        blank=True,
-        help_text="List of red flags detected"
-    )
+    adoption_fee = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    fee_explanation = models.TextField(blank=True, null=True)
     
-    reviewed_by = models.ForeignKey(
-        User,
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
-        related_name='reviewed_listings'
-    )
-    reviewed_at = models.DateTimeField(null=True, blank=True)
+    included_items = models.JSONField(default=list, blank=True)
+    photos = models.JSONField(default=list, blank=True)
+    video_url = models.URLField(blank=True, null=True)
     
+    urgency_level = models.CharField(max_length=20, choices=UrgencyLevel.choices)
+    ideal_adoption_date = models.DateField(blank=True, null=True)
+    
+    location_city = models.CharField(max_length=100)
+    location_state = models.CharField(max_length=50)
+    location_zip = models.CharField(max_length=20)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
+    service_area_miles = models.IntegerField(default=50)
+    
+    privacy_level = models.CharField(max_length=20, choices=PrivacyLevel.choices, default=PrivacyLevel.PUBLIC)
+    custom_questions = models.JSONField(default=list, blank=True)
+    
+    status = models.CharField(max_length=20, choices=ListingStatus.choices, default='draft')
+    rejection_reason = models.TextField(blank=True, null=True)
+    
+    view_count = models.IntegerField(default=0)
+    application_count = models.IntegerField(default=0)
+    
+    published_at = models.DateTimeField(null=True, blank=True)
+    expires_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        verbose_name = "Listing Review"
-        verbose_name_plural = "Listing Reviews"
-        ordering = ['-created_at']
-    
+        ordering = ['-published_at', '-created_at']
+        indexes = [
+            models.Index(fields=['pet_owner']),
+            models.Index(fields=['species']),
+            models.Index(fields=['location_city', 'location_state']),
+            models.Index(fields=['status']),
+            models.Index(fields=['-published_at']),
+        ]
+
     def __str__(self):
-        return f"Review for {self.pet.pet_name} - {self.get_status_display()}"
+        return f"{self.pet_name} - {self.status}"
+
+
+class AdoptionApplication(models.Model):
+    """
+    Adoption applications submitted.
+    """
+    class ApplicationStatus(models.TextChoices):
+        PENDING_REVIEW = 'pending_review', _('Pending Review')
+        INFO_REQUESTED = 'info_requested', _('Info Requested')
+        REJECTED = 'rejected', _('Rejected')
+        APPROVED_MEET_GREET = 'approved_meet_greet', _('Approved for Meet & Greet')
+        MEET_GREET_SUCCESS = 'meet_greet_success', _('Meet & Greet Successful')
+        HOME_CHECK_PENDING = 'home_check_pending', _('Home Check Pending')
+        HOME_CHECK_PASSED = 'home_check_passed', _('Home Check Passed')
+        TRIAL_PERIOD = 'trial_period', _('Trial Period')
+        READY_FOR_ADOPTION = 'ready_for_adoption', _('Ready for Adoption')
+        ADOPTED = 'adopted', _('Adopted')
+        ADOPTION_COMPLETED = 'adoption_completed', _('Adoption Completed')
+        RETURN_REQUESTED = 'return_requested', _('Return Requested')
+        RETURNED = 'returned', _('Returned')
+
+    listing = models.ForeignKey(RehomingListing, on_delete=models.CASCADE, related_name='applications')
+    applicant = models.ForeignKey(User, on_delete=models.CASCADE, related_name='adoption_applications')
+    adopter_profile = models.ForeignKey('users.AdopterProfile', on_delete=models.CASCADE, related_name='applications')
     
-    def calculate_quality_score(self):
-        """Calculate quality score based on automated checks"""
-        if not self.automated_checks:
-            return 0
-        
-        checks = self.automated_checks
-        total_checks = len(checks)
-        if total_checks == 0:
-            return 0
-        
-        passed_checks = sum(1 for value in checks.values() if value)
-        score = int((passed_checks / total_checks) * 100)
-        
-        # Deduct points for red flags
-        red_flag_penalty = len(self.red_flags) * 10
-        score = max(0, score - red_flag_penalty)
-        
-        self.quality_score = score
-        self.save()
-        return score
+    application_message = models.TextField()
+    custom_answers = models.JSONField(default=dict, blank=True)
+    match_score = models.IntegerField(default=0)
     
-    def run_automated_checks(self):
-        """Run all automated checks on the listing"""
-        listing = self.pet
-        checks = {}
-        
-        # Check required fields
-        checks['required_fields_complete'] = all([
-            listing.pet_name,
-            listing.species,
-            listing.rehoming_story and len(listing.rehoming_story) >= 1000,
-            listing.medical_history,
-            listing.behavioral_profile,
-            listing.aggression_disclosed,
-        ])
-        
-        # Check photos (5 minimum required)
-        checks['photos_quality'] = listing.photo_count >= 5
-        
-        # Check vaccination records uploaded
-        has_vax_records = listing.medical_history.get('vaccination_records_url') if isinstance(listing.medical_history, dict) else False
-        checks['vaccination_records'] = bool(has_vax_records)
-        
-        # Check for contact info in text (simple check for phone/email patterns)
-        import re
-        text_to_check = f"{listing.rehoming_story} {listing.aggression_details}"
-        has_phone = bool(re.search(r'\b\d{3}[-.]?\d{3}[-.]?\d{4}\b', text_to_check))
-        has_email = bool(re.search(r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b', text_to_check))
-        checks['no_contact_info_in_text'] = not (has_phone or has_email)
-        
-        # Check adoption fee within limits ($0-300)
-        checks['fee_within_limits'] = 0 <= listing.adoption_fee <= 300
-        
-        # Check account verification
-        checks['account_verified'] = listing.pet_owner.email_verified and listing.pet_owner.phone_verified
-        
-        self.automated_checks = checks
-        self.calculate_quality_score()
-        return checks
+    status = models.CharField(max_length=30, choices=ApplicationStatus.choices, default='pending_review')
+    rejection_reason = models.TextField(blank=True, null=True)
+    pet_owner_notes = models.TextField(blank=True, null=True)
+    
+    meet_greet_scheduled = models.DateTimeField(null=True, blank=True)
+    meet_greet_location = models.CharField(max_length=300, blank=True, null=True)
+    meet_greet_feedback = models.JSONField(null=True, blank=True)
+    
+    home_check_required = models.BooleanField(default=False)
+    home_check_completed = models.BooleanField(default=False)
+    home_check_passed = models.BooleanField(null=True, blank=True)
+    home_check_notes = models.TextField(blank=True, null=True)
+    home_check_photos = models.JSONField(default=list, blank=True)
+    
+    trial_period = models.BooleanField(default=False)
+    trial_start_date = models.DateField(null=True, blank=True)
+    trial_end_date = models.DateField(null=True, blank=True)
+    trial_feedback = models.JSONField(null=True, blank=True)
+    
+    adoption_fee_amount = models.DecimalField(max_digits=5, decimal_places=2, default=0)
+    adoption_contract_signed = models.BooleanField(default=False)
+    microchip_transferred = models.BooleanField(default=False)
+    
+    finalized_at = models.DateTimeField(null=True, blank=True)
+    return_requested = models.BooleanField(default=False)
+    return_reason = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['listing']),
+            models.Index(fields=['applicant']),
+            models.Index(fields=['status']),
+            models.Index(fields=['created_at']),
+        ]
+
+    def __str__(self):
+        return f"Application by {self.applicant.email} for {self.listing.pet_name}"
+
+
+class AdoptionContract(models.Model):
+    """
+    Legal adoption agreements.
+    """
+    application = models.OneToOneField(AdoptionApplication, on_delete=models.CASCADE, related_name='contract')
+    contract_template = models.CharField(max_length=50, blank=True)
+    contract_text = models.TextField()
+    terms_and_conditions = models.JSONField(default=dict, blank=True)
+    
+    pet_owner_name = models.CharField(max_length=200)
+    pet_owner_signature = models.TextField(blank=True, null=True)
+    pet_owner_signed_at = models.DateTimeField(null=True, blank=True)
+    pet_owner_ip = models.GenericIPAddressField(null=True, blank=True)
+    
+    adopter_name = models.CharField(max_length=200)
+    adopter_signature = models.TextField(blank=True, null=True)
+    adopter_signed_at = models.DateTimeField(null=True, blank=True)
+    adopter_ip = models.GenericIPAddressField(null=True, blank=True)
+    
+    is_fully_signed = models.BooleanField(default=False)
+    document_pdf_url = models.URLField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['is_fully_signed']),
+        ]
+
+    def __str__(self):
+        return f"Contract for {self.application}"
+
+
+class AdoptionPayment(models.Model):
+    """
+    Payment processing and escrow.
+    """
+    PAYMENT_STATUS_CHOICES = (
+        ('pending', 'Pending'),
+        ('processing', 'Processing'),
+        ('held', 'Held in Escrow'),
+        ('released', 'Released'),
+        ('refunded', 'Refunded'),
+        ('failed', 'Failed'),
+    )
+    
+    application = models.OneToOneField(AdoptionApplication, on_delete=models.CASCADE, related_name='payment')
+    adoption_fee = models.DecimalField(max_digits=7, decimal_places=2)
+    platform_fee = models.DecimalField(max_digits=7, decimal_places=2, default=0) # Calculated
+    payout_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0) # Calculated
+    
+    payment_method = models.CharField(max_length=50, choices=[('credit_card','Credit Card'), ('paypal','PayPal')])
+    stripe_payment_id = models.CharField(max_length=100, blank=True, null=True)
+    stripe_payout_id = models.CharField(max_length=100, blank=True, null=True)
+    
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
+    held_until = models.DateTimeField(null=True, blank=True)
+    released_at = models.DateTimeField(null=True, blank=True)
+    
+    refund_amount = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    refund_reason = models.TextField(blank=True, null=True)
+    transaction_notes = models.TextField(blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        indexes = [
+            models.Index(fields=['payment_status']),
+            models.Index(fields=['stripe_payment_id']),
+        ]
+
+
+class PostAdoptionCheckIn(models.Model):
+    """
+    Follow-up surveys post-adoption.
+    """
+    CHECK_IN_DAYS = (
+        (3, '3 Days'),
+        (7, '1 Week'),
+        (14, '2 Weeks'),
+        (30, '1 Month'),
+    )
+
+    application = models.ForeignKey(AdoptionApplication, on_delete=models.CASCADE, related_name='check_ins')
+    check_in_day = models.IntegerField(choices=CHECK_IN_DAYS)
+    survey_questions = models.JSONField(default=list)
+    responses = models.JSONField(null=True, blank=True)
+    
+    issues_reported = models.BooleanField(default=False)
+    issue_details = models.TextField(blank=True, null=True)
+    support_requested = models.BooleanField(default=False)
+    
+    vet_visit_completed = models.BooleanField(null=True, blank=True)
+    vet_receipt_url = models.URLField(blank=True, null=True)
+    photos_shared = models.JSONField(default=list, blank=True)
+    
+    completed_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=['application']),
+            models.Index(fields=['check_in_day']),
+        ]
+
+
+class AdoptionReview(models.Model):
+    """
+    Reviews post-adoption (both parties).
+    Move from reviews app.
+    """
+    application = models.ForeignKey(AdoptionApplication, on_delete=models.CASCADE, related_name='reviews')
+    reviewer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='written_adoption_reviews')
+    reviewee = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_adoption_reviews')
+    
+    reviewer_role = models.CharField(max_length=20, choices=[('pet_owner','Pet Owner'), ('adopter','Adopter')])
+    
+    rating_overall = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)])
+    rating_responsiveness = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], null=True, blank=True)
+    rating_preparation = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], null=True, blank=True)
+    rating_honesty = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], null=True, blank=True)
+    rating_follow_through = models.IntegerField(choices=[(i, str(i)) for i in range(1, 6)], null=True, blank=True)
+    
+    review_text = models.TextField()
+    would_recommend = models.BooleanField()
+    tags = models.JSONField(default=list, blank=True)
+    
+    is_featured = models.BooleanField(default=False)
+    helpful_count = models.IntegerField(default=0)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        unique_together = ('application', 'reviewer')
