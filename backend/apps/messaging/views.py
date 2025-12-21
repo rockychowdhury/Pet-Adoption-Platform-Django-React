@@ -13,10 +13,8 @@ class ConversationViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
 
     def get_queryset(self):
-        # Return conversations where user is p1 OR p2
-        return Conversation.objects.filter(
-            Q(participant_1=self.request.user) | Q(participant_2=self.request.user)
-        ).distinct().order_by('-updated_at')
+        # Return conversations where user is a participant
+        return Conversation.objects.filter(participants=self.request.user).distinct().order_by('-updated_at')
 
     @action(detail=False, methods=['post'])
     def start(self, request):
@@ -32,17 +30,18 @@ class ConversationViewSet(viewsets.ModelViewSet):
         if recipient == request.user:
             return Response({'error': 'Cannot message yourself'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # Check for existing conversation (order insensitive)
-        conversation = Conversation.objects.filter(
-            Q(participant_1=request.user, participant_2=recipient) |
-            Q(participant_1=recipient, participant_2=request.user)
-        ).first()
+        # Check for existing direct conversation
+        # Filter conversations with exactly these 2 participants and type='direct'
+        conversations = Conversation.objects.filter(
+            conversation_type='direct',
+            participants=request.user
+        ).filter(participants=recipient)
+        
+        conversation = conversations.first()
         
         if not conversation:
-            conversation = Conversation.objects.create(
-                participant_1=request.user,
-                participant_2=recipient
-            )
+            conversation = Conversation.objects.create(conversation_type='direct')
+            conversation.participants.add(request.user, recipient)
         
         return Response(ConversationSerializer(conversation).data, status=status.HTTP_200_OK)
 
