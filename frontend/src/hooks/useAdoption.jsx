@@ -10,7 +10,7 @@ const useAdoption = () => {
         return useQuery({
             queryKey: ['adoptionProfile'],
             queryFn: async () => {
-                const response = await api.get('/adoption/adopter-profile/me/');
+                const response = await api.get('/user/adopter-profiles/me/');
                 return response.data;
             },
         });
@@ -25,10 +25,10 @@ const useAdoption = () => {
                 // If we don't have ID, we can try POST, if 400, maybe we need to fetch first.
                 // But let's assume the UI fetches profile first so we have ID if it exists.
                 if (id) {
-                    const response = await api.patch(`/adoption/adopter-profile/${id}/`, data);
+                    const response = await api.patch(`/user/adopter-profiles/${id}/`, data);
                     return response.data;
                 } else {
-                    const response = await api.post('/adoption/adopter-profile/', data);
+                    const response = await api.post('/user/adopter-profiles/', data);
                     return response.data;
                 }
             },
@@ -42,7 +42,7 @@ const useAdoption = () => {
     const useSubmitApplication = () => {
         return useMutation({
             mutationFn: async (applicationData) => {
-                const response = await api.post('/adoption/applications/', applicationData);
+                const response = await api.post('/rehoming/applications/', applicationData);
                 return response.data;
             },
             onSuccess: () => {
@@ -56,7 +56,7 @@ const useAdoption = () => {
         return useQuery({
             queryKey: ['hasApplied', petId],
             queryFn: async () => {
-                const response = await api.get(`/adoption/applications/?pet=${petId}`);
+                const response = await api.get(`/rehoming/applications/?pet=${petId}`);
                 // If list is not empty, we have applied.
                 return response.data.length > 0;
             },
@@ -68,7 +68,7 @@ const useAdoption = () => {
         return useQuery({
             queryKey: ['myApplications'],
             queryFn: async () => {
-                const response = await api.get(`/adoption/applications/`);
+                const response = await api.get(`/rehoming/applications/`);
                 return response.data;
             },
         });
