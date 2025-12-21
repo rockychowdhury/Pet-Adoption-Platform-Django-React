@@ -5,17 +5,20 @@ from apps.users.serializers import UserSerializer
 
 class AdoptionApplicationSerializer(serializers.ModelSerializer):
     applicant = serializers.StringRelatedField(read_only=True)
+    applicant_id = serializers.PrimaryKeyRelatedField(source='applicant', read_only=True)
     applicant_email = serializers.EmailField(source='applicant.email', read_only=True)
     pet_name = serializers.CharField(source='pet.pet_name', read_only=True)
     pet_image = serializers.SerializerMethodField(read_only=True)
     pet_breed = serializers.CharField(source='pet.breed', read_only=True)
     pet_age_display = serializers.CharField(source='pet.age_display', read_only=True)
     owner_name = serializers.CharField(source='pet.pet_owner.first_name', read_only=True) 
+    pet_owner_id = serializers.PrimaryKeyRelatedField(source='pet.pet_owner', read_only=True) 
 
     class Meta:
         model = AdoptionApplication
         fields = [
-            'id', 'applicant', 'applicant_email', 'pet', 'pet_name', 'pet_image', 'pet_breed', 'pet_age_display', 'owner_name',
+            'id', 'applicant', 'applicant_id', 'applicant_email', 'pet', 'pet_name', 'pet_image', 'pet_breed', 'pet_age_display', 
+            'owner_name', 'pet_owner_id',
             'adopter_profile', 'message', 'custom_answers', 'readiness_score', 'status', 
             'rejection_reason', 'owner_notes', 'created_at', 'updated_at'
         ]

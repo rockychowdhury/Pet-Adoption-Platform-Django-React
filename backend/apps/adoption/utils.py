@@ -131,10 +131,10 @@ def generate_adoption_agreement_pdf(application, legal_agreement):
         
         # Save to model
         filename = f"agreement_{application.id}.pdf"
-        legal_agreement.document_url.save(filename, ContentFile(result.getvalue()))
+        legal_agreement.document_pdf_url.save(filename, ContentFile(result.getvalue()))
         
         # Save text snapshot
-        legal_agreement.terms_text = "Standard PetCircle Adoption Agreement v1.0\n\n" + "\n".join(terms)
+        legal_agreement.contract_text = "Standard PetCircle Adoption Agreement v1.0\n\n" + "\n".join(terms)
         legal_agreement.save()
         
         return True

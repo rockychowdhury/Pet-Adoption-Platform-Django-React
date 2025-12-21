@@ -6,7 +6,7 @@ from .scheduling_models import MeetGreetSchedule, HomeCheck, VisitNote
 from django.db import models
 from .serializers import AdoptionApplicationSerializer, AdopterProfileSerializer
 from apps.users.permissions import IsAdopter, IsAdmin
-from apps.admin_panel.models import LegalAgreement
+from .models import AdoptionContract
 from .utils import generate_adoption_agreement_pdf
 
 class AdoptionApplicationViewSet(viewsets.ModelViewSet):
@@ -125,7 +125,11 @@ class AdoptionApplicationViewSet(viewsets.ModelViewSet):
              return Response({'error': 'Permission denied'}, status=status.HTTP_403_FORBIDDEN)
              
         # Create or Get Agreement
-        agreement, created = LegalAgreement.objects.get_or_create(application=application)
+        agreement, created = AdoptionContract.objects.get_or_create(application=application, defaults={
+             'pet_owner_name': application.pet.pet_owner.full_name,
+             'adopter_name': application.applicant.full_name,
+             'contract_text': 'Standard Adoption Agreement', 
+        })
         
         # Generate PDF
         success = generate_adoption_agreement_pdf(application, agreement)
@@ -133,7 +137,7 @@ class AdoptionApplicationViewSet(viewsets.ModelViewSet):
         if success:
             return Response({
                 'status': 'generated',
-                'url': agreement.document_url.url if agreement.document_url else None
+                'url': agreement.document_pdf_url.url if agreement.document_pdf_url else None
             })
         return Response({'error': 'Failed to generate PDF'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
