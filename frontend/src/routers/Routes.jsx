@@ -10,6 +10,7 @@ import Navbar from "../components/common/Navbar";
 import DashboardLayout from "../layouts/DashboardLayout";
 import AuthPageLayout from "../layouts/AuthPageLayout";
 import Dashboard from "../pages/Dashboard/Dashboard";
+import UserDashboardOverview from "../pages/Dashboard/UserDashboardOverview";
 import useAuth from "../hooks/useAuth";
 import { Navigate } from "react-router";
 
@@ -30,7 +31,9 @@ import PetDetailPage from "../pages/PetPages/PetDetailPage";
 import PetEditPage from "../pages/PetPages/PetEditPage";
 import PetListingPage from "../pages/PetPages/PetListingPage";
 import MyPetsPage from "../pages/PetPages/MyPetsPage";
-// Assuming PetsPage was the search page, let's map it to a new one or keep existing if viable.
+import AddPetPage from "../pages/PetPages/AddPetPage";
+// import PetCreatePage from "../pages/PetPages/PetCreatePage"; // Replaced
+// import PetEditPage from "../pages/PetPages/PetEditPage";  // Replaced
 // For now, let's assume we use a PetSearchPage, but I'll use the existing PetPages/PetsPage if it existed or create one.
 // The script didn't create PetsPage, but listed MyPetsPage. I'll stick to what I created.
 
@@ -184,6 +187,10 @@ const routes = [
             // Messaging
             { path: '/messages', element: <MessagesPage /> },
             { path: '/messages/:id', element: <MessagesPage /> },
+
+            // Rehoming Flow (Standalone Protected)
+            { path: '/rehoming/start', element: <RehomingInterventionPage /> },
+            { path: '/rehoming/create', element: <RehomingCreateListingPage /> },
         ]
     },
 
@@ -192,17 +199,18 @@ const routes = [
         path: '/dashboard',
         element: <PrivateRoute><DashboardLayout /></PrivateRoute>,
         children: [
-            { path: '', element: <UserProfilePage /> }, // Dashboard Home -> User Profile
-            { path: 'applications', element: <Dashboard /> },
+            { path: '', element: <UserDashboardOverview /> }, // Dashboard Home -> Overview
+            { path: 'applications', element: <MyApplicationsPage /> }, // Replaced Dashboard with MyApplicationsPage
+            { path: 'applications/:id', element: <ApplicationDetailPage /> },
+            { path: 'applications/setup', element: <AdoptionProfileSetupPage /> },
+            { path: 'profile', element: <UserProfilePage /> },
             { path: 'profile', element: <UserProfilePage /> },
             { path: 'profile/settings', element: <ProfileSettingsPage /> },
             { path: 'profile/edit', element: <EditProfilePage /> },
             { path: 'verification', element: <VerificationPage /> },
             { path: 'my-pets', element: <MyPetsPage /> },
-            { path: 'pets/create', element: <PetCreatePage /> },
-            { path: 'pets/edit/:id', element: <PetEditPage /> },
-            { path: 'rehoming/start', element: <RehomingInterventionPage /> },
-            { path: 'rehoming/create', element: <RehomingCreateListingPage /> },
+            { path: 'pets/create', element: <AddPetPage /> },
+            { path: 'pets/:id/edit', element: <AddPetPage /> },
             { path: 'rehoming/manage', element: <RehomingDashboardPage /> },
             { path: 'reviews', element: <div className="p-8"><h1 className="text-2xl font-bold mb-2">Reviews</h1><p className="text-text-secondary">Your reviews dashboard is coming soon.</p></div> },
         ]
