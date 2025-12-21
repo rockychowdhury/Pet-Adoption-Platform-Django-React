@@ -26,3 +26,10 @@ class RoleRequestAdmin(ModelAdmin):
     list_display = ("user", "requested_role", "status", "created_at")
     list_filter = ("status", "requested_role")
     search_fields = ("user__email",)
+
+from .models import AdopterProfile
+
+@admin.register(AdopterProfile)
+class AdopterProfileAdmin(ModelAdmin):
+    list_display = ("user", "housing_type", "readiness_score")
+    search_fields = ("user__email",)
