@@ -82,7 +82,7 @@ const HeroSection = () => {
                                 The Community <br />
                                 <span className="text-brand-primary relative inline-block">
                                     Driven
-                                </span> Pet Network
+                                </span> Pet <br /> Network
                             </motion.h1>
                         </motion.div>
 
