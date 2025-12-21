@@ -14,7 +14,7 @@ const usePets = () => {
                 Object.keys(filters).forEach(key => {
                     if (filters[key]) params.append(key, filters[key]);
                 });
-                const response = await api.get(`/pets/?${params.toString()}`);
+                const response = await api.get(`/pets/profiles/?${params.toString()}`);
                 return response.data;
             },
         });
@@ -25,7 +25,7 @@ const usePets = () => {
         return useQuery({
             queryKey: ['pet', id],
             queryFn: async () => {
-                const response = await api.get(`/pets/${id}/`);
+                const response = await api.get(`/pets/profiles/${id}/`);
                 return response.data;
             },
             enabled: !!id,
@@ -36,7 +36,7 @@ const usePets = () => {
     const useCreatePet = () => {
         return useMutation({
             mutationFn: async (petData) => {
-                const response = await api.post('/user/pets/', petData); // Ensure correct endpoint
+                const response = await api.post('/pets/profiles/', petData); // Ensure correct endpoint
                 return response.data;
             },
             onSuccess: () => {
@@ -49,7 +49,7 @@ const usePets = () => {
     const useUpdatePet = () => {
         return useMutation({
             mutationFn: async ({ id, data }) => {
-                const response = await api.patch(`/user/pets/${id}/`, data);
+                const response = await api.patch(`/pets/profiles/${id}/`, data);
                 return response.data;
             },
             onSuccess: () => {
@@ -62,7 +62,7 @@ const usePets = () => {
     const useDeletePet = () => {
         return useMutation({
             mutationFn: async (id) => {
-                await api.delete(`/user/pets/${id}/`);
+                await api.delete(`/pets/profiles/${id}/`);
             },
             onSuccess: () => {
                 queryClient.invalidateQueries(['myPets']);
@@ -75,7 +75,7 @@ const usePets = () => {
         return useQuery({
             queryKey: ['myPets'],
             queryFn: async () => {
-                const response = await api.get('/user/pets/');
+                const response = await api.get('/pets/profiles/');
                 return response.data;
             },
         });
