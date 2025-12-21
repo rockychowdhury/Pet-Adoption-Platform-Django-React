@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import UserReport, LegalAgreement
+from .models import UserReport
 from apps.users.serializers import UserSerializer
 
 class UserReportSerializer(serializers.ModelSerializer):
@@ -15,14 +15,16 @@ class UserReportSerializer(serializers.ModelSerializer):
         ]
         read_only_fields = ['reporter', 'created_at', 'resolved_at']
 
-class LegalAgreementSerializer(serializers.ModelSerializer):
+from apps.rehoming.models import AdoptionContract
+
+class AdoptionContractSerializer(serializers.ModelSerializer):
     pet_owner_name = serializers.CharField(source='application.pet.owner.get_full_name', read_only=True)
     adopter_name = serializers.CharField(source='application.applicant.get_full_name', read_only=True)
     
     class Meta:
-        model = LegalAgreement
+        model = AdoptionContract
         fields = [
-            'id', 'application', 'agreement_type', 'document_url',
+            'id', 'application', 'contract_template', 'document_pdf_url',
             'pet_owner_signed_at', 'adopter_signed_at', 'is_fully_signed',
             'pet_owner_name', 'adopter_name', 'created_at'
         ]

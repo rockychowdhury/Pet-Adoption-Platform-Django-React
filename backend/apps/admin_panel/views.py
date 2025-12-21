@@ -2,8 +2,8 @@ from rest_framework import viewsets, permissions, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
-from .models import UserReport, LegalAgreement
-from .serializers import UserReportSerializer, LegalAgreementSerializer
+from .models import UserReport
+from .serializers import UserReportSerializer, AdoptionContractSerializer
 from apps.users.permissions import IsAdmin
 
 class UserReportViewSet(viewsets.ModelViewSet):
@@ -39,12 +39,16 @@ class UserReportViewSet(viewsets.ModelViewSet):
         return Response({'status': 'updated'})
 
 
-class LegalAgreementViewSet(viewsets.ReadOnlyModelViewSet):
+from apps.rehoming.models import AdoptionContract
+from .serializers import UserReportSerializer, AdoptionContractSerializer
+
+
+class AdoptionContractViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    Admin view for legal agreements.
+    Admin view for adoption contracts.
     """
-    queryset = LegalAgreement.objects.all().order_by('-created_at')
-    serializer_class = LegalAgreementSerializer
+    queryset = AdoptionContract.objects.all().order_by('-created_at')
+    serializer_class = AdoptionContractSerializer
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
 
 
@@ -56,11 +60,27 @@ class ListingModerationViewSet(viewsets.ReadOnlyModelViewSet):
     permission_classes = [permissions.IsAuthenticated, IsAdmin]
     # We use PetDetailSerializer to show full details, 
     # but we might need a custom one if we want to show moderation history.
-    from apps.pets.serializers import PetDetailSerializer
-    serializer_class = PetDetailSerializer
+    # from apps.pets.serializers import PetDetailSerializer
+    # serializer_class = PetDetailSerializer
+    # PetDetailSerializer probably moved or needs update. Use a simple serializer for now or import from rehoming if available?
+    # Actually RehomingListing is in rehoming.
+    # Let's import RehomingListingSerializer if it exists, or just use ModelSerializer
+    
+    # For now, let's keep it simple and just use a placeholder or check if RehomingListingSerializer exists in rehoming (it doesn't yet).
+    # I'll comment out serializer_class for now or set it to None and handle list
+    
+    def get_serializer_class(self):
+        # Temporary fallback
+        from rest_framework import serializers
+        from apps.rehoming.models import RehomingListing
+        class SimpleListingSerializer(serializers.ModelSerializer):
+            class Meta:
+                model = RehomingListing
+                fields = '__all__'
+        return SimpleListingSerializer
 
     def get_queryset(self):
-        from apps.pets.models import RehomingListing
+        from apps.rehoming.models import RehomingListing
         # Default to showing pending_review first, but allow filtering
         status_param = self.request.query_params.get('status')
         if status_param:
@@ -71,6 +91,7 @@ class ListingModerationViewSet(viewsets.ReadOnlyModelViewSet):
     def approve(self, request, pk=None):
         listing = self.get_object()
         listing.status = 'active'
+        listing.published_at = timezone.now() # Set published_at
         listing.save()
         # Create ListingReview entry if not exists or update it
         # listing.listing_review.status = 'approved' ...
@@ -91,8 +112,7 @@ class AnalyticsView(APIView):
 
     def get(self, request):
         from django.contrib.auth import get_user_model
-        from apps.pets.models import RehomingListing
-        from apps.adoption.models import AdoptionApplication
+        from apps.rehoming.models import RehomingListing, AdoptionApplication
         
         User = get_user_model()
         today = timezone.now().date()
