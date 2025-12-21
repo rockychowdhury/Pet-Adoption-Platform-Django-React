@@ -1,0 +1,321 @@
+# /services Page Content Requirements
+
+Based on the developer feature specifications, here's what you need to include on the `/services` page:
+
+## Page Header
+- **Title**: "Pet Services Directory" or "Find Trusted Pet Services"
+- **Subtitle/Description**: Brief explanation of the service directory
+- **Search Bar**: Search by service name, location (zip code + radius)
+- **Quick Filters**: Toggle buttons for service types (Foster Care, Veterinary, Trainers, Groomers, etc.)
+
+---
+
+## Filter Sidebar (Left Side)
+
+### Service Type
+- Foster Care
+- Veterinary Clinics
+- Pet Trainers (Phase 2)
+- Groomers (Phase 2)
+- Pet Sitters/Dog Walkers (Phase 2)
+
+### Location Filters
+- Zip Code input
+- Radius selector (5, 10, 25, 50, 100+ miles)
+- Current location button (use GPS)
+
+### Availability (for Foster Care)
+- Available now (green indicator)
+- Limited availability (yellow)
+- Currently full (red)
+
+### Price Range Slider
+- Min - Max (e.g., $15 - $200/day for foster)
+- Display current selected range
+
+### Species Accepted (for Foster Care)
+- Dogs (with size options: Small, Medium, Large, Giant)
+- Cats
+- Small Animals (rabbits, birds, guinea pigs)
+- Exotic Pets
+- Special Needs
+
+### Clinic Type (for Veterinary)
+- General Practice
+- Emergency/24-hour
+- Specialty Clinic
+- Mobile Vet
+- Holistic/Alternative
+
+### Services Offered (for Veterinary)
+- Wellness Exams
+- Vaccinations
+- Surgery
+- Dental Care
+- Emergency Care
+- Diagnostics
+- Boarding
+
+### Amenities (for Veterinary)
+- Separate cat area
+- Parking available
+- Wheelchair accessible
+- On-site pharmacy
+- Fear-free certified
+
+### Ratings Filter
+- 4+ stars
+- 4.5+ stars
+- 5 stars only
+
+### Verification Badges
+- Identity Verified
+- License Verified
+- Background Checked
+- AAHA Accredited (vets)
+- Insurance Verified
+
+---
+
+## Main Content Area
+
+### Sort Options (Top Right)
+- Nearest to me (default if location provided)
+- Highest rated
+- Most reviewed
+- Lowest price
+- Newest listings
+
+### View Toggle
+- Grid view (cards)
+- List view (detailed rows)
+- Map view (show all on map)
+
+### Results Header
+- "Showing X of Y results"
+- Applied filters display (removable chips)
+- "Clear all filters" button
+
+---
+
+## Service Provider Cards (Grid Layout)
+
+Each card should display:
+
+### Visual Elements
+- **Main photo** (business logo or facility photo)
+- **Verification badges** (small icons: verified, licensed, background checked)
+- **Availability indicator** (for foster: green/yellow/red dot)
+
+### Basic Information
+- **Business name** (clickable to detail page)
+- **Service type** (Foster Care / Veterinary / etc.)
+- **Location**: City, State + distance from user
+- **Rating**: Star rating (e.g., 4.8 ★) + number of reviews (e.g., "127 reviews")
+
+### Key Details (Foster Care)
+- **Species accepted**: Dog, Cat icons
+- **Capacity**: "2 pets available" or "Full"
+- **Price**: "$35/day" (starting price)
+- **Environment**: "Home-based with fenced yard"
+
+### Key Details (Veterinary)
+- **Clinic type**: "General Practice" or "Emergency"
+- **Hours**: "Mon-Fri 8am-6pm" or "Open 24/7"
+- **Services**: Top 3 services (e.g., "Wellness, Surgery, Emergency")
+- **Pricing**: "Exam from $65"
+
+### Quick Actions
+- **"View Profile"** button (primary)
+- **"Contact"** button (opens messaging)
+- **Heart icon** (save/bookmark for later)
+- **Share icon** (share listing)
+
+---
+
+## Service Provider Detail Page (when card is clicked)
+
+### Header Section
+- **Business name** (large)
+- **Business type badge** (Foster Care / Veterinary)
+- **Location**: Full address + map pin
+- **Verification badges** (all earned badges displayed)
+- **Overall rating**: Large star rating + total reviews
+- **Action buttons**: "Contact Provider", "Book Appointment" (if available), "Report"
+
+### Photo Gallery
+- Main large photo
+- Thumbnail gallery below (minimum 6-8 photos)
+- Lightbox view on click
+
+### About Section
+- **Business description** (500+ words)
+- **Years in operation**
+- **Owner/operator bio**
+- **Certifications**: Pet First Aid, Fear Free, AAHA, etc.
+- **License number** (if applicable)
+- **Insurance information** (coverage amount, certificate viewable)
+
+### Services & Pricing (Foster Care)
+- **Foster care types offered**: Short-term, Medium-term, Long-term, Foster-to-adopt
+- **Species/size accepted**: Detailed list with capacity
+- **Current availability**: Real-time indicator + available spots
+- **Environment details**:
+  - Home-based or facility
+  - Indoor/outdoor space descriptions
+  - Fenced yard (size)
+  - Other pets in home
+  - Children in household
+  - Climate control
+- **Care standards**:
+  - Daily exercise routine
+  - Feeding schedule
+  - Medication administration experience
+  - Special diet accommodation
+  - Grooming included
+  - Daily updates (yes/no)
+  - Vet access protocol
+- **Pricing table**:
+  - Daily rate
+  - Weekly rate (with discount %)
+  - Monthly rate
+  - Additional fees (medication, special needs)
+  - Deposit required
+  - Cancellation policy
+
+### Services & Pricing (Veterinary)
+- **Services offered**: Expandable sections for each service category
+  - Preventive care (wellness, vaccinations, dental)
+  - Medical services (diagnostics, surgery, internal medicine)
+  - Emergency care
+- **Species treated**: Dogs, Cats, Exotic
+- **Veterinarian profiles**: Individual doctor info (education, specializations, photo)
+- **Pricing transparency**: Common procedure costs (exam fees, spay/neuter, vaccines)
+- **Facility details**:
+  - Photo gallery of facility rooms
+  - Equipment available (X-ray, ultrasound, lab)
+  - Amenities checklist
+- **Hours of operation**: Detailed schedule + holiday hours
+- **Payment options**: Insurance accepted, payment plans, discounts
+
+### Location & Contact
+- **Interactive map** (Google Maps embed)
+- **Full address**
+- **Phone number** (click-to-call on mobile)
+- **Email**
+- **Website link**
+- **Directions** (from user's location)
+- **Parking information**
+
+### Availability Calendar (Foster Care)
+- Monthly calendar view
+- Available dates (green)
+- Limited availability (yellow)
+- Fully booked (gray)
+- Click to request booking
+
+### Reviews Section
+- **Overall rating breakdown**:
+  - 5-star: progress bar + count
+  - 4-star: progress bar + count
+  - 3-star: progress bar + count
+  - 2-star: progress bar + count
+  - 1-star: progress bar + count
+- **Category ratings** (1-5 stars each):
+  - Communication
+  - Cleanliness
+  - Quality of Care
+  - Value for Money
+- **Filters**:
+  - Sort by: Most recent, Highest rated, Lowest rated
+  - Filter by: Pet type, Service type, Date range
+- **Individual reviews**:
+  - Reviewer name (first name + last initial)
+  - Verified client badge
+  - Date of review
+  - Star rating (overall + categories)
+  - Written review text
+  - Photos uploaded by reviewer (if any)
+  - Provider response (if replied)
+  - Upvote/helpful button
+  - Report button
+
+### Inquiry Form (Bottom of Page)
+- **"Contact [Business Name]"** section
+- Form fields:
+  - Your name
+  - Email
+  - Phone
+  - Pet information (species, age, special needs)
+  - Service needed (dropdown)
+  - Preferred dates (for foster)
+  - Message (describe your needs)
+- **Submit button**: "Send Inquiry"
+- **Note**: "Provider will respond within 24-48 hours"
+
+---
+
+## Empty States
+
+### No Results Found
+- Friendly illustration
+- "No service providers match your filters"
+- Suggestions:
+  - "Try expanding your search radius"
+  - "Remove some filters"
+  - "Browse all service providers"
+- Button: "Clear Filters" or "View All Services"
+
+### No Services in Your Area
+- "We haven't launched in your area yet"
+- Email signup: "Get notified when we expand to [City]"
+- Alternative: "Browse nearby cities"
+
+---
+
+## Additional Features
+
+### Map View Toggle
+- Full-screen map with provider pins
+- Click pin to see provider card popup
+- Cluster markers if many in one area
+- Filter/search still active on map
+
+### Save/Bookmark Providers
+- Heart icon on each card
+- "Saved Services" page in user dashboard
+- Remove from saved list option
+
+### Share Provider
+- Share button opens modal with options:
+  - Copy link
+  - Email
+  - Facebook, Twitter icons
+
+### Report Provider
+- Report button opens form:
+  - Reason dropdown (incorrect info, scam, inappropriate content)
+  - Description textbox
+  - Submit
+
+---
+
+## Mobile Responsive Considerations
+- Filters collapse into slide-out drawer
+- Cards stack vertically (1 column)
+- Sticky "Filter" button at bottom
+- Swipeable photo galleries
+- Click-to-call buttons prominent
+- Map view full-screen modal
+
+---
+
+## SEO & Metadata
+- Page title: "Pet Services Directory - Foster Care & Veterinary Clinics | PetCircle"
+- Meta description with keywords
+- Structured data (JSON-LD) for local business listings
+- Breadcrumbs: Home > Services > [Service Type]
+
+---
+
+This structure mirrors your pet listing page but adapted for service providers, ensuring consistency across your platform while accommodating the unique needs of service directory browsing.
