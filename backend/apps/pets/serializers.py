@@ -17,10 +17,9 @@ class PetProfileSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'owner', 'name', 'species', 'breed', 
             'birth_date', 'age', 'gender', 'weight', 'size_category',
-            'personality_traits', 'health_status', 'medical_history',
-            'is_spayed_neutered', 'is_vaccinated', 'microchip_number',
-            'aggression_history', 'aggression_details',
-            'description', 'photos', 'profile_photo', 'is_active',
+            'personality_traits', 'health_status', 
+            'is_spayed_neutered', 'is_microchipped', 'microchip_number',
+            'description', 'photos', 'is_active',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['created_at', 'updated_at', 'owner']
