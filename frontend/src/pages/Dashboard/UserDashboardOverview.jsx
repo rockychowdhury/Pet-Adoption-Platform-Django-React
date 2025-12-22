@@ -83,7 +83,7 @@ const UserDashboardOverview = () => {
     };
 
     return (
-        <div className="space-y-8 max-w-[1600px] mx-auto p-6 md:p-8 font-jakarta text-text-primary">
+        <div className="space-y-8 font-jakarta text-text-primary">
 
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4">
