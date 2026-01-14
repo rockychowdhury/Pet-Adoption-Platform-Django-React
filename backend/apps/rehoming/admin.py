@@ -1,36 +1,21 @@
 from django.contrib import admin
 from unfold.admin import ModelAdmin
-from .models import (
-    RehomingIntervention, RehomingListing, AdoptionApplication, 
-    AdoptionContract, AdoptionPayment, PostAdoptionCheckIn, AdoptionReview
-)
+from .models import RehomingListing, RehomingRequest, AdoptionInquiry
 
-@admin.register(RehomingIntervention)
-class RehomingInterventionAdmin(ModelAdmin):
-    list_display = ('user', 'reason_category', 'urgency_level', 'created_at')
+@admin.register(RehomingRequest)
+class RehomingRequestAdmin(ModelAdmin):
+    list_display = ('id', 'owner', 'pet', 'urgency', 'status', 'created_at')
+    list_filter = ('urgency', 'status')
+    search_fields = ('owner__email', 'pet__name')
 
 @admin.register(RehomingListing)
 class RehomingListingAdmin(ModelAdmin):
-    list_display = ('pet_name', 'species', 'pet_owner', 'status', 'published_at')
-    list_filter = ('status', 'species')
+    list_display = ('pet', 'owner', 'status', 'published_at')
+    list_filter = ('status', 'urgency', 'privacy_level')
+    search_fields = ('pet__name', 'owner__email', 'location_city')
 
-@admin.register(AdoptionApplication)
-class AdoptionApplicationAdmin(ModelAdmin):
-    list_display = ('applicant', 'listing', 'status', 'match_score', 'created_at')
+@admin.register(AdoptionInquiry)
+class AdoptionInquiryAdmin(ModelAdmin):
+    list_display = ('listing', 'requester', 'status', 'created_at')
     list_filter = ('status',)
-
-@admin.register(AdoptionContract)
-class AdoptionContractAdmin(ModelAdmin):
-    list_display = ('application', 'is_fully_signed', 'created_at')
-
-@admin.register(AdoptionPayment)
-class AdoptionPaymentAdmin(ModelAdmin):
-    list_display = ('application', 'adoption_fee', 'payment_status', 'created_at')
-
-@admin.register(PostAdoptionCheckIn)
-class PostAdoptionCheckInAdmin(ModelAdmin):
-    list_display = ('application', 'check_in_day', 'completed_at')
-
-@admin.register(AdoptionReview)
-class AdoptionReviewAdmin(ModelAdmin):
-    list_display = ('application', 'reviewer', 'rating_overall', 'created_at')
+    search_fields = ('listing__pet__name', 'requester__email')
