@@ -1,81 +1,127 @@
 from django.db import models
-from django.utils.translation import gettext_lazy as _
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
 class PetProfile(models.Model):
     """
-    Pet profile model for user's pets.
-    Can be linked to rehoming listings or used as social pet profiles.
+    Refactored PetProfile: The canonical source of pet truth.
+    Stores immutable/slow-changing facts about the pet.
     """
-    owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='pet_profiles')
-    name = models.CharField(max_length=100)
-    species = models.CharField(
-        max_length=50,
-        choices=[
-            ('dog', 'Dog'),
-            ('cat', 'Cat'),
-            ('rabbit', 'Rabbit'),
-            ('bird', 'Bird'),
-            ('other', 'Other'),
-        ]
+    owner = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="pets"
     )
-    breed = models.CharField(max_length=100, blank=True, null=True)
-    birth_date = models.DateField(blank=True, null=True, help_text="Pet's birth date")
-    age = models.PositiveIntegerField(help_text="Age in years (if birth date unknown)", blank=True, null=True)
+
+    # Identity
+    name = models.CharField(max_length=100)
+    species = models.CharField(max_length=20, choices=[
+        ('dog', 'Dog'),
+        ('cat', 'Cat'),
+        ('rabbit', 'Rabbit'),
+        ('bird', 'Bird'),
+        ('other', 'Other')
+    ])
+    breed = models.CharField(max_length=100, blank=True)
+
+    birth_date = models.DateField(null=True, blank=True)
+
     gender = models.CharField(
         max_length=10,
-        choices=[('male', 'Male'), ('female', 'Female'), ('unknown', 'Unknown')],
-        blank=True,
-        null=True
+        choices=[('male','Male'), ('female','Female'), ('unknown','Unknown')],
+        default='unknown'
     )
-    
-    # Physical Attributes
-    weight = models.DecimalField(max_digits=5, decimal_places=2, blank=True, null=True, help_text="Weight in lbs")
+
+    # Physical
+    weight_kg = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
     size_category = models.CharField(
         max_length=10,
-        choices=[
-            ('xs', 'Extra Small'),
-            ('small', 'Small'),
-            ('medium', 'Medium'),
-            ('large', 'Large'),
-            ('xl', 'Extra Large'),
-        ],
+        choices=[('small','Small'), ('medium','Medium'), ('large','Large')],
         blank=True,
         null=True
     )
 
-    # Community & Personality Features
-    description = models.TextField(max_length=500, blank=True, null=True, help_text="Short description (500 char max)")
-    photos = models.JSONField(default=list, blank=True, help_text="Array of photo URLs")
-    personality_traits = models.JSONField(default=list, blank=True, help_text="e.g., playful, calm, energetic")
-    
-    gotcha_day = models.DateField(blank=True, null=True, help_text="Adoption anniversary")
-    health_status = models.TextField(blank=True, null=True, help_text="Health notes")
+    # Health (baseline only)
+    spayed_neutered = models.BooleanField(default=False)
+    microchipped = models.BooleanField(default=False)
 
-    # Health & Safety (Critical for Rehoming)
-    is_spayed_neutered = models.BooleanField(default=False)
-    is_microchipped = models.BooleanField(default=False)
-    microchip_number = models.CharField(max_length=50, blank=True, null=True)
+    # Lifecycle
+    status = models.CharField(
+        max_length=20,
+        choices=[
+            ('active','Active'),
+            ('rehomed','Rehomed'),
+            ('deceased','Deceased')
+        ],
+        default='active'
+    )
     
-    # Status
-    is_active = models.BooleanField(default=True, help_text="Pet profile status: active, inactive, deceased")
-    is_for_rehoming = models.BooleanField(default=False, help_text="Linked to rehoming listing")
-    
+    # Description (Moved from listing/old profile)
+    description = models.TextField(max_length=1000, blank=True)
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    class Meta:
-        verbose_name = "Pet Profile"
-        verbose_name_plural = "Pet Profiles"
-        ordering = ['-created_at']
-        indexes = [
-            models.Index(fields=['owner']),
-            models.Index(fields=['species']),
-            models.Index(fields=['is_active']),
-            models.Index(fields=['created_at']),
+    def __str__(self):
+        return f"{self.name} ({self.species})"
+
+    @property
+    def profile_is_complete(self):
+        """
+        Checks if the pet profile has all required fields for rehoming.
+        """
+        required_fields = [
+            self.name,
+            self.species,
+            self.breed,
+            self.birth_date or self.age_display, # birth_date is enough? age_display isn't a field.
+            self.gender,
+            self.description
         ]
+        # Check birth_date specificly
+        has_age = self.birth_date is not None
+        has_photo = self.media.exists()
+        
+        # Check simple fields
+        basic_fields = [self.name, self.species, self.gender, self.description]
+        
+        return all(basic_fields) and has_age and has_photo
+
+    class Meta:
+        ordering = ['-created_at']
+
+
+class PetMedia(models.Model):
+    pet = models.ForeignKey(PetProfile, on_delete=models.CASCADE, related_name="media")
+    url = models.URLField()
+    delete_url = models.URLField(max_length=500, blank=True, null=True)
+    is_primary = models.BooleanField(default=False)
+    uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    def save(self, *args, **kwargs):
+        if self.is_primary:
+            # Demote others
+            PetMedia.objects.filter(pet=self.pet, is_primary=True).update(is_primary=False)
+        super().save(*args, **kwargs)
 
     def __str__(self):
-        return f"{self.name} ({self.owner.email})"
+        return f"Media for {self.pet.name}"
+
+
+class PersonalityTrait(models.Model):
+    name = models.CharField(max_length=50, unique=True)
+    
+    def __str__(self):
+        return self.name
+
+
+class PetPersonality(models.Model):
+    pet = models.ForeignKey(PetProfile, on_delete=models.CASCADE, related_name='traits')
+    trait = models.ForeignKey(PersonalityTrait, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ('pet', 'trait')
+
+    def __str__(self):
+        return f"{self.pet.name} is {self.trait.name}"
