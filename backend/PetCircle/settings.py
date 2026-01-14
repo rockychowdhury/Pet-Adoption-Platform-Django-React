@@ -91,7 +91,6 @@ INSTALLED_APPS = [
     'apps.notifications',
     'apps.analytics',
     'apps.messaging',
-    'apps.adoption',
     'apps.reviews',
     'apps.admin_panel',
     'apps.services',
