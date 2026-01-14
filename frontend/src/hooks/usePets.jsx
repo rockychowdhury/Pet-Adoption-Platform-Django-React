@@ -45,27 +45,74 @@ const usePets = () => {
         });
     };
 
-    // Update Pet (e.g. for status toggle)
+    // Update Pet (e.g. for status toggle) - with Optimistic Update
     const useUpdatePet = () => {
         return useMutation({
             mutationFn: async ({ id, data }) => {
                 const response = await api.patch(`/pets/profiles/${id}/`, data);
                 return response.data;
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries(['myPets']);
+            onMutate: async ({ id, data }) => {
+                await queryClient.cancelQueries({ queryKey: ['myPets'] });
+                const previousPets = queryClient.getQueryData(['myPets']);
+
+                queryClient.setQueryData(['myPets'], (old) => {
+                    if (!old) return old;
+
+                    const updatePetInList = (list) => list.map(pet =>
+                        pet.id === id ? { ...pet, ...data } : pet
+                    );
+
+                    if (Array.isArray(old)) {
+                        return updatePetInList(old);
+                    } else if (old.results && Array.isArray(old.results)) {
+                        return { ...old, results: updatePetInList(old.results) };
+                    }
+                    return old;
+                });
+
+                return { previousPets };
+            },
+            onError: (err, newPet, context) => {
+                queryClient.setQueryData(['myPets'], context.previousPets);
+                console.error("Optimistic update failed:", err);
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries({ queryKey: ['myPets'] });
             },
         });
     };
 
-    // Delete Pet
+    // Delete Pet - with Optimistic Update
     const useDeletePet = () => {
         return useMutation({
             mutationFn: async (id) => {
                 await api.delete(`/pets/profiles/${id}/`);
             },
-            onSuccess: () => {
-                queryClient.invalidateQueries(['myPets']);
+            onMutate: async (id) => {
+                await queryClient.cancelQueries({ queryKey: ['myPets'] });
+                const previousPets = queryClient.getQueryData(['myPets']);
+
+                queryClient.setQueryData(['myPets'], (old) => {
+                    if (!old) return old;
+
+                    const removePetFromList = (list) => list.filter(pet => pet.id !== id);
+
+                    if (Array.isArray(old)) {
+                        return removePetFromList(old);
+                    } else if (old.results && Array.isArray(old.results)) {
+                        return { ...old, results: removePetFromList(old.results) };
+                    }
+                    return old;
+                });
+
+                return { previousPets };
+            },
+            onError: (err, id, context) => {
+                queryClient.setQueryData(['myPets'], context.previousPets);
+            },
+            onSettled: () => {
+                queryClient.invalidateQueries({ queryKey: ['myPets'] });
             },
         });
     };
