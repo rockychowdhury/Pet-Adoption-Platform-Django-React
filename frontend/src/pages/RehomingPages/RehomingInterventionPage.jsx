@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { AlertCircle, ChevronRight, CheckCircle, Info, Lightbulb, Clock, BookOpen, HeartHandshake } from 'lucide-react';
+import { AlertCircle, ChevronRight, CheckCircle, Info, Lightbulb, Clock, BookOpen, HeartHandshake, Home, DollarSign, Activity, AlertTriangle, UserX, HelpCircle, X } from 'lucide-react';
 import { toast } from 'react-toastify';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
@@ -9,22 +9,55 @@ import useRehoming from '../../hooks/useRehoming';
 
 const RehomingInterventionPage = () => {
     const navigate = useNavigate();
-    const { useSubmitIntervention } = useRehoming();
+    const { useSubmitIntervention, useGetActiveIntervention, useUpdateIntervention } = useRehoming();
     const submitIntervention = useSubmitIntervention();
+    const updateIntervention = useUpdateIntervention();
+    const { data: activeIntervention, isLoading } = useGetActiveIntervention();
 
+    // -- State --
+    const [showEntryModal, setShowEntryModal] = useState(true);
+    const [showCoolingOffModal, setShowCoolingOffModal] = useState(false);
     const [step, setStep] = useState(1);
+    const [coolingData, setCoolingData] = useState(null);
+
+    // Initial Check
+    useEffect(() => {
+        if (activeIntervention) {
+            if (activeIntervention.status === 'cooling') {
+                setCoolingData(activeIntervention);
+                setShowEntryModal(false);
+            } else if (activeIntervention.status === 'proceeded') {
+                navigate('/rehoming/create');
+            }
+        }
+    }, [activeIntervention, navigate]);
+
+    // Form Data
     const [formData, setFormData] = useState({
+        // Step 1: Assessment
         reason: '',
         explanation: '',
         urgency: '',
-        reviewedResources: false,
+
+        // Step 2: Resources
+        reviewedResources: {}, // { resourceId: boolean }
+
+        // Step 3: Reflection
+        attemptedSolutions: '',
+        isPermanent: null, // boolean
+        certaintyScale: 5,
+
+        // Step 4: Acknowledgments
         acknowledgments: {
             resources: false,
             permanent: false,
             honest: false,
             exclusive: false,
-            responsibility: false
+            responsibility: false,
+            fee_policy: false,
+            tos: false
         },
+
         commitment: ''
     });
 
@@ -46,91 +79,170 @@ const RehomingInterventionPage = () => {
     const nextStep = () => setStep(prev => prev + 1);
     const prevStep = () => setStep(prev => prev - 1);
 
+    // -- Submit Handler --
     const handleSubmit = async () => {
-        // Map to Backend
-        // Backend Model Fields:
-        // owner (from request), reason (choices), explanation (TextField), 
-        // urgency (choices), resources_viewed (Boolean), intervention_status (default PENDING)
-        // Missing: acknowledgment details (maybe stored in explanation or ignored for now or we update model)
-        // I will map reason/explanation/urgency/resources_viewed.
+        // Construct Payload mapping to existing backend fields
+        // We append reflection data to reason_text
+
+        const reflectionSummary = `
+--- REFLECTION ---
+Attempted Solutions: ${formData.attemptedSolutions}
+Permanent Decision: ${formData.isPermanent ? 'Yes' : 'No'}
+Certainty Level: ${formData.certaintyScale}/10
+Commitment: ${formData.commitment}
+        `.trim();
+
+        const mapReasonToBackend = (frontendReason) => {
+            const map = {
+                'housing': 'moving',
+                'financial': 'financial',
+                'behavior': 'behavioral',
+                'time': 'no_time',
+                'health': 'allergies', // Closest match for "Owner health or allergies"
+                'pets': 'other', // "Too many pets" -> Other
+                'other': 'other'
+            };
+            return map[frontendReason] || 'other';
+        };
 
         const payload = {
-            reason: formData.reason,
-            urgency: formData.urgency.includes('week') ? 'immediate' :
-                formData.urgency.includes('1 month') ? 'short_term' :
-                    formData.urgency.includes('3 months') ? 'medium_term' : 'flexible',
-            resources_viewed: formData.reviewedResources,
-            explanation: `${formData.explanation}\n\nCommitment: ${formData.commitment}`
+            reason_category: mapReasonToBackend(formData.reason),
+            urgency_level: formData.urgency.includes('week') ? 'immediate' :
+                formData.urgency.includes('1 month') ? 'one_month' :
+                    formData.urgency.includes('3 months') ? 'three_months' : 'flexible',
+
+            // Correctly map resources to backend fields
+            resources_viewed: Object.keys(formData.reviewedResources).filter(k => formData.reviewedResources[k]),
+            resources_acknowledged: Object.values(formData.reviewedResources).every(Boolean),
+
+            // Set acknowledged_at timestamp to pass pre-flight check in next step
+            acknowledged_at: new Date().toISOString(),
+
+            reason_text: `${formData.explanation}\n\n${reflectionSummary}`
         };
 
         try {
-            await submitIntervention.mutateAsync(payload);
-            toast.success("Intervention record created. Proceeding to listing creation.");
-            navigate('/rehoming/create');
+            // 1. Create Intervention
+            const result = await submitIntervention.mutateAsync(payload);
+
+            // 2. Check Status
+            if (result.status === 'cooling') {
+                setCoolingData(result);
+                toast.info("Cooling period started.");
+                return;
+            }
+
+            // 3. If started (immediate), Proceed automatically
+            // We need to mark it as proceeded contextually
+            if (result.status === 'started' || result.status === 'acknowledged') {
+                await updateIntervention.mutateAsync({
+                    id: result.id,
+                    data: { status: 'proceeded' }
+                });
+                toast.success("Proceeding to listing creation.");
+                navigate('/rehoming/create');
+            }
+
         } catch (error) {
             console.error("Intervention submission failed", error);
-            // Ideally we check if it failed because already exists, then navigate anyway or show error.
-            // For MVP, just show error.
             toast.error("Failed to submit intervention. Please try again.");
         }
     };
 
+    // -- Definitions --
+
+    const REASONS = [
+        { id: 'housing', label: 'Moving / Housing', icon: Home, desc: 'Landlord issues, no pets allowed' },
+        { id: 'financial', label: 'Financial Hardship', icon: DollarSign, desc: 'Can\'t afford food/vet bills' },
+        { id: 'behavior', label: 'Behavioral Issues', icon: Activity, desc: 'Aggression, destruction, anxiety' },
+        { id: 'time', label: 'Time Constraints', icon: Clock, desc: 'New job, schedule changes' },
+        { id: 'health', label: 'Health Issues', icon: AlertTriangle, desc: 'Owner health or allergies' },
+        { id: 'pets', label: 'Too Many Pets', icon: UserX, desc: 'Overwhelmed, accidental litter' },
+        { id: 'other', label: 'Other', icon: HelpCircle, desc: 'Any other reason' }
+    ];
+
+    const getResources = () => {
+        const common = [
+            { id: 'guide', title: 'Expert Guides', desc: 'Read our comprehensive guides on overcoming challenges.', icon: BookOpen },
+            { id: 'community', title: 'Community Support', desc: 'Connect with local groups and fosters.', icon: HeartHandshake },
+        ];
+
+        if (formData.reason === 'behavior') {
+            return [
+                { id: 'training', title: 'Certified Trainers', desc: 'Find positive reinforcement trainers near you.', icon: Activity },
+                ...common
+            ];
+        } else if (formData.reason === 'financial') {
+            return [
+                { id: 'aid', title: 'Pet Food Banks & Aid', desc: 'Apply for temporary financial assistance.', icon: DollarSign },
+                ...common
+            ];
+        } else if (formData.reason === 'housing') {
+            return [
+                { id: 'housing', title: 'Pet-Friendly Housing', desc: 'Search our verified pet-friendly rental database.', icon: Home },
+                { id: 'esa', title: 'Tenant Rights & ESA', desc: 'Understand your legal rights as a pet owner.', icon: Info },
+                ...common
+            ];
+        }
+        return common;
+    };
+
+    const currentResources = getResources();
+
+    // -- Render Steps --
+
     // Step 1: Reason Assessment
     const renderStep1 = () => (
-        <div className="space-y-6 max-w-2xl mx-auto">
+        <div className="space-y-8 max-w-4xl mx-auto animation-fade-in">
             <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-text-primary">Why are you considering rehoming?</h2>
-                <p className="text-text-secondary">Understanding your situation helps us provide the best support.</p>
+                <p className="text-text-secondary">Select the primary reason to help us understand your situation.</p>
             </div>
 
-            <div className="space-y-4">
-                <label className="block text-sm font-bold text-text-primary">Primary Reason</label>
-                <select
-                    name="reason"
-                    value={formData.reason}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-border bg-bg-surface focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
-                >
-                    <option value="">Select a reason...</option>
-                    <option value="housing">Moving / Housing Restrictions</option>
-                    <option value="financial">Financial Hardship</option>
-                    <option value="behavior">Behavioral Issues</option>
-                    <option value="time">Time Constraints</option>
-                    <option value="health">Health Issues (Owner)</option>
-                    <option value="allergies">Allergies</option>
-                    <option value="pets">Too Many Pets</option>
-                    <option value="other">Other</option>
-                </select>
+            {/* Reason Cards */}
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {REASONS.map(({ id, label, icon: Icon, desc }) => (
+                    <div
+                        key={id}
+                        onClick={() => setFormData(prev => ({ ...prev, reason: id }))}
+                        className={`cursor-pointer p-4 rounded-xl border-2 transition-all hover:shadow-md flex flex-col items-center text-center gap-3
+                            ${formData.reason === id ? 'border-brand-primary bg-brand-primary/5' : 'border-border bg-bg-surface hover:border-brand-secondary'}
+                        `}
+                    >
+                        <div className={`p-3 rounded-full ${formData.reason === id ? 'bg-brand-primary text-text-inverted' : 'bg-bg-secondary text-text-secondary'}`}>
+                            <Icon size={24} />
+                        </div>
+                        <div>
+                            <div className="font-bold text-sm">{label}</div>
+                            <div className="text-xs text-text-tertiary mt-1">{desc}</div>
+                        </div>
+                    </div>
+                ))}
             </div>
 
-            <div className="space-y-2">
-                <label className="block text-sm font-bold text-text-primary">Detailed Explanation</label>
+            {/* Detailed Explanation */}
+            <div className={`transition-all duration-300 ${formData.reason ? 'opacity-100' : 'opacity-50 pointer-events-none'}`}>
+                <label className="block text-sm font-bold text-text-primary mb-2">Detailed Explanation (Required)</label>
                 <textarea
                     name="explanation"
                     value={formData.explanation}
                     onChange={handleInputChange}
-                    placeholder="Take your time to describe what's happening..."
-                    className="w-full h-40 px-4 py-3 rounded-xl border border-border bg-bg-surface focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none transition-all"
+                    placeholder="Please describe your situation in detail. What has led to this decision? (Min 50 characters)"
+                    className="w-full h-40 px-4 py-3 rounded-xl border border-border bg-bg-surface focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none"
                 ></textarea>
-                <div className="flex justify-end text-xs text-text-tertiary">
-                    {formData.explanation.length}/500 characters min
+                <div className={`flex justify-end text-xs font-bold mt-1 ${formData.explanation.length < 50 ? 'text-status-error' : 'text-status-success'}`}>
+                    {formData.explanation.length}/50 characters
                 </div>
             </div>
 
-            <div className="space-y-4">
-                <label className="block text-sm font-bold text-text-primary">How soon do you need to rehome?</label>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                    {['Immediate (within 1 week)', 'Within 1 month', 'Within 3 months', 'Flexible timeline'].map((option) => (
-                        <label key={option} className={`flex items-center p-4 rounded-xl border cursor-pointer transition-all ${formData.urgency === option ? 'border-brand-primary bg-brand-primary/5' : 'border-border hover:border-brand-secondary'}`}>
-                            <input
-                                type="radio"
-                                name="urgency"
-                                value={option}
-                                checked={formData.urgency === option}
-                                onChange={handleInputChange}
-                                className="mr-3 text-brand-primary focus:ring-brand-primary"
-                            />
-                            <span className="text-sm font-medium">{option}</span>
+            {/* Urgency */}
+            <div className="transition-all duration-300">
+                <label className="block text-sm font-bold text-text-primary mb-3">How soon do you need to rehome?</label>
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+                    {['Immediate (< 1 week)', 'Within 1 month', 'Within 3 months', 'Flexible'].map((option) => (
+                        <label key={option} className={`flex items-center justify-center p-3 rounded-xl border cursor-pointer text-center transition-all ${formData.urgency === option ? 'border-brand-primary bg-brand-primary/5 font-bold' : 'border-border hover:border-brand-secondary'}`}>
+                            <input type="radio" name="urgency" value={option} checked={formData.urgency === option} onChange={handleInputChange} className="hidden" />
+                            <span className="text-sm">{option}</span>
                         </label>
                     ))}
                 </div>
@@ -140,7 +252,7 @@ const RehomingInterventionPage = () => {
                 variant="primary"
                 onClick={nextStep}
                 disabled={!formData.reason || formData.explanation.length < 50 || !formData.urgency}
-                className="w-full mt-8"
+                className="w-full mt-4"
             >
                 Next: View Resources
             </Button>
@@ -149,137 +261,287 @@ const RehomingInterventionPage = () => {
 
     // Step 2: Resources
     const renderStep2 = () => (
-        <div className="space-y-8 max-w-3xl mx-auto">
+        <div className="space-y-8 max-w-3xl mx-auto animation-fade-in">
             <div className="bg-status-info/10 border border-status-info/20 rounded-2xl p-6 flex gap-4">
-                <div className="p-3 bg-status-info/20 rounded-full h-fit text-status-info">
-                    <Lightbulb size={24} />
-                </div>
+                <div className="mt-1 text-status-info"><Lightbulb size={24} /></div>
                 <div>
-                    <h3 className="text-lg font-bold text-status-info mb-2">Did you know?</h3>
+                    <h3 className="text-lg font-bold text-status-info mb-1">Before you proceed...</h3>
                     <p className="text-status-info text-sm leading-relaxed">
-                        Many rehoming situations can be resolved with the right support. Based on your reason <strong>"{formData.reason}"</strong>, we've curated these resources for you.
+                        Based on your reason <strong>"{REASONS.find(r => r.id === formData.reason)?.label}"</strong>, we strongly recommend checking these resources.
+                        Many owners find they can keep their pets with just a little help.
                     </p>
                 </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Resources Cards logic can be same as before */}
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                    <div className="p-2 w-12 h-12 rounded-xl bg-brand-secondary/10 text-brand-secondary flex items-center justify-center mb-4 group-hover:bg-brand-secondary group-hover:text-text-inverted transition-colors">
-                        <BookOpen size={24} />
-                    </div>
-                    <h4 className="font-bold text-text-primary mb-2">Expert Guides</h4>
-                    <p className="text-sm text-text-secondary mb-4">Read our comprehensive guides on overcoming challenges.</p>
-                </Card>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                    <div className="p-2 w-12 h-12 rounded-xl bg-status-success/10 text-status-success flex items-center justify-center mb-4 group-hover:bg-status-success group-hover:text-text-inverted transition-colors">
-                        <HeartHandshake size={24} />
-                    </div>
-                    <h4 className="font-bold text-text-primary mb-2">Community Support</h4>
-                    <p className="text-sm text-text-secondary mb-4">Connect with local groups and fosters.</p>
-                </Card>
-                <Card className="hover:shadow-lg transition-shadow cursor-pointer group">
-                    <div className="p-2 w-12 h-12 rounded-xl bg-status-warning/10 text-status-warning flex items-center justify-center mb-4 group-hover:bg-status-warning group-hover:text-text-inverted transition-colors">
-                        <Info size={24} />
-                    </div>
-                    <h4 className="font-bold text-text-primary mb-2">Professional Help</h4>
-                    <p className="text-sm text-text-secondary mb-4">Directory of vet behaviorists and trainers.</p>
-                </Card>
-            </div>
-
-            <div className="flex items-start gap-3 p-4 bg-bg-surface rounded-xl border border-border">
-                <Checkbox
-                    checked={formData.reviewedResources}
-                    onChange={() => setFormData(prev => ({ ...prev, reviewedResources: !prev.reviewedResources }))}
-                />
-                <div>
-                    <p className="text-sm font-bold text-text-primary">I have reviewed these resources</p>
-                    <p className="text-xs text-text-secondary">Please confirm you've attempted alternatives before proceeding.</p>
-                </div>
+            <div className="grid grid-cols-1 gap-4">
+                {currentResources.map(res => (
+                    <Card key={res.id} className="p-4 flex items-start gap-4 hover:shadow-md transition-shadow">
+                        <div className="p-3 bg-bg-secondary rounded-xl text-brand-primary">
+                            <res.icon size={24} />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="font-bold text-text-primary">{res.title}</h4>
+                            <p className="text-sm text-text-secondary mb-3">{res.desc}</p>
+                            <label className="flex items-center gap-2 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={!!formData.reviewedResources[res.id]}
+                                    onChange={() => setFormData(prev => ({
+                                        ...prev,
+                                        reviewedResources: { ...prev.reviewedResources, [res.id]: !prev.reviewedResources[res.id] }
+                                    }))}
+                                    className="w-4 h-4 text-brand-primary rounded border-gray-300 focus:ring-brand-primary"
+                                />
+                                <span className={`text-sm ${formData.reviewedResources[res.id] ? 'text-brand-primary font-bold' : 'text-text-tertiary'}`}>
+                                    I have reviewed this resource
+                                </span>
+                            </label>
+                        </div>
+                    </Card>
+                ))}
             </div>
 
             <div className="flex gap-4">
                 <Button variant="outline" onClick={prevStep}>Back</Button>
                 <div className="flex-1"></div>
-                <Button variant="primary" onClick={nextStep} disabled={!formData.reviewedResources}>Continue to Acknowledgment</Button>
-            </div>
-        </div>
-    );
-
-    // Step 3: Acknowledgment
-    const renderStep3 = () => (
-        <div className="space-y-8 max-w-2xl mx-auto">
-            <div className="text-center mb-6">
-                <h2 className="text-2xl font-bold text-text-primary">Important Acknowledgments</h2>
-                <p className="text-text-secondary">Please confirm you understand the rehoming process.</p>
-            </div>
-
-            <Card className="p-6 space-y-4">
-                {[
-                    { key: 'resources', label: 'I have reviewed available resources and attempted alternatives.' },
-                    { key: 'permanent', label: 'I understand that rehoming is a permanent decision.' },
-                    { key: 'honest', label: 'I commit to providing honest and complete information about my pet.' },
-                    { key: 'exclusive', label: 'I will not list my pet on other platforms while this listing is active.' },
-                    { key: 'responsibility', label: "I understand PetCircle's role is to facilitate connections." }
-                ].map((item) => (
-                    <div key={item.key} className="flex gap-3">
-                        <Checkbox
-                            checked={formData.acknowledgments[item.key]}
-                            onChange={() => handleAcknowledgmentChange(item.key)}
-                        />
-                        <span className="text-sm text-text-primary leading-tight pt-0.5">{item.label}</span>
-                    </div>
-                ))}
-            </Card>
-
-            <div className="space-y-2">
-                <label className="block text-sm font-bold text-text-primary">Commitment Statement (Optional)</label>
-                <textarea
-                    name="commitment"
-                    value={formData.commitment}
-                    onChange={handleInputChange}
-                    placeholder="Why have you decided to move forward with rehoming?"
-                    className="w-full h-32 px-4 py-3 rounded-xl border border-border bg-bg-surface focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none transition-all"
-                ></textarea>
-            </div>
-
-            <div className="flex gap-4">
-                <Button variant="outline" onClick={prevStep}>Back</Button>
                 <Button
                     variant="primary"
-                    className="flex-1"
-                    disabled={!Object.values(formData.acknowledgments).every(Boolean) || submitIntervention.isLoading}
-                    onClick={handleSubmit}
+                    onClick={nextStep}
+                    disabled={currentResources.some(r => !formData.reviewedResources[r.id])} // Must review all
                 >
-                    {submitIntervention.isLoading ? 'Submitting...' : 'Create Rehoming Listing'}
+                    I've Checked All Resources
                 </Button>
             </div>
         </div>
     );
 
-    return (
-        <div className="min-h-screen bg-bg-primary py-12 px-4">
-            <div className="max-w-4xl mx-auto">
-                <div className="mb-12">
-                    <h1 className="text-3xl font-bold text-center text-text-primary mb-2">Before You Rehome...</h1>
+    // Step 3: Reflection
+    const renderStep3 = () => (
+        <div className="space-y-8 max-w-2xl mx-auto animation-fade-in">
+            <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-text-primary">Crucial Reflection</h2>
+                <p className="text-text-secondary">Let's pause and reflect on the decision.</p>
+            </div>
+
+            <Card className="p-8 space-y-6">
+                {/* Attempted Solutions */}
+                <div className="space-y-3">
+                    <label className="block text-sm font-bold text-text-primary">Have you attempted any solutions listed in the previous step?</label>
+                    <select name="attemptedSolutions" value={formData.attemptedSolutions} onChange={handleInputChange} className="w-full px-4 py-3 rounded-xl border border-border bg-bg-surface outline-none">
+                        <option value="">Select an option...</option>
+                        <option value="yes_failed">Yes, but they didn't work</option>
+                        <option value="yes_partial">Yes, somewhat (need more help)</option>
+                        <option value="no_impossible">No, my situation makes it impossible</option>
+                        <option value="no_didnt_know">No, I didn't know about them</option>
+                    </select>
                 </div>
 
-                {/* Progress */}
-                <div className="flex justify-center items-center gap-4 mb-12">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="flex items-center">
-                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm transition-all ${step >= i ? 'bg-brand-primary text-text-inverted' : 'bg-bg-secondary text-text-tertiary'
-                                }`}>
-                                {step > i ? <CheckCircle size={20} /> : i}
-                            </div>
-                            {i < 3 && <div className={`w-16 h-1 bg-bg-secondary mx-2 ${step > i ? 'bg-brand-primary' : ''}`}></div>}
+                {/* Permanent vs Temporary */}
+                <div className="space-y-3">
+                    <label className="block text-sm font-bold text-text-primary">Is your situation permanent or temporary?</label>
+                    <div className="flex gap-4">
+                        <label className={`flex-1 p-4 border rounded-xl cursor-pointer text-center transition-all ${formData.isPermanent === true ? 'border-brand-primary bg-brand-primary/5 font-bold' : 'border-border hover:border-brand-secondary'}`}>
+                            <input type="radio" name="isPermanent" checked={formData.isPermanent === true} onChange={() => setFormData(p => ({ ...p, isPermanent: true }))} className="hidden" />
+                            Permanent
+                        </label>
+                        <label className={`flex-1 p-4 border rounded-xl cursor-pointer text-center transition-all ${formData.isPermanent === false ? 'border-brand-primary bg-brand-primary/5 font-bold' : 'border-border hover:border-brand-secondary'}`}>
+                            <input type="radio" name="isPermanent" checked={formData.isPermanent === false} onChange={() => setFormData(p => ({ ...p, isPermanent: false }))} className="hidden" />
+                            Temporary
+                        </label>
+                    </div>
+                    {formData.isPermanent === false && (
+                        <div className="text-sm text-status-info bg-status-info/10 p-3 rounded-lg flex gap-2">
+                            <Info size={16} className="shrink-0 mt-0.5" />
+                            Considering Foster Care might be a better option than permanent rehoming.
                         </div>
-                    ))}
+                    )}
+                </div>
+
+                {/* Certainty Scale */}
+                <div className="space-y-4">
+                    <label className="flex justify-between text-sm font-bold text-text-primary">
+                        <span>How certain are you about rehoming? (1-10)</span>
+                        <span className="text-brand-primary text-lg">{formData.certaintyScale}</span>
+                    </label>
+                    <input
+                        type="range" min="1" max="10"
+                        value={formData.certaintyScale}
+                        onChange={(e) => setFormData(p => ({ ...p, certaintyScale: parseInt(e.target.value) }))}
+                        className="w-full accent-brand-primary h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer"
+                    />
+                    <div className="flex justify-between text-xs text-text-tertiary">
+                        <span>Unsure</span>
+                        <span>Absolutely Certain</span>
+                    </div>
+                    {formData.certaintyScale < 7 && (
+                        <div className="text-sm text-text-primary font-medium text-center">
+                            It seems you're having doubts. It's okay to take more time.
+                        </div>
+                    )}
+                </div>
+            </Card>
+
+            <div className="flex gap-4">
+                <Button variant="outline" onClick={prevStep}>Back</Button>
+                <div className="flex-1"></div>
+                <Button variant="primary" onClick={nextStep} disabled={!formData.attemptedSolutions || formData.isPermanent === null}>Continue</Button>
+            </div>
+        </div>
+    );
+
+    // Step 4: Acknowledgments
+    const renderStep4 = () => (
+        <div className="space-y-8 max-w-2xl mx-auto animation-fade-in">
+            <div className="text-center mb-6">
+                <h2 className="text-2xl font-bold text-text-primary">Final Acknowledgments</h2>
+                <p className="text-text-secondary">Please confirm you understand the responsibilities.</p>
+            </div>
+
+            <Card className="p-6 space-y-4">
+                {[
+                    { key: 'resources', label: 'I have reviewed the resources and attempted alternatives where possible.' },
+                    { key: 'permanent', label: 'I understand that rehoming is a permanent decision.' },
+                    { key: 'honest', label: 'I commit to providing honest, complete info about my pet (health/behavior).' },
+                    { key: 'exclusive', label: 'I will not list my pet on other platforms while this listing is active.' },
+                    { key: 'responsibility', label: "I understand PetCircle's role is to facilitate connections, not guarantee adoption." },
+                    { key: 'fee_policy', label: 'I agree to the platform fee policy (if applicable).' },
+                    { key: 'tos', label: 'I agree to the Terms of Service & Privacy Policy.' },
+                ].map((item) => (
+                    <div key={item.key} className="flex gap-3 items-start">
+                        <Checkbox
+                            checked={formData.acknowledgments[item.key]}
+                            onChange={() => handleAcknowledgmentChange(item.key)}
+                            className="mt-1"
+                        />
+                        <span className="text-sm text-text-primary">{item.label}</span>
+                    </div>
+                ))}
+            </Card>
+
+            <div className="flex gap-4">
+                <Button variant="outline" onClick={prevStep}>Back</Button>
+                <div className="flex-1"></div>
+                <Button
+                    variant="primary"
+                    onClick={handleSubmit} // Trigger Cooling Off Modal
+                    disabled={!Object.values(formData.acknowledgments).every(Boolean)}
+                >
+                    Proceed to Listing
+                </Button>
+            </div>
+        </div>
+    );
+
+    // -- Modals --
+
+    // Entry Modal
+    const renderEntryModal = () => {
+        if (!showEntryModal) return null;
+        return (
+            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4 animate-in fade-in zoom-in duration-300">
+                <div className="bg-bg-primary rounded-2xl max-w-md w-full p-8 shadow-2xl space-y-6 text-center">
+                    <div className="w-16 h-16 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto text-brand-primary">
+                        <HeartHandshake size={32} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-text-primary">Before we start...</h2>
+                    <p className="text-text-secondary leading-relaxed">
+                        Rehoming is a big decision. We can help you explore alternatives to keep your pet, or guide you through finding them a great new home.
+                    </p>
+                    <div className="flex flex-col gap-3">
+                        <Button variant="outline" className="w-full py-4 border-2" onClick={() => setShowEntryModal(false)}>
+                            Explore Alternatives First
+                        </Button>
+                        <Button variant="ghost" className="text-text-tertiary text-sm hover:underline" onClick={() => setShowEntryModal(false)}>
+                            I've already decided to rehome
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
+    // -- Render Cooling Screen --
+    if (coolingData) {
+        // Calculate remaining time
+        const now = new Date();
+        const coolingUntil = new Date(coolingData.cooling_until);
+        const diffMs = coolingUntil - now;
+        const diffHrs = Math.ceil(diffMs / (1000 * 60 * 60));
+
+        const isCoolingOver = diffMs <= 0;
+
+        return (
+            <div className="min-h-screen bg-bg-primary flex items-center justify-center p-4">
+                <Card className="max-w-md w-full p-8 text-center space-y-6">
+                    <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center mx-auto text-brand-primary">
+                        <Clock size={40} />
+                    </div>
+                    <h2 className="text-2xl font-bold text-text-primary">
+                        {isCoolingOver ? "Cooling Period Complete" : "Cooling Period Active"}
+                    </h2>
+
+                    {!isCoolingOver ? (
+                        <div className="space-y-4">
+                            <p className="text-text-secondary leading-relaxed">
+                                We ask all owners to wait 48 hours before listing. This ensures the decision is made with a clear mind.
+                            </p>
+                            <div className="bg-bg-secondary p-4 rounded-xl text-brand-primary font-bold text-xl">
+                                {diffHrs} Hours Remaining
+                            </div>
+                            <Button variant="outline" onClick={() => navigate('/dashboard')}>Return to Dashboard</Button>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                            <p className="text-text-secondary">
+                                Thank you for waiting. If you still wish to proceed, you can now create your listing.
+                            </p>
+                            <Button
+                                variant="primary"
+                                className="w-full"
+                                onClick={async () => {
+                                    try {
+                                        // Update to proceeded
+                                        await updateIntervention.mutateAsync({
+                                            id: coolingData.id,
+                                            data: { status: 'proceeded' }
+                                        });
+                                        navigate('/rehoming/create');
+                                    } catch (e) {
+                                        toast.error("Failed to proceed.");
+                                    }
+                                }}
+                            >
+                                Proceed to Listing
+                            </Button>
+                        </div>
+                    )}
+                </Card>
+            </div>
+        );
+    }
+
+
+    return (
+        <div className="min-h-screen bg-bg-primary py-12 px-4">
+            {/* Modals */}
+            {renderEntryModal()}
+
+            <div className="max-w-4xl mx-auto">
+                {/* Header */}
+                <div className="text-center mb-10">
+                    <h1 className="text-3xl font-bold text-text-primary mb-2">Responsible Rehoming</h1>
+                    <div className="flex justify-center items-center gap-2 text-sm text-text-tertiary">
+                        <span>Step {step} of 4</span>
+                        <div className="w-20 h-1 bg-bg-secondary rounded-full overflow-hidden">
+                            <div className="h-full bg-brand-primary transition-all duration-500" style={{ width: `${(step / 4) * 100}%` }}></div>
+                        </div>
+                    </div>
                 </div>
 
                 {step === 1 && renderStep1()}
                 {step === 2 && renderStep2()}
                 {step === 3 && renderStep3()}
+                {step === 4 && renderStep4()}
             </div>
         </div>
     );
