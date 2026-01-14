@@ -69,8 +69,8 @@ const HowItWorksPage = () => {
                         <button
                             onClick={() => setActiveTab('adopter')}
                             className={`px-8 py-3 rounded-full font-bold transition-all duration-300 ${activeTab === 'adopter'
-                                    ? 'bg-brand-primary text-white shadow-sm'
-                                    : 'text-text-secondary hover:bg-gray-100'
+                                ? 'bg-brand-primary text-white shadow-sm'
+                                : 'text-text-secondary hover:bg-gray-100'
                                 }`}
                         >
                             I want to Adopt
@@ -78,8 +78,8 @@ const HowItWorksPage = () => {
                         <button
                             onClick={() => setActiveTab('owner')}
                             className={`px-8 py-3 rounded-full font-bold transition-all duration-300 ${activeTab === 'owner'
-                                    ? 'bg-brand-secondary text-white shadow-sm'
-                                    : 'text-text-secondary hover:bg-gray-100'
+                                ? 'bg-brand-secondary text-white shadow-sm'
+                                : 'text-text-secondary hover:bg-gray-100'
                                 }`}
                         >
                             I need to Rehome
@@ -109,7 +109,7 @@ const HowItWorksPage = () => {
                 <div className="max-w-4xl mx-auto px-6 text-center">
                     <h2 className="text-3xl font-bold mb-8">Ready to start your journey?</h2>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link to="/browse" className="px-8 py-4 bg-brand-primary text-white rounded-full font-bold hover:bg-brand-primary/90 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
+                        <Link to="/pets" className="px-8 py-4 bg-brand-primary text-white rounded-full font-bold hover:bg-brand-primary/90 transition shadow-lg hover:shadow-xl transform hover:-translate-y-1">
                             Browse Pets
                         </Link>
                         <Link to="/register" className="px-8 py-4 bg-white border-2 border-brand-primary text-brand-primary rounded-full font-bold hover:bg-brand-primary/5 transition">

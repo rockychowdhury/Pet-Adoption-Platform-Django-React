@@ -39,7 +39,7 @@ const PetDetailPage = () => {
             </div>
             <h1 className="text-3xl font-logo font-black tracking-tight text-text-primary mb-2">Pet Not Found</h1>
             <p className="text-text-secondary font-jakarta mb-8 max-w-sm">The pet profile you are looking for might have been removed or the link is broken.</p>
-            <Button variant="primary" onClick={() => navigate('/adopt')}>Browse Other Pets</Button>
+            <Button variant="primary" onClick={() => navigate('/pets')}>Browse Other Pets</Button>
         </div>
     );
 

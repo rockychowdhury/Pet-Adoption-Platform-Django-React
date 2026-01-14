@@ -126,12 +126,12 @@ const HeroSection = () => {
                             variants={itemVariants}
                             className="flex flex-wrap gap-5"
                         >
-                            <button className="px-10 py-5 bg-brand-primary text-text-inverted rounded-full font-black text-xs uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-brand-primary/20">
+                            <Link to="/pets" className="px-10 py-5 bg-brand-primary text-text-inverted rounded-full font-black text-xs uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-brand-primary/20 flex items-center justify-center">
                                 Find a Pet
-                            </button>
-                            <button className="px-10 py-5 bg-bg-surface text-text-primary border border-border/60 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-bg-secondary transition-all duration-300">
+                            </Link>
+                            <Link to="/community" className="px-10 py-5 bg-bg-surface text-text-primary border border-border/60 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-bg-secondary transition-all duration-300 flex items-center justify-center">
                                 Join Community
-                            </button>
+                            </Link>
                         </motion.div>
                     </motion.div>
 

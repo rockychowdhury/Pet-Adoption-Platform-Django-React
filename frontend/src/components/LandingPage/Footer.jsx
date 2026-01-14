@@ -60,7 +60,7 @@ const Footer = () => {
                     <motion.div variants={itemVariants}>
                         <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-text-tertiary mb-10">Navigation</h4>
                         <ul className="space-y-5 text-[13px] font-black uppercase tracking-widest text-text-secondary">
-                            <li><FooterLink to="/adopt">Find a Pet</FooterLink></li>
+                            <li><FooterLink to="/pets">Find a Pet</FooterLink></li>
                             <li><FooterLink to="/rehoming">Rehome a Pet</FooterLink></li>
                             <li><FooterLink to="/services">Pet Services</FooterLink></li>
                             <li><FooterLink to="/community">Community Feed</FooterLink></li>

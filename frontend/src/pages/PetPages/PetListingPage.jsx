@@ -201,7 +201,6 @@ const PetListingPage = () => {
             verified_owner: '',
             verified_identity: '',
             verified_vet: '',
-            verified_vet: '',
             max_fee: '',
             energy_level: '',
             location: '',

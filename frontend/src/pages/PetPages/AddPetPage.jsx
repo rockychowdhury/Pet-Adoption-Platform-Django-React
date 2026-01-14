@@ -14,6 +14,21 @@ import {
     Camera, Info, Dog, Cat, Rabbit, Bird, Plus, Check, Calendar, Sparkles
 } from 'lucide-react';
 
+const deepEqual = (obj1, obj2) => {
+    if (obj1 === obj2) return true;
+    if (typeof obj1 !== 'object' || obj1 === null || typeof obj2 !== 'object' || obj2 === null) return false;
+    if (Array.isArray(obj1) !== Array.isArray(obj2)) return false;
+
+    const keys1 = Object.keys(obj1);
+    const keys2 = Object.keys(obj2);
+    if (keys1.length !== keys2.length) return false;
+
+    for (const key of keys1) {
+        if (!keys2.includes(key) || !deepEqual(obj1[key], obj2[key])) return false;
+    }
+    return true;
+};
+
 const SECTIONS = [
     { id: 'basic', label: 'Identity', icon: PawPrint },
     { id: 'photos', label: 'Visuals', icon: Camera },
@@ -29,16 +44,12 @@ const SPECIES_OPTIONS = [
     { value: 'other', label: 'Other', icon: <Plus size={24} /> },
 ];
 
-const PERSONALITY_TRAITS = [
-    'Playful', 'Calm', 'Energetic', 'Affectionate', 'Independent', 'Friendly', 'Shy', 'Protective', 'Curious', 'Lazy', 'Good with Kids', 'Good with Dogs', 'Good with Cats'
-];
+// PERSONALITY_TRAITS removed - fetched from API
 
 const SIZE_OPTIONS = [
-    { value: 'xs', label: 'XS (0-10 lbs)' },
-    { value: 'small', label: 'Small (11-25 lbs)' },
-    { value: 'medium', label: 'Medium (26-60 lbs)' },
-    { value: 'large', label: 'Large (61-100 lbs)' },
-    { value: 'xl', label: 'XL (100+ lbs)' },
+    { value: 'small', label: 'Small' },
+    { value: 'medium', label: 'Medium' },
+    { value: 'large', label: 'Large' },
 ];
 
 const AddPetPage = () => {
@@ -51,9 +62,12 @@ const AddPetPage = () => {
     // Draft State
     const [petId, setPetId] = useState(paramId || null);
     const [isDraftCreated, setIsDraftCreated] = useState(!!paramId);
+    const [initialPayload, setInitialPayload] = useState(null);
 
     const [activeSection, setActiveSection] = useState('basic');
     const [isSaving, setIsSaving] = useState(false);
+
+    const [availableTraits, setAvailableTraits] = useState([]);
 
     const { register, control, handleSubmit, setValue, watch, trigger, formState: { errors } } = useForm({
         mode: 'onChange',
@@ -61,21 +75,15 @@ const AddPetPage = () => {
             pet_name: '',
             species: 'dog',
             breed: '',
-            age: '',
             birth_date: '',
             gender: 'unknown',
             size: 'medium',
             weight: '',
-            color: '',
             rehoming_story: '',
             personality_traits: [],
-            is_active: true,
             medical_history: {
                 spayed_neutered: false,
-                vaccinations_up_to_date: false,
                 microchipped: false,
-                microchip_number: '',
-                medical_conditions: ''
             },
             photos: []
         }
@@ -87,19 +95,16 @@ const AddPetPage = () => {
         name: data.pet_name,
         species: data.species,
         breed: data.breed,
-        age: parseInt(data.age || 0),
         birth_date: data.birth_date || null,
         gender: data.gender,
         size_category: data.size,
-        weight: parseFloat(data.weight) || 0,
+        weight_kg: parseFloat(data.weight) || 0,
         description: data.rehoming_story,
-        photos: data.photos,
-        personality_traits: data.personality_traits,
-        is_active: data.is_active,
-        is_spayed_neutered: data.medical_history?.spayed_neutered,
-        is_microchipped: data.medical_history?.microchipped,
-        microchip_number: data.medical_history?.microchip_number,
-        health_status: data.medical_history?.medical_conditions,
+        media_data: data.photos, // Send list of {url, delete_url} objects
+        traits: data.personality_traits,
+        status: 'active', // Default validation status
+        spayed_neutered: data.medical_history?.spayed_neutered,
+        microchipped: data.medical_history?.microchipped,
     }), []);
 
     // Load Existing Pet
@@ -110,27 +115,26 @@ const AddPetPage = () => {
                     const res = await api.get(`/pets/profiles/${paramId}/`);
                     const pet = res.data;
                     const formData = {
-                        pet_name: pet.pet_name || pet.name,
+                        pet_name: pet.name,
                         species: pet.species,
                         breed: pet.breed || '',
-                        age: pet.age || '',
                         birth_date: pet.birth_date || '',
                         gender: pet.gender || 'unknown',
                         size: pet.size_category || 'medium',
-                        weight: pet.weight || '',
-                        rehoming_story: pet.description || pet.rehoming_story || '',
-                        personality_traits: pet.personality_traits || [],
-                        is_active: pet.is_active ?? true,
+                        weight: pet.weight_kg || '',
+                        rehoming_story: pet.description || '',
+                        personality_traits: pet.traits ? pet.traits.map(t => t.name) : [],
                         medical_history: {
-                            spayed_neutered: pet.is_spayed_neutered || false,
-                            vaccinations_up_to_date: false,
-                            microchipped: pet.is_microchipped || false,
-                            microchip_number: pet.microchip_number || '',
-                            medical_conditions: pet.health_status || ''
+                            spayed_neutered: pet.spayed_neutered || false,
+                            microchipped: pet.microchipped || false,
                         },
-                        photos: pet.photos || []
+                        photos: pet.media ? pet.media.map(m => ({ url: m.url, delete_url: m.delete_url })) : []
                     };
                     Object.keys(formData).forEach(key => setValue(key, formData[key]));
+
+                    // Set initial payload for comparison
+                    const initial = getPayload(formData);
+                    setInitialPayload(initial);
                 } catch (error) {
                     console.error("Failed to fetch pet", error);
                     toast.error("Could not load pet details.");
@@ -139,6 +143,21 @@ const AddPetPage = () => {
             fetchPet();
         }
     }, [paramId, api, setValue, user]);
+
+    // Fetch Traits
+    useEffect(() => {
+        const fetchTraits = async () => {
+            try {
+                const res = await api.get('/pets/traits/');
+                // API might return list or { results: list } if paginated
+                const traitsData = Array.isArray(res.data) ? res.data : (res.data.results || []);
+                setAvailableTraits(traitsData);
+            } catch (error) {
+                console.error("Failed to fetch traits", error);
+            }
+        };
+        fetchTraits();
+    }, [api]);
 
     // Step Navigation Handlers
     const currentSectionIndex = SECTIONS.findIndex(s => s.id === activeSection);
@@ -159,11 +178,18 @@ const AddPetPage = () => {
                 setIsDraftCreated(true);
                 // Update URL without reload
                 window.history.replaceState(null, '', `/dashboard/pets/${newPetId}/edit`);
+                setInitialPayload(payload);
                 toast.success("Draft created! You can finish this later.");
             } else {
                 // Update existing draft
                 const payload = getPayload(watchedValues);
-                await api.patch(`/pets/profiles/${petId}/`, payload);
+
+                // Only save if data changed
+                if (!initialPayload || !deepEqual(payload, initialPayload)) {
+                    await api.patch(`/pets/profiles/${petId}/`, payload);
+                    setInitialPayload(payload);
+                    toast.success("Progress saved.");
+                }
             }
             if (!isLastSection) setActiveSection(SECTIONS[currentSectionIndex + 1].id);
         } catch (error) {
@@ -186,12 +212,15 @@ const AddPetPage = () => {
         try {
             const payload = getPayload(watchedValues);
             if (isDraftCreated) {
-                await api.patch(`/pets/profiles/${petId}/`, payload);
+                if (!initialPayload || !deepEqual(payload, initialPayload)) {
+                    await api.patch(`/pets/profiles/${petId}/`, payload);
+                }
+                toast.success("Profile updated successfully!");
             } else {
                 await api.post('/pets/profiles/', payload);
+                toast.success("Profile created successfully!");
             }
             navigate('/dashboard/my-pets');
-            toast.success("Profile saved successfully!");
         } catch (error) {
             console.error("Final submit failed", error);
             toast.error("Failed to save profile.");
@@ -206,10 +235,13 @@ const AddPetPage = () => {
         try {
             const uploadPromises = files.map(file => uploadImage(file));
             const results = await Promise.all(uploadPromises);
-            const validUrls = results.filter(res => res && res.success).map(res => res.url);
-            if (validUrls.length > 0) {
+            const validPhotos = results.filter(res => res && res.success).map(res => ({
+                url: res.url,
+                delete_url: res.delete_url
+            }));
+            if (validPhotos.length > 0) {
                 const current = watch('photos') || [];
-                setValue('photos', [...current, ...validUrls].slice(0, 10));
+                setValue('photos', [...current, ...validPhotos].slice(0, 10));
             }
         } catch (err) {
             toast.error("Upload failed");
@@ -294,11 +326,12 @@ const AddPetPage = () => {
                                                     setValue('age', Math.max(0, age));
                                                 }
                                             })}
-                                            className="w-full bg-bg-secondary/50 border-2 border-transparent focus:border-brand-primary/30 focus:bg-bg-surface rounded-[1.25rem] px-6 py-4 outline-none transition-all duration-200 font-medium text-text-primary pr-12 cursor-pointer"
+                                            className={`w-full bg-bg-secondary/50 border-2 rounded-[1.25rem] px-6 py-4 outline-none transition-all duration-200 font-medium text-text-primary pr-12 cursor-pointer ${errors.birth_date ? 'border-status-error/20 focus:border-status-error' : 'border-transparent focus:border-brand-primary/30 focus:bg-bg-surface'}`}
                                             onClick={(e) => e.target.showPicker && e.target.showPicker()}
                                         />
-                                        <Calendar className="absolute right-6 top-1/2 -translate-y-1/2 text-text-tertiary pointer-events-none group-focus-within:text-brand-primary transition-colors" size={18} />
+                                        <Calendar className={`absolute right-6 top-1/2 -translate-y-1/2 pointer-events-none transition-colors ${errors.birth_date ? 'text-status-error' : 'text-text-tertiary group-focus-within:text-brand-primary'}`} size={18} />
                                     </div>
+                                    {errors.birth_date && <p className="text-status-error text-xs font-bold ml-2">{errors.birth_date.message}</p>}
                                     {watch('birth_date') && (
                                         <div className="px-4 py-2 bg-brand-primary/10 rounded-xl text-brand-primary text-xs font-bold inline-flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
                                             <Sparkles size={14} />
@@ -370,9 +403,9 @@ const AddPetPage = () => {
                                     <span className="text-xs font-bold text-text-secondary">{uploading ? 'Uploading...' : 'Add Photos'}</span>
                                 </div>
                             </div>
-                            {(watch('photos') || []).map((src, idx) => (
+                            {(watch('photos') || []).map((photo, idx) => (
                                 <div key={idx} className="relative aspect-square rounded-[2rem] overflow-hidden group shadow-lg">
-                                    <img src={src} alt="Preview" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
+                                    <img src={photo.url} alt="Preview" className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" />
                                     <button type="button" onClick={() => removePhoto(idx)} className="absolute top-2 right-2 p-2 bg-white/90 rounded-full text-red-500 opacity-0 group-hover:opacity-100 transition-opacity">
                                         <X size={14} />
                                     </button>
@@ -391,19 +424,22 @@ const AddPetPage = () => {
                                     name="personality_traits" control={control}
                                     render={({ field }) => (
                                         <>
-                                            {PERSONALITY_TRAITS.map(trait => (
-                                                <button
-                                                    key={trait} type="button"
-                                                    onClick={() => {
-                                                        const current = field.value || [];
-                                                        if (current.includes(trait)) field.onChange(current.filter(t => t !== trait));
-                                                        else field.onChange([...current, trait]);
-                                                    }}
-                                                    className={`px-4 py-2 rounded-full text-xs font-bold transition-all border-2 ${field.value?.includes(trait) ? 'bg-brand-primary border-brand-primary text-text-inverted' : 'bg-bg-surface border-border text-text-tertiary'}`}
-                                                >
-                                                    {trait}
-                                                </button>
-                                            ))}
+                                            {availableTraits.map(traitObj => {
+                                                const traitName = traitObj.name;
+                                                return (
+                                                    <button
+                                                        key={traitObj.id} type="button"
+                                                        onClick={() => {
+                                                            const current = field.value || [];
+                                                            if (current.includes(traitName)) field.onChange(current.filter(t => t !== traitName));
+                                                            else field.onChange([...current, traitName]);
+                                                        }}
+                                                        className={`px-4 py-2 rounded-full text-xs font-bold transition-all border-2 ${field.value?.includes(traitName) ? 'bg-brand-primary border-brand-primary text-text-inverted' : 'bg-bg-surface border-border text-text-tertiary'}`}
+                                                    >
+                                                        {traitName}
+                                                    </button>
+                                                );
+                                            })}
                                         </>
                                     )}
                                 />
@@ -423,6 +459,7 @@ const AddPetPage = () => {
                 return (
                     <div className="space-y-8 animate-in slide-in-from-right-8 duration-500">
                         <div className="space-y-4">
+                            <label className="text-sm font-bold text-text-secondary ml-1">Medical Status</label>
                             <div className="grid grid-cols-2 gap-4">
                                 <label className={`flex items-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer ${watch('medical_history.spayed_neutered') ? 'border-status-success bg-status-success/10 text-status-success' : 'border-border bg-bg-secondary text-text-tertiary'}`}>
                                     <input type="checkbox" {...register('medical_history.spayed_neutered')} className="hidden" />
@@ -435,41 +472,17 @@ const AddPetPage = () => {
                                     <span className="text-xs font-bold uppercase tracking-wider">Microchipped</span>
                                 </label>
                             </div>
-                            {watch('medical_history.microchipped') && (
-                                <div className="animate-in slide-in-from-top-2 duration-300">
-                                    <label className="text-sm font-bold text-text-secondary ml-1">Microchip Number</label>
-                                    <input
-                                        {...register('medical_history.microchip_number')}
-                                        className="w-full bg-bg-secondary/50 border-2 border-transparent focus:border-brand-primary/30 focus:bg-bg-surface rounded-[1.25rem] px-6 py-4 outline-none transition-all duration-200 font-medium text-text-primary mt-2"
-                                        placeholder="e.g. 981020000123456"
-                                    />
-                                </div>
-                            )}
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-bold text-text-secondary ml-1">Health Notes</label>
-                            <textarea
-                                {...register('medical_history.medical_conditions')}
-                                className="w-full h-32 bg-bg-secondary/50 border-2 border-transparent focus:border-brand-primary/30 focus:bg-bg-surface rounded-[1.5rem] px-6 py-4 outline-none transition-all duration-200 font-medium text-text-primary resize-none"
-                                placeholder="Any allergies or conditions?"
-                            />
                         </div>
 
-                        <label className="flex items-center gap-4 bg-bg-secondary/50 p-6 rounded-[1.5rem] cursor-pointer hover:bg-bg-surface hover:shadow-soft transition-all group border-2 border-transparent hover:border-brand-primary/20">
-                            <div className="relative">
-                                <input
-                                    type="checkbox"
-                                    {...register('is_active')}
-                                    className="sr-only peer"
-                                />
-                                <div className="w-12 h-6 bg-bg-secondary rounded-full peer peer-checked:bg-status-success transition-colors"></div>
-                                <div className="absolute left-1 top-1 w-4 h-4 bg-bg-surface rounded-full transition-transform peer-checked:translate-x-6"></div>
+                        <div className="bg-bg-secondary/30 p-6 rounded-2xl border border-border/50 flex gap-4">
+                            <Info size={24} className="text-brand-primary flex-shrink-0" />
+                            <div className="space-y-1">
+                                <h4 className="text-sm font-bold text-text-primary">Medical Privacy</h4>
+                                <p className="text-xs text-text-tertiary leading-relaxed">
+                                    We only display the basics (Spayed/Neutered status) publicly. Detailed medical records will be handled securely during the adoption process if needed.
+                                </p>
                             </div>
-                            <div>
-                                <p className="font-bold text-text-primary group-hover:text-status-success transition-colors">Visible to Public</p>
-                                <p className="text-xs text-text-tertiary font-medium">Determines if other users can discover this profile.</p>
-                            </div>
-                        </label>
+                        </div>
                     </div >
                 );
             default: return null;
@@ -548,7 +561,7 @@ const AddPetPage = () => {
                             <div className="bg-bg-surface rounded-[1.5rem] overflow-hidden shadow-soft border border-border group">
                                 <div className="aspect-[4/5] bg-bg-secondary relative overflow-hidden">
                                     {(watchedValues.photos && watchedValues.photos.length > 0) ? (
-                                        <img src={watchedValues.photos[0]} alt="Preview" className="w-full h-full object-cover" />
+                                        <img src={watchedValues.photos[0].url} alt="Preview" className="w-full h-full object-cover" />
                                     ) : (
                                         <div className="w-full h-full flex flex-col items-center justify-center text-text-tertiary gap-4">
                                             <div className="w-20 h-20 rounded-full border-4 border-dashed border-border flex items-center justify-center">

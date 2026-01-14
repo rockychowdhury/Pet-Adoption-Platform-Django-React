@@ -37,7 +37,7 @@ const DashboardLayout = () => {
         { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
         { name: 'My Pets', path: '/dashboard/my-pets', icon: PawPrint },
         // Reuse rehoming manage page as "My Listings"
-        { name: 'My Listings', path: '/dashboard/rehoming/manage', icon: FileText },
+        { name: 'My Listings', path: '/dashboard/rehoming', icon: FileText },
         // Applications focuses on adopter applications view
         { name: 'Applications', path: '/dashboard/applications', icon: FolderOpen },
         { name: 'Messages', path: '/messages', icon: MessageSquare },

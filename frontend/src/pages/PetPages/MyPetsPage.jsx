@@ -32,9 +32,9 @@ const MyPetsPage = () => {
     const filteredPets = useMemo(() => {
         const petsList = Array.isArray(pets) ? pets : (pets?.results || []);
         return petsList.filter(pet => {
-            // Tab Filter based on is_active boolean
-            if (activeTab === 'Active' && !pet.is_active) return false;
-            if (activeTab === 'Inactive' && pet.is_active) return false;
+            // Tab Filter based on status
+            if (activeTab === 'Active' && pet.status !== 'active') return false;
+            if (activeTab === 'Inactive' && pet.status === 'active') return false;
 
             // Search Filter - PetProfile uses 'name'
             if (searchQuery) {
@@ -77,11 +77,14 @@ const MyPetsPage = () => {
     // Toggle Active Status
     const handleToggleActive = async (pet) => {
         try {
+            const newStatus = pet.status === 'active' ? 'rehomed' : 'active'; // or 'archived' depending on backend enum. Let's use rehomed as inactive for now or check model.
+            // Backend choices: active, rehomed, deceased. 
+            // If currently active -> rehomed. If not active -> active.
             await updatePetMutation.mutateAsync({
                 id: pet.id,
-                data: { is_active: !pet.is_active }
+                data: { status: newStatus }
             });
-            toast.success(`${pet.name} is now ${!pet.is_active ? 'Active' : 'Archived'}`);
+            toast.success(`${pet.name} is now ${newStatus === 'active' ? 'Active' : 'Archived'}`);
         } catch (error) {
             toast.error("Failed to update status.");
         }
@@ -180,7 +183,7 @@ const MyPetsPage = () => {
                     </div>
 
                     {/* Content Grid */}
-                    {isLoading ? (
+                    {isLoading && !pets ? (
                         <div className="flex justify-center py-32">
                             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-100 border-t-gray-900" />
                         </div>

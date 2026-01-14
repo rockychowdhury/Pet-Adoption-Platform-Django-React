@@ -51,19 +51,19 @@ const Navbar = () => {
         if (searchLocation) params.set('location', searchLocation);
         if (radius) params.set('radius', radius);
 
-        // Always navigate to /adopt for search results from navbar
-        // Use replace: true if already on /adopt to avoid spamming history with live search
-        const isAdoptPage = location.pathname === '/adopt';
-        navigate(`/adopt?${params.toString()}`, { replace: isAdoptPage });
+        // Always navigate to /pets for search results from navbar
+        // Use replace: true if already on /pets to avoid spamming history with live search
+        const isPetsPage = location.pathname === '/pets';
+        navigate(`/pets?${params.toString()}`, { replace: isPetsPage });
     };
 
     // Determine if search bar should be visible based on path
-    const showSearchBar = location.pathname.startsWith('/adopt') ||
+    const showSearchBar = location.pathname.startsWith('/pets') ||
         location.pathname.startsWith('/services') ||
         location.pathname.startsWith('/community');
 
     // Determine if location pill should be shown in search bar
-    const showLocation = location.pathname.startsWith('/adopt') ||
+    const showLocation = location.pathname.startsWith('/pets') ||
         location.pathname.startsWith('/services');
 
     return (
@@ -81,7 +81,7 @@ const Navbar = () => {
                             {/* Show Links on Left ONLY if Search Bar is Visible */}
                             {showSearchBar && (
                                 <div className="hidden xl:flex items-center gap-8">
-                                    <NavLink to="/adopt" label="Find a Pet" active={isActive('/adopt')} />
+                                    <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />
                                     <NavLink to="/services" label="Services" active={isActive('/services')} />
                                     <NavLink to="/community" label="Community" active={isActive('/community')} />
                                     <NavLink to="/about" label="About" active={isActive('/about')} />
@@ -106,7 +106,7 @@ const Navbar = () => {
                             ) : (
                                 /* Show Links in Center if Search Bar is Hidden */
                                 <div className="hidden md:flex items-center gap-8">
-                                    <NavLink to="/adopt" label="Find a Pet" active={isActive('/adopt')} />
+                                    <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />
                                     <NavLink to="/services" label="Services" active={isActive('/services')} />
                                     <NavLink to="/community" label="Community" active={isActive('/community')} />
                                     <NavLink to="/about" label="About" active={isActive('/about')} />
@@ -219,7 +219,7 @@ const Navbar = () => {
                 {/* Mobile Menu (simplified for now) */}
                 {isMenuOpen && (
                     <div className="md:hidden bg-white border-t border-gray-100 absolute top-full left-0 w-full shadow-xl p-4 flex flex-col gap-4 animate-fade-in">
-                        <MobileNavLink to="/adopt" label="Find a Pet" onClick={() => setIsMenuOpen(false)} active={isActive('/adopt')} />
+                        <MobileNavLink to="/pets" label="Find a Pet" onClick={() => setIsMenuOpen(false)} active={isActive('/pets')} />
                         <MobileNavLink to="/services" label="Services" onClick={() => setIsMenuOpen(false)} active={isActive('/services')} />
                         <MobileNavLink to="/community" label="Community" onClick={() => setIsMenuOpen(false)} active={isActive('/community')} />
                         <MobileNavLink to="/about" label="About" onClick={() => setIsMenuOpen(false)} active={isActive('/about')} />

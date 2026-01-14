@@ -9,7 +9,7 @@ const NotFoundPage = () => {
     const handleSearch = (e) => {
         e.preventDefault();
         // Implement search logic or redirect to browse
-        navigate('/browse');
+        navigate('/pets');
     };
 
     return (
@@ -67,7 +67,7 @@ const NotFoundPage = () => {
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <QuickLink
-                            to="/browse"
+                            to="/pets"
                             icon={<Search size={20} />}
                             label="Browse Pets"
                         />

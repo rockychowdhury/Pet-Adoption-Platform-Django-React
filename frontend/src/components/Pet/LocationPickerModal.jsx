@@ -146,8 +146,6 @@ const LocationPickerModal = ({ isOpen, onClose, onSelect, initialLocation, initi
         onSelect({
             name: locationName,
             lat: position[0],
-            name: locationName,
-            lat: position[0],
             lng: position[1],
             radius: radius
         });
