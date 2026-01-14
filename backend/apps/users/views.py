@@ -5,16 +5,17 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import  TokenError
 from rest_framework import viewsets, permissions
 from apps.users.permissions import IsOwnerOrReadOnly
 from .serializers import (
     UserRegistrationSerializer, UserUpdateSerializer, UserSerializer, 
-    UserPetSerializer, PublicUserSerializer, VerificationDocumentSerializer, RoleRequestSerializer, AdopterProfileSerializer
+    PublicUserSerializer, RoleRequestSerializer
 )
+from apps.pets.serializers import PetProfileSerializer
 from .utils import send_verification_email, send_password_reset_email
-from .models import VerificationDocument, RoleRequest, AdopterProfile
+from .models import RoleRequest
 from apps.pets.models import PetProfile
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
@@ -274,6 +275,9 @@ class ResendEmailVerificationView(APIView):
 
 
 class UserProfileUpdateView(APIView):
+    """
+    Updates the User's profile information.
+    """
     permission_classes = [IsAuthenticated]
 
     def patch(self, request):
@@ -423,7 +427,7 @@ class PasswordResetConfirmView(APIView):
             return Response({"error": "Invalid or expired token"}, status=400)
 
 class UserPetViewSet(viewsets.ModelViewSet):
-    serializer_class = UserPetSerializer
+    serializer_class = PetProfileSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly, IsOwnerOrReadOnly]
 
     def get_queryset(self):
@@ -446,21 +450,6 @@ class PublicUserProfileView(APIView):
             return Response(serializer.data)
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
-
-class VerificationDocumentViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet for uploading and managing verification documents.
-    Users can upload/list their own documents.
-    """
-    serializer_class = VerificationDocumentSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        return VerificationDocument.objects.filter(user=self.request.user).order_by('-created_at')
-
-    def perform_create(self, serializer):
-        serializer.save(user=self.request.user)
-
 
 class RoleRequestViewSet(viewsets.ModelViewSet):
     """
@@ -496,25 +485,3 @@ class RoleRequestViewSet(viewsets.ModelViewSet):
         
         
         return response
-
-class AdopterProfileViewSet(viewsets.ModelViewSet):
-    serializer_class = AdopterProfileSerializer
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get_queryset(self):
-        # Users can manage their own profile
-        return AdopterProfile.objects.filter(user=self.request.user)
-
-    def perform_create(self, serializer):
-        # One profile per user
-        if AdopterProfile.objects.filter(user=self.request.user).exists():
-            raise ValidationError("You already have an adopter profile.")
-        serializer.save(user=self.request.user)
-    
-    @action(detail=False, methods=['get'])
-    def me(self, request):
-        profile = AdopterProfile.objects.filter(user=request.user).first()
-        if not profile:
-            return Response({"detail": "No profile found."}, status=status.HTTP_404_NOT_FOUND)
-        serializer = self.get_serializer(profile)
-        return Response(serializer.data)

@@ -8,10 +8,10 @@ from django.utils import timezone
 from django.db import transaction
 
 from apps.pets.models import PetProfile
-from apps.users.models import UserProfile, VerificationDocument, AdopterProfile
+
 from apps.rehoming.models import (
-    RehomingListing, AdoptionApplication, AdoptionContract, 
-    RehomingIntervention, AdoptionReview
+    RehomingListing, AdoptionInquiry,
+    RehomingRequest
 )
 from apps.messaging.models import Conversation, Message
 from apps.services.models import ServiceProvider, FosterService, VeterinaryClinic, TrainerService, ServiceReview
@@ -147,7 +147,6 @@ class Command(BaseCommand):
                 phone_verified=True,
                 is_active=True
             )
-            UserProfile.objects.create(user=user)
             users.append(user)
             
         # Random Users
@@ -167,7 +166,6 @@ class Command(BaseCommand):
                 phone_verified=True,
                 is_active=True
             )
-            UserProfile.objects.create(user=user)
             users.append(user)
             
         return users
@@ -177,58 +175,67 @@ class Command(BaseCommand):
         profiles = []
         species_options = ['dog', 'cat', 'rabbit', 'bird']
         
+        from apps.pets.models import PetMedia
+        
         for i in range(total_count):
             owner = users[i % len(users)]  # Distribute evenly
             species = random.choice(species_options)
+            
+            # Approximate birth date from random age
+            age = random.randint(1, 15)
+            birth_date = timezone.now().date() - timedelta(days=age*365)
             
             profile = PetProfile.objects.create(
                 owner=owner,
                 name=self.random_pet_name(),
                 species=species,
                 breed=self.random_breed(species),
-                age=random.randint(1, 15),
+                birth_date=birth_date,
                 gender=random.choice(['male', 'female']),
                 description=self.random_pet_description(),
-                photos=[self.get_random_image(species)],
-                is_active=True
+                status='active'
             )
+            
+            # Create Media
+            PetMedia.objects.create(
+                pet=profile,
+                url=self.get_random_image(species),
+                is_primary=True
+            )
+            
             profiles.append(profile)
         
         return profiles
 
     def create_rehoming_listings(self, users, pet_profiles, count):
-        """Create 20 rehoming listings"""
+        """Create 20 rehoming listings with associated requests"""
         listings = []
         # Use first 20 profiles for listings, or random ones if count > profiles (unlikely here)
         listing_pets = pet_profiles[:count]
         
         for pet in listing_pets:
-            listing = RehomingListing.objects.create(
-                pet_owner=pet.owner,  # Use the pet's actual owner
-                pet_profile=pet,
-                pet_name=pet.name,
-                species=pet.species,
-                breed=pet.breed,
-                age=pet.age,
-                gender=pet.gender,
-                weight=Decimal(str(random.uniform(5, 50))),
-                size_category=random.choice(['small', 'medium', 'large']),
-                medical_history={
-                    'spayed_neutered': 'yes',
-                    'vaccinations_up_to_date': 'yes',
-                    'medical_conditions': []
-                },
-                behavioral_profile={
-                    'good_with_children': 'yes',
-                    'good_with_dogs': 'yes',
-                    'good_with_cats': 'unknown'
-                },
-                aggression_disclosed=False,
-                rehoming_story=self.random_rehoming_story(),
-                photos=pet.photos,
-                adoption_fee=Decimal(str(random.choice([50, 100, 150, 200]))),
+            # 1. Create Confirmed Request
+            req = RehomingRequest.objects.create(
+                pet=pet,
+                owner=pet.owner,
+                reason=self.random_rehoming_story(),
+                urgency='immediate',
                 location_city=pet.owner.location_city,
                 location_state=pet.owner.location_state,
+                status='confirmed',
+                terms_accepted=True,
+                confirmed_at=timezone.now()
+            )
+            
+            # 2. Create Listing linked to request
+            listing = RehomingListing.objects.create(
+                request=req,
+                pet=pet,
+                owner=pet.owner,
+                reason=req.reason,
+                urgency=req.urgency,
+                location_city=req.location_city,
+                location_state=req.location_state,
                 location_zip=pet.owner.zip_code,
                 status='active',
                 published_at=timezone.now()
@@ -254,7 +261,7 @@ class Command(BaseCommand):
                 email_verified=True,
                 phone_verified=True
             )
-            UserProfile.objects.create(user=user)
+
             
             provider_type = random.choice(['vet', 'foster', 'trainer', 'groomer'])
             provider = ServiceProvider.objects.create(
@@ -304,47 +311,38 @@ class Command(BaseCommand):
         return providers
 
     def create_adoption_applications(self, users, listings, count):
-        """Create 20 adoption applications"""
-        applications = []
+        """Create 20 adoption inquiries"""
+        inquiries = []
         
         for i in range(count):
             applicant = users[i % len(users)]
             listing = listings[i % len(listings)]
             
             # Ensure applicant is not owner
-            if applicant == listing.pet_owner:
+            if applicant == listing.owner:
                  applicant = users[(i + 1) % len(users)]
 
-            adopter_profile, _ = AdopterProfile.objects.get_or_create(
-                user=applicant,
-                defaults={
-                    'housing_type': 'house',
-                    'own_or_rent': 'own',
-                    'num_adults': 2,
-                    'why_adopt': 'Love pets!'
-                }
-            )
+            # Check for existing
+            if not AdoptionInquiry.objects.filter(listing=listing, requester=applicant).exists():
+                inquiry = AdoptionInquiry.objects.create(
+                    requester=applicant,
+                    listing=listing,
+                    message="I would love to adopt this pet!",
+                    status='pending'
+                )
+                inquiries.append(inquiry)
             
-            app = AdoptionApplication.objects.create(
-                applicant=applicant,
-                listing=listing,
-                adopter_profile=adopter_profile,
-                application_message="I would love to adopt this pet!",
-                status='pending_review'
-            )
-            applications.append(app)
-            
-        return applications
+        return inquiries
 
-    def create_messages(self, applications):
-        """Create a few messages for the applications"""
-        for app in applications:
+    def create_messages(self, inquiries):
+        """Create a few messages for the inquiries"""
+        for inquiry in inquiries:
             convo = Conversation.objects.create(conversation_type='direct')
-            convo.participants.add(app.applicant, app.listing.pet_owner)
+            convo.participants.add(inquiry.requester, inquiry.listing.owner)
             Message.objects.create(
                 conversation=convo,
-                sender=app.applicant,
-                content=f"Hi, is {app.listing.pet_name} still available?"
+                sender=inquiry.requester,
+                content=f"Hi, is {inquiry.listing.pet.name} still available?"
             )
 
     # Helpers

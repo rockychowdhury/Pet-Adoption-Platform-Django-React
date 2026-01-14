@@ -4,8 +4,11 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError as DjangoValidationError
 from rest_framework.exceptions import AuthenticationFailed
-from .models import UserProfile, VerificationDocument, RoleRequest, AdopterProfile
+from .models import RoleRequest, UserTrustReview
 from apps.pets.models import PetProfile
+
+# Import PetProfileSerializer to ensure consistent pet representation (including media)
+from apps.pets.serializers import PetProfileSerializer
 
 User = get_user_model()
 
@@ -31,39 +34,6 @@ class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'first_name', 'last_name', 'photoURL', 'role', 'verified_identity', 'pet_owner_verified', 'location_city', 'location_state']
-
-class UserPetSerializer(serializers.ModelSerializer):
-    owner = PublicUserSerializer(read_only=True)
-    class Meta:
-        model = PetProfile
-        fields = [
-            'id', 'owner', 'name', 'species', 'breed', 
-            'birth_date', 'age', 'gender', 'weight', 'size_category',
-            'personality_traits', 'health_status', 'medical_history',
-            'is_spayed_neutered', 'is_vaccinated', 'microchip_number',
-            'aggression_history', 'aggression_details',
-            'description', 'photos', 'profile_photo', 'is_active',
-            'created_at', 'updated_at'
-        ]
-        read_only_fields = ['created_at', 'updated_at', 'owner']
-
-class UserProfileSerializer(serializers.ModelSerializer):
-    """Nested serializer for UserProfile model"""
-    class Meta:
-        model = UserProfile
-        fields = ['privacy_settings', 'verification_badges', 'created_at']
-
-class VerificationDocumentSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = VerificationDocument
-        fields = ['id', 'document_type', 'document_url', 'status', 'admin_notes', 'reviewed_at', 'created_at']
-        read_only_fields = ['status', 'admin_notes', 'reviewed_at', 'created_at']
-
-class AdopterProfileSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = AdopterProfile
-        fields = '__all__'
-        read_only_fields = ['readiness_score', 'created_at', 'updated_at']
 
 class RoleRequestSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
@@ -95,13 +65,9 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
             
     def create(self, validated_data):
         user = User.objects.create_user(**validated_data)
-        # Create empty profile
-        UserProfile.objects.create(user=user)
         return user
 
 class UserUpdateSerializer(serializers.ModelSerializer):
-    privacy_settings = serializers.DictField(required=False, write_only=True)
-
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'phone_number', 'photoURL', 'bio', 
@@ -114,34 +80,17 @@ class UserUpdateSerializer(serializers.ModelSerializer):
             'bio': {'required': False},
         }
 
-    def update(self, instance, validated_data):
-        privacy_data = validated_data.pop('privacy_settings', None)
-        
-        # Update User fields
-        for attr, value in validated_data.items():
-            setattr(instance, attr, value)
-        instance.save()
-        
-        # Update Profile fields
-        if privacy_data is not None:
-            # Create profile if missing (though it should exist via signal/create logic)
-            if not hasattr(instance, 'profile'):
-                UserProfile.objects.create(user=instance, privacy_settings=privacy_data)
-            else:
-                profile = instance.profile
-                # Initialize default if empty
-                if not profile.privacy_settings:
-                    profile.privacy_settings = {}
-                # Update keys
-                profile.privacy_settings.update(privacy_data)
-                profile.save()
-                
-        return instance
+class UserTrustReviewSerializer(serializers.ModelSerializer):
+    reviewer = PublicUserSerializer(read_only=True)
+    class Meta:
+        model = UserTrustReview
+        fields = ['id', 'reviewer', 'reviewee', 'rating', 'comment', 'created_at']
+        read_only_fields = ['reviewer', 'reviewee', 'created_at']
 
 class UserSerializer(serializers.ModelSerializer):
-    user_pets = UserPetSerializer(many=True, read_only=True)
-    profile = UserProfileSerializer(read_only=True)
-    verification_documents = VerificationDocumentSerializer(many=True, read_only=True)
+    # Use the shared serializer
+    pets = PetProfileSerializer(many=True, read_only=True)
+    received_reviews = UserTrustReviewSerializer(many=True, read_only=True)
     
     class Meta:
         model = User
@@ -150,6 +99,6 @@ class UserSerializer(serializers.ModelSerializer):
             'phone_number', 'location_city', 'location_state', 'location_country',
             'email_verified', 'phone_verified', 'verified_identity', 'pet_owner_verified',
             'is_user', 'is_service_provider', 'is_admin', 
-            'can_create_listing', 'account_status',
-            'user_pets', 'profile', 'verification_documents'
+            'can_create_listing', 'account_status', 'profile_is_complete',
+            'pets', 'privacy_settings', 'received_reviews'
         ]
