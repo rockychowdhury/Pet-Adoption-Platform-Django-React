@@ -11,7 +11,7 @@ class RehomingRequest(models.Model):
     
     STATUS_CHOICES = [
         ('draft', 'Draft'),
-        ('cooling_period', 'Cooling Period'),  # 24hr wait for non-immediate
+        ('cooling_period', 'Cooling Period'),
         ('confirmed', 'Confirmed'),  # Ready to create listing
         ('cancelled', 'Cancelled'),  # Owner changed mind
         ('expired', 'Expired'),  # Draft never completed

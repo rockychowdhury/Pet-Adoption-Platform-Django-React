@@ -34,12 +34,17 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         rehoming_status = 'draft' # Default
         cooling_until = None
 
-        # Logic: If immediate, skip cooling. Else, 24h cooling.
+        # Logic: If immediate, skip cooling. Else, 5min cooling.
         if urgency == 'immediate':
             rehoming_status = 'confirmed'
+            cooling_until = None
         else:
             rehoming_status = 'cooling_period'
-            cooling_until = timezone.now() + datetime.timedelta(hours=24)
+            cooling_until = timezone.now() + datetime.timedelta(minutes=5)
+        
+        # SIMPLIFIED FLOW: Removed override for 5min rule
+        # rehoming_status = 'confirmed'
+        # cooling_until = None
         
         # Default location to user profile if not provided
         location_city = serializer.validated_data.get('location_city')
