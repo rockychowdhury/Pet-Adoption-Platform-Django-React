@@ -128,6 +128,14 @@ class UserProfileView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)
 
+    def patch(self, request):
+        user= request.user
+        serializer = UserUpdateSerializer(user, data = request.data, partial = True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'message': 'Profile updated successfully', 'data': serializer.data}, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
 
 
 
@@ -274,19 +282,6 @@ class ResendEmailVerificationView(APIView):
         )
 
 
-class UserProfileUpdateView(APIView):
-    """
-    Updates the User's profile information.
-    """
-    permission_classes = [IsAuthenticated]
-
-    def patch(self, request):
-        user= request.user
-        serializer = UserUpdateSerializer(user, data = request.data, partial = True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response({'message': 'Profile updated successfully', 'data': serializer.data}, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
 
 
@@ -345,7 +340,8 @@ class UserActivateView(APIView):
 class PasswordChangeView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def patch(self, request):
+    # Changed from patch to post to match frontend expectation and standard practice for sensitive action
+    def post(self, request):
         user = request.user
         old_password = request.data.get('old_password')
         new_password = request.data.get('new_password')

@@ -39,7 +39,6 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     # Basic Information
     email                   = models.EmailField(unique=True)
-    username                = models.CharField(max_length=50, unique=True, blank=True, null=True, help_text="Display name for the user")
     first_name              = models.CharField(max_length=50)
     last_name               = models.CharField(max_length=50)
     phone_number            = models.CharField(max_length=15, blank=True, null=True)
@@ -128,7 +127,7 @@ class User(AbstractBaseUser, PermissionsMixin):
             self.location_city,
             self.location_state
         ]
-        return all(required_fields) and self.is_verified
+        return all(required_fields)
 
 
 class UserTrustReview(models.Model):

@@ -4,7 +4,7 @@ from .views import (
     UserProfileView,
     LogoutView,
     UserRegistrationView,
-    UserProfileUpdateView,
+
     UserDeactivateView, 
     UserActivateView,
     PasswordChangeView,
@@ -34,7 +34,7 @@ urlpatterns = [
     path('verify-email/', VerifyEmailView.as_view(), name='verify-email'),
     path('resend-email-verification/', ResendEmailVerificationView.as_view(), name='resend-email-verification'),
     path('register/',UserRegistrationView.as_view(),name="register"),
-    path('update-profile/',UserProfileUpdateView.as_view(),name="update_profile"),
+
     path('logout/',LogoutView.as_view(),name="logout"),
     path('deactivate/',UserDeactivateView.as_view(),name="deactivate_user"),
     path('activate/',UserActivateView.as_view(),name="activate_user"),

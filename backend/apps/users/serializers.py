@@ -71,7 +71,7 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['first_name', 'last_name', 'phone_number', 'photoURL', 'bio', 
-                  'location_city', 'location_state', 'location_country', 'privacy_settings']
+                  'location_city', 'location_state', 'location_country', 'zip_code', 'privacy_settings']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
@@ -96,7 +96,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'photoURL', 'bio', 
-            'phone_number', 'location_city', 'location_state', 'location_country',
+            'phone_number', 'location_city', 'location_state', 'location_country', 'zip_code',
             'email_verified', 'phone_verified', 'verified_identity', 'pet_owner_verified',
             'is_user', 'is_service_provider', 'is_admin', 
             'can_create_listing', 'account_status', 'profile_is_complete',
