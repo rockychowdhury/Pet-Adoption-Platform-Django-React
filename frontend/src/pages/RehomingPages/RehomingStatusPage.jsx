@@ -20,7 +20,9 @@ const RehomingStatusPage = () => {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
-    const request = requests && requests.length > 0 ? requests[0] : null;
+    // Handle pagination or flat array
+    const results = Array.isArray(requests) ? requests : (requests?.results || []);
+    const request = results.length > 0 ? results[0] : null;
 
     if (isLoading) return <div className="text-center py-20">Loading status...</div>;
 
@@ -95,7 +97,7 @@ const RehomingStatusPage = () => {
                     <React.Fragment key={idx}>
                         <div className="flex flex-col items-center gap-2 relative z-10 w-20">
                             <div className={`w-4 h-4 rounded-full border-2 transition-colors ${step.completed ? 'bg-primary border-primary' :
-                                    step.active && !step.completed ? 'bg-background border-primary animate-pulse' : 'bg-background border-muted'
+                                step.active && !step.completed ? 'bg-background border-primary animate-pulse' : 'bg-background border-muted'
                                 }`} />
                             <span className={`text-[10px] font-bold uppercase tracking-wider ${step.active ? 'text-primary' : 'text-muted-foreground'}`}>{step.label}</span>
                         </div>
@@ -120,7 +122,7 @@ const RehomingStatusPage = () => {
                     <Clock className="w-12 h-12" />
                 </div>
                 <h1 className="text-3xl font-display font-bold text-foreground mb-4">
-                    24-Hour Reflection Period Started
+                    5-Minute Reflection Period Started
                 </h1>
                 <p className="text-lg text-muted-foreground mb-8 max-w-lg mx-auto">
                     We've received your request for <strong>{request.pet_details?.name || 'your pet'}</strong>.
@@ -132,7 +134,7 @@ const RehomingStatusPage = () => {
                         <span className="text-muted-foreground font-medium">Time Remaining</span>
                         <span className="font-mono font-bold text-xl text-primary">
                             {/* Simple Logic for now */}
-                            ~24 Hours
+                            ~5 Minutes
                         </span>
                     </div>
                     <div className="flex justify-between items-center">

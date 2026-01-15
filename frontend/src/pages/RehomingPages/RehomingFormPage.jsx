@@ -232,7 +232,7 @@ const RehomingFormPage = () => {
                         )}
 
                         <div className="p-4 bg-blue-50 text-blue-800 rounded-xl text-sm border border-blue-100 mt-4">
-                            All requests have a mandatory <b>24-hour cooling-off period</b> before going live.
+                            All requests have a mandatory <b>5-minute cooling-off period</b> before going live.
                         </div>
                     </div>
                 )}

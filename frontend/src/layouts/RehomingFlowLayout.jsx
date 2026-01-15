@@ -1,9 +1,10 @@
-import React from 'react';
-import { Outlet, useLocation, Link } from 'react-router-dom';
-import { ChevronRight, Heart, FileText, CheckCircle, Clock } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Heart, FileText, CheckCircle, Clock } from 'lucide-react';
 
 const RehomingFlowLayout = () => {
     const location = useLocation();
+    const navigate = useNavigate();
     const currentPath = location.pathname;
 
     const steps = [
@@ -21,8 +22,9 @@ const RehomingFlowLayout = () => {
         const index = steps.findIndex(step => step.path === currentPath);
         if (index !== -1) return index;
 
-        // Fallback logic
+        // Fallback logic for sub-routes
         if (currentPath.includes('select-pet')) return 1;
+        if (currentPath.includes('pet-incomplete')) return 1; // Treat gate as step 1
         if (currentPath.includes('check-in')) return 2;
         if (currentPath.includes('create-request')) return 3;
         if (currentPath.includes('status')) return 4;
@@ -33,43 +35,75 @@ const RehomingFlowLayout = () => {
 
     const activeStep = getCurrentStepIndex();
 
+    // Track the furthest step reached to allow backward/forward navigation within completed range
+    const [maxReachedStep, setMaxReachedStep] = useState(0);
+
+    useEffect(() => {
+        setMaxReachedStep(prev => Math.max(prev, activeStep));
+    }, [activeStep]);
+
+    const handleStepClick = (stepPath, index) => {
+        // Allow navigation if the step is within the range of steps we've reached so far
+        if (index <= maxReachedStep) {
+            navigate(stepPath);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-background pt-20 pb-12">
-            <div className="container mx-auto px-4 max-w-5xl">
+            <div className="container mx-auto px-4 max-w-7xl">
                 {/* Progress Stepper */}
-                {/* Progress Stepper */}
-                <div className="mb-10 overflow-x-auto pb-4">
-                    <div className="relative min-w-[600px] px-10">
-                        {/* Connecting Line - Background */}
-                        <div className="absolute top-5 left-0 w-full h-1 bg-secondary rounded-full -z-10" />
+                <div className="mb-16 overflow-x-auto pb-4 no-scrollbar">
+                    <div className="relative min-w-[600px] px-8 max-w-4xl mx-auto">
 
-                        {/* Connecting Line - Progress */}
-                        <div
-                            className="absolute top-5 left-0 h-1 bg-green-500 rounded-full transition-all duration-500 -z-10"
-                            style={{ width: `${(activeStep / (steps.length - 1)) * 100}%` }}
-                        />
+                        {/* Connecting Line Container */}
+                        <div className="absolute top-6 left-0 right-0 px-16 z-0">
+                            {/* Gray Background Line */}
+                            <div className="w-full h-[2px] bg-border" />
 
-                        <div className="flex items-start justify-between">
+                            {/* Colored Progress Line */}
+                            <div
+                                className="absolute top-0 left-0 h-[2px] bg-brand-primary transition-all duration-500 ease-in-out origin-left"
+                                style={{ width: `${(activeStep / (steps.length - 1)) * 100}%` }}
+                            />
+                        </div>
+
+                        <div className="flex items-start justify-between relative z-10">
                             {steps.map((step, index) => {
                                 const Icon = step.icon;
                                 const isActive = index === activeStep;
                                 const isCompleted = index < activeStep;
+                                const isUnlocked = index <= maxReachedStep;
 
                                 return (
-                                    <div key={step.path} className="flex flex-col items-center relative z-10 w-24">
+                                    <div
+                                        key={step.path}
+                                        onClick={() => handleStepClick(step.path, index)}
+                                        className={`flex flex-col items-center group w-24 transition-opacity duration-200 ${isUnlocked ? 'cursor-pointer hover:opacity-80' : 'cursor-not-allowed opacity-60'}`}
+                                    >
                                         <div
-                                            className={`w-10 h-10 rounded-full flex items-center justify-center mb-2 transition-all duration-300 border-2 ${isActive
-                                                ? 'bg-primary border-primary text-white shadow-lg scale-110'
-                                                : isCompleted
-                                                    ? 'bg-green-500 border-green-500 text-white'
-                                                    : 'bg-background border-border text-muted-foreground'
-                                                }`}
+                                            className={`
+                                                w-12 h-12 rounded-full flex items-center justify-center mb-3 transition-all duration-300 border-[1.5px] relative z-20
+                                                ${isActive
+                                                    ? 'bg-brand-primary border-brand-primary text-white shadow-lg scale-110'
+                                                    : isCompleted
+                                                        ? 'bg-white border-brand-primary text-brand-primary' // Green outline for completed
+                                                        : 'bg-white border-border text-text-tertiary shadow-sm'
+                                                }
+                                                ${!isUnlocked && 'grayscale'}
+                                            `}
                                         >
-                                            <Icon className="w-5 h-5" />
+                                            {isCompleted ? (
+                                                <CheckCircle className="w-6 h-6" /> // Completed Icon
+                                            ) : (
+                                                <Icon className="w-5 h-5" strokeWidth={isActive ? 2.5 : 2} />
+                                            )}
                                         </div>
                                         <span
-                                            className={`text-xs md:text-sm font-bold text-center ${isActive ? 'text-primary' : isCompleted ? 'text-foreground' : 'text-muted-foreground'
-                                                }`}
+                                            className={`
+                                                text-sm font-bold font-jakarta text-center tracking-tight transition-colors duration-300
+                                                ${isActive ? 'text-brand-primary' : isCompleted ? 'text-text-primary' : 'text-text-tertiary'}
+                                            `}
                                         >
                                             {step.label}
                                         </span>
@@ -80,7 +114,7 @@ const RehomingFlowLayout = () => {
                     </div>
                 </div>
 
-                <div className="bg-card rounded-2xl border border-border shadow-sm p-6 md:p-10 min-h-[500px]">
+                <div className="min-h-[500px]">
                     <Outlet />
                 </div>
             </div>

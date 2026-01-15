@@ -1,4 +1,4 @@
-import { createBrowserRouter, Navigate, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import useAuth from "../hooks/useAuth";
 
 // Layouts
@@ -179,10 +179,10 @@ const router = createBrowserRouter([
                     { path: "/adoptions/:id/review", element: <AdoptionReviewPage /> },
 
                     /* Rehoming flow */
-                    /* Rehoming flow */
                     {
                         path: "/rehoming",
                         children: [
+                            /* Start Flow with Landing Page, not redirect */
                             { index: true, element: <RehomingLandingPage /> },
                             {
                                 element: <RehomingFlowLayout />,

@@ -21,17 +21,21 @@ const RehomingCreateListingPage = () => {
     const { user } = useAuth();
 
     // Hooks
-    const { useGetActiveIntervention, useCreateListing, useUpdateListing, useGetListingDetail } = useRehoming();
+    const { useGetRehomingRequests, useCreateListing, useUpdateListing, useGetListingDetail } = useRehoming();
     const { useGetUserPets, useCreatePet, useUpdatePet } = usePets();
 
     const createListing = useCreateListing();
     const updateListing = useUpdateListing();
     const createPet = useCreatePet();
     const updatePet = useUpdatePet();
-    const { uploadImage, uploading: isUploadingPhoto } = useImgBB(); // Init hook
+    const { uploadImage, uploading: isUploadingPhoto } = useImgBB(); // Import useImgBB
 
     // Data Fetching
-    const { data: intervention, isLoading: isCheckingIntervention } = useGetActiveIntervention();
+    const { data: requestsData, isLoading: isCheckingRequests } = useGetRehomingRequests();
+    // Handle pagination or flat array
+    const requests = Array.isArray(requestsData) ? requestsData : (requestsData?.results || []);
+    // Find the relevant request. Ideally passed via state, or pick latest confirmed.
+    const rehomingRequest = requests.length > 0 ? requests[0] : null;
     const { data: myPetsData, isLoading: isLoadingPets } = useGetUserPets();
     const myPets = Array.isArray(myPetsData) ? myPetsData : (myPetsData?.results || []);
     const { data: existingListing } = useGetListingDetail(editId);
@@ -115,16 +119,45 @@ const RehomingCreateListingPage = () => {
         }
     }, [existingListing]);
 
-    // Pre-flight Check Effect
+    // Pre-flight Check & Auto-fill Effect
     useEffect(() => {
-        if (!isCheckingIntervention && !existingListing) {
-            // Strict Gate: Must have 'proceeded' status
-            if (!intervention || intervention.status !== 'proceeded') {
-                toast.info("Please complete the rehoming intervention process first.");
-                navigate('/rehoming/start');
+        if (!isCheckingRequests && !existingListing) {
+            // Strict Gate: Must have 'confirmed' status (passed cooling period)
+            if (!rehomingRequest || rehomingRequest.status !== 'confirmed') {
+                if (rehomingRequest?.status === 'cooling_period') {
+                    toast.info("Your request is in the cooling period.");
+                    navigate('/rehoming/status');
+                } else if (!rehomingRequest) {
+                    // No request found
+                    toast.info("Please start a rehoming request first.");
+                    navigate('/rehoming');
+                }
+            } else if (rehomingRequest.status === 'confirmed') {
+                // AUTO-POPULATION LOGIC
+                // If confirmed, we skip the 'Select Pet' UI (Step 0) and populate from the request.
+                const pet = rehomingRequest.pet_details; // Assuming this is available, fallback to myPets lookup
+                // Ensure we satisfy the "selectedPetId"
+                setSelectedPetId(String(rehomingRequest.pet));
+
+                if (pet) {
+                    setFormData(prev => ({
+                        ...prev,
+                        pet_name: pet.name,
+                        species: pet.species,
+                        breed: pet.breed || '',
+                        age: pet.age || '',
+                        gender: pet.gender || 'unknown',
+                        photos: pet.photos || [],
+                        // Also populate location if user matches
+                        location_city: user?.location_city || prev.location_city,
+                        location_state: user?.location_state || prev.location_state,
+                    }));
+                }
+                // Skip Pre-flight UI
+                setCurrentStep(1);
             }
         }
-    }, [intervention, isCheckingIntervention, navigate, existingListing]);
+    }, [rehomingRequest, isCheckingRequests, navigate, existingListing, user]);
 
     // Helper to map urgency
     const mapUrgency = (u) => {
@@ -273,7 +306,7 @@ const RehomingCreateListingPage = () => {
             const listingPayload = {
                 pet: finalizedPetId, // Send ID
                 reason: formData.story, // Use story as reason
-                urgency: mapUrgency(intervention?.urgency), // Map from intervention
+                urgency: mapUrgency(rehomingRequest?.urgency), // Map from request
                 location_city: formData.location_city,
                 location_state: formData.location_state,
                 location_zip: formData.location_zip,
@@ -653,7 +686,7 @@ const RehomingCreateListingPage = () => {
         </div>
     );
 
-    if (isCheckingIntervention) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    if (isCheckingRequests) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
 
     return (
         <div className="min-h-screen bg-bg-primary pb-20">
