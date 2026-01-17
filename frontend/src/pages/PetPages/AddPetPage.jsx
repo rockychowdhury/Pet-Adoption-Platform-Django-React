@@ -253,6 +253,29 @@ const AddPetPage = () => {
         setValue('photos', currentPhotos.filter((_, i) => i !== index));
     };
 
+    const calculateCompletion = (values) => {
+        let completed = 0;
+        const missing = [];
+
+        // Basic Fields
+        if (values.pet_name) completed++; else missing.push('Name');
+        if (values.species) completed++; else missing.push('Species');
+        if (values.breed) completed++; else missing.push('Breed');
+        if (values.gender && values.gender !== 'unknown') completed++; else missing.push('Gender');
+        if (values.rehoming_story) completed++; else missing.push('Bio/Story');
+
+        // Complex Checks
+        if (values.birth_date) completed++; else missing.push('Birth Date');
+
+        if (values.photos && values.photos.length >= 3) completed++;
+        else missing.push(`Photos (${(values.photos || []).length}/3)`);
+
+        if (values.personality_traits && values.personality_traits.length >= 2) completed++;
+        else missing.push(`Personality Traits (${(values.personality_traits || []).length}/2)`);
+
+        return { score: completed, total: 8, missing };
+    };
+
     // --- Render Sections ---
     const renderSectionContent = () => {
         switch (activeSection) {
@@ -583,10 +606,46 @@ const AddPetPage = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className="bg-brand-primary text-text-inverted p-6 rounded-[1.5rem] shadow-lg shadow-brand-primary/20 space-y-3 relative overflow-hidden">
-                                <div className="absolute -right-4 -bottom-4 opacity-10 rotate-12"><Heart size={100} fill="white" /></div>
-                                <h4 className="font-bold text-sm">Join the Community</h4>
-                                <p className="text-[11px] font-medium leading-relaxed opacity-90">By creating a pet profile, you're joining a network of thousands of pet lovers.</p>
+                            <div className="bg-white border border-border p-6 rounded-[1.5rem] shadow-sm space-y-4">
+                                <div className="flex justify-between items-center">
+                                    <h4 className="font-bold text-sm text-text-primary uppercase tracking-wide">Profile Strength</h4>
+                                    <span className="text-xs font-black bg-brand-primary/10 text-brand-primary px-2 py-1 rounded-lg">
+                                        {Math.round((calculateCompletion(watchedValues).score / 8) * 100)}%
+                                    </span>
+                                </div>
+
+                                {/* Progress Bar */}
+                                <div className="w-full h-2 bg-bg-secondary rounded-full overflow-hidden">
+                                    <div
+                                        className={`h-full rounded-full transition-all duration-500 ${calculateCompletion(watchedValues).score === 8 ? 'bg-status-success' : 'bg-brand-primary'}`}
+                                        style={{ width: `${(calculateCompletion(watchedValues).score / 8) * 100}%` }}
+                                    ></div>
+                                </div>
+
+                                <p className="text-xs text-text-secondary font-medium">
+                                    {calculateCompletion(watchedValues).score}/8 Requirements Met
+                                </p>
+
+                                {calculateCompletion(watchedValues).missing.length > 0 && (
+                                    <div className="space-y-2 pt-2 border-t border-border/50">
+                                        <p className="text-[10px] uppercase font-black text-text-tertiary">Missing for Completion:</p>
+                                        <ul className="space-y-2">
+                                            {calculateCompletion(watchedValues).missing.map((item, i) => (
+                                                <li key={i} className="flex items-center gap-2 text-xs font-medium text-status-warning">
+                                                    <div className="w-1.5 h-1.5 rounded-full bg-status-warning flex-shrink-0" />
+                                                    {item}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
+
+                                {calculateCompletion(watchedValues).score === 8 && (
+                                    <div className="flex items-center gap-2 text-status-success bg-status-success/5 p-3 rounded-xl border border-status-success/10">
+                                        <CheckCircle size={16} />
+                                        <span className="text-xs font-bold">Profile is Complete!</span>
+                                    </div>
+                                )}
                             </div>
                         </div>
                     </div>

@@ -69,24 +69,27 @@ class PetProfile(models.Model):
     @property
     def profile_is_complete(self):
         """
+        Enhanced completion check.
         Checks if the pet profile has all required fields for rehoming.
         """
         required_fields = [
             self.name,
             self.species,
             self.breed,
-            self.birth_date or self.age_display, # birth_date is enough? age_display isn't a field.
             self.gender,
             self.description
         ]
-        # Check birth_date specificly
+
+        # Check age/birthdate
         has_age = self.birth_date is not None
-        has_photo = self.media.exists()
-        
-        # Check simple fields
-        basic_fields = [self.name, self.species, self.gender, self.description]
-        
-        return all(basic_fields) and has_age and has_photo
+
+        # Check photos (minimum 3)
+        has_photos = self.media.count() >= 3
+
+        # Check personality traits (minimum 2)
+        has_traits = self.traits.count() >= 2
+
+        return all(required_fields) and has_age and has_photos and has_traits
 
     class Meta:
         ordering = ['-created_at']
