@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, Save, MapPin, Clock, AlertTriangle, Home, Shield, CheckCircle2, FileText, ChevronDown, ChevronUp } from 'lucide-react';
+import { toast } from 'react-toastify';
 import useRehoming from '../../hooks/useRehoming';
 import useAuth from '../../hooks/useAuth';
 
@@ -113,11 +114,21 @@ const RehomingFormPage = () => {
 
         createRequest({ pet: petId, ...formData }, {
             onSuccess: () => {
+                toast.success("Request submitted successfully!");
                 navigate('/rehoming/status');
             },
             onError: (error) => {
                 console.error("Failed to create request:", error);
-                alert("Something went wrong. Please try again.");
+
+                // Extract backend error message
+                const backendError = error.response?.data?.detail || error.response?.data?.non_field_errors?.[0] || "Something went wrong. Please try again.";
+
+                // Specific handling for duplicate requests (optional: could prompt to view existing)
+                if (backendError.includes("already has an active")) {
+                    toast.error(backendError, { autoClose: 5000 });
+                } else {
+                    toast.error(backendError);
+                }
             }
         });
     };

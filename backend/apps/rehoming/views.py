@@ -49,6 +49,21 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         if not user.profile_is_complete:
             raise PermissionDenied("Complete your user profile before starting.")
 
+        pet = serializer.validated_data.get('pet')
+        
+        # 1. Check for existing active requests
+        existing = RehomingRequest.objects.filter(
+            pet=pet,
+            status__in=['cooling_period', 'confirmed']
+        ).exists()
+        
+        if existing:
+            raise PermissionDenied("This pet already has an active rehoming request.")
+            
+        # 2. Validate terms acceptance
+        if not serializer.validated_data.get('terms_accepted'):
+            raise PermissionDenied("You must accept the terms to proceed.")
+
         urgency = serializer.validated_data.get('urgency', 'flexible')
         rehoming_status = 'draft' # Default
         cooling_until = None
@@ -60,12 +75,20 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         else:
             rehoming_status = 'cooling_period'
             cooling_until = timezone.now() + datetime.timedelta(minutes=5)
+            # Send email notification
+            try:
+                from django.core.mail import send_mail
+                send_mail(
+                    subject='Rehoming Request - Cooling Period Started',
+                    message=f'Your request to rehome has started a 5-minute cooling period. You may confirm it after {cooling_until.strftime("%H:%M")}.',
+                    from_email='noreply@petcircle.com',
+                    recipient_list=[user.email],
+                    fail_silently=True,
+                )
+            except Exception:
+                pass # Non-blocking email failure
         
-        # SIMPLIFIED FLOW: Removed override for 5min rule
-        # rehoming_status = 'confirmed'
-        # cooling_until = None
-        
-        # Default location to user profile if not provided
+        # 3. Auto-populate location from user profile if not provided
         location_city = serializer.validated_data.get('location_city')
         if not location_city:
             location_city = user.location_city
@@ -73,6 +96,10 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         location_state = serializer.validated_data.get('location_state')
         if not location_state:
             location_state = user.location_state
+            
+        # Enforce location presence
+        if not location_city or not location_state:
+             raise PermissionDenied("Location is required. Please update your profile or provide a location manually.")
 
         instance = serializer.save(
             owner=user, 
