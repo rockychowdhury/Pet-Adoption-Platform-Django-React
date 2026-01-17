@@ -13,8 +13,9 @@ import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 
 const RehomingDashboardPage = () => {
-    const { useGetListings, useDeleteListing } = useRehoming();
-    const { data: listings, isLoading } = useGetListings({ owner: 'me' });
+    const { useGetListings, useDeleteListing, useGetRehomingRequests } = useRehoming();
+    const { data: listings } = useGetListings({ owner: 'me' });
+    const { data: requests } = useGetRehomingRequests();
     const deleteListingMutation = useDeleteListing();
 
     // State
@@ -29,34 +30,74 @@ const RehomingDashboardPage = () => {
     const tabs = [
         { id: 'All', label: 'All Listings' },
         { id: 'Active', label: 'Active' },
-        { id: 'Pending', label: 'In Review' },
-        { id: 'Draft', label: 'Drafts' },
+        { id: 'Cooling Period', label: 'Cooling Period' },
+        { id: 'Draft', label: 'Draft' }, // Confirmed Requests awaiting listing
         { id: 'History', label: 'History' } // Adopted/Archived
     ];
 
     const listingsList = useMemo(() => Array.isArray(listings) ? listings : (listings?.results || []), [listings]);
+    const requestsList = useMemo(() => Array.isArray(requests) ? requests : (requests?.results || []), [requests]);
 
-    // Filtering Logic
-    const filteredListings = useMemo(() => {
-        return listingsList.filter(l => {
-            const status = l.status?.toLowerCase();
+    // Unified List
+    const filteredItems = useMemo(() => {
+        let items = [];
 
-            // Tab Filter
-            if (activeTab === 'Active' && status !== 'active') return false;
-            if (activeTab === 'Pending' && status !== 'pending_review') return false;
-            if (activeTab === 'Draft' && status !== 'draft' && status !== 'rejected') return false;
-            if (activeTab === 'History' && status !== 'adopted' && status !== 'expired' && status !== 'on_hold') return false;
-
-            if (searchQuery) {
-                const query = searchQuery.toLowerCase();
-                const name = l.pet?.name?.toLowerCase() || '';
-                const breed = l.pet?.breed?.toLowerCase() || '';
-                return name.includes(query) || breed.includes(query);
-            }
-
-            return true;
+        // Helper to normalize
+        const normalizeListing = (l) => ({ ...l, type: 'listing' });
+        const normalizeRequest = (r) => ({
+            id: r.id,
+            type: 'request',
+            status: r.status,
+            pet: r.pet_details,
+            created_at: r.created_at,
+            location_city: r.location_city,
+            cooling_period_end: r.cooling_period_end
         });
-    }, [listingsList, activeTab, searchQuery]);
+
+        const activeListings = listingsList.map(normalizeListing);
+        const activeRequests = requestsList.map(normalizeRequest);
+
+        // Filter Logic based on User Requirements
+        switch (activeTab) {
+            case 'All':
+                // "All Listings will show all of the listing of the user not rehomed yet."
+                items = activeListings.filter(l => l.status !== 'rehomed' && l.status !== 'adopted' && l.status !== 'closed');
+                break;
+            case 'Active':
+                items = activeListings.filter(l => l.status === 'active');
+                break;
+            case 'Cooling Period':
+                // "Request for rehome that are in cooling period status"
+                items = activeRequests.filter(r => r.status === 'cooling_period');
+                break;
+            case 'Draft':
+                // "Requests that cooling period end and confirmed... listing not created yet"
+                // Note: We checkconfirmed requests. If backend auto-creates listing, this might be empty, but logic is here.
+                items = activeRequests.filter(r => r.status === 'confirmed');
+                // Optionally filter out if a listing already exists for this request? 
+                // But frontend doesn't easily know link without deep check. 
+                // Assuming 'confirmed' requests in the request list are what we want.
+                break;
+            case 'History':
+                // "Rehomed listings"
+                items = activeListings.filter(l => ['rehomed', 'adopted', 'closed', 'expired'].includes(l.status));
+                break;
+            default:
+                items = activeListings;
+        }
+
+        // Search Filter
+        if (searchQuery) {
+            const query = searchQuery.toLowerCase();
+            items = items.filter(item => {
+                const name = item.pet?.name?.toLowerCase() || '';
+                const breed = item.pet?.breed?.toLowerCase() || '';
+                return name.includes(query) || breed.includes(query);
+            });
+        }
+
+        return items;
+    }, [listingsList, requestsList, activeTab, searchQuery]);
 
     const handleDeleteClick = (listing) => {
         setListingToDelete(listing);
@@ -76,14 +117,25 @@ const RehomingDashboardPage = () => {
     };
 
     // Helper to get status styling
-    const getStatusStyle = (status) => {
-        switch (status?.toLowerCase()) {
+    const getStatusStyle = (item) => {
+        const status = item.status?.toLowerCase();
+
+        // Special Request Statuses
+        if (item.type === 'request') {
+            if (status === 'cooling_period') return { bg: 'bg-blue-500/90', text: 'Cooling Period', icon: Clock };
+            if (status === 'confirmed') return { bg: 'bg-green-500/90', text: 'Ready to Publish', icon: CheckCircle2 };
+            if (status === 'draft') return { bg: 'bg-gray-400/90', text: 'Draft Request', icon: Edit2 };
+        }
+
+        switch (status) {
             case 'active': return { bg: 'bg-brand-primary/90', text: 'Active', icon: CheckCircle2 };
             case 'pending_review': return { bg: 'bg-status-warning/90', text: 'In Review', icon: Clock };
             case 'draft': return { bg: 'bg-gray-500/90', text: 'Draft', icon: Edit2 };
-            case 'adopted': return { bg: 'bg-purple-500/90', text: 'Adopted', icon: Heart };
+            case 'adopted':
+            case 'rehomed': return { bg: 'bg-purple-500/90', text: 'Rehomed', icon: Heart };
             case 'rejected': return { bg: 'bg-status-error/90', text: 'Needs Revision', icon: AlertTriangle };
             case 'on_hold': return { bg: 'bg-orange-500/90', text: 'Paused', icon: PauseCircle };
+            case 'closed': return { bg: 'bg-gray-700/90', text: 'Closed', icon: Archive };
             default: return { bg: 'bg-gray-500/90', text: status, icon: AlertCircle };
         }
     };
@@ -161,15 +213,16 @@ const RehomingDashboardPage = () => {
                     </div>
 
                     {/* Content */}
-                    {isLoading && !listingsList.length ? (
+                    {/* Note: Combined loading state might flicker if one loads faster, but manageable */}
+                    {!listings && !requests ? (
                         <div className="flex justify-center py-32">
                             <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-100 border-t-gray-900" />
                         </div>
                     ) : (
                         <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4' : 'grid-cols-1'}`}>
 
-                            {/* Create New Card (Grid Only) */}
-                            {viewMode === 'grid' && activeTab === 'All' && !searchQuery && (
+                            {/* Create New Card (Grid Only) - Only show on 'All' or 'Active' */}
+                            {viewMode === 'grid' && (activeTab === 'All' || activeTab === 'Active') && !searchQuery && (
                                 <Link
                                     to="/rehoming/start"
                                     className="group bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex flex-col items-center justify-center min-h-[420px] cursor-pointer"
@@ -181,14 +234,23 @@ const RehomingDashboardPage = () => {
                                 </Link>
                             )}
 
-                            {filteredListings.map(listing => {
-                                const status = getStatusStyle(listing.status);
+                            {filteredItems.map(item => {
+                                const status = getStatusStyle(item);
                                 const StatusIcon = status.icon;
-                                const photoUrl = listing.pet?.main_photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80';
+                                const photoUrl = item.pet?.main_photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80';
+
+                                // Determine Detail Link based on Type
+                                let detailLink = '#';
+                                if (item.type === 'listing') {
+                                    detailLink = `/pets/${item.id}`; // Or listing detail page
+                                } else {
+                                    // It's a Request
+                                    detailLink = '/rehoming/status'; // Simplification: Go to status hub usually
+                                }
 
                                 return (
                                     <motion.div
-                                        key={listing.id}
+                                        key={`${item.type}-${item.id}`}
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         className={`group bg-bg-surface rounded-3xl shadow-sm border border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 flex font-jakarta ${viewMode === 'grid' ? 'flex-col h-full' : 'flex-row h-64'}`}
@@ -197,7 +259,7 @@ const RehomingDashboardPage = () => {
                                         <div className={`relative overflow-hidden bg-bg-secondary/20 ${viewMode === 'grid' ? 'aspect-[3/2] w-full' : 'w-64 h-full shrink-0'}`}>
                                             <img
                                                 src={photoUrl}
-                                                alt={listing.pet?.name}
+                                                alt={item.pet?.name}
                                                 className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                                             />
                                             {viewMode === 'grid' && (
@@ -212,31 +274,33 @@ const RehomingDashboardPage = () => {
                                                 </div>
                                             </div>
 
-                                            {/* App Count Badge */}
-                                            {listing.application_count > 0 && (
+                                            {/* App Count Badge (Listings Only) */}
+                                            {item.type === 'listing' && item.application_count > 0 && (
                                                 <div className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md px-2 py-1 rounded-lg text-[9px] font-bold text-brand-primary shadow-sm flex items-center gap-1">
                                                     <Folder size={10} />
-                                                    {listing.application_count} Apps
+                                                    {item.application_count} Apps
                                                 </div>
                                             )}
 
                                             {/* Edit Icon */}
-                                            <Link
-                                                to={`/rehoming/create-listing?edit=${listing.id}`}
-                                                className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-text-primary transition-all shadow-sm group/edit"
-                                                title="Edit Listing"
-                                            >
-                                                <Edit2 size={14} className="group-hover/edit:scale-90 transition-transform" />
-                                            </Link>
+                                            {item.type === 'listing' && (
+                                                <Link
+                                                    to={`/rehoming/create-listing?edit=${item.id}`}
+                                                    className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-text-primary transition-all shadow-sm group/edit"
+                                                    title="Edit Listing"
+                                                >
+                                                    <Edit2 size={14} className="group-hover/edit:scale-90 transition-transform" />
+                                                </Link>
+                                            )}
                                         </div>
 
                                         {/* Content Body */}
                                         <div className="p-4 flex flex-col gap-3 flex-1">
                                             {/* Identity Block */}
                                             <div>
-                                                <h3 className="font-logo text-xl text-text-primary leading-tight mb-0.5">{listing.pet?.name}</h3>
+                                                <h3 className="font-logo text-xl text-text-primary leading-tight mb-0.5">{item.pet?.name}</h3>
                                                 <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider font-jakarta">
-                                                    {listing.pet?.species} • <span className="text-text-tertiary">{listing.pet?.breed || 'Unknown'}</span>
+                                                    {item.pet?.species} • <span className="text-text-tertiary">{item.pet?.breed || 'Unknown'}</span>
                                                 </p>
                                             </div>
 
@@ -244,59 +308,76 @@ const RehomingDashboardPage = () => {
                                             <div className="grid grid-cols-2 gap-y-2 gap-x-4">
                                                 <div className="flex items-center gap-2 text-text-secondary">
                                                     <span className="text-sm">🎂</span>
-                                                    <span className="text-[11px] font-bold">{listing.pet?.age_display || 'Age N/A'}</span>
+                                                    <span className="text-[11px] font-bold">{item.pet?.age_display || 'Age N/A'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-text-secondary">
                                                     <span className="text-sm">⚧</span>
-                                                    <span className="text-[11px] font-bold capitalize">{listing.pet?.gender || 'Unknown'}</span>
+                                                    <span className="text-[11px] font-bold capitalize">{item.pet?.gender || 'Unknown'}</span>
                                                 </div>
                                                 <div className="flex items-center gap-2 text-text-secondary">
                                                     <span className="text-sm">📍</span>
-                                                    <span className="text-[11px] font-bold truncate max-w-[100px]">{listing.location_city || 'Location N/A'}</span>
+                                                    <span className="text-[11px] font-bold truncate max-w-[100px]">{item.location_city || 'Location N/A'}</span>
                                                 </div>
-                                                <div className="flex items-center gap-2 text-text-secondary">
-                                                    <span className="text-sm">👁️</span>
-                                                    <span className="text-[11px] font-bold">{listing.view_count || 0} Views</span>
-                                                </div>
+                                                {item.type === 'listing' && (
+                                                    <div className="flex items-center gap-2 text-text-secondary">
+                                                        <span className="text-sm">👁️</span>
+                                                        <span className="text-[11px] font-bold">{item.view_count || 0} Views</span>
+                                                    </div>
+                                                )}
+                                                {item.type === 'request' && item.status === 'cooling_period' && (
+                                                    <div className="flex items-center gap-2 text-blue-600 col-span-2">
+                                                        <span className="text-sm"><Clock size={12} /></span>
+                                                        <span className="text-[10px] font-bold">Cooling... Check Status</span>
+                                                    </div>
+                                                )}
                                             </div>
 
                                             {/* Meta Info */}
                                             <div className="mt-auto pt-3 border-t border-border/30 text-[9px] font-medium text-text-tertiary flex flex-col gap-0.5">
-                                                <span>Created {new Date(listing.created_at).toLocaleDateString()}</span>
+                                                <span>Created {new Date(item.created_at).toLocaleDateString()}</span>
                                             </div>
 
                                             {/* Actions */}
                                             <div className="flex items-center gap-2 pt-1">
-                                                {listing.status === 'active' ? (
-                                                    <Link
-                                                        to={`/rehoming/listings/${listing.id}/applications`}
-                                                        className="flex-1 bg-brand-primary text-text-inverted h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                                                    >
-                                                        Review Apps
-                                                    </Link>
-                                                ) : listing.status === 'draft' || listing.status === 'rejected' ? (
-                                                    <Link
-                                                        to={`/rehoming/create?edit=${listing.id}`}
-                                                        className="flex-1 bg-brand-primary text-text-inverted h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
-                                                    >
-                                                        Continue
-                                                    </Link>
+                                                {item.type === 'listing' ? (
+                                                    // LISTING ACTIONS
+                                                    <>
+                                                        {item.status === 'active' ? (
+                                                            <Link
+                                                                to={`/rehoming/listings/${item.id}/applications`}
+                                                                className="flex-1 bg-brand-primary text-text-inverted h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
+                                                            >
+                                                                Review Apps
+                                                            </Link>
+                                                        ) : item.status === 'rehomed' ? (
+                                                            <div className="flex-1 bg-purple-100 text-purple-700 h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em]">
+                                                                Rehomed
+                                                            </div>
+                                                        ) : (
+                                                            <Link
+                                                                to={`/pets/${item.id}`} // Preview
+                                                                className="flex-1 bg-bg-secondary text-text-secondary h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-bg-secondary/80 transition-all duration-300"
+                                                            >
+                                                                View
+                                                            </Link>
+                                                        )}
+                                                        <button
+                                                            onClick={() => handleDeleteClick(item)}
+                                                            className="w-10 h-10 flex items-center justify-center border border-status-error/20 text-status-error bg-status-error/5 rounded-full hover:bg-status-error/10 hover:shadow-sm transition-all duration-300"
+                                                            title="Delete Listing"
+                                                        >
+                                                            <Trash2 size={16} />
+                                                        </button>
+                                                    </>
                                                 ) : (
+                                                    // REQUEST ACTIONS
                                                     <Link
-                                                        to={`/pets/${listing.id}`}
-                                                        className="flex-1 bg-bg-secondary text-text-secondary h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-bg-secondary/80 transition-all duration-300"
+                                                        to="/rehoming/status"
+                                                        className="flex-1 bg-brand-primary text-text-inverted h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand-primary/90 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                                                     >
-                                                        View Preview
+                                                        {item.status === 'cooling_period' ? 'View Status' : 'Finish Listing'}
                                                     </Link>
                                                 )}
-
-                                                <button
-                                                    onClick={() => handleDeleteClick(listing)}
-                                                    className="w-10 h-10 flex items-center justify-center border border-status-error/20 text-status-error bg-status-error/5 rounded-full hover:bg-status-error/10 hover:shadow-sm transition-all duration-300"
-                                                    title="Delete Listing"
-                                                >
-                                                    <Trash2 size={16} />
-                                                </button>
                                             </div>
                                         </div>
                                     </motion.div>
@@ -304,7 +385,7 @@ const RehomingDashboardPage = () => {
                             })}
 
                             {/* Empty State */}
-                            {filteredListings.length === 0 && !(!searchQuery && activeTab === 'All' && viewMode === 'grid') && (
+                            {filteredItems.length === 0 && !(!searchQuery && activeTab === 'All' && viewMode === 'grid') && (
                                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
                                     <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-300">
                                         <PackageOpen size={40} />
