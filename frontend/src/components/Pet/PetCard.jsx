@@ -2,7 +2,8 @@ import React from 'react';
 import {
     Heart, MapPin, Clock, Sparkles, ShieldCheck,
     Home, Share2, LayoutGrid, List as ListIcon,
-    Calendar, CheckCircle2, Info, Trash2, Archive, RotateCcw, Pencil, Eye
+    Calendar, CheckCircle2, Info, Trash2, Archive, RotateCcw, Pencil, Eye,
+    Cake, Ruler, Scale, Tag, Syringe
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
@@ -73,13 +74,18 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
             state: pet.location_state || '',
 
             status: pet.status,
-            urgency: 'flexible',
-            isUrgent: false,
+            weight: pet.weight_kg ? `${parseFloat(pet.weight_kg).toFixed(2)} lbs` : 'N/A',
+            size: pet.size_category || 'N/A',
+            isNeutered: pet.spayed_neutered,
+            isChipped: pet.microchipped,
+            traits: (pet.traits || []).map(t => t.name || t), // Handle objects or strings
+            created_at: pet.created_at ? new Date(pet.created_at).toLocaleDateString() : 'Unknown',
 
+            // Defaults
+            isUrgent: false,
             views: 0,
             applications: 0,
-            isVerified: false,
-            traits: pet.personality_traits || []
+            isVerified: false
         };
         data.locationLabel = data.state ? `${data.city}, ${data.state}` : data.city;
     }
@@ -92,68 +98,112 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
     if (isProfile) {
         return (
             <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="group bg-bg-surface rounded-3xl shadow-sm border border-border/50 overflow-hidden hover:shadow-md transition-all duration-300 h-full flex flex-col font-jakarta"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col font-jakarta relative h-full"
             >
-                {/* Hero Zone - Compact 3:2 */}
-                <div className="relative aspect-[3/2] overflow-hidden bg-bg-secondary/20">
+                {/* Hero Zone - Compact Aspect Ratio */}
+                <div className="relative aspect-[3/2] overflow-hidden">
                     <img
                         src={data.photo}
                         alt={data.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
                     />
-                    <div className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/50 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50" />
 
-                    {/* Status (Top Left) */}
+                    {/* Status Badge - Smaller */}
                     <div className="absolute top-3 left-3">
-                        <div className={`px-2.5 py-1 text-white text-[8px] font-black uppercase tracking-widest rounded-full flex items-center gap-1.5 shadow-sm backdrop-blur-md ${data.status === 'active' ? 'bg-brand-primary/90' : 'bg-gray-500/90'}`}>
+                        <div className={`px-2 py-1 text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm backdrop-blur-md ${data.status === 'active' ? 'bg-status-success' : 'bg-gray-500'}`}>
                             <div className={`w-1.5 h-1.5 rounded-full ${data.status === 'active' ? 'bg-white' : 'bg-gray-300'}`} />
-                            {data.status === 'active' ? 'Active' : 'Inactive'}
+                            {data.status === 'active' ? 'Active' : 'Archived'}
                         </div>
                     </div>
 
-                    {/* Edit Icon (Top Right) */}
+                    {/* Edit Action - Smaller */}
                     <Link
                         to={`/dashboard/pets/${data.id}/edit`}
-                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-text-primary transition-all shadow-sm group/edit"
+                        className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-brand-primary transition-all shadow-lg group/edit"
                     >
                         <Pencil size={14} className="group-hover/edit:scale-90 transition-transform" />
                     </Link>
                 </div>
 
-                {/* Content Body */}
+                {/* Body - Reduced Padding */}
                 <div className="p-4 flex flex-col gap-3 flex-1">
-                    {/* Identity */}
-                    <div>
-                        <h3 className="font-logo text-xl text-text-primary leading-tight mb-0.5">{data.name}</h3>
-                        <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider font-jakarta">
-                            {data.species} • <span className="text-text-tertiary">{data.breed}</span>
-                        </p>
+
+                    {/* Header Info - Compact */}
+                    <div className="flex justify-between items-start">
+                        <div>
+                            <h3 className="text-lg font-bold text-text-primary leading-tight">{data.name}</h3>
+                            <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5 mt-0.5">
+                                {data.species} • <span className="text-brand-primary/80">{data.breed}</span>
+                            </p>
+                        </div>
                     </div>
 
-                    {/* Dashboard Actions */}
-                    <div className="mt-auto pt-3 border-t border-border/30 flex gap-2">
+                    {/* Stats Grid - Single Row / Compact Grid */}
+                    <div className="grid grid-cols-2 gap-2 py-2 border-t border-border/40">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                            <Cake size={14} className="text-brand-orange" />
+                            <span className="text-xs font-bold">{data.age}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-text-secondary">
+                            <span className="text-sm">
+                                {data.gender.toLowerCase() === 'female' ? '♀' : data.gender.toLowerCase() === 'male' ? '♂' : '?'}
+                            </span>
+                            <span className="text-xs font-bold capitalize">{data.gender}</span>
+                            {data.isNeutered && <CheckCircle2 size={12} className="text-status-success ml-1" />}
+                        </div>
+                        <div className="flex items-center gap-2 text-text-secondary">
+                            <Scale size={14} className="text-brand-secondary" />
+                            <span className="text-xs font-bold">{data.weight}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-text-secondary">
+                            <Ruler size={14} className="text-brand-tertiary" />
+                            <span className="text-xs font-bold capitalize">{data.size}</span>
+                        </div>
+                    </div>
+
+                    {/* Traits - Single Line */}
+                    {data.traits.length > 0 && (
+                        <div className="flex items-center gap-1.5 overflow-hidden pb-1">
+                            {data.traits.slice(0, 3).map((trait, i) => (
+                                <span key={i} className="px-2 py-1 bg-bg-secondary text-text-secondary text-[9px] font-bold rounded-md whitespace-nowrap border border-border/50">
+                                    {trait}
+                                </span>
+                            ))}
+                            {data.traits.length > 3 && (
+                                <span className="px-1.5 py-1 text-text-tertiary text-[9px] font-bold whitespace-nowrap">
+                                    +{data.traits.length - 3}
+                                </span>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Footer Actions - Shorter Height */}
+                    <div className="mt-auto pt-2 flex gap-2">
                         <Link
-                            to={`/pets/${data.id}`} // Assuming simple ID link works or needs fixing if listing ID differs
-                            className="flex-1 bg-brand-primary/10 text-brand-primary h-9 rounded-lg flex items-center justify-center text-[10px] font-black uppercase hover:bg-brand-primary hover:text-white transition-all"
+                            to={`/pets/${data.id}`}
+                            className="flex-1 bg-text-primary text-text-inverted h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-brand-primary hover:shadow-lg transition-all"
                         >
-                            <Eye size={14} className="mr-1.5" /> View Public
+                            View
                         </Link>
                         {onToggleActive && (
                             <button
                                 onClick={() => onToggleActive(pet)}
-                                className="w-9 h-9 flex items-center justify-center border border-border rounded-lg text-text-tertiary hover:text-brand-primary hover:border-brand-primary transition-colors"
+                                title={data.status === 'active' ? 'Archive Pet' : 'Activate Pet'}
+                                className="w-9 h-9 flex items-center justify-center border border-border rounded-xl text-text-tertiary hover:text-brand-primary hover:bg-brand-primary/5 transition-all"
                             >
-                                <RotateCcw size={14} />
+                                {data.status === 'active' ? <Archive size={16} /> : <RotateCcw size={16} />}
                             </button>
                         )}
                         {onDelete && (
                             <button
                                 onClick={() => onDelete(pet.id)}
-                                className="w-9 h-9 flex items-center justify-center border border-status-error/20 rounded-lg text-status-error hover:bg-status-error/10 transition-colors"
+                                title="Delete Profile"
+                                className="w-9 h-9 flex items-center justify-center border border-status-error/20 bg-status-error/5 rounded-xl text-status-error hover:bg-status-error hover:text-white transition-all"
                             >
-                                <Trash2 size={14} />
+                                <Trash2 size={16} />
                             </button>
                         )}
                     </div>
