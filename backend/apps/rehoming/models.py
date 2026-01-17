@@ -47,7 +47,7 @@ class RehomingRequest(models.Model):
     
     # Location (for initial filtering)
     location_city = models.CharField(max_length=100)
-    location_state = models.CharField(max_length=50)
+    location_state = models.CharField( max_length=50)
     location_zip = models.CharField(max_length=20, blank=True)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
@@ -126,11 +126,23 @@ class RehomingListing(models.Model):
         ('closed', 'Closed'),
     ]
     
+    # Valid status transitions
+    STATUS_TRANSITIONS = {
+        'pending_review': ['active', 'rejected'],
+        'active': ['paused', 'under_review', 'closed', 'rehomed'],
+        'paused': ['active', 'closed'],
+        'under_review': ['active', 'rehomed', 'closed'],
+        'rehomed': [],  # Terminal state
+        'closed': []    # Terminal state
+    }
+
     # Link to request that created this
     request = models.OneToOneField(
         RehomingRequest,
         on_delete=models.CASCADE,
-        related_name='listing'
+        related_name='listing',
+        null=False,
+        blank=False
     )
     
     pet = models.OneToOneField(
@@ -139,6 +151,25 @@ class RehomingListing(models.Model):
         related_name='rehoming_listing'
     )
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name='listings')
+
+    def can_transition_to(self, new_status):
+        """Check if status transition is allowed"""
+        return new_status in self.STATUS_TRANSITIONS.get(self.status, [])
+    
+    def save(self, *args, **kwargs):
+        """Validate status transitions before saving"""
+        if self.pk:  # Existing object
+            try:
+                old_instance = RehomingListing.objects.get(pk=self.pk)
+                if old_instance.status != self.status:
+                    if not old_instance.can_transition_to(self.status):
+                        from django.core.exceptions import ValidationError
+                        raise ValidationError(
+                            f"Cannot transition from '{old_instance.status}' to '{self.status}'"
+                        )
+            except RehomingListing.DoesNotExist:
+                pass # Should not happen if self.pk exists
+        super().save(*args, **kwargs)
     
     # Copy key fields from request (for query performance)
     reason = models.TextField()

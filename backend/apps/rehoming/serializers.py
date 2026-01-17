@@ -9,10 +9,11 @@ class PetSnapshotSerializer(serializers.ModelSerializer):
     """
     age_display = serializers.SerializerMethodField()
     main_photo = serializers.SerializerMethodField()
+    photos = serializers.SerializerMethodField()
 
     class Meta:
         model = PetProfile
-        fields = ['id', 'name', 'species', 'breed', 'gender', 'age_display', 'main_photo', 'status']
+        fields = ['id', 'name', 'species', 'breed', 'gender', 'age_display', 'main_photo', 'photos', 'status']
 
     def get_age_display(self, obj):
         if obj.birth_date:
@@ -31,6 +32,16 @@ class PetSnapshotSerializer(serializers.ModelSerializer):
         any_photo = obj.media.first()
         return any_photo.url if any_photo else None
 
+    def get_photos(self, obj):
+        """Return all photos for gallery"""
+        return [
+            {
+                'url': media.url,
+                'is_primary': media.is_primary
+            }
+            for media in obj.media.all().order_by('-is_primary', 'uploaded_at')
+        ]
+
 class ListingSerializer(serializers.ModelSerializer):
     """List view serializer"""
     owner = PublicUserSerializer(read_only=True)
@@ -42,7 +53,8 @@ class ListingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'pet', 'owner', 'status', 
             'urgency', 'location_city', 'location_state',
-            'published_at', 'created_at', 'reason', 'application_count'
+            'published_at', 'created_at', 'reason', 'application_count', 'view_count', 'privacy_level',
+            'latitude', 'longitude'
         ]
 
 class ListingDetailSerializer(serializers.ModelSerializer):
@@ -59,7 +71,7 @@ class ListingCreateUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = RehomingListing
         exclude = ['created_at', 'updated_at', 'published_at', 'view_count']
-        read_only_fields = ['owner', 'status', 'request']
+        read_only_fields = ['owner', 'status', 'request', 'pet']
 
 class RehomingRequestSerializer(serializers.ModelSerializer):
     """

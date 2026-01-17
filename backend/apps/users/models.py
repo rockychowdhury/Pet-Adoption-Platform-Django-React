@@ -92,6 +92,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         return f"{self.email} ({self.role})"
     
     @property
+    def username(self):
+        return self.email
+    
+    @property
     def is_user(self):
         return self.role == User.UserRole.USER
     

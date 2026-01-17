@@ -14,6 +14,7 @@ from .serializers import (
 )
 from apps.users.permissions import IsAdmin, IsOwnerOrReadOnly
 import datetime
+import math
 
 class RehomingRequestViewSet(viewsets.ModelViewSet):
     """
@@ -24,6 +25,24 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         return RehomingRequest.objects.filter(owner=self.request.user)
+
+    def _create_listing_from_request(self, rehoming_req):
+        """Helper to create listing from confirmed request"""
+        listing, created = RehomingListing.objects.get_or_create(
+            request=rehoming_req,
+            defaults={
+                'owner': rehoming_req.owner,
+                'pet': rehoming_req.pet,
+                'reason': rehoming_req.reason,
+                'urgency': rehoming_req.urgency,
+                'ideal_home_notes': rehoming_req.ideal_home_notes,
+                'location_city': rehoming_req.location_city,
+                'location_state': rehoming_req.location_state,
+                'status': 'active', # Immediately active
+                'privacy_level': rehoming_req.privacy_level
+            }
+        )
+        return listing
 
     def perform_create(self, serializer):
         user = self.request.user
@@ -55,13 +74,16 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         if not location_state:
             location_state = user.location_state
 
-        serializer.save(
+        instance = serializer.save(
             owner=user, 
             status=rehoming_status, 
             cooling_period_end=cooling_until,
             location_city=location_city,
             location_state=location_state
         )
+
+        if instance.status == 'confirmed':
+            self._create_listing_from_request(instance)
 
     @action(detail=True, methods=['post'])
     def confirm(self, request, pk=None):
@@ -74,13 +96,32 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         if rehoming_req.status != 'cooling_period':
              raise PermissionDenied("Request is not in cooling period.")
              
-        if rehoming_req.is_in_cooling_period:
-             raise PermissionDenied("Cooling period is still active.")
+        # Precise server-side time check
+        now = timezone.now()
+        if rehoming_req.cooling_period_end and rehoming_req.cooling_period_end > now:
+             time_remaining = (rehoming_req.cooling_period_end - now).total_seconds()
+             return Response(
+                {
+                    'error': 'Cooling period is still active.',
+                    'seconds_remaining': int(time_remaining),
+                    'ends_at': rehoming_req.cooling_period_end.isoformat()
+                },
+                status=status.HTTP_400_BAD_REQUEST
+             )
              
+        # Proceed with confirmation
         rehoming_req.status = 'confirmed'
-        rehoming_req.confirmed_at = timezone.now()
+        rehoming_req.confirmed_at = now
         rehoming_req.save()
-        return Response(self.get_serializer(rehoming_req).data)
+        
+        # AUTO-CREATE LISTING (Phase 5 Simplification)
+        # Check if listing exists first to be safe
+        listing = self._create_listing_from_request(rehoming_req)
+        
+        # Return listing info
+        response_data = self.get_serializer(rehoming_req).data
+        response_data['listing_id'] = listing.id
+        return Response(response_data)
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):
@@ -105,11 +146,70 @@ class ListingListCreateView(generics.ListCreateAPIView):
         return ListingSerializer
 
     def get_queryset(self):
-        queryset = RehomingListing.objects.select_related('owner', 'pet').filter(status='active')
+        from django.db.models import Count
+        queryset = RehomingListing.objects.select_related('owner', 'pet').filter(status='active').annotate(
+            application_count=Count('inquiries')
+        )
         
-        # Filtering logic... (Same as before)
-        species = self.request.query_params.get('species')
+        # Filtering logic
+        params = self.request.query_params
+        
+        # 1. Text Search (Name, Breed, City)
+        search_query = params.get('search')
+        if search_query:
+            queryset = queryset.filter(
+                Q(pet__name__icontains=search_query) |
+                Q(pet__breed__icontains=search_query) |
+                Q(location_city__icontains=search_query)
+            )
+
+        # 2. Location & Radius Filtering
+        location_lat = params.get('lat')
+        location_lon = params.get('lng') # or 'lon'
+        radius = params.get('radius') # in miles/km
+
+        if location_lat and location_lon and radius:
+            try:
+                lat = float(location_lat)
+                lon = float(location_lon)
+                rad = float(radius)
+                
+                # Simple bounding box first for speed
+                # 1 deg lat ~= 69 miles (111km)
+                # 1 deg lon ~= 69 miles * cos(lat)
+                # This is an approximation
+                
+                lat_delta = rad / 69.0
+                lon_delta = rad / (69.0 * abs(math.cos(math.radians(lat))))
+                
+                queryset = queryset.filter(
+                    latitude__range=(lat - lat_delta, lat + lat_delta),
+                    longitude__range=(lon - lon_delta, lon + lon_delta)
+                )
+                
+                # Optionally: Exact distance calculation could be done here or in DB if using PostGIS
+                # For SQLite/Basic, Bounding Box is usually sufficient for small datasets
+            except (ValueError, TypeError):
+                pass
+        
+        # 3. Standard Filters
+        species = params.get('species')
         if species: queryset = queryset.filter(pet__species__iexact=species)
+        
+        breed = params.get('breed')
+        if breed: queryset = queryset.filter(pet__breed__icontains=breed)
+
+        gender = params.get('gender')
+        if gender: queryset = queryset.filter(pet__gender__iexact=gender)
+        
+        urgency = params.get('urgency_level')
+        if urgency: queryset = queryset.filter(urgency=urgency)
+        
+        # Ordering
+        ordering = params.get('ordering', '-published_at')
+        if ordering in ['published_at', '-published_at', 'created_at', '-created_at']:
+            queryset = queryset.order_by(ordering)
+
         return queryset
 
     def perform_create(self, serializer):
@@ -119,10 +219,6 @@ class ListingListCreateView(generics.ListCreateAPIView):
              raise PermissionDenied("Profile verification required.")
              
         # Gate 2: Must have a CONFIRMED RehomingRequest
-        # We expect 'request_id' in body or look it up based on pet?
-        # The serializer might not have 'request' field if it's read_only. 
-        # But we need to link it.
-        
         request_id = self.request.data.get('request_id')
         if not request_id:
             raise PermissionDenied("Rehoming Request ID required.")
@@ -132,8 +228,13 @@ class ListingListCreateView(generics.ListCreateAPIView):
         except RehomingRequest.DoesNotExist:
             raise NotFound("Rehoming Request not found.")
             
-        if not rehoming_req.can_proceed_to_listing:
-             raise PermissionDenied("Rehoming Request is not ready (Cooling or Terms not accepted).")
+        if rehoming_req.status != 'confirmed':
+             raise PermissionDenied("Rehoming Request is not confirmed.")
+
+        # Gate 3: Listing must not already exist
+        if hasattr(rehoming_req, 'listing'):
+            from rest_framework.exceptions import ValidationError
+            raise ValidationError("A listing already exists for this request.")
              
         # Create Listing linked to request
         serializer.save(
