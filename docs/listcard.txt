@@ -1,0 +1,227 @@
+Perfect — this is a **different psychological context**, so the card **must feel different**, even if it visually belongs to the same design system.
+
+I’ll act as a **world-class UI/UX expert** and write **clear, non-code UI instructions** for a frontend dev.
+
+---
+
+# 🐾 Rehoming Pet Card (Public / Pet Seeker View)
+
+**Context:**
+This card is shown to **potential adopters** browsing pets to welcome into their home.
+The goal of the card is **selection + emotional connection**, not management.
+
+> Think: *“Can I imagine this pet in my life?”*
+
+---
+
+## 🎯 Core UX Goal
+
+* Help users **quickly filter & shortlist**
+* Create **emotional attraction without overwhelming**
+* Encourage **click-through to pet detail page**
+* Build **trust & safety signals subtly**
+
+---
+
+## 🧠 Psychological Principles to Apply
+
+* **Face-first bias** → Pet image is the emotional hook
+* **Cognitive ease** → Minimal, scannable info
+* **Trust heuristics** → Verified & location signals
+* **Urgency framing** → Without panic or guilt
+* **Choice reduction** → Avoid overload in list view
+
+---
+
+## 🧱 Card Layout Structure (Top → Bottom)
+
+---
+
+## 1️⃣ Media Section (Primary Attention Anchor)
+
+### Main Photo
+
+* Use `pet.main_photo`
+* Full-width image
+* Aspect ratio: **4:3**
+* Rounded top corners
+* Subtle gradient overlay at bottom for text readability
+
+### Image Badges (Top-left or Top-right)
+
+Show **at most 2 small badges**:
+
+* **Urgency Badge**
+
+  * Based on `urgency`
+  * Examples:
+
+    * `Immediate` → Red / Orange (⚠️ Immediate)
+    * `Soon` → Amber
+    * `Flexible` → Soft Green
+* **Status Badge**
+
+  * `status: active` → “Available”
+
+> ❗ Avoid showing internal statuses like “draft” or “paused” here
+
+---
+
+## 2️⃣ Pet Identity Block (First Cognitive Scan)
+
+### Pet Name (Primary)
+
+* `pet.name`
+* Large, friendly typography
+* Emotion-first — this is the **headline**
+
+### Quick Meta Line (Single Line)
+
+Format:
+
+> **Species • Breed • Age • Gender**
+
+Example:
+
+> Cat • Persian • 0 years • Male
+
+* Uses `species`, `breed`, `age_display`, `gender`
+* Use icons subtly (🐱 ♂️ 🎂)
+
+---
+
+## 3️⃣ Emotional Compatibility Indicators (Key Differentiator)
+
+### Personality Preview (Max 3 Chips)
+
+From pet traits (if available later) or inferred basics:
+
+* Friendly
+* Calm
+* Playful
+* Good with kids (if applicable)
+
+**Rules:**
+
+* Max **3 traits only**
+* Rounded soft chips
+* Neutral positive tone
+* No scrolling inside card
+
+> 💡 This helps users *self-filter emotionally*
+
+---
+
+## 4️⃣ Location & Trust Signals (Reassurance Layer)
+
+### Location
+
+* Show:
+
+  * `location_city`, `location_state`
+* Use subtle pin icon
+* Secondary text style
+
+### Owner Trust Indicator (Minimal, Non-invasive)
+
+* Show **one combined trust label**, not raw booleans:
+
+  * If `verified_identity` or `pet_owner_verified` →
+    ✅ “Verified Owner”
+  * Else →
+    ℹ️ “Owner profile available”
+
+> ❌ Never show `false / true` directly
+> ❌ Never shame the owner
+
+---
+
+## 5️⃣ Engagement Signals (Social Proof)
+
+Show **small, muted counters**:
+
+* 👀 `view_count` views
+* ❤️ `application_count` interested
+
+Placement:
+
+* Bottom-left
+* Secondary importance
+
+> This subtly indicates demand without creating pressure
+
+---
+
+## 6️⃣ Call-to-Action (Primary Conversion Trigger)
+
+### Primary CTA Button
+
+* Text: **“View Details”**
+* Full-width
+* Friendly tone
+* High contrast but not aggressive
+
+### Optional Secondary Action (Icon only)
+
+* Save / Bookmark (♡)
+* Tooltip: “Save for later”
+
+> ❗ No “Apply” button here — that belongs on the detail page
+
+---
+
+## 🚫 What NOT to Show on This Card
+
+These belong to **detail view only**:
+
+* Rehoming `reason`
+* Microchip info
+* Owner full name
+* Owner photo
+* Privacy level
+* Medical details
+* Full description text
+
+---
+
+## 🎨 Visual Tone Guidelines
+
+* Softer colors than dashboard cards
+* More warmth, less control
+* Rounded corners (more than admin/dashboard cards)
+* Subtle shadow to suggest “life & warmth”
+
+---
+
+## 🔁 Relation to User Dashboard Pet Card
+
+| User Dashboard Card | Public Rehoming Card        |
+| ------------------- | --------------------------- |
+| Ownership-focused   | Emotion & selection-focused |
+| Status-heavy        | Compatibility-heavy         |
+| Management actions  | Discovery actions           |
+| Neutral tone        | Warm & inviting             |
+
+---
+
+## 🧪 Edge Case Handling
+
+* If photo missing → friendly placeholder illustration
+* If urgency = immediate → badge visible but **no flashing**
+* If view/application count = 0 → hide counters (don’t show zero)
+
+---
+
+## 🧠 Final Mental Model for Dev
+
+> **Dashboard card = “This is my responsibility”**
+> **Rehoming card = “This could be my companion”**
+
+If you want, next I can:
+
+* Compare **public vs dashboard card side-by-side**
+* Design **hover states & micro-interactions**
+* Review **RehomingIntervention model UX implications**
+* Define **empty state & loading skeleton behavior**
+
+Just tell me 👌
