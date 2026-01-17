@@ -184,7 +184,9 @@ const RehomingStatusPage = () => {
                     </div>
                     <div className="flex justify-between items-center">
                         <span className="text-muted-foreground">Ends At</span>
-                        <span className="font-medium text-foreground">{coolingEnds?.toLocaleString()}</span>
+                        <span className="font-medium text-foreground">
+                            {request.cooling_period_end ? new Date(request.cooling_period_end).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A'}
+                        </span>
                     </div>
                     <div className="mt-6 text-sm text-center text-muted-foreground bg-secondary/50 p-3 rounded-lg">
                         We'll email you when the period ends.
