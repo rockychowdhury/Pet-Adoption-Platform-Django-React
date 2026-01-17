@@ -3,7 +3,7 @@ import {
     Heart, MapPin, Clock, Sparkles, ShieldCheck,
     Home, Share2, LayoutGrid, List as ListIcon,
     Calendar, CheckCircle2, Info, Trash2, Archive, RotateCcw, Pencil, Eye,
-    Cake, Ruler, Scale, Tag, Syringe
+    Cake, Ruler, Scale
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
