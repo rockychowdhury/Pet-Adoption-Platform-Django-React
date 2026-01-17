@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import {
     ChevronLeft, ChevronRight, Share2, Heart, MapPin,
     Clock, Sparkles, ShieldCheck, Scale, Activity,
-    Users, Info, MessageCircle, AlertCircle, checkCircle as CheckCircle, CheckCircle2, Flag
+    Users, Info, MessageCircle, AlertCircle, CheckCircle, CheckCircle2, Flag
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import useRehoming from '../../hooks/useRehoming';
