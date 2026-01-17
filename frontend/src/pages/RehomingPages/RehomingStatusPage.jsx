@@ -1,10 +1,38 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, CheckCircle, AlertOctagon, ArrowRight, LayoutDashboard, CheckCircle2 } from 'lucide-react';
+import { toast } from 'react-toastify';
 import useRehoming from '../../hooks/useRehoming';
 import useAuth from '../../hooks/useAuth';
 import RehomingCancellationModal from '../../components/Rehoming/Modals/RehomingCancellationModal';
 import RehomingConfirmationModal from '../../components/Rehoming/Modals/RehomingConfirmationModal';
+
+// --- Countdown Helper ---
+function useCountdown(targetDate) {
+    const calculateTimeLeft = (target) => {
+        if (!target) return null;
+        const diff = new Date(target) - new Date();
+        if (diff <= 0) return { expired: true };
+
+        return {
+            minutes: Math.floor((diff / 1000 / 60) % 60),
+            seconds: Math.floor((diff / 1000) % 60),
+            expired: false
+        };
+    };
+
+    const [timeLeft, setTimeLeft] = useState(calculateTimeLeft(targetDate));
+
+    useEffect(() => {
+        if (!targetDate) return;
+        const timer = setInterval(() => {
+            setTimeLeft(calculateTimeLeft(targetDate));
+        }, 1000);
+        return () => clearInterval(timer);
+    }, [targetDate]);
+
+    return timeLeft;
+}
 
 const RehomingStatusPage = () => {
     const navigate = useNavigate();
@@ -20,9 +48,25 @@ const RehomingStatusPage = () => {
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+    // Auto-refresh when expired
+    const [hasExpiredTriggered, setHasExpiredTriggered] = useState(false);
+
     // Handle pagination or flat array
     const results = Array.isArray(requests) ? requests : (requests?.results || []);
     const request = results.length > 0 ? results[0] : null;
+
+    // HOOKS MUST BE UNCONDITIONAL
+    const timeLeft = useCountdown(request?.cooling_period_end);
+
+    useEffect(() => {
+        if (timeLeft?.expired && !hasExpiredTriggered && request?.status === 'cooling_period') {
+            setHasExpiredTriggered(true);
+            toast.success("Cooling period complete! You can now confirm your listing.");
+        }
+    }, [timeLeft, request, hasExpiredTriggered]);
+
+    // Derived state for view switching
+    const isCoolingActive = !timeLeft?.expired; // Only active if NOT expired
 
     if (isLoading) return <div className="text-center py-20">Loading status...</div>;
 
@@ -43,50 +87,49 @@ const RehomingStatusPage = () => {
     const isCancelled = request.status === 'cancelled';
     const isActive = request.status === 'active';
 
-    const coolingEnds = request.cooling_period_end ? new Date(request.cooling_period_end) : null;
-    const now = new Date();
-    // Logic: If cooling period exists and is in the future
-    const isCoolingActive = coolingEnds && coolingEnds > now;
-
-    // --- Actions ---
     const handleConfirm = () => {
+        if (!request) return;
         confirmRequest(request.id, {
             onSuccess: () => {
                 setIsConfirmModalOpen(false);
-                navigate('/rehoming/create-listing', { state: { requestId: request.id } });
+                toast.success("Listing created successfully!");
+                navigate('/dashboard/rehoming');
+            },
+            onError: (err) => {
+                // If error is just "early", toast shows it. 
+                // The hook usually handles error toasts but we can be specific.
+                if (err.response?.data?.seconds_remaining) {
+                    toast.error(`Please wait ${err.response.data.seconds_remaining} more seconds.`);
+                } else {
+                    toast.error("Failed to confirm request. Please try again.");
+                }
             }
         });
     };
 
     const handleCancel = (reason) => {
-        cancelRequest(request.id, {
+        if (!request) return;
+        cancelRequest({ id: request.id, reason: reason || 'User cancelled' }, {
             onSuccess: () => {
                 setIsCancelModalOpen(false);
-                // Refresh happens via query invalidation usually, or manual
+                toast.info("Request cancelled.");
+                navigate('/dashboard');
+            },
+            onError: () => {
+                toast.error("Failed to cancel request.");
             }
         });
     };
 
     // --- Components ---
     const Timeline = ({ status }) => {
-        // status: 'submitted', 'cooling', 'ready', 'live'
-        const steps = [
-            { label: 'Submitted', active: true, completed: true },
-            {
-                label: 'Cooling Period',
-                active: isCooling || isConfirmed || isActive,
-                completed: !isCooling && !isConfirmed // Technically completed if we are past it? Simplified for visual:
-                // If we are 'ready' or 'live', cooling is done.
-            },
-            { label: 'Listing Live', active: isActive, completed: false },
-        ];
-
+        // ... (existing timeline code) ...
         // Refined visual logic
         const isReady = isConfirmed && !isActive;
         const isLive = isActive;
 
         const step1 = { label: 'Submitted', active: true, completed: true };
-        const step2 = { label: 'Cooling Period', active: true, completed: isReady || isLive };
+        const step2 = { label: 'Cooling Period', active: true, completed: !isCoolingActive };
         const step3 = { label: 'Listing Live', active: isLive, completed: false };
 
         const timelineSteps = [step1, step2, step3];
@@ -112,8 +155,8 @@ const RehomingStatusPage = () => {
     };
 
     // --- VIEW: Cooling Period (Page 7) ---
-    // If status is cooling OR (status is confirmed but cooling end date is future - unlikely but safe)
-    if (isCooling || (isConfirmed && isCoolingActive)) {
+    // If status is cooling AND cooling is still active
+    if (isCooling && isCoolingActive) {
         return (
             <div className="max-w-2xl mx-auto text-center py-10 pb-20">
                 <Timeline status="cooling" />
@@ -132,9 +175,11 @@ const RehomingStatusPage = () => {
                 <div className="bg-card border border-border p-8 rounded-2xl inline-block text-left w-full max-w-md shadow-sm mb-10">
                     <div className="flex justify-between items-center mb-4 border-b border-border pb-4">
                         <span className="text-muted-foreground font-medium">Time Remaining</span>
-                        <span className="font-mono font-bold text-xl text-primary">
-                            {/* Simple Logic for now */}
-                            ~5 Minutes
+                        <span className="font-mono font-bold text-3xl text-primary tabular-nums">
+                            {timeLeft && !timeLeft.expired
+                                ? `${timeLeft.minutes}:${timeLeft.seconds.toString().padStart(2, '0')}`
+                                : <span className="text-green-600 animate-pulse">Ready!</span>
+                            }
                         </span>
                     </div>
                     <div className="flex justify-between items-center">
@@ -173,8 +218,8 @@ const RehomingStatusPage = () => {
     }
 
     // --- VIEW: Ready to Confirm (Post-Cooling) ---
-    // If confirmed and cooling passed, OR cooling status but time passed (safety fallback)
-    if ((isConfirmed && !isCoolingActive && !isActive) || (isCooling && !isCoolingActive)) {
+    // If (confirmed and ready) OR (cooling but time expired)
+    if ((isConfirmed && !isActive) || (isCooling && !isCoolingActive)) {
         return (
             <div className="max-w-2xl mx-auto text-center py-10 pb-20">
                 <Timeline status="ready" />

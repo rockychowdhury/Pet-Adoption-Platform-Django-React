@@ -111,46 +111,48 @@ const RehomingDashboardPage = () => {
                     </div>
 
                     {/* Controls */}
-                    <div className="flex flex-col xl:flex-row gap-8 items-start xl:items-center justify-between mb-10">
+                    <div className="flex flex-col lg:flex-row gap-6 items-start lg:items-center justify-between mb-10">
                         {/* Tabs */}
-                        <div className="bg-bg-secondary p-1.5 rounded-full flex gap-1 overflow-x-auto scrollbar-hide max-w-full">
-                            {tabs.map(tab => (
-                                <button
-                                    key={tab.id}
-                                    onClick={() => setActiveTab(tab.id)}
-                                    className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab.id
-                                        ? 'bg-bg-surface text-text-primary shadow-sm'
-                                        : 'text-text-secondary hover:text-text-primary'
-                                        }`}
-                                >
-                                    {tab.label}
-                                </button>
-                            ))}
+                        <div className="w-full lg:w-auto overflow-x-auto pb-2 lg:pb-0 no-scrollbar -mx-6 px-6 lg:mx-0 lg:px-0">
+                            <div className="bg-bg-secondary p-1.5 rounded-full flex gap-1 w-max">
+                                {tabs.map(tab => (
+                                    <button
+                                        key={tab.id}
+                                        onClick={() => setActiveTab(tab.id)}
+                                        className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${activeTab === tab.id
+                                            ? 'bg-bg-surface text-text-primary shadow-sm'
+                                            : 'text-text-secondary hover:text-text-primary'
+                                            }`}
+                                    >
+                                        {tab.label}
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Search & Toggle */}
-                        <div className="flex w-full xl:w-auto gap-4">
-                            <div className="relative flex-1 xl:w-80 group">
+                        <div className="flex flex-col sm:flex-row w-full lg:w-auto gap-4">
+                            <div className="relative flex-1 lg:w-80 group">
                                 <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-gray-900 transition-colors" size={20} />
                                 <input
                                     type="text"
                                     placeholder="Search listings..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-full py-3.5 pl-12 pr-4 outline-none text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all font-medium"
+                                    className="w-full bg-bg-surface border border-border rounded-full py-3.5 pl-12 pr-4 outline-none text-text-primary placeholder-text-tertiary focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium shadow-sm"
                                 />
                             </div>
 
-                            <div className="bg-gray-100 dark:bg-gray-800 p-1.5 rounded-full flex shrink-0">
+                            <div className="bg-bg-surface border border-border p-1.5 rounded-full flex shrink-0 self-start sm:self-auto shadow-sm">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'grid' ? 'bg-bg-secondary text-text-primary shadow-inner' : 'text-text-tertiary hover:text-text-secondary'}`}
                                 >
                                     <Grid size={18} />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'list' ? 'bg-bg-secondary text-text-primary shadow-inner' : 'text-text-tertiary hover:text-text-secondary'}`}
                                 >
                                     <List size={18} />
                                 </button>
@@ -220,7 +222,7 @@ const RehomingDashboardPage = () => {
 
                                             {/* Edit Icon */}
                                             <Link
-                                                to={`/rehoming/create?edit=${listing.id}`}
+                                                to={`/rehoming/create-listing?edit=${listing.id}`}
                                                 className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-text-primary transition-all shadow-sm group/edit"
                                                 title="Edit Listing"
                                             >

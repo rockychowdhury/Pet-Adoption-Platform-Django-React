@@ -28,23 +28,27 @@ const RehomingCreateListingPage = () => {
     const updateListing = useUpdateListing();
     const createPet = useCreatePet();
     const updatePet = useUpdatePet();
-    const { uploadImage, uploading: isUploadingPhoto } = useImgBB(); // Import useImgBB
+    const { uploadImage, uploading: isUploadingPhoto } = useImgBB();
 
     // Data Fetching
     const { data: requestsData, isLoading: isCheckingRequests } = useGetRehomingRequests();
+    // Prefer requestId from navigation state, else fallback to latest confirmed
+    const navRequestId = location.state?.requestId;
+
     // Handle pagination or flat array
     const requests = Array.isArray(requestsData) ? requestsData : (requestsData?.results || []);
-    // Find the relevant request. Ideally passed via state, or pick latest confirmed.
-    const rehomingRequest = requests.length > 0 ? requests[0] : null;
-    const { data: myPetsData, isLoading: isLoadingPets } = useGetUserPets();
-    const myPets = Array.isArray(myPetsData) ? myPetsData : (myPetsData?.results || []);
+
+    // Resolve the active request
+    const rehomingRequest = navRequestId
+        ? requests.find(r => r.id === navRequestId)
+        : requests.find(r => r.status === 'confirmed');
+
     const { data: existingListing } = useGetListingDetail(editId);
 
     // State
-    const [currentStep, setCurrentStep] = useState(0); // 0 = Pre-flight
-    const [selectedPetId, setSelectedPetId] = useState('');
-    const [isNewPet, setIsNewPet] = useState(false);
+    const [currentStep, setCurrentStep] = useState(1); // Start at Basics (Step 1)
 
+    // Form Data
     const [formData, setFormData] = useState({
         // Pet Details
         pet_name: '', species: 'dog', breed: '', age: '', gender: 'male', size_category: 'medium',
@@ -112,52 +116,61 @@ const RehomingCreateListingPage = () => {
 
                 included_items: existingListing.included_items || [],
                 timeline: existingListing.ideal_adoption_date || '',
-                stay_in_touch: existingListing.custom_questions?.stay_in_touch ? 'yes' : 'no', // Mapping loosely
+                stay_in_touch: existingListing.custom_questions?.stay_in_touch ? 'yes' : 'no',
                 return_policy: existingListing.custom_questions?.return_policy ? 'yes' : 'no'
             });
-            setCurrentStep(1); // Skip pre-flight if editing
+            setCurrentStep(1);
         }
     }, [existingListing]);
 
-    // Pre-flight Check & Auto-fill Effect
+    // Request Validation & Auto-Populate
     useEffect(() => {
-        if (!isCheckingRequests && !existingListing) {
-            // Strict Gate: Must have 'confirmed' status (passed cooling period)
-            if (!rehomingRequest || rehomingRequest.status !== 'confirmed') {
-                if (rehomingRequest?.status === 'cooling_period') {
-                    toast.info("Your request is in the cooling period.");
-                    navigate('/rehoming/status');
-                } else if (!rehomingRequest) {
-                    // No request found
-                    toast.info("Please start a rehoming request first.");
-                    navigate('/rehoming');
-                }
-            } else if (rehomingRequest.status === 'confirmed') {
-                // AUTO-POPULATION LOGIC
-                // If confirmed, we skip the 'Select Pet' UI (Step 0) and populate from the request.
-                const pet = rehomingRequest.pet_details; // Assuming this is available, fallback to myPets lookup
-                // Ensure we satisfy the "selectedPetId"
-                setSelectedPetId(String(rehomingRequest.pet));
+        // If editing, skip request checks
+        if (editId || existingListing) return;
 
-                if (pet) {
-                    setFormData(prev => ({
+        if (!isCheckingRequests) {
+            if (!rehomingRequest) {
+                toast.info("Please start a rehoming request first.");
+                navigate('/rehoming');
+                return;
+            }
+
+            if (rehomingRequest.status === 'cooling_period') {
+                toast.info("Your request is in the cooling period.");
+                navigate('/rehoming/status');
+                return;
+            }
+
+            if (rehomingRequest.status !== 'confirmed') {
+                toast.error("Invalid request status.");
+                navigate('/rehoming');
+                return;
+            }
+
+            // Valid Confirmed Request -> Populate
+            const pet = rehomingRequest.pet_details;
+            if (pet) {
+                // Only populate if form is empty (prevent overwrite on re-renders)
+                setFormData(prev => {
+                    if (prev.pet_name) return prev; // Already populated
+
+                    toast.info(`Continuing listing for ${pet.name}`);
+                    return {
                         ...prev,
                         pet_name: pet.name,
                         species: pet.species,
                         breed: pet.breed || '',
                         age: pet.age || '',
                         gender: pet.gender || 'unknown',
-                        photos: pet.photos || [],
-                        // Also populate location if user matches
-                        location_city: user?.location_city || prev.location_city,
-                        location_state: user?.location_state || prev.location_state,
-                    }));
-                }
-                // Skip Pre-flight UI
-                setCurrentStep(1);
+                        photos: pet.photos || [], // Now includes gallery from backend updates
+                        story: rehomingRequest.reason || '',
+                        location_city: rehomingRequest.location_city || user?.location_city || '',
+                        location_state: rehomingRequest.location_state || user?.location_state || '',
+                    };
+                });
             }
         }
-    }, [rehomingRequest, isCheckingRequests, navigate, existingListing, user]);
+    }, [rehomingRequest, isCheckingRequests, navigate, editId, existingListing, user]);
 
     // Helper to map urgency
     const mapUrgency = (u) => {
@@ -179,7 +192,7 @@ const RehomingCreateListingPage = () => {
     ];
 
     const nextStep = () => setCurrentStep(prev => Math.min(prev + 1, STEPS.length));
-    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 0));
+    const prevStep = () => setCurrentStep(prev => Math.max(prev - 1, 1));
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -224,28 +237,6 @@ const RehomingCreateListingPage = () => {
         }));
     };
 
-    const handlePetSelection = (petId) => {
-        setSelectedPetId(petId);
-        if (petId === 'new') {
-            setIsNewPet(true);
-            setFormData(prev => ({ ...prev, pet_name: '', species: 'dog', breed: '', age: '', gender: 'male' }));
-        } else {
-            setIsNewPet(false);
-            const pet = myPets.find(p => p.id === parseInt(petId));
-            if (pet) {
-                setFormData(prev => ({
-                    ...prev,
-                    pet_name: pet.name,
-                    species: pet.species,
-                    breed: pet.breed || '',
-                    age: pet.age || '',
-                    gender: pet.gender || 'unknown',
-                    photos: pet.photos || []
-                }));
-            }
-        }
-    };
-
     const handleSubmit = async () => {
         // 1. Prepare Pet Payload
         const traits = [];
@@ -267,10 +258,9 @@ const RehomingCreateListingPage = () => {
             birth_date: birthDate,
             gender: formData.gender,
             size_category: formData.size_category,
-            // Rehoming specific behavior profile mapped to description or discarded as strict model doesn't support them all
             description: formData.story,
-            media_data: formData.photos, // Array of {url, delete_url}
-            traits: traits, // Mapped from behavior
+            media_data: formData.photos,
+            traits: traits,
             spayed_neutered: formData.spayed === 'yes',
             microchipped: formData.microchip === 'yes',
             status: 'active'
@@ -287,33 +277,28 @@ const RehomingCreateListingPage = () => {
         }
 
         try {
-            let finalizedPetId = selectedPetId;
-            let petName = formData.pet_name;
-
-            // Step 1: Create or Update Pet
-            if (isNewPet || selectedPetId === 'new') {
-                const newPet = await createPet.mutateAsync(petPayload);
-                finalizedPetId = newPet.id;
-                petName = newPet.name;
-            } else if (selectedPetId) {
-                // If existing, we update it to ensure rehoming details are current
-                await updatePet.mutateAsync({ id: selectedPetId, data: petPayload });
+            // New Flow: Core Logic uses rehomingRequest
+            if (!rehomingRequest && !editId) {
+                toast.error("Missing rehoming request context.");
+                return;
             }
 
-            if (!finalizedPetId) throw new Error("Failed to resolve Pet ID");
+            // Step 1: Update Pet (Always update the pet from the request)
+            const petId = rehomingRequest?.pet || existingListing?.pet?.id;
+            await updatePet.mutateAsync({ id: petId, data: petPayload });
 
-            // Step 2: Create Listing
+            // Step 2: Create/Update Listing
             const listingPayload = {
-                pet: finalizedPetId, // Send ID
-                reason: formData.story, // Use story as reason
-                urgency: mapUrgency(rehomingRequest?.urgency), // Map from request
+                request_id: rehomingRequest?.id, // CRITICAL: Send request_id for backend link
+                reason: formData.story,
+                urgency: mapUrgency(rehomingRequest?.urgency),
                 location_city: formData.location_city,
                 location_state: formData.location_state,
                 location_zip: formData.location_zip,
                 latitude: formData.location_lat ? parseFloat(formData.location_lat).toFixed(6) : null,
                 longitude: formData.location_lon ? parseFloat(formData.location_lon).toFixed(6) : null,
                 ideal_home_notes: `Timeline: ${formData.timeline || 'Flexible'}. Included: ${formData.included_items.join(', ')}.`,
-                status: 'active' // or draft? Let's default to active if submitting
+                status: 'active'
             };
 
             if (existingListing) {
@@ -327,77 +312,9 @@ const RehomingCreateListingPage = () => {
 
         } catch (error) {
             console.error("Submission failed", error);
-            toast.error("Failed to submit listing. Please try again.");
+            const msg = error?.response?.data?.message || "Failed to submit listing.";
+            toast.error(msg);
         }
-    };
-
-    // --- Render Steps ---
-
-    const renderPreFlight = () => {
-        const isProfileComplete = user?.location_city && user?.phone_verified; // Example criteria
-        // Relaxing phone verification for dev, but keeping location
-        const hasLocation = !!user?.location_city;
-
-        return (
-            <div className="max-w-2xl mx-auto space-y-8">
-                <h2 className="text-2xl font-bold text-center">Let's Get Started</h2>
-
-                {/* Profile Check */}
-                <Card className={`p-6 border-l-4 ${hasLocation ? 'border-l-status-success' : 'border-l-status-warning'}`}>
-                    <div className="flex justify-between items-center">
-                        <div>
-                            <h3 className="font-bold text-lg mb-1">1. Your Profile</h3>
-                            <p className="text-sm text-text-secondary">
-                                {hasLocation ? "Your profile is ready." : "We need your location to match you with adopters."}
-                            </p>
-                        </div>
-                        {hasLocation ? (
-                            <Check className="text-status-success" />
-                        ) : (
-                            <Link to="/profile/settings" className="text-brand-primary text-sm font-bold hover:underline">
-                                Update Profile
-                            </Link>
-                        )}
-                    </div>
-                </Card>
-
-                {/* Pet Selection */}
-                <Card className="p-6 border-l-4 border-l-brand-primary">
-                    <h3 className="font-bold text-lg mb-4">2. Select Pet</h3>
-                    {isLoadingPets ? (
-                        <div>Loading pets...</div>
-                    ) : (
-                        <div className="space-y-3">
-                            <label className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${selectedPetId === 'new' ? 'border-brand-primary bg-brand-primary/5' : 'hover:border-brand-secondary'}`}>
-                                <div className="flex items-center gap-3">
-                                    <input type="radio" name="petSelect" value="new" checked={selectedPetId === 'new'} onChange={() => handlePetSelection('new')} />
-                                    <span className="font-medium">Create New Pet Profile</span>
-                                </div>
-                            </label>
-
-                            {myPets?.map(pet => (
-                                <label key={pet.id} className={`flex items-center justify-between p-4 border rounded-xl cursor-pointer transition-all ${selectedPetId === String(pet.id) ? 'border-brand-primary bg-brand-primary/5' : 'hover:border-brand-secondary'}`}>
-                                    <div className="flex items-center gap-3">
-                                        <input type="radio" name="petSelect" value={pet.id} checked={selectedPetId === String(pet.id)} onChange={() => handlePetSelection(String(pet.id))} />
-                                        <span className="font-medium">{pet.name} ({pet.species})</span>
-                                    </div>
-                                    <span className="text-xs text-text-tertiary">Edit if needed</span>
-                                </label>
-                            ))}
-                        </div>
-                    )}
-                </Card>
-
-                <Button
-                    variant="primary"
-                    className="w-full"
-                    disabled={!selectedPetId || !hasLocation}
-                    onClick={() => nextStep()}
-                >
-                    Continue to Listing Details
-                </Button>
-            </div>
-        );
     };
 
     const renderBasics = () => (
@@ -712,8 +629,6 @@ const RehomingCreateListingPage = () => {
             )}
 
             <div className="max-w-3xl mx-auto px-4 py-8">
-                {currentStep === 0 && renderPreFlight()}
-
                 {currentStep > 0 && (
                     <form onSubmit={e => e.preventDefault()}>
                         <div className="mb-8">
