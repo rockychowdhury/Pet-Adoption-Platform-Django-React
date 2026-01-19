@@ -58,6 +58,7 @@ const AdminDashboard = () => {
     ];
 
     const pendingActions = [
+        { label: 'Role Requests', count: analytics.pending_role_requests || 0, link: '/admin/role-requests', color: 'info' },
         { label: 'Listings to Review', count: analytics.pending_listings, link: '/admin/listings', color: 'warning' },
         { label: 'Pending Applications', count: analytics.pending_applications, link: '/admin/applications', color: 'info' },
         { label: 'High Priority Reports', count: 0, link: '/admin/reports', color: 'error' },
