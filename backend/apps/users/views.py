@@ -455,6 +455,9 @@ class RoleRequestViewSet(viewsets.ModelViewSet):
     """
     serializer_class = RoleRequestSerializer
     permission_classes = [permissions.IsAuthenticated]
+    filterset_fields = ['status', 'requested_role']
+    ordering_fields = ['created_at', 'updated_at']
+    ordering = ['-created_at']
 
     def get_queryset(self):
         user = self.request.user
@@ -479,5 +482,50 @@ class RoleRequestViewSet(viewsets.ModelViewSet):
                 user.role = instance.requested_role
                 user.save()
         
-        
         return response
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def approve(self, request, pk=None):
+        """Approve a role request"""
+        role_request = self.get_object()
+        
+        if role_request.status != 'pending':
+            return Response(
+                {"error": "Only pending requests can be approved"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        role_request.status = 'approved'
+        role_request.admin_notes = request.data.get('admin_notes', '')
+        role_request.save()
+        
+        # Update user role and ensure account is active (per servicesflow.md Section 3)
+        user = role_request.user
+        user.role = role_request.requested_role
+        user.is_active = True  # Ensure user account is active
+        user.save()
+        
+        return Response({
+            "message": "Role request approved successfully",
+            "data": RoleRequestSerializer(role_request).data
+        })
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def reject(self, request, pk=None):
+        """Reject a role request"""
+        role_request = self.get_object()
+        
+        if role_request.status != 'pending':
+            return Response(
+                {"error": "Only pending requests can be rejected"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        
+        role_request.status = 'rejected'
+        role_request.admin_notes = request.data.get('admin_notes', 'Request rejected by admin')
+        role_request.save()
+        
+        return Response({
+            "message": "Role request rejected",
+            "data": RoleRequestSerializer(role_request).data
+        })
