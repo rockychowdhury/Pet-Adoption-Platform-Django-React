@@ -1,7 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
 import {
@@ -27,7 +27,20 @@ import { motion } from 'framer-motion';
 const UserDashboardOverview = () => {
     const api = useAPI();
     const { user } = useAuth();
+    const navigate = useNavigate();
     const [appTab, setAppTab] = useState('received'); // 'received' | 'submitted'
+
+    // Redirect based on role
+    useEffect(() => {
+        if (user?.role === 'admin') {
+            navigate('/admin', { replace: true });
+        } else if (user?.role === 'service_provider') {
+            navigate('/provider/dashboard', { replace: true });
+        }
+    }, [user, navigate]);
+
+    // Only fetch data for regular users (not admins or providers)
+    const isRegularUser = user?.role !== 'admin' && user?.role !== 'service_provider';
 
     // Fetch Active Listings
     const { data: activeListings = [] } = useQuery({
@@ -35,7 +48,8 @@ const UserDashboardOverview = () => {
         queryFn: async () => {
             const res = await api.get('/pets/?owner=me&status=active');
             return res.data.results || res.data;
-        }
+        },
+        enabled: isRegularUser, // Only run for regular users
     });
 
     // Fetch Applications
@@ -44,7 +58,8 @@ const UserDashboardOverview = () => {
         queryFn: async () => {
             const res = await api.get('/adoption/applications/');
             return res.data.results || res.data;
-        }
+        },
+        enabled: isRegularUser, // Only run for regular users
     });
 
     // Filter Applications
@@ -69,7 +84,9 @@ const UserDashboardOverview = () => {
         { label: 'My Pets', icon: PawPrint, to: '/dashboard/my-pets', desc: 'Manage profiles' },
         { label: 'Browse Pets', icon: Search, to: '/pets', desc: 'Find a friend' },
         { label: 'Services', icon: MapPin, to: '/services', desc: 'Find vets & more' },
-        { label: 'Community', icon: Users, to: '/community', desc: 'Join discussions' },
+        ...(user?.role !== 'service_provider' && user?.role !== 'admin' ? [
+            { label: 'Become Provider', icon: Users, to: '/become-provider', desc: 'Offer services' }
+        ] : []),
         { label: 'Messages', icon: Mail, to: '/dashboard/messages', desc: 'View inbox' },
     ];
 

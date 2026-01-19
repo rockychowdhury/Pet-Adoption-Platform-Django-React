@@ -158,6 +158,18 @@ const Navbar = () => {
                                                     <DropdownLink to="/dashboard" icon={<User size={16} />} label="Dashboard" />
                                                     <DropdownLink to="/dashboard/profile" icon={<User size={16} />} label="My Profile" />
                                                     <DropdownLink to="/dashboard/my-pets" icon={<User size={16} />} label="My Pets" />
+
+                                                    {/* Role-based links */}
+                                                    {user.role === 'admin' && (
+                                                        <DropdownLink to="/admin" icon={<User size={16} />} label="Admin Panel" />
+                                                    )}
+                                                    {user.role === 'service_provider' && (
+                                                        <DropdownLink to="/provider/dashboard" icon={<User size={16} />} label="Provider Dashboard" />
+                                                    )}
+                                                    {user.role !== 'service_provider' && user.role !== 'admin' && (
+                                                        <DropdownLink to="/become-provider" icon={<User size={16} />} label="Become a Provider" />
+                                                    )}
+
                                                     <Link
                                                         to="/rehoming/create"
                                                         className="flex items-center gap-3 px-4 py-2.5 mx-2 my-1 text-sm text-[#2D5A41] bg-[#2D5A41]/5 rounded-xl hover:bg-[#2D5A41]/10 transition-all font-bold"
