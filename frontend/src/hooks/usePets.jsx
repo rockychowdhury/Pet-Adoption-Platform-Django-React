@@ -117,7 +117,7 @@ const usePets = () => {
         });
     };
 
-    // Fetch My Pets (User's Listings)
+    // Fetch My Pets (User's Listings) - Public/Search
     const useGetUserPets = (filters = {}) => {
         return useQuery({
             queryKey: ['myPets', filters],
@@ -132,13 +132,25 @@ const usePets = () => {
         });
     };
 
+    // Fetch Authenticated User's Pets (for management/booking)
+    const useGetMyPets = () => {
+        return useQuery({
+            queryKey: ['userPets'],
+            queryFn: async () => {
+                const response = await api.get('/user/pets/');
+                return response.data;
+            },
+        });
+    };
+
     return {
         useGetPets,
         useGetPet,
         useCreatePet,
         useUpdatePet,
         useDeletePet,
-        useGetUserPets
+        useGetUserPets,
+        useGetMyPets
     };
 };
 
