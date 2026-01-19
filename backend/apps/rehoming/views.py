@@ -110,7 +110,28 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         )
 
         if instance.status == 'confirmed':
-            self._create_listing_from_request(instance)
+            # Phase 6 Separation: Do NOT auto-create listing.
+            pass
+
+    @action(detail=True, methods=['post'])
+    def publish(self, request, pk=None):
+        """Publish the request: Create listing and mark request as listed."""
+        rehoming_req = self.get_object()
+        
+        if rehoming_req.status == 'listed':
+             raise PermissionDenied("Request is already listed.")
+             
+        if rehoming_req.status != 'confirmed':
+             raise PermissionDenied("Request must be confirmed before publishing.")
+
+        # Create the listing
+        listing = self._create_listing_from_request(rehoming_req)
+        
+        # Update request status
+        rehoming_req.status = 'listed'
+        rehoming_req.save()
+        
+        return Response({'status': 'listed', 'listing_id': listing.id})
 
     @action(detail=True, methods=['post'])
     def confirm(self, request, pk=None):
@@ -141,14 +162,9 @@ class RehomingRequestViewSet(viewsets.ModelViewSet):
         rehoming_req.confirmed_at = now
         rehoming_req.save()
         
-        # AUTO-CREATE LISTING (Phase 5 Simplification)
-        # Check if listing exists first to be safe
-        listing = self._create_listing_from_request(rehoming_req)
-        
-        # Return listing info
-        response_data = self.get_serializer(rehoming_req).data
-        response_data['listing_id'] = listing.id
-        return Response(response_data)
+        # Phase 6 Separation: Do NOT auto-create listing.
+        # Just return the confirmed request status.
+        return Response(self.get_serializer(rehoming_req).data)
 
     @action(detail=True, methods=['post'])
     def cancel(self, request, pk=None):

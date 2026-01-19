@@ -118,11 +118,15 @@ const usePets = () => {
     };
 
     // Fetch My Pets (User's Listings)
-    const useGetUserPets = () => {
+    const useGetUserPets = (filters = {}) => {
         return useQuery({
-            queryKey: ['myPets'],
+            queryKey: ['myPets', filters],
             queryFn: async () => {
-                const response = await api.get('/pets/profiles/');
+                const params = new URLSearchParams();
+                Object.keys(filters).forEach(key => {
+                    if (filters[key]) params.append(key, filters[key]);
+                });
+                const response = await api.get(`/pets/profiles/?${params.toString()}`);
                 return response.data;
             },
         });

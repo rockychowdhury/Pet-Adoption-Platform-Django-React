@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useForm, Controller } from 'react-hook-form';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
@@ -56,6 +56,7 @@ const SIZE_OPTIONS = [
 const AddPetPage = () => {
     const { id: paramId } = useParams();
     const navigate = useNavigate();
+    const location = useLocation(); // Add hook
     const api = useAPI();
     const { user } = useAuth();
     const { uploadImage, uploading } = useImgBB();
@@ -221,7 +222,13 @@ const AddPetPage = () => {
                 await api.post('/pets/profiles/', payload);
                 toast.success("Profile created successfully!");
             }
-            navigate('/dashboard/my-pets');
+
+            // Redirect based on returnTo context or default
+            if (location.state?.returnTo) {
+                navigate(location.state.returnTo);
+            } else {
+                navigate('/dashboard/my-pets');
+            }
         } catch (error) {
             console.error("Final submit failed", error);
             toast.error("Failed to save profile.");

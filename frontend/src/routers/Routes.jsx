@@ -47,12 +47,11 @@ import ServiceProviderRegistrationPage from "../pages/ServicePages/ServiceProvid
 import RehomingFlowLayout from "../layouts/RehomingFlowLayout";
 import RehomingLandingPage from '../pages/RehomingPages/RehomingLandingPage';
 import RehomingPetSelectionPage from '../pages/RehomingPages/RehomingPetSelectionPage';
-import RehomingPetCompletionPage from '../pages/RehomingPages/RehomingPetCompletionPage';
+
 import RehomingCheckInPage from '../pages/RehomingPages/RehomingCheckInPage';
 import RehomingFormPage from "../pages/RehomingPages/RehomingFormPage";
 import RehomingStatusPage from "../pages/RehomingPages/RehomingStatusPage";
 import RehomingListingDetailPage from "../pages/RehomingPages/RehomingListingDetailPage";
-import RehomingCreateListingPage from "../pages/RehomingPages/RehomingCreateListingPage";
 import RehomingDashboardPage from "../pages/RehomingPages/RehomingDashboardPage";
 import RehomingRequestPage from "../pages/RehomingPages/RehomingRequestPage";
 // import RehomingInterventionPage from "../pages/RehomingPages/RehomingInterventionPage"; // Legacy, removed
@@ -188,11 +187,10 @@ const router = createBrowserRouter([
                                 element: <RehomingFlowLayout />,
                                 children: [
                                     { path: "select-pet", element: <RehomingPetSelectionPage /> },
-                                    { path: "pet-incomplete", element: <RehomingPetCompletionPage /> },
+
                                     { path: "check-in", element: <RehomingCheckInPage /> },
                                     { path: "create-request", element: <RehomingFormPage /> },
                                     { path: "status", element: <RehomingStatusPage /> },
-                                    { path: "create-listing", element: <RehomingCreateListingPage /> },
                                 ]
                             }
                         ]

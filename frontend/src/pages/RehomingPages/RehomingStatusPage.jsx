@@ -37,13 +37,19 @@ function useCountdown(targetDate) {
 const RehomingStatusPage = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
-    const { useGetRehomingRequests, useConfirmRehomingRequest, useCancelRehomingRequest } = useRehoming();
+    const {
+        useGetRehomingRequests,
+        useConfirmRehomingRequest,
+        useCancelRehomingRequest,
+        usePublishRehomingRequest
+    } = useRehoming();
 
     // Fetch latest request
     const { data: requests, isLoading } = useGetRehomingRequests();
 
     const { mutate: confirmRequest, isLoading: isConfirming } = useConfirmRehomingRequest();
     const { mutate: cancelRequest, isLoading: isCancelling } = useCancelRehomingRequest();
+    const { mutate: publishRequest, isLoading: isPublishing } = usePublishRehomingRequest();
 
     const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -92,7 +98,12 @@ const RehomingStatusPage = () => {
         confirmRequest(request.id, {
             onSuccess: () => {
                 setIsConfirmModalOpen(false);
-                toast.success("Listing created successfully!");
+                toast.success("Request confirmed successfully!");
+                // Do not navigate away immediately, let the UI update to 'Confirmed' state or navigate to dashboard
+                // navigate('/dashboard/rehoming'); 
+                // Actually, staying on page to show "Confirmed" state is better UX, or redirecting.
+                // User said "options to ... return to dashboard". 
+                // Let's redirect to dashboard rehoming tab (Drafts) as that's where they can proceed.
                 navigate('/dashboard/rehoming');
             },
             onError: (err) => {
@@ -219,9 +230,9 @@ const RehomingStatusPage = () => {
         );
     }
 
-    // --- VIEW: Ready to Confirm (Post-Cooling) ---
-    // If (confirmed and ready) OR (cooling but time expired)
-    if ((isConfirmed && !isActive) || (isCooling && !isCoolingActive)) {
+    // --- VIEW: Ready to Confirm (Post-Cooling, Pre-Confirmation) ---
+    // Rule: Status is still 'cooling_period' BUT time has expired.
+    if (isCooling && !isCoolingActive) {
         return (
             <div className="max-w-2xl mx-auto text-center py-10 pb-20">
                 <Timeline status="ready" />
@@ -230,11 +241,11 @@ const RehomingStatusPage = () => {
                     <CheckCircle className="w-12 h-12" />
                 </div>
                 <h1 className="text-3xl font-display font-bold text-foreground mb-4">
-                    Ready to Publish
+                    Ready to Confirm
                 </h1>
                 <p className="text-lg text-muted-foreground mb-8">
                     The cooling period for <strong>{request.pet_details?.name}</strong> has ended.
-                    You can now confirm and publish your listing.
+                    You can now confirm your request.
                 </p>
 
                 <div className="flex flex-col gap-4 items-center">
@@ -242,7 +253,7 @@ const RehomingStatusPage = () => {
                         onClick={() => setIsConfirmModalOpen(true)}
                         className="btn btn-primary btn-lg shadow-xl shadow-brand-primary/20 px-10"
                     >
-                        Confirm & Publish Listing
+                        Confirm Request
                     </button>
                     <div className="flex gap-4 text-sm mt-4">
                         <button onClick={() => navigate('/dashboard')} className="text-muted-foreground hover:text-primary">
@@ -273,7 +284,48 @@ const RehomingStatusPage = () => {
         );
     }
 
-    // --- VIEW: Active / Immediate Success (Page 8) ---
+    // --- VIEW: Confirmed (Success State) ---
+    // Logic: Status is 'confirmed'.
+    if (isConfirmed) {
+        return (
+            <div className="max-w-2xl mx-auto text-center py-10 pb-20">
+                <Timeline status="ready" />
+
+                <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                    <CheckCircle2 className="w-12 h-12" />
+                </div>
+                <h1 className="text-3xl font-display font-bold text-foreground mb-4">
+                    Request Confirmed
+                </h1>
+                <p className="text-lg text-muted-foreground mb-8">
+                    Your rehoming request for <strong>{request.pet_details?.name}</strong> has been confirmed.
+                    You can now proceed to create your listing from the dashboard.
+                </p>
+
+                <button onClick={() => navigate('/dashboard/rehoming')} className="btn btn-secondary">
+                    Go to Dashboard
+                </button>
+                <button
+                    onClick={() => {
+                        publishRequest(request.id, {
+                            onSuccess: () => {
+                                toast.success("Listing published successfully!");
+                                navigate('/dashboard/rehoming?tab=Active');
+                            },
+                            onError: () => toast.error("Failed to publish listing.")
+                        });
+                    }}
+                    disabled={isPublishing}
+                    className="btn btn-primary"
+                >
+                    {isPublishing ? 'Publishing...' : 'Publish Listing Now'}
+                </button>
+            </div>
+        );
+    }
+
+    // --- VIEW: Active (Fallback / Legacy) ---
+    // If we ever have 'active' status on request
     if (isActive) {
         return (
             <div className="max-w-2xl mx-auto text-center py-10 pb-20">
@@ -289,15 +341,6 @@ const RehomingStatusPage = () => {
                     We're helping you find a new home for <strong>{request.pet_details?.name}</strong>.
                     You will be notified when someone inquires.
                 </p>
-
-                <div className="bg-card p-6 rounded-2xl border border-border shadow-sm mb-8 text-left max-w-md mx-auto">
-                    <h3 className="font-bold mb-4">What Happens Next?</h3>
-                    <ul className="space-y-3 text-sm text-muted-foreground">
-                        <li className="flex gap-2"><div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">1</div> Listing is visible to potential adopters</li>
-                        <li className="flex gap-2"><div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">2</div> Receive notifications for inquiries</li>
-                        <li className="flex gap-2"><div className="w-6 h-6 rounded-full bg-secondary flex items-center justify-center text-xs font-bold">3</div> Respond via secure messaging</li>
-                    </ul>
-                </div>
 
                 <div className="flex gap-4 justify-center">
                     <button onClick={() => navigate('/dashboard/listings')} className="btn btn-primary">

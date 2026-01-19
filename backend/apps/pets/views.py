@@ -23,7 +23,20 @@ class PetProfileListCreateView(generics.ListCreateAPIView):
         return PetProfileSerializer
 
     def get_queryset(self):
-        return PetProfile.objects.filter(owner=self.request.user)
+        queryset = PetProfile.objects.filter(owner=self.request.user)
+        
+        exclude_active = self.request.query_params.get('exclude_active_listings')
+        if exclude_active == 'true':
+            # Exclude pets with active Listings
+            queryset = queryset.exclude(
+                rehoming_listing__status__in=['active', 'pending_review', 'paused', 'under_review']
+            )
+            # Exclude pets with active Requests (Draft, Cooling, Confirmed) to prevent dupes
+            queryset = queryset.exclude(
+                rehoming_requests__status__in=['draft', 'cooling_period', 'confirmed']
+            )
+            
+        return queryset
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)

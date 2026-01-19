@@ -64,6 +64,19 @@ const useRehoming = () => {
         });
     };
 
+    const usePublishRehomingRequest = () => {
+        return useMutation({
+            mutationFn: async (id) => {
+                const response = await api.post(`/rehoming/requests/${id}/publish/`);
+                return response.data;
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries(['myRehomingRequests']);
+                queryClient.invalidateQueries(['rehomingListings']);
+            }
+        });
+    };
+
     const useGetListings = (filters = {}) => {
         return useQuery({
             queryKey: ['rehomingListings', filters],
@@ -146,6 +159,7 @@ const useRehoming = () => {
         useUpdateRehomingRequest,
         useCancelRehomingRequest,
         useConfirmRehomingRequest,
+        usePublishRehomingRequest,
         useGetListings,
         useGetListingDetail,
         useCreateListing,

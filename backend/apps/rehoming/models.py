@@ -13,6 +13,7 @@ class RehomingRequest(models.Model):
         ('draft', 'Draft'),
         ('cooling_period', 'Cooling Period'),
         ('confirmed', 'Confirmed'),  # Ready to create listing
+        ('listed', 'Listed'),       # Listing has been created
         ('cancelled', 'Cancelled'),  # Owner changed mind
         ('expired', 'Expired'),  # Draft never completed
     ]

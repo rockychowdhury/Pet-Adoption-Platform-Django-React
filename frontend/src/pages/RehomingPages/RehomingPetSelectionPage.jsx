@@ -8,7 +8,7 @@ const RehomingPetSelectionPage = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const { useGetUserPets } = usePets();
-    const { data: pets, isLoading } = useGetUserPets();
+    const { data: pets, isLoading } = useGetUserPets({ exclude_active_listings: true });
 
     const [selectedPetId, setSelectedPetId] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -26,8 +26,10 @@ const RehomingPetSelectionPage = () => {
 
     const handlePetClick = (pet) => {
         if (!pet.profile_is_complete) {
-            // Navigate to Completion Gate if incomplete
-            navigate('/rehoming/pet-incomplete', { state: { pet } });
+            // Direct redirect to Edit Page with returnTo context
+            navigate(`/dashboard/pets/${pet.id}/edit`, {
+                state: { returnTo: '/rehoming/select-pet' } // Context for return
+            });
             return;
         }
 
