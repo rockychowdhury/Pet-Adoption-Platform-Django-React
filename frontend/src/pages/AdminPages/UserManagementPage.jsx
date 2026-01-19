@@ -1,41 +1,40 @@
 import React, { useState, useEffect } from 'react';
 import useAPI from '../../hooks/useAPI';
+import useAdmin from '../../hooks/useAdmin';
 import { Search, Filter, MoreHorizontal, Eye, Edit, Trash2, Mail, Shield, Check, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
+import { toast } from 'react-toastify';
 
 const UserManagementPage = () => {
     const [filterStatus, setFilterStatus] = useState('All');
     const [searchTerm, setSearchTerm] = useState('');
     const [activeTab, setActiveTab] = useState('users');
-    const [roleRequests, setRoleRequests] = useState([]);
     const api = useAPI();
+    const { useGetRoleRequests, useApproveRoleRequest, useRejectRoleRequest } = useAdmin();
 
-    useEffect(() => {
-        if (activeTab === 'requests') {
-            fetchRequests();
-        }
-    }, [activeTab]);
+    // Use the new admin hooks for role requests
+    const { data: roleRequestsData, refetch } = useGetRoleRequests({ status: 'pending' });
+    const approveMutation = useApproveRoleRequest();
+    const rejectMutation = useRejectRoleRequest();
 
-    const fetchRequests = async () => {
+    const roleRequests = roleRequestsData?.results || roleRequestsData || [];
+
+    const handleRequestAction = async (id, action) => {
         try {
-            const response = await api.get('/user/role-requests/'); // Corrected endpoint if needed, but keeping consistent
-            const data = response.data;
-            setRoleRequests(Array.isArray(data) ? data : (data?.results || []));
-        } catch (error) {
-            console.error("Failed to fetch requests", error);
-            setRoleRequests([]);
-        }
-    };
-
-    const handleRequestAction = async (id, status) => {
-        try {
-            await api.patch(`/users/role-requests/${id}/`, { status });
-            fetchRequests();
+            if (action === 'approved') {
+                await approveMutation.mutateAsync({ id, admin_notes: 'Approved from user management' });
+                toast.success('Role request approved');
+            } else {
+                await rejectMutation.mutateAsync({ id, admin_notes: 'Rejected from user management' });
+                toast.success('Role request rejected');
+            }
+            refetch();
         } catch (error) {
             console.error("Failed to update status", error);
+            toast.error('Failed to update role request');
         }
     };
 
