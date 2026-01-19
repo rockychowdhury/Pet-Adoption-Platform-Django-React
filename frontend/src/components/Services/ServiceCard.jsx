@@ -16,22 +16,29 @@ import {
 import { motion } from 'framer-motion';
 
 const ServiceCard = ({ provider, viewMode = 'grid' }) => {
-    const isVet = provider.provider_type === 'vet';
-    const isFoster = provider.provider_type === 'foster';
+    // Logic to determine type based on content or category
+    const isVet = !!provider.vet_details || provider.category?.slug === 'veterinary' || provider.category?.name?.toLowerCase().includes('vet');
+    const isFoster = !!provider.foster_details || provider.category?.slug === 'foster' || provider.category?.name?.toLowerCase().includes('foster');
 
-    // Mock Data Fallbacks (ensure UI looks good even with partial data)
-    const rating = provider.avg_rating || 4.8;
-    const reviewCount = provider.reviews_count || 124;
-    const distance = provider.distance || '2.5 miles away';
-    const price = isFoster ? `$${provider.foster_details?.daily_rate || 35}/day` : 'Exam from $65';
+    // Visual Helpers
+    const heroImage = provider.media?.find(m => m.is_primary)?.file_url || provider.media?.[0]?.file_url || 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&q=80';
+
+    // Mock Data / Fallbacks
+    const rating = provider.avg_rating || 'New';
+    const reviewCount = provider.reviews_count || 0;
+    const distance = provider.distance ? `${provider.distance} miles away` : ''; // API might need to return distance annotation
+
+    // Formatting Price/Details
+    let priceDisplay = 'Contact for details';
+    if (isFoster && provider.foster_details?.daily_rate) {
+        priceDisplay = `$${provider.foster_details.daily_rate}/day`;
+    } else if (isVet && provider.vet_details?.base_price) {
+        priceDisplay = `Exam from $${provider.vet_details.base_price}`;
+    }
 
     // Foster Specifics
-    const capacityStatus = provider.foster_details?.capacity_status || 'Available'; // Available, Limited, Full
-    const capacityColor = {
-        'Available': 'bg-green-500',
-        'Limited': 'bg-yellow-500',
-        'Full': 'bg-red-500'
-    }[capacityStatus] || 'bg-gray-400';
+    const capacityStatus = provider.foster_details?.current_availability > 0 ? 'Available' : 'Full';
+    const capacityColor = capacityStatus === 'Available' ? 'bg-green-500' : 'bg-red-500';
 
     return (
         <motion.div
@@ -43,7 +50,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
             {/* Visual Header */}
             <div className={`relative shrink-0 overflow-hidden ${viewMode === 'list' ? 'w-full md:w-72 h-48 md:h-auto' : 'w-full h-48'}`}>
                 <img
-                    src={provider.photos?.[0] || 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&q=80'}
+                    src={heroImage}
                     alt={provider.business_name}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                 />
@@ -55,7 +62,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                             <ShieldCheck size={12} fill="currentColor" /> Verified
                         </div>
                     )}
-                    {isVet && provider.is_emergency && (
+                    {isVet && provider.vet_details?.is_emergency && (
                         <div className="bg-red-500 text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm">
                             24/7 Emergency
                         </div>
@@ -76,7 +83,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                                 <span className={`w-2 h-2 rounded-full ${capacityColor}`}></span>
                             ) : null}
                             <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">
-                                {isVet ? (provider.clinic_type || 'General Practice') : (capacityStatus === 'Available' ? 'Spaces Available' : capacityStatus)}
+                                {isVet ? (provider.clinic_type || 'Veterinary Clinic') : (isFoster ? 'Foster Care' : provider.category?.name)}
                             </span>
                         </div>
                         <h3 className="text-lg font-bold text-[#1F2937] group-hover:text-[#2D5A41] transition-colors leading-tight">
@@ -89,7 +96,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                             {rating}
                         </div>
                         <span className="text-[10px] text-[#9CA3AF] font-medium block">
-                            ({reviewCount} reviews)
+                            {typeof reviewCount === 'number' ? `(${reviewCount} reviews)` : ''}
                         </span>
                     </div>
                 </div>
@@ -97,8 +104,12 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                 <div className="flex items-center gap-1.5 text-sm text-[#4B5563] mb-4">
                     <MapPin size={14} className="text-[#9CA3AF]" />
                     {provider.city}, {provider.state}
-                    <span className="text-[#9CA3AF]">•</span>
-                    <span className="text-[#6B7280]">{distance}</span>
+                    {distance && (
+                        <>
+                            <span className="text-[#9CA3AF]">•</span>
+                            <span className="text-[#6B7280]">{distance}</span>
+                        </>
+                    )}
                 </div>
 
                 {/* Key Details Grid */}
@@ -106,34 +117,37 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                     {isFoster ? (
                         <>
                             <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Species</p>
-                                <div className="flex items-center gap-1 text-[13px] font-medium text-[#374151]">
-                                    <Dog size={14} /> <Cat size={14} />
-                                </div>
+                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Availability</p>
+                                <p className="text-[13px] font-medium text-[#374151] truncate">
+                                    {provider.foster_details?.current_availability || 0} spots
+                                </p>
                             </div>
                             <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Environment</p>
-                                <p className="text-[13px] font-medium text-[#374151] truncate">Home + Fenced Yard</p>
+                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Rate</p>
+                                <p className="text-[13px] font-bold text-[#2D5A41] truncate">{priceDisplay}</p>
                             </div>
-                            <div className="col-span-2 mt-2">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Starting Rate</p>
-                                <p className="text-[16px] font-bold text-[#2D5A41]">{price}</p>
-                            </div>
+                            {provider.foster_details?.environment_details?.has_fenced_yard && (
+                                <div className="col-span-2 mt-1 flex items-center gap-1 text-xs text-green-700">
+                                    <ShieldCheck size={12} /> Fenced Yard Verified
+                                </div>
+                            )}
                         </>
                     ) : (
                         // Vet Details
                         <>
                             <div className="col-span-2 mb-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Services</p>
-                                <p className="text-[13px] font-medium text-[#374151] truncate">Wellness, Surgery, Dental</p>
+                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Known For</p>
+                                <p className="text-[13px] font-medium text-[#374151] truncate">
+                                    {provider.vet_details?.services_offered?.slice(0, 3).map(s => s.name).join(', ') || 'General Care'}
+                                </p>
                             </div>
                             <div className="col-span-1">
                                 <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Hours</p>
-                                <p className="text-[13px] font-medium text-[#374151]">Mon-Sat 8am-7pm</p>
+                                <p className="text-[13px] font-medium text-[#374151]">See Profile</p>
                             </div>
                             <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Exam</p>
-                                <p className="text-[13px] font-medium text-[#2D5A41]">{price}</p>
+                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Rate</p>
+                                <p className="text-[13px] font-medium text-[#2D5A41]">{priceDisplay}</p>
                             </div>
                         </>
                     )}
@@ -142,7 +156,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                 {/* Actions */}
                 <div className="mt-auto flex gap-3 pt-2">
                     <Link
-                        to={`/services/${provider.provider_type}/${provider.id}`}
+                        to={`/services/${provider.id}`}
                         className="flex-1 bg-[#2D5A41] text-white py-2.5 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-[#234532] transition-colors shadow-sm"
                     >
                         View Profile

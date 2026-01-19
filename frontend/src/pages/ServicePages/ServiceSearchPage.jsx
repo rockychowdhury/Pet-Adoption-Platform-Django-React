@@ -19,8 +19,13 @@ const ServiceSearchPage = () => {
     const location = useLocation();
 
     // Determine context based on URL or filters
-    const initialType = location.pathname.includes('/vet') ? 'vet' : 'foster';
+    const isVetPath = location.pathname.includes('/vet');
+    const initialType = isVetPath ? 'vet' : 'foster';
     const providerType = searchParams.get('providerType') || initialType;
+
+    // Map internal type to API Category Slug
+    // Assumption: Backend slugs are 'veterinary' and 'foster' (or similar)
+    const categorySlug = providerType === 'vet' ? 'veterinary' : 'foster';
 
     // State from URL
     const search = searchParams.get('search') || '';
@@ -70,7 +75,7 @@ const ServiceSearchPage = () => {
 
     // Filter out radius if no location is provided
     const queryParams = {
-        providerType,
+        category: categorySlug,
         search,
         location: city,
         radius,

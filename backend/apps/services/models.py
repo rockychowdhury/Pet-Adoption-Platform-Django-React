@@ -3,20 +3,71 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+class ServiceCategory(models.Model):
+    """
+    Main categories of services (e.g., Veterinary, Training, Foster).
+    """
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
+    description = models.TextField(blank=True)
+    icon_name = models.CharField(max_length=50, blank=True, help_text="Lucide icon name for frontend")
+
+    class Meta:
+        verbose_name = "Service Category"
+        verbose_name_plural = "Service Categories"
+
+    def __str__(self):
+        return self.name
+
+
+class Species(models.Model):
+    """
+    Normalized species model.
+    """
+    name = models.CharField(max_length=50, unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
+
+    class Meta:
+        verbose_name_plural = "Species"
+
+    def __str__(self):
+        return self.name
+
+
+class Specialization(models.Model):
+    """
+    Specific specializations (e.g., Behavioral Issues, Emergency Care, Surgery).
+    """
+    category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name='specializations')
+    name = models.CharField(max_length=100)
+    description = models.TextField(blank=True)
+
+    class Meta:
+        unique_together = ('category', 'name')
+
+    def __str__(self):
+        return f"{self.name} ({self.category.name})"
+
+
+class ServiceOption(models.Model):
+    """
+    Predefined service options for each category (e.g., 'Wellness Exam' for Veterinary).
+    """
+    category = models.ForeignKey(ServiceCategory, on_delete=models.CASCADE, related_name='service_options')
+    name = models.CharField(max_length=100)
+    base_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    description = models.TextField(blank=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.category.name})"
+
+
+
 class ServiceProvider(models.Model):
     """
     Enhanced service provider model with full contact, verification, and media support.
     Base model for all service provider types (foster, vet, trainer, etc.)
     """
-    PROVIDER_TYPES = (
-        ('vet', 'Veterinarian'),
-        ('foster', 'Foster Home'),
-        ('trainer', 'Trainer'),
-        ('walker', 'Pet Walker'),
-        ('groomer', 'Groomer'),
-        ('sitter', 'Pet Sitter'),
-    )
-    
     VERIFICATION_STATUS_CHOICES = (
         ('pending', 'Pending Verification'),
         ('verified', 'Verified'),
@@ -25,22 +76,22 @@ class ServiceProvider(models.Model):
     
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='service_provider_profile')
     business_name = models.CharField(max_length=100)
-    provider_type = models.CharField(max_length=20, choices=PROVIDER_TYPES)
+    category = models.ForeignKey(ServiceCategory, on_delete=models.PROTECT, related_name='providers', null=True, blank=True)
     description = models.TextField(help_text="Business description (500+ words required)")
     website = models.URLField(blank=True, null=True)
     
-    # Full Address
+    # Address
     address_line1 = models.CharField(max_length=255)
     address_line2 = models.CharField(max_length=255, blank=True)
-    city = models.CharField(max_length=100, verbose_name="City")
-    state = models.CharField(max_length=100, verbose_name="State")
+    city = models.CharField(max_length=100)
+    state = models.CharField(max_length=100)
     zip_code = models.CharField(max_length=10)
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
     # Contact Info
-    phone = models.CharField(max_length=15)
-    email = models.EmailField()
+    phone = models.CharField(max_length=15, help_text="Business phone number")
+    email = models.EmailField(help_text="Business email address")
     
     # Verification & Licensing
     license_number = models.CharField(max_length=50, blank=True, help_text="Professional license number")
@@ -51,15 +102,6 @@ class ServiceProvider(models.Model):
         default='pending'
     )
     
-    # Media
-    photos = models.JSONField(
-        default=list,
-        help_text="Array of photo URLs (business photos)"
-    )
-    
-    # Services Offered (JSON array)
-    services_offered = models.JSONField(default=list, help_text="List of services offered")
-    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -68,7 +110,7 @@ class ServiceProvider(models.Model):
         verbose_name_plural = "Service Providers"
         ordering = ['-created_at']
         indexes = [
-            models.Index(fields=['provider_type', 'verification_status']),
+            models.Index(fields=['category', 'verification_status']),
             models.Index(fields=['city', 'state']),
             models.Index(fields=['latitude', 'longitude']),
         ]
@@ -88,7 +130,7 @@ class ServiceProvider(models.Model):
     @property
     def photo_count(self):
         """Count of photos"""
-        return len(self.photos) if isinstance(self.photos, list) else 0
+        return self.media.count()
     
     @property
     def average_rating(self):
@@ -103,6 +145,57 @@ class ServiceProvider(models.Model):
     def review_count(self):
         """Count of reviews"""
         return self.reviews.count()
+
+
+class ServiceMedia(models.Model):
+    """
+    Normalized media model for service providers and specific services.
+    """
+    provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='media')
+    file_url = models.URLField()
+    thumbnail_url = models.URLField(blank=True, null=True)
+    is_primary = models.BooleanField(default=False)
+    alt_text = models.CharField(max_length=255, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        verbose_name = "Service Media"
+        verbose_name_plural = "Service Media"
+        ordering = ['-is_primary', '-created_at']
+
+    def __str__(self):
+        return f"Media for {self.provider.business_name}"
+
+
+class BusinessHours(models.Model):
+    """
+    Normalized hours of operation for service providers.
+    """
+    DAYS_OF_WEEK = (
+        (0, 'Monday'),
+        (1, 'Tuesday'),
+        (2, 'Wednesday'),
+        (3, 'Thursday'),
+        (4, 'Friday'),
+        (5, 'Saturday'),
+        (6, 'Sunday'),
+    )
+    
+    provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='hours')
+    day = models.IntegerField(choices=DAYS_OF_WEEK)
+    open_time = models.TimeField(null=True, blank=True)
+    close_time = models.TimeField(null=True, blank=True)
+    is_closed = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = ('provider', 'day')
+        ordering = ['day']
+
+    def __str__(self):
+        day_name = dict(self.DAYS_OF_WEEK).get(self.day)
+        if self.is_closed:
+            return f"{day_name}: Closed"
+        return f"{day_name}: {self.open_time} - {self.close_time}"
 
 
 class FosterService(models.Model):
@@ -126,36 +219,16 @@ class FosterService(models.Model):
         default='available'
     )
     
-    # Species Accepted (JSON array)
-    # ['dogs', 'cats', 'small_animals', 'birds', 'reptiles']
-    species_accepted = models.JSONField(
-        default=list,
-        help_text="List of species accepted"
-    )
+    # Species Accepted
+    species_accepted = models.ManyToManyField(Species, related_name='foster_providers')
     
-    # Environment Details (JSON structure)
-    # {
-    #   "type": "home_based|facility",
-    #   "indoor_space_sqft": int,
-    #   "outdoor_space": boolean,
-    #   "fenced_yard": boolean,
-    #   "fence_height_ft": int,
-    #   "other_pets": boolean,
-    #   "children_in_household": boolean,
-    #   "children_ages": [int]
-    # }
+    # Environment Details (Keep as JSON for specific flexible data)
     environment_details = models.JSONField(
         default=dict,
-        help_text="Detailed environment information"
+        help_text="Detailed environment information (indoor_space, yard, etc.)"
     )
     
-    # Care Standards (JSON structure)
-    # {
-    #   "exercise_routine": string,
-    #   "feeding_schedule": string,
-    #   "medication_administration": boolean,
-    #   "special_diet_accommodation": boolean
-    # }
+    # Care Standards, (Keep as JSON)
     care_standards = models.JSONField(
         default=dict,
         help_text="Care standards and routines"
@@ -177,11 +250,6 @@ class FosterService(models.Model):
         help_text="Monthly rate in USD"
     )
     
-    # Media
-    photos = models.JSONField(
-        default=list,
-        help_text="Array of photo URLs (8+ photos required)"
-    )
     video_url = models.URLField(
         blank=True,
         null=True,
@@ -230,46 +298,18 @@ class VeterinaryClinic(models.Model):
         default='general'
     )
     
-    # Services Offered (JSON array)
-    # ['wellness_exams', 'vaccinations', 'dental', 'surgery', 'diagnostics',
-    #  'emergency_care', 'boarding', 'grooming']
-    services_offered = models.JSONField(
-        default=list,
-        help_text="List of services offered"
-    )
+    # Services Offered (M2M)
+    services_offered = models.ManyToManyField(ServiceOption, related_name='clinics')
     
-    # Species Treated (JSON array)
-    # ['dogs', 'cats', 'exotic', 'birds', 'reptiles']
-    species_treated = models.JSONField(
-        default=list,
-        help_text="List of species treated"
-    )
-    
-    # Hours of Operation (JSON structure)
-    # {
-    #   "monday": {"open": "09:00", "close": "17:00", "closed": false},
-    #   "tuesday": {"open": "09:00", "close": "17:00", "closed": false},
-    #   ...
-    # }
-    hours_of_operation = models.JSONField(
-        default=dict,
-        help_text="Hours for each day of the week"
-    )
+    # Species Treated (M2M)
+    species_treated = models.ManyToManyField(Species, related_name='clinics')
     
     # Pricing
     pricing_info = models.TextField(
         help_text="Text description of pricing or specific procedure prices"
     )
     
-    # Media
-    photos = models.JSONField(
-        default=list,
-        help_text="Array of photo URLs (6+ photos required)"
-    )
-    
-    # Amenities (JSON array)
-    # ['separate_cat_area', 'parking', 'wheelchair_accessible',
-    #  'on_site_pharmacy', 'boarding_available']
+    # Amenities (JSON array is okay for simple tags)
     amenities = models.JSONField(
         default=list,
         help_text="List of amenities available"
@@ -286,27 +326,17 @@ class VeterinaryClinic(models.Model):
         return f"Vet details for {self.provider.business_name}"
     
     def is_open_now(self):
-        """Check if clinic is currently open"""
+        """Check if clinic is currently open using BusinessHours"""
         from django.utils import timezone
-        import datetime
-        
         now = timezone.now()
-        day_name = now.strftime('%A').lower()
+        day = now.weekday()  # Monday is 0, Sunday is 6
         
-        if day_name not in self.hours_of_operation:
+        hours = self.provider.hours.filter(day=day).first()
+        if not hours or hours.is_closed:
             return False
         
-        day_hours = self.hours_of_operation[day_name]
-        if day_hours.get('closed', False):
-            return False
-        
-        try:
-            open_time = datetime.datetime.strptime(day_hours['open'], '%H:%M').time()
-            close_time = datetime.datetime.strptime(day_hours['close'], '%H:%M').time()
-            current_time = now.time()
-            return open_time <= current_time <= close_time
-        except (KeyError, ValueError):
-            return False
+        current_time = now.time()
+        return hours.open_time <= current_time <= hours.close_time
 
 
 class TrainerService(models.Model):
@@ -323,12 +353,9 @@ class TrainerService(models.Model):
     
     provider = models.OneToOneField(ServiceProvider, on_delete=models.CASCADE, related_name='trainer_details')
     
-    # Specializations (JSON array)
-    # ['behavioral_issues', 'obedience', 'puppy_training', 'agility', 'therapy_dog', 'service_dog']
-    specializations = models.JSONField(
-        default=list,
-        help_text="List of training specializations"
-    )
+    # Specializations (M2M)
+    # Links to Specialization model (Training category)
+    specializations = models.ManyToManyField(Specialization, related_name='trainers')
     
     # Training Methods
     primary_method = models.CharField(
@@ -340,28 +367,17 @@ class TrainerService(models.Model):
         help_text="Detailed explanation of training approach and philosophy"
     )
     
-    # Certifications (JSON array)
-    # [{"name": "CPDT-KA", "organization": "CCPDT", "year": 2020}, ...]
+    # Certifications (JSON is okay for this structured secondary info)
     certifications = models.JSONField(
         default=list,
-        help_text="List of professional certifications"
+        help_text="List of professional certifications [{'name': 'CPDT-KA', ...}]"
     )
     
     # Experience
     years_experience = models.IntegerField(default=0)
     
-    # Species Trained (JSON array)
-    species_trained = models.JSONField(
-        default=list,
-        help_text="Species the trainer works with (typically dogs, cats)"
-    )
-    
-    # Behavioral Issues Addressed (JSON array)
-    # ['aggression', 'separation_anxiety', 'fear', 'reactivity', 'house_training', 'jumping', 'barking']
-    behavioral_issues_addressed = models.JSONField(
-        default=list,
-        help_text="Specific behavioral issues the trainer can address"
-    )
+    # Species Trained (M2M)
+    species_trained = models.ManyToManyField(Species, related_name='trainers')
     
     # Training Options
     offers_private_sessions = models.BooleanField(default=True)
@@ -383,11 +399,7 @@ class TrainerService(models.Model):
         help_text="Per-class rate for group sessions"
     )
     
-    # Package Options (JSON structure)
-    # [
-    #   {"name": "Basic Obedience Package", "sessions": 6, "price": 450, "description": "..."},
-    #   {"name": "Behavioral Modification", "sessions": 10, "price": 800, "description": "..."}
-    # ]
+    # Package Options (JSON is okay for this complex pricing structure)
     package_options = models.JSONField(
         default=list,
         blank=True,
@@ -402,11 +414,6 @@ class TrainerService(models.Model):
     current_client_count = models.IntegerField(default=0)
     accepting_new_clients = models.BooleanField(default=True)
     
-    # Media
-    photos = models.JSONField(
-        default=list,
-        help_text="Photos of trainer with dogs, training sessions, etc."
-    )
     video_url = models.URLField(
         blank=True,
         null=True,
@@ -440,17 +447,16 @@ from apps.pets.models import PetProfile
 
 class ServiceBooking(models.Model):
     """
-    Booking/reservation system for foster care and potentially other services.
+    Generalized booking/reservation system for all service types.
     """
     BOOKING_TYPE_CHOICES = (
-        ('short_term', 'Short Term'),
-        ('medium_term', 'Medium Term'),
-        ('long_term', 'Long Term'),
-        ('respite', 'Respite Care'),
+        ('standard', 'Standard Service'),
+        ('recurring', 'Recurring'),
+        ('emergency', 'Emergency'),
     )
     
     STATUS_CHOICES = (
-        ('pending', 'Pending'),
+        ('pending', 'Pending Approval'),
         ('confirmed', 'Confirmed'),
         ('in_progress', 'In Progress'),
         ('completed', 'Completed'),
@@ -464,17 +470,21 @@ class ServiceBooking(models.Model):
         ('refunded', 'Refunded'),
     )
     
-    provider = models.ForeignKey(FosterService, on_delete=models.CASCADE, related_name='bookings')
+    provider = models.ForeignKey(ServiceProvider, on_delete=models.CASCADE, related_name='bookings')
     client = models.ForeignKey(User, on_delete=models.CASCADE, related_name='service_bookings')
-    pet = models.ForeignKey(PetProfile, on_delete=models.CASCADE, related_name='foster_bookings')
+    pet = models.ForeignKey(PetProfile, on_delete=models.CASCADE, related_name='service_bookings')
     
-    booking_type = models.CharField(max_length=50, choices=BOOKING_TYPE_CHOICES)
+    # Optional specific service option
+    service_option = models.ForeignKey(ServiceOption, on_delete=models.SET_NULL, null=True, blank=True)
     
-    start_date = models.DateField()
-    end_date = models.DateField()
+    booking_type = models.CharField(max_length=50, choices=BOOKING_TYPE_CHOICES, default='standard')
     
-    daily_rate = models.DecimalField(max_digits=6, decimal_places=2)
-    deposit_paid = models.DecimalField(max_digits=7, decimal_places=2, default=0)
+    start_date = models.DateTimeField(auto_now_add=True)
+    end_date = models.DateTimeField(null=True, blank=True)
+    
+    # Financials
+    agreed_price = models.DecimalField(max_digits=10, decimal_places=2, default=0, help_text="Total price agreed for the service")
+    deposit_paid = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     
     special_requirements = models.TextField(blank=True, null=True)
     
@@ -493,20 +503,15 @@ class ServiceBooking(models.Model):
         ordering = ['-created_at']
         
     def __str__(self):
-        return f"Booking for {self.pet.name} with {self.provider.provider.business_name}"
+        return f"Booking: {self.provider.business_name} for {self.pet.name}"
         
     @property
-    def total_days(self):
-        """Calculate duration days"""
+    def duration_hours(self):
+        """Calculate duration in hours"""
         if self.start_date and self.end_date:
             delta = self.end_date - self.start_date
-            return max(1, delta.days)
+            return max(0, delta.total_seconds() / 3600)
         return 0
-        
-    @property
-    def total_cost(self):
-        """Calculate total cost"""
-        return self.daily_rate * self.total_days
 
 
 class ServiceReview(models.Model):
@@ -531,11 +536,11 @@ class ServiceReview(models.Model):
         help_text="Optional photo with review"
     )
     
-    # Service Type Used
-    service_type = models.CharField(
-        max_length=20,
-        help_text="Type of service used (foster, vet, etc.)"
-    )
+    # Service Type Used (Optional - can be inferred from provider but useful for history)
+    category = models.ForeignKey(ServiceCategory, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    # Specific service option used
+    service_option = models.ForeignKey(ServiceOption, on_delete=models.SET_NULL, null=True, blank=True)
     
     # Verification
     verified_client = models.BooleanField(
