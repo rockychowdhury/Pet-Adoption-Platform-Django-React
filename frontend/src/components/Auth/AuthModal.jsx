@@ -1,10 +1,23 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { X } from 'lucide-react';
 import FeatureCarousel from './FeatureCarousel';
 import AuthForm from './AuthForm';
+import useAuth from '../../hooks/useAuth';
+import { getRoleBasedRedirect } from '../../utils/roleRedirect';
 
 const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
+    const navigate = useNavigate();
+    const { user } = useAuth();
+
     if (!isOpen) return null;
+
+    const handleSuccess = () => {
+        onClose();
+        // Navigate based on role after successful login
+        const redirectPath = getRoleBasedRedirect(user);
+        navigate(redirectPath, { replace: true });
+    };
 
     return (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in overflow-y-auto">
@@ -26,7 +39,7 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
                 {/* Right Side - Form */}
                 <div className="w-full lg:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-white">
-                    <AuthForm initialMode={initialMode} onSuccess={onClose} />
+                    <AuthForm initialMode={initialMode} onSuccess={handleSuccess} />
                 </div>
             </div>
         </div>
