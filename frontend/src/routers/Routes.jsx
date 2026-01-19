@@ -1,5 +1,6 @@
 import { createBrowserRouter, RouterProvider, Outlet, Navigate } from 'react-router-dom';
 import useAuth from "../hooks/useAuth";
+import PrivateRoute, { AdminRoute, ServiceProviderRoute } from './PrivateRoute';
 
 // Layouts
 import MainLayout from "../layouts/MainLayout";
@@ -42,6 +43,7 @@ import ServiceSearchPage from "../pages/ServicePages/ServiceSearchPage";
 import ServiceDetailPage from "../pages/ServicePages/ServiceDetailPage";
 import ServiceReviewPage from "../pages/ServicePages/ServiceReviewPage";
 import ServiceProviderRegistrationPage from "../pages/ServicePages/ServiceProviderRegistrationPage";
+import ProviderDashboardPage from "../pages/ServicePages/ProviderDashboardPage";
 
 // Rehoming
 import RehomingFlowLayout from "../layouts/RehomingFlowLayout";
@@ -85,20 +87,9 @@ import UserDetailPage from "../pages/AdminPages/UserDetailPage";
 import ListingModerationPage from "../pages/AdminPages/ListingModerationPage";
 import ReportManagementPage from "../pages/AdminPages/ReportManagementPage";
 import AnalyticsPage from "../pages/AdminPages/AnalyticsPage";
+import RoleRequestsPage from "../pages/AdminPages/RoleRequestsPage";
 
-// --- Guards ---
-
-const PrivateRoute = ({ children }) => {
-    const { user, loading } = useAuth();
-    if (loading) return <div>Loading...</div>;
-    return user ? children : <Navigate to="/login" replace />;
-};
-
-const AdminRoute = ({ children }) => {
-    const { user, loading } = useAuth();
-    if (loading) return <div>Loading...</div>;
-    return user?.role === "admin" ? children : <Navigate to="/" replace />;
-};
+// --- Guards imported from PrivateRoute.jsx ---
 
 
 // --- Router ---
@@ -140,7 +131,7 @@ const router = createBrowserRouter([
 
                     /* Services */
                     { path: "/services", element: <ServiceSearchPage /> },
-                    { path: "/services/:type/:id", element: <ServiceDetailPage /> },
+                    { path: "/services/:id", element: <ServiceDetailPage /> },
 
                     /* Community */
                     { path: "/community", element: <CommunityFeedPage /> },
@@ -210,6 +201,20 @@ const router = createBrowserRouter([
             },
 
             /* =======================
+               SERVICE PROVIDER ROUTES
+            ======================== */
+            {
+                element: (
+                    <ServiceProviderRoute>
+                        <MainLayout />
+                    </ServiceProviderRoute>
+                ),
+                children: [
+                    { path: "/provider/dashboard", element: <ProviderDashboardPage /> },
+                ],
+            },
+
+            /* =======================
                USER DASHBOARD
             ======================== */
             {
@@ -265,6 +270,7 @@ const router = createBrowserRouter([
                 ),
                 children: [
                     { index: true, element: <AdminDashboard /> },
+                    { path: "role-requests", element: <RoleRequestsPage /> },
                     { path: "users", element: <UserManagementPage /> },
                     { path: "users/:id", element: <UserDetailPage /> },
                     { path: "moderation", element: <ListingModerationPage /> },
