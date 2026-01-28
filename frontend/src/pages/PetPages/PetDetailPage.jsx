@@ -44,7 +44,7 @@ const PetDetailPage = () => {
                 <AlertCircle size={40} />
             </div>
             <h1 className="text-3xl font-logo font-black tracking-tight text-text-primary mb-2">Listing Not Found</h1>
-            <p className="text-text-secondary font-jakarta mb-8 max-w-sm">The pet profile you are looking for might have been removed or the link is broken.</p>
+            <p className="text-text-secondary  mb-8 max-w-sm">The pet profile you are looking for might have been removed or the link is broken.</p>
             <Button variant="primary" onClick={() => navigate('/pets')}>Browse Other Pets</Button>
         </div>
     );
@@ -95,21 +95,21 @@ const PetDetailPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F9F8F6] pb-24 font-jakarta text-[#1A1A1A]">
+        <div className="min-h-screen bg-bg-primary pb-24 text-text-primary">
             {/* Context Header */}
             <div className="max-w-7xl mx-auto px-6 h-24 flex items-center justify-between pointer-events-none sticky top-24 z-10 transition-all duration-300">
                 <button
                     onClick={() => navigate(-1)}
-                    className="pointer-events-auto flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-[#8F8F8F] hover:text-[#1A1A1A] transition-colors"
+                    className="pointer-events-auto flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-tertiary hover:text-text-primary transition-colors"
                 >
                     <ChevronLeft size={14} />
                     Back
                 </button>
                 <div className="flex items-center gap-3 pointer-events-auto">
-                    <button className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center text-[#5F5F5F] hover:bg-white hover:shadow-sm transition-all bg-transparent">
+                    <button className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-text-secondary hover:bg-bg-surface hover:shadow-sm transition-all bg-transparent">
                         <Share2 size={16} />
                     </button>
-                    <button className="w-10 h-10 rounded-full border border-gray-100 flex items-center justify-center text-[#5F5F5F] hover:bg-white hover:shadow-sm transition-all bg-transparent">
+                    <button className="w-10 h-10 rounded-full border border-border flex items-center justify-center text-text-secondary hover:bg-bg-surface hover:shadow-sm transition-all bg-transparent">
                         <Heart size={16} />
                     </button>
                 </div>
@@ -123,7 +123,7 @@ const PetDetailPage = () => {
 
                         {/* Gallery Section */}
                         <section className="space-y-6">
-                            <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden bg-white shadow-sm border border-gray-100 group">
+                            <div className="relative aspect-[16/9] rounded-[32px] overflow-hidden bg-bg-surface shadow-[0_32px_64px_-16px_rgba(0,0,0,0.05)] border border-border/40 group">
                                 <IconButton
                                     icon={<ChevronLeft size={20} />}
                                     onClick={prevImage}
@@ -150,7 +150,7 @@ const PetDetailPage = () => {
                                     <button
                                         key={i}
                                         onClick={() => setCurrentImageIndex(i)}
-                                        className={`w-24 h-16 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${currentImageIndex === i ? 'border-[#6B8E7B]' : 'border-transparent opacity-60'}`}
+                                        className={`w-24 h-16 rounded-xl overflow-hidden border-2 shrink-0 transition-all ${currentImageIndex === i ? 'border-brand-primary' : 'border-transparent opacity-60'}`}
                                     >
                                         <img src={photo} className="w-full h-full object-cover" alt="" />
                                     </button>
@@ -161,22 +161,22 @@ const PetDetailPage = () => {
                         {/* Pet Identity Area */}
                         <section className="space-y-4">
                             <div className="flex flex-wrap items-center gap-2">
-                                <span className="px-4 py-1 bg-[#FFF6E9] text-[#B45309] rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                <span className="px-4 py-1 bg-amber-50 text-amber-700 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
                                     <Sparkles size={10} className="fill-current" /> {species}
                                 </span>
-                                <span className="px-4 py-1 bg-[#FEF2F2] text-[#EF4444] rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                <span className="px-4 py-1 bg-red-50 text-red-600 rounded-full text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
                                     <Clock size={10} className="fill-current" /> {urgency === 'immediate' ? 'Immediate Need' : urgency}
                                 </span>
-                                <span className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-widest ml-1">
+                                <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-widest ml-1">
                                     Listed {formatDistanceToNow(new Date(published_at || created_at), { addSuffix: true })}
                                 </span>
                             </div>
 
                             <div className="space-y-0.5">
-                                <h1 className="text-5xl font-logo font-black tracking-tighter text-text-primary uppercase leading-none">
+                                <h1 className="text-5xl font-black tracking-tighter text-text-primary uppercase leading-none">
                                     {pet_name}
                                 </h1>
-                                <p className="text-xl text-[#8F8F8F] font-jakarta">
+                                <p className="text-xl text-text-tertiary">
                                     {breed} • {age_display}
                                 </p>
                             </div>
@@ -190,14 +190,14 @@ const PetDetailPage = () => {
                             <StatCard label="Vaccinated" value="Check w/ Owner" icon={<CheckCircle2 size={16} className="text-[#10B981]/60" />} />
                         </section>
 
-                        <div className="h-px bg-[#E5E5E5]" />
+                        <div className="h-px bg-border/50" />
 
                         {/* Content Sections */}
                         <section className="space-y-16">
                             <div className="space-y-12">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-8 h-1 bg-[#6B8E7B] rounded-full" />
-                                    <h3 className="text-sm font-logo font-black uppercase tracking-widest text-[#1A1A1A]">My Story</h3>
+                                    <div className="w-8 h-1 bg-brand-primary rounded-full" />
+                                    <h3 className="text-sm font-black uppercase tracking-widest text-text-primary">My Story</h3>
                                 </div>
 
                                 <div className="space-y-10">
@@ -209,7 +209,7 @@ const PetDetailPage = () => {
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-20 pt-4">
                                 <div>
-                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1A1A1A] mb-8">Compatibility</h3>
+                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-text-primary mb-8">Compatibility</h3>
                                     <div className="space-y-6">
                                         <CompatibilityItem label="Kids" value={traits.some(t => t.toLowerCase().includes('kids')) ? 'FRIENDLY' : 'UNKNOWN'} />
                                         <CompatibilityItem label="Dogs" value={traits.some(t => t.toLowerCase().includes('dog')) ? 'FRIENDLY' : 'UNKNOWN'} />
@@ -217,7 +217,7 @@ const PetDetailPage = () => {
                                     </div>
                                 </div>
                                 <div>
-                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-[#1A1A1A] mb-8">Health & Facts</h3>
+                                    <h3 className="text-[11px] font-black uppercase tracking-widest text-text-primary mb-8">Health & Facts</h3>
                                     <div className="space-y-6">
                                         <FactItem label="Spayed / Neutered" value={spayed_neutered ? 'Yes' : 'No'} />
                                         <FactItem label="Microchipped" value={microchipped ? 'Yes' : 'No'} />
@@ -234,15 +234,15 @@ const PetDetailPage = () => {
                         <div className="sticky top-40 space-y-8">
 
                             {/* Adopt Card */}
-                            <div className="bg-[#6B8E7B] rounded-[32px] p-10 text-white text-center space-y-6 shadow-md border border-white/10">
+                            <div className="bg-brand-primary rounded-[32px] p-10 text-text-inverted text-center space-y-6 shadow-xl shadow-brand-primary/20 border border-white/10">
                                 <p className="text-[10px] font-black uppercase tracking-[0.2em] opacity-80">Interested?</p>
-                                <h2 className="text-4xl font-logo font-black uppercase leading-[0.85] tracking-tight">Adopt {pet_name}</h2>
+                                <h2 className="text-4xl font-black uppercase leading-[0.85] tracking-tight">Adopt {pet_name}</h2>
                                 <p className="text-[11px] opacity-80 leading-relaxed max-w-[240px] mx-auto text-white/90">
                                     Start by submitting an inquiry. The owner will review your application and get in touch.
                                 </p>
                                 <Button
                                     onClick={() => setIsApplicationModalOpen(true)}
-                                    className="w-full bg-[#FCF5E5] text-[#6B8E7B] hover:bg-white hover:text-[#6B8E7B] h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] border-none shadow-xl transition-all duration-300"
+                                    className="w-full bg-[#FCF5E5] text-brand-primary hover:bg-white hover:text-brand-primary h-14 rounded-2xl font-black uppercase tracking-widest text-[11px] border-none shadow-xl transition-all duration-300"
                                 >
                                     Start Application
                                 </Button>
@@ -253,11 +253,11 @@ const PetDetailPage = () => {
                             </div>
 
                             {/* Owner Card */}
-                            <div className="bg-white rounded-[32px] border border-gray-100 shadow-sm p-10 space-y-8">
+                            <div className="bg-bg-surface rounded-[32px] border border-border/50 shadow-sm p-10 space-y-8">
                                 <div className="space-y-6">
-                                    <p className="text-[9px] font-black uppercase tracking-widest text-[#8F8F8F]">Listed By</p>
+                                    <p className="text-[9px] font-black uppercase tracking-widest text-text-tertiary">Listed By</p>
                                     <div className="flex items-center gap-4">
-                                        <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-100 border border-gray-100">
+                                        <div className="w-12 h-12 rounded-full overflow-hidden bg-bg-secondary border border-border">
                                             <img
                                                 src={owner.photoURL || "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=120&q=80"}
                                                 className="w-full h-full object-cover"
@@ -265,32 +265,32 @@ const PetDetailPage = () => {
                                             />
                                         </div>
                                         <div>
-                                            <h4 className="text-sm font-black text-[#1A1A1A] capitalize">{owner.first_name} {owner.last_name}</h4>
-                                            <p className="text-[9px] font-bold text-[#8F8F8F] uppercase tracking-widest mt-1">Identity Unverified</p>
+                                            <h4 className="text-sm font-black text-text-primary capitalize">{owner.first_name} {owner.last_name}</h4>
+                                            <p className="text-[9px] font-bold text-text-tertiary uppercase tracking-widest mt-1">Identity Unverified</p>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-3">
-                                    <div className="bg-[#F9F9F9] rounded-xl p-4 text-center border border-gray-100/50">
-                                        <p className="text-[8px] font-black uppercase tracking-widest text-[#8F8F8F] mb-1">City</p>
-                                        <p className="text-[11px] font-black text-[#1A1A1A] truncate">{location_city || 'N/A'}</p>
+                                    <div className="bg-bg-secondary rounded-xl p-4 text-center border border-border/50">
+                                        <p className="text-[8px] font-black uppercase tracking-widest text-text-tertiary mb-1">City</p>
+                                        <p className="text-[11px] font-black text-text-primary truncate">{location_city || 'N/A'}</p>
                                     </div>
-                                    <div className="bg-[#F9F9F9] rounded-xl p-4 text-center border border-gray-100/50">
-                                        <p className="text-[8px] font-black uppercase tracking-widest text-[#8F8F8F] mb-1">State</p>
-                                        <p className="text-[11px] font-black text-[#1A1A1A] truncate">{location_state || 'N/A'}</p>
+                                    <div className="bg-bg-secondary rounded-xl p-4 text-center border border-border/50">
+                                        <p className="text-[8px] font-black uppercase tracking-widest text-text-tertiary mb-1">State</p>
+                                        <p className="text-[11px] font-black text-text-primary truncate">{location_state || 'N/A'}</p>
                                     </div>
                                 </div>
 
                                 <button
                                     onClick={handleMessageOwner}
-                                    className="w-full h-14 rounded-2xl border border-gray-200 flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-[#1A1A1A] hover:bg-gray-50 transition-all font-jakarta"
+                                    className="w-full h-14 rounded-2xl border border-border flex items-center justify-center gap-3 text-[10px] font-black uppercase tracking-widest text-text-primary hover:bg-bg-secondary transition-all"
                                 >
                                     <MessageCircle size={16} />
                                     Message Owner
                                 </button>
 
-                                <button className="w-full text-center text-[9px] font-black uppercase tracking-widest text-[#8F8F8F] hover:text-[#EF4444] transition-colors opacity-50">
+                                <button className="w-full text-center text-[9px] font-black uppercase tracking-widest text-text-tertiary hover:text-status-error transition-colors opacity-50">
                                     Report Listing
                                 </button>
                             </div>
@@ -312,39 +312,39 @@ const PetDetailPage = () => {
 // --- Helper Components ---
 
 const StatCard = ({ label, value, icon }) => (
-    <div className="bg-white/40 border border-[#E5E5E5] rounded-[24px] p-8 space-y-6 hover:bg-white hover:shadow-sm transition-all group">
-        <div className="w-10 h-10 rounded-full bg-white flex items-center justify-center shadow-sm transition-transform group-hover:scale-110">
+    <div className="bg-bg-surface/40 border border-border/50 rounded-[24px] p-8 space-y-6 hover:bg-bg-surface hover:shadow-sm transition-all group">
+        <div className="w-10 h-10 rounded-full bg-bg-surface flex items-center justify-center shadow-sm transition-transform group-hover:scale-110">
             {icon}
         </div>
         <div>
-            <p className="text-[8px] font-black uppercase tracking-widest text-[#8F8F8F] mb-1">{label}</p>
-            <p className="text-sm font-black text-[#1A1A1A] capitalize truncate">{value}</p>
+            <p className="text-[8px] font-black uppercase tracking-widest text-text-tertiary mb-1">{label}</p>
+            <p className="text-sm font-black text-text-primary capitalize truncate">{value}</p>
         </div>
     </div>
 );
 
 const ContentBlock = ({ title, text }) => (
     <div className="space-y-3">
-        <h4 className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F]">{title}</h4>
-        <p className="text-base text-[#5F5F5F] leading-relaxed font-jakarta">
+        <h4 className="text-[10px] font-black uppercase tracking-widest text-text-tertiary">{title}</h4>
+        <p className="text-base text-text-secondary leading-relaxed ">
             {text || "Information not provided."}
         </p>
     </div>
 );
 
 const CompatibilityItem = ({ label, value }) => (
-    <div className="flex items-center justify-between py-2 border-b border-[#E5E5E5]/50 last:border-0 pb-4">
-        <span className="text-sm font-bold text-[#1A1A1A]">{label}</span>
-        <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black tracking-widest ${value === 'FRIENDLY' ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-[#F5F5F5] text-[#8F8F8F]'}`}>
+    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0 pb-4">
+        <span className="text-sm font-bold text-text-primary">{label}</span>
+        <span className={`px-2.5 py-1 rounded-lg text-[8px] font-black tracking-widest ${value === 'FRIENDLY' ? 'bg-[#E8F5E9] text-[#2E7D32]' : 'bg-bg-secondary text-text-tertiary'}`}>
             {value}
         </span>
     </div>
 );
 
 const FactItem = ({ label, value }) => (
-    <div className="flex items-center justify-between py-2 border-b border-[#E5E5E5]/50 last:border-0 pb-4">
-        <span className="text-sm font-bold text-[#1A1A1A]">{label}</span>
-        <span className="text-[13px] font-bold text-[#8F8F8F]">{value}</span>
+    <div className="flex items-center justify-between py-2 border-b border-border/50 last:border-0 pb-4">
+        <span className="text-sm font-bold text-text-primary">{label}</span>
+        <span className="text-[13px] font-bold text-text-tertiary">{value}</span>
     </div>
 );
 

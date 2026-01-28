@@ -64,7 +64,7 @@ class ListingSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'pet', 'owner', 'status', 
             'urgency', 'location_city', 'location_state',
-            'published_at', 'created_at', 'reason', 'application_count', 'view_count', 'privacy_level',
+            'published_at', 'created_at', 'reason', 'application_count', 'view_count',
             'latitude', 'longitude'
         ]
 
@@ -85,7 +85,7 @@ class ListingCreateUpdateSerializer(serializers.ModelSerializer):
         read_only_fields = [
             'owner', 'status', 'request', 'pet',
             'reason', 'urgency', 'ideal_home_notes',
-            'location_city', 'location_state', 'privacy_level'
+            'location_city', 'location_state'
         ]
 
 class RehomingRequestSerializer(serializers.ModelSerializer):
@@ -101,7 +101,7 @@ class RehomingRequestSerializer(serializers.ModelSerializer):
             'id', 'pet', 'pet_details', 'owner', 'reason', 'urgency', 
             'ideal_home_notes', 'location_city', 'location_state', 
             'status', 'status_display',
-            'terms_accepted', 'privacy_level', 'created_at'
+            'terms_accepted', 'created_at'
         ]
         read_only_fields = ['owner', 'status']
         extra_kwargs = {
@@ -158,7 +158,10 @@ class AdoptionInquirySerializer(serializers.ModelSerializer):
             "owner_notes": obj.owner_notes,
             "rejection_reason": obj.rejection_reason,
             "submitted_at": obj.created_at,
-            "last_updated_at": obj.updated_at
+            "last_updated_at": obj.updated_at,
+            "match_percentage": obj.match_percentage,
+            "ai_processed": obj.ai_processed,
+            "is_ai_processed": obj.ai_processed # For convenience if needed
         }
 
     def get_pet(self, obj):
@@ -182,13 +185,22 @@ class AdoptionInquirySerializer(serializers.ModelSerializer):
 
     def get_listing(self, obj):
         listing = obj.listing
+        
+        owner_data = None
+        if listing.owner:
+            owner_data = {
+                "id": listing.owner.id,
+                "full_name": listing.owner.full_name,
+                "photo_url": listing.owner.photoURL,
+                "email": listing.owner.email
+            }
+            
         return {
             "id": listing.id,
             "status": listing.status,
             "urgency": listing.urgency,
-            "owner": {
-                "full_name": listing.owner.full_name if listing.owner else "Unknown"
-            },
+            "owner": owner_data,
+            "created_at": listing.created_at,
             "location": {
                 "city": listing.location_city,
                 "state": listing.location_state

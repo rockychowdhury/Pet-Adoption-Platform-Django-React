@@ -14,7 +14,7 @@ const PetDetailsPage = () => {
     if (error || !pet) return <div className="min-h-screen flex items-center justify-center">Pet not found.</div>;
 
     return (
-        <div className="min-h-screen bg-bg-primary pt-32 pb-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 font-inter">
+        <div className="min-h-screen bg-bg-primary pt-32 pb-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ">
             <div className="max-w-[1200px] mx-auto">
                 <Link to="/pets" className="inline-flex items-center text-text-secondary hover:text-brand-secondary mb-8 transition font-medium text-sm">
                     <ArrowLeft size={18} className="mr-2" />

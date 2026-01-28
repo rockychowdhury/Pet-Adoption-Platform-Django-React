@@ -11,7 +11,7 @@ class RehomingRequestAdmin(ModelAdmin):
 @admin.register(RehomingListing)
 class RehomingListingAdmin(ModelAdmin):
     list_display = ('pet', 'owner', 'status', 'published_at')
-    list_filter = ('status', 'urgency', 'privacy_level')
+    list_filter = ('status', 'urgency')
     search_fields = ('pet__name', 'owner__email', 'location_city')
 
 @admin.register(AdoptionInquiry)

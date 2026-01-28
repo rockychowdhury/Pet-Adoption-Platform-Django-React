@@ -25,9 +25,6 @@ const RehomingDetailsPage = () => {
         if (!formData.location_city || !formData.location_state) {
             newErrors.location = "Location is required.";
         }
-        if (!formData.privacy_level) {
-            newErrors.privacy_level = "Please select a privacy level.";
-        }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
     };
@@ -54,11 +51,11 @@ const RehomingDetailsPage = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto font-jakarta animate-in fade-in slide-in-from-right-4 duration-500">
-            <h1 className="text-xl font-logo font-bold text-foreground mb-1">Pet Details</h1>
-            <p className="text-muted-foreground text-xs mb-6">Help adopters understand your pet's needs.</p>
+        <div className="max-w-2xl mx-auto  animate-in fade-in slide-in-from-right-4 duration-500">
+            <h1 className="text-xl font-black text-text-primary mb-1">Pet Details</h1>
+            <p className="text-text-secondary text-xs mb-6">Help adopters understand your pet's needs.</p>
 
-            <div className="bg-white rounded-xl shadow-sm border border-border p-5 md:p-6 mb-6">
+            <div className="bg-bg-surface rounded-xl shadow-sm border border-border p-5 md:p-6 mb-6">
 
                 {/* Location */}
                 <div className="space-y-4 mb-6">
@@ -68,8 +65,8 @@ const RehomingDetailsPage = () => {
                                 <MapPin size={16} />
                             </div>
                             <div>
-                                <label className="text-sm font-bold text-foreground block">Location</label>
-                                <p className="text-[10px] text-muted-foreground">Where is the pet currently located?</p>
+                                <label className="text-sm font-bold text-text-primary block">Location</label>
+                                <p className="text-[10px] text-text-secondary">Where is the pet currently located?</p>
                             </div>
                         </div>
                         {(user?.location_city) && (
@@ -87,35 +84,35 @@ const RehomingDetailsPage = () => {
                             <span className="text-sm font-bold text-text-primary">
                                 {formData.location_city}, {formData.location_state}
                             </span>
-                            <span className="text-[10px] bg-white border border-border px-2 py-0.5 rounded-full text-text-secondary">
+                            <span className="text-[10px] bg-bg-surface border border-border px-2 py-0.5 rounded-full text-text-secondary">
                                 Default
                             </span>
                         </div>
                     ) : (
                         <div className="grid grid-cols-2 gap-3 animate-in fade-in zoom-in-95 duration-200">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-gray-700">City</label>
+                                <label className="text-[10px] font-bold text-text-secondary">City</label>
                                 <input
                                     type="text"
                                     value={formData.location_city || ''}
                                     onChange={(e) => updateFormData({ location_city: e.target.value })}
-                                    className="w-full p-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-brand-primary/20 outline-none"
+                                    className="w-full p-2 text-sm bg-bg-surface border border-border rounded-lg focus:ring-2 focus:ring-brand-primary/20 outline-none text-text-primary"
                                     placeholder="City"
                                 />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-gray-700">State</label>
+                                <label className="text-[10px] font-bold text-text-secondary">State</label>
                                 <input
                                     type="text"
                                     value={formData.location_state || ''}
                                     onChange={(e) => updateFormData({ location_state: e.target.value })}
-                                    className="w-full p-2 text-sm border border-border rounded-lg focus:ring-2 focus:ring-brand-primary/20 outline-none"
+                                    className="w-full p-2 text-sm bg-bg-surface border border-border rounded-lg focus:ring-2 focus:ring-brand-primary/20 outline-none text-text-primary"
                                     placeholder="State"
                                 />
                             </div>
                         </div>
                     )}
-                    {errors.location && <p className="text-red-500 text-[10px] font-bold flex items-center gap-1"><AlertTriangle size={10} /> {errors.location}</p>}
+                    {errors.location && <p className="text-status-error text-[10px] font-bold flex items-center gap-1"><AlertTriangle size={10} /> {errors.location}</p>}
                 </div>
 
                 <hr className="border-border mb-6" />
@@ -124,62 +121,19 @@ const RehomingDetailsPage = () => {
                 <div className="space-y-2 mb-6">
                     <div className="flex items-center gap-1.5 mb-0.5">
                         <Heart className="text-brand-primary" size={16} />
-                        <label className="text-sm font-bold text-foreground">Ideal Home Description</label>
+                        <label className="text-sm font-bold text-text-primary">Ideal Home Description</label>
                     </div>
-                    <p className="text-[10px] text-muted-foreground">
+                    <p className="text-[10px] text-text-secondary">
                         Constraints/Requirements (e.g., "No cats", "Fenced yard needed").
                     </p>
                     <textarea
                         value={formData.ideal_home_notes || ''}
                         onChange={(e) => updateFormData({ ideal_home_notes: e.target.value })}
                         placeholder="Describe the perfect home..."
-                        className="w-full h-24 p-3 text-sm rounded-lg border border-border resize-none focus:ring-2 focus:ring-brand-primary/10 outline-none transition-all focus:border-brand-primary"
+                        className="w-full h-24 p-3 text-sm bg-bg-surface rounded-lg border border-border resize-none focus:ring-2 focus:ring-brand-primary/10 outline-none transition-all focus:border-brand-primary text-text-primary"
                     />
                 </div>
 
-                <hr className="border-border mb-6" />
-
-                {/* Privacy */}
-                <div className="space-y-2">
-                    <label className="text-sm font-bold block">Who can see this listing?</label>
-                    <div className="grid md:grid-cols-2 gap-3">
-                        <label className={`flex flex-col gap-2 p-3 rounded-lg border cursor-pointer transition-all hover:bg-bg-secondary/20 ${formData.privacy_level === 'public' ? 'border-brand-primary bg-brand-primary/5' : 'border-border'}`}>
-                            <div className="flex justify-between items-start">
-                                <div className="p-1 rounded-full bg-brand-primary/10 text-brand-primary w-fit"><Shield size={14} /></div>
-                                <input
-                                    type="radio"
-                                    name="privacy_level"
-                                    value="public"
-                                    checked={formData.privacy_level === 'public'}
-                                    onChange={(e) => updateFormData({ privacy_level: e.target.value })}
-                                    className="w-4 h-4 text-brand-primary"
-                                />
-                            </div>
-                            <div>
-                                <div className="font-bold text-xs mb-0.5">Public (Recommended)</div>
-                                <div className="text-[10px] text-muted-foreground leading-relaxed">Visible to everyone.</div>
-                            </div>
-                        </label>
-                        <label className={`flex flex-col gap-2 p-3 rounded-lg border cursor-pointer transition-all hover:bg-bg-secondary/20 ${formData.privacy_level === 'verified' ? 'border-brand-primary bg-brand-primary/5' : 'border-border'}`}>
-                            <div className="flex justify-between items-start">
-                                <div className="p-1 rounded-full bg-gray-100 text-gray-600 w-fit"><Shield size={14} /></div>
-                                <input
-                                    type="radio"
-                                    name="privacy_level"
-                                    value="verified"
-                                    checked={formData.privacy_level === 'verified'}
-                                    onChange={(e) => updateFormData({ privacy_level: e.target.value })}
-                                    className="w-4 h-4 text-brand-primary"
-                                />
-                            </div>
-                            <div>
-                                <div className="font-bold text-xs mb-0.5">Verified Users Only</div>
-                                <div className="text-[10px] text-muted-foreground leading-relaxed">Only logged-in verified users.</div>
-                            </div>
-                        </label>
-                    </div>
-                    {errors.privacy_level && <p className="text-red-500 text-[10px]">{errors.privacy_level}</p>}
-                </div>
             </div>
 
             <div className="flex items-center justify-between pt-2">

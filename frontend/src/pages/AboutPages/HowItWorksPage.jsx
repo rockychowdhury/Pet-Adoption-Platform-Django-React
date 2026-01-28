@@ -52,7 +52,7 @@ const HowItWorksPage = () => {
     ];
 
     return (
-        <div className="bg-bg-primary min-h-screen font-inter text-text-primary">
+        <div className="bg-bg-primary min-h-screen  text-text-primary">
             {/* Hero */}
             <section className="bg-brand-primary text-text-inverted py-20 px-6 text-center">
                 <h1 className="text-4xl md:text-5xl font-bold mb-6">How PetCircle Works</h1>

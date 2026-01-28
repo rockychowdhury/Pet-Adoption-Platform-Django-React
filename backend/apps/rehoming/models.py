@@ -53,15 +53,6 @@ class RehomingRequest(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
-    # Privacy
-    privacy_level = models.CharField(
-        max_length=20,
-        choices=[
-            ('public', 'Public - Anyone can see'),
-            ('verified', 'Verified Users Only')
-        ],
-        default='public'
-    )
     
     # Status & Timeline
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
@@ -174,8 +165,6 @@ class RehomingListing(models.Model):
     latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True)
     
-    # Privacy
-    privacy_level = models.CharField(max_length=20, default='public')
     
     # Listing Status
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='active')
@@ -244,6 +233,10 @@ class AdoptionInquiry(models.Model):
     
     owner_notes = models.TextField(blank=True, null=True, help_text="Notes from the owner regarding this application")
     rejection_reason = models.TextField(blank=True, null=True, help_text="Reason for rejection")
+
+    # AI Match Analysis
+    match_percentage = models.IntegerField(default=0, help_text="AI Calculated match percentage (0-100)")
+    ai_processed = models.BooleanField(default=False, help_text="Whether this application has been analyzed by AI")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

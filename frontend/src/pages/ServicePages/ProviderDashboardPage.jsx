@@ -45,7 +45,7 @@ const ProviderDashboardPage = () => {
 
     if (!provider) {
         return (
-            <div className="min-h-screen bg-bg-primary font-jakarta">
+            <div className="min-h-screen bg-bg-primary ">
                 <Navbar />
                 <div className="max-w-3xl mx-auto px-4 py-12 text-center">
                     <User size={64} className="mx-auto text-gray-300 mb-4" />
@@ -84,7 +84,7 @@ const ProviderDashboardPage = () => {
     const completionPercentage = calculateCompletion();
 
     return (
-        <div className="min-h-screen bg-bg-primary font-jakarta">
+        <div className="min-h-screen bg-bg-primary ">
             <Navbar />
             <div className="max-w-7xl mx-auto px-4 py-8">
 

@@ -9,6 +9,7 @@ import aboutImage1 from '../../assets/about1.png';
 import aboutImage2 from '../../assets/about2.jpg';
 import { Heart, ShieldCheck, MessageCircle, Sparkles, Star } from 'lucide-react';
 import SectionCursor from '../common/SectionCursor';
+import Button from '../common/Buttons/Button';
 
 const HeroSection = () => {
     // Animation Variants
@@ -47,12 +48,12 @@ const HeroSection = () => {
     };
 
     return (
-        <section className="relative w-full min-h-screen pt-16 flex flex-col lg:flex-row overflow-hidden font-jakarta bg-bg-secondary transition-colors duration-300">
+        <section className="relative w-full min-h-screen pt-24 flex flex-col lg:flex-row overflow-hidden  bg-bg-secondary transition-colors duration-300">
             <SectionCursor label="PET NETWORK" icon={<Sparkles size={14} />} className="w-full h-full">
 
 
                 {/* Content Container */}
-                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row h-full items-center min-h-[calc(100vh-4rem)] lg:-mt-10">
+                <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10 flex flex-col lg:flex-row h-full items-center flex-1 py-12 lg:py-0">
 
                     {/* Left Side */}
                     <motion.div
@@ -77,7 +78,7 @@ const HeroSection = () => {
                         >
                             <motion.h1
                                 variants={itemVariants}
-                                className="text-5xl sm:text-6xl lg:text-[94px] font-black text-text-primary leading-[0.9] font-logo tracking-tighter relative"
+                                className="text-display-xl font-black text-text-primary relative"
                             >
                                 The Community <br />
                                 <span className="text-brand-primary relative inline-block">
@@ -91,7 +92,7 @@ const HeroSection = () => {
                             variants={itemVariants}
                             className="mb-10 max-w-lg relative"
                         >
-                            <p className="text-text-secondary text-xl font-jakarta leading-relaxed font-medium opacity-80">
+                            <p className="text-text-secondary text-xl  leading-relaxed font-medium opacity-80">
                                 A warm, trusted space where pet lovers meet, share stories, and save lives through the power of community.
                             </p>
                         </motion.div>
@@ -126,11 +127,15 @@ const HeroSection = () => {
                             variants={itemVariants}
                             className="flex flex-wrap gap-5"
                         >
-                            <Link to="/pets" className="px-10 py-5 bg-brand-primary text-text-inverted rounded-full font-black text-xs uppercase tracking-[0.2em] hover:scale-105 active:scale-95 transition-all duration-300 shadow-xl shadow-brand-primary/20 flex items-center justify-center">
-                                Find a Pet
+                            <Link to="/pets">
+                                <Button variant="primary" size="lg" className="rounded-full px-10 py-5 h-auto text-xs uppercase tracking-[0.2em] shadow-xl shadow-brand-primary/20">
+                                    Find a Pet
+                                </Button>
                             </Link>
-                            <Link to="/community" className="px-10 py-5 bg-bg-surface text-text-primary border border-border/60 rounded-full font-black text-xs uppercase tracking-[0.2em] hover:bg-bg-secondary transition-all duration-300 flex items-center justify-center">
-                                Join Community
+                            <Link to="/community">
+                                <Button variant="outline" size="lg" className="rounded-full px-10 py-5 h-auto text-xs uppercase tracking-[0.2em] bg-bg-surface border-border/60 hover:bg-bg-secondary">
+                                    Join Community
+                                </Button>
                             </Link>
                         </motion.div>
                     </motion.div>
@@ -214,16 +219,6 @@ const HeroSection = () => {
                 </motion.div>
             </SectionCursor>
 
-            {/* Custom Animation Styles */}
-            <style jsx>{`
-                .animate-marquee {
-                    animation: marquee 40s linear infinite;
-                }
-                @keyframes marquee {
-                    0% { transform: translateX(0); }
-                    100% { transform: translateX(-50%); }
-                }
-            `}</style>
         </section>
     );
 };

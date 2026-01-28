@@ -48,10 +48,10 @@ const OwnerApplicationDetailPage = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+            <div className="min-h-screen bg-bg-secondary flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin w-12 h-12 border-4 border-[#1A1A1A] border-t-transparent rounded-full mx-auto mb-4" />
-                    <p className="text-[#8F8F8F] font-medium">Loading application...</p>
+                    <div className="animate-spin w-12 h-12 border-4 border-text-primary border-t-transparent rounded-full mx-auto mb-4" />
+                    <p className="text-text-tertiary font-medium">Loading application...</p>
                 </div>
             </div>
         );
@@ -59,9 +59,9 @@ const OwnerApplicationDetailPage = () => {
 
     if (error || !application) {
         return (
-            <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+            <div className="min-h-screen bg-bg-secondary flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-500 font-bold text-lg mb-4">Application not found</p>
+                    <p className="text-status-error font-bold text-lg mb-4">Application not found</p>
                     <Button onClick={() => navigate(-1)}>Back to Applications</Button>
                 </div>
             </div>
@@ -77,24 +77,24 @@ const OwnerApplicationDetailPage = () => {
     const age = applicant.date_of_birth ? differenceInYears(new Date(), new Date(applicant.date_of_birth)) : null;
 
     return (
-        <div className="min-h-screen bg-[#F9F8F6] py-8 px-4 font-jakarta">
+        <div className="min-h-screen bg-bg-secondary py-8 px-4 ">
             <div className="max-w-4xl mx-auto">
                 {/* Back Button */}
                 <Button
                     variant="ghost"
-                    className="mb-6 pl-0 hover:bg-transparent text-[#8F8F8F] hover:text-[#1A1A1A]"
+                    className="mb-6 pl-0 hover:bg-transparent text-text-tertiary hover:text-text-primary"
                     onClick={() => navigate(-1)}
                 >
                     <ChevronLeft size={18} className="mr-2" /> Back to Applications
                 </Button>
 
                 {/* Main Card */}
-                <div className="bg-white rounded-[32px] border border-[#E5E5E5] overflow-hidden shadow-sm">
+                <div className="bg-bg-surface rounded-[32px] border border-border overflow-hidden shadow-sm">
 
                     {/* Header - Application For */}
-                    <div className="px-8 pt-8 pb-6 border-b border-[#E5E5E5]">
+                    <div className="px-8 pt-8 pb-6 border-b border-border">
                         <div className="flex items-center gap-4">
-                            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
+                            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-bg-secondary flex-shrink-0">
                                 <img
                                     src={pet.primary_photo}
                                     alt={pet.name}
@@ -102,9 +102,9 @@ const OwnerApplicationDetailPage = () => {
                                 />
                             </div>
                             <div className="flex-1">
-                                <p className="text-sm text-[#8F8F8F] font-medium mb-1">Application for</p>
-                                <h1 className="text-2xl font-black text-[#1A1A1A]">{pet.name}</h1>
-                                <p className="text-sm text-[#5F5F5F] mt-1">
+                                <p className="text-sm text-text-tertiary font-medium mb-1">Application for</p>
+                                <h1 className="text-2xl font-black text-text-primary">{pet.name}</h1>
+                                <p className="text-sm text-text-secondary mt-1">
                                     {pet.breed} • {pet.gender} • {pet.species}
                                 </p>
                             </div>
@@ -118,10 +118,10 @@ const OwnerApplicationDetailPage = () => {
                     </div>
 
                     {/* Applicant Section */}
-                    <div className="px-8 py-6 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                    <div className="px-8 py-6 bg-bg-secondary border-b border-border">
                         <div className="flex items-start gap-6">
                             {/* Photo */}
-                            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-white border-2 border-white shadow-sm flex-shrink-0">
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-bg-surface border-2 border-bg-surface shadow-sm flex-shrink-0">
                                 <img
                                     src={applicant.photo_url}
                                     alt={applicant.full_name}
@@ -133,8 +133,8 @@ const OwnerApplicationDetailPage = () => {
                             <div className="flex-1">
                                 <div className="flex items-start justify-between mb-4">
                                     <div>
-                                        <h2 className="text-xl font-black text-[#1A1A1A] mb-1">{applicant.full_name}</h2>
-                                        <p className="text-sm text-[#5F5F5F]">
+                                        <h2 className="text-xl font-black text-text-primary mb-1">{applicant.full_name}</h2>
+                                        <p className="text-sm text-text-secondary">
                                             {age && `${age} years old • `}
                                             Member since {format(new Date(applicant.member_since), 'MMM yyyy')}
                                         </p>
@@ -143,16 +143,16 @@ const OwnerApplicationDetailPage = () => {
 
                                 {/* Contact & Location */}
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
-                                    <div className="flex items-center gap-2 text-sm text-[#5F5F5F]">
-                                        <Mail size={16} className="text-[#8F8F8F]" />
+                                    <div className="flex items-center gap-2 text-sm text-text-secondary">
+                                        <Mail size={16} className="text-text-tertiary" />
                                         <span>{applicant.email}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-[#5F5F5F]">
-                                        <Phone size={16} className="text-[#8F8F8F]" />
+                                    <div className="flex items-center gap-2 text-sm text-text-secondary">
+                                        <Phone size={16} className="text-text-tertiary" />
                                         <span>{applicant.phone}</span>
                                     </div>
-                                    <div className="flex items-center gap-2 text-sm text-[#5F5F5F] md:col-span-2">
-                                        <MapPin size={16} className="text-[#8F8F8F]" />
+                                    <div className="flex items-center gap-2 text-sm text-text-secondary md:col-span-2">
+                                        <MapPin size={16} className="text-text-tertiary" />
                                         <span>{applicant.location.city}, {applicant.location.state}</span>
                                     </div>
                                 </div>
@@ -190,9 +190,9 @@ const OwnerApplicationDetailPage = () => {
 
                     {/* Application Message */}
                     <div className="px-8 py-8">
-                        <h3 className="text-xs font-black uppercase tracking-widest text-[#8F8F8F] mb-4">Application Message</h3>
-                        <div className="bg-[#F9F8F6] rounded-2xl p-6 border border-[#E5E5E5]">
-                            <p className="text-[#1A1A1A] leading-relaxed whitespace-pre-wrap">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-text-tertiary mb-4">Application Message</h3>
+                        <div className="bg-bg-secondary rounded-2xl p-6 border border-border">
+                            <p className="text-text-primary leading-relaxed whitespace-pre-wrap">
                                 {application.application_message.intro_message}
                             </p>
                         </div>
@@ -200,14 +200,14 @@ const OwnerApplicationDetailPage = () => {
 
                     {/* Application Details */}
                     <div className="px-8 pb-8">
-                        <div className="grid grid-cols-2 gap-4 p-6 bg-[#FAFAFA] rounded-2xl border border-[#E5E5E5]">
+                        <div className="grid grid-cols-2 gap-4 p-6 bg-bg-secondary rounded-2xl border border-border">
                             <div>
-                                <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider mb-1">Submitted</p>
-                                <p className="text-[#1A1A1A] font-bold">{format(new Date(appData.submitted_at), 'MMM d, yyyy')}</p>
+                                <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Submitted</p>
+                                <p className="text-text-primary font-bold">{format(new Date(appData.submitted_at), 'MMM d, yyyy')}</p>
                             </div>
                             <div>
-                                <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider mb-1">Last Updated</p>
-                                <p className="text-[#1A1A1A] font-bold">{format(new Date(appData.last_updated_at), 'MMM d, yyyy')}</p>
+                                <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">Last Updated</p>
+                                <p className="text-text-primary font-bold">{format(new Date(appData.last_updated_at), 'MMM d, yyyy')}</p>
                             </div>
                         </div>
                     </div>
@@ -223,7 +223,7 @@ const OwnerApplicationDetailPage = () => {
                                 Reject Application
                             </Button>
                             <Button
-                                className="bg-[#1A1A1A] text-white hover:bg-black font-bold px-6"
+                                className="bg-text-primary text-text-inverted hover:bg-black font-bold px-6"
                                 onClick={() => setIsApproveModalOpen(true)}
                             >
                                 Approve for Meet & Greet
@@ -254,9 +254,9 @@ const OwnerApplicationDetailPage = () => {
             {/* Reject Modal */}
             <Modal isOpen={isRejectModalOpen} onClose={() => setIsRejectModalOpen(false)} title="Reject Application">
                 <div className="space-y-4">
-                    <p className="text-[#5F5F5F]">Are you sure you want to reject this application? The applicant will be notified.</p>
+                    <p className="text-text-secondary">Are you sure you want to reject this application? The applicant will be notified.</p>
                     <textarea
-                        className="w-full h-24 p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none resize-none"
+                        className="w-full h-24 p-3 border border-border rounded-xl focus:ring-2 focus:ring-text-primary outline-none resize-none"
                         placeholder="Reason for rejection (optional)..."
                         value={actionNote}
                         onChange={(e) => setActionNote(e.target.value)}
@@ -276,32 +276,32 @@ const OwnerApplicationDetailPage = () => {
             {/* Approve Modal */}
             <Modal isOpen={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)} title="Approve for Meet & Greet">
                 <div className="space-y-4">
-                    <p className="text-[#5F5F5F]">Schedule a Meet & Greet with the applicant. Your contact details will be shared.</p>
+                    <p className="text-text-secondary">Schedule a Meet & Greet with the applicant. Your contact details will be shared.</p>
 
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-[#1A1A1A] uppercase">Date</label>
+                            <label className="text-xs font-bold text-text-primary uppercase">Date</label>
                             <input
                                 type="date"
-                                className="w-full p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none text-sm"
+                                className="w-full p-3 border border-border rounded-xl focus:ring-2 focus:ring-text-primary outline-none text-sm"
                                 id="meet-date"
                                 min={format(new Date(), 'yyyy-MM-dd')}
                             />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-xs font-bold text-[#1A1A1A] uppercase">Time</label>
+                            <label className="text-xs font-bold text-text-primary uppercase">Time</label>
                             <input
                                 type="time"
-                                className="w-full p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none text-sm"
+                                className="w-full p-3 border border-border rounded-xl focus:ring-2 focus:ring-text-primary outline-none text-sm"
                                 id="meet-time"
                             />
                         </div>
                     </div>
 
                     <div className="space-y-1">
-                        <label className="text-xs font-bold text-[#1A1A1A] uppercase">Additional Notes</label>
+                        <label className="text-xs font-bold text-text-primary uppercase">Additional Notes</label>
                         <textarea
-                            className="w-full h-24 p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none resize-none"
+                            className="w-full h-24 p-3 border border-border rounded-xl focus:ring-2 focus:ring-text-primary outline-none resize-none"
                             placeholder="Add location details or special instructions..."
                             value={actionNote}
                             onChange={(e) => setActionNote(e.target.value)}
@@ -311,7 +311,7 @@ const OwnerApplicationDetailPage = () => {
                     <div className="flex justify-end gap-3">
                         <Button variant="ghost" onClick={() => setIsApproveModalOpen(false)}>Cancel</Button>
                         <Button
-                            className="bg-[#1A1A1A] text-white hover:bg-black"
+                            className="bg-text-primary text-text-inverted hover:bg-black"
                             onClick={() => {
                                 const date = document.getElementById('meet-date').value;
                                 const time = document.getElementById('meet-time').value;

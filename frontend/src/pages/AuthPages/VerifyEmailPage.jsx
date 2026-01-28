@@ -4,7 +4,7 @@ import { Mail, Clock } from 'lucide-react';
 import AuthSplitLayout from '../../layouts/AuthSplitLayout';
 import FeatureCarousel from '../../components/Auth/FeatureCarousel';
 import CodeInput from '../../components/Auth/CodeInput';
-import DarkButton from '../../components/Auth/DarkButton';
+import Button from '../../components/common/Buttons/Button';
 import useAuth from '../../hooks/useAuth';
 
 const VerifyEmailPage = () => {
@@ -107,15 +107,16 @@ const VerifyEmailPage = () => {
                 {/* Timer and Error Removed as per redesign request */}
 
                 {/* Verify Button */}
-                <DarkButton
-                    type="button"
+                <Button
+                    type="submit"
                     onClick={handleVerify}
-                    loading={isLoading}
+                    isLoading={isLoading}
                     disabled={code.length !== 6}
-                    className="mb-6"
+                    className="mb-6 w-full"
+                    variant="primary"
                 >
                     Verify Email
-                </DarkButton>
+                </Button>
 
                 {/* Resend Link */}
                 <div className="text-center text-sm text-text-secondary mb-4">

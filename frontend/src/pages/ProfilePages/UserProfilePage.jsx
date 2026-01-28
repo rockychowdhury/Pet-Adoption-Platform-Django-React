@@ -46,7 +46,7 @@ const UserProfilePage = () => {
     }
   });
 
-  if (!user) return <div className="min-h-screen pt-20 text-center font-jakarta">Loading profile...</div>;
+  if (!user) return <div className="min-h-screen pt-20 text-center ">Loading profile...</div>;
 
   return (
     <div className="max-w-7xl mx-auto px-4 pb-20 pt-8">
@@ -90,7 +90,7 @@ const UserProfilePage = () => {
                   <h1 className="text-3xl md:text-4xl font-logo font-bold text-text-primary mb-2">
                     {user?.first_name} {user?.last_name}
                   </h1>
-                  <div className="flex flex-wrap items-center gap-4 text-text-secondary text-sm font-jakarta">
+                  <div className="flex flex-wrap items-center gap-4 text-text-secondary text-sm ">
                     <div className="flex items-center gap-1.5 bg-bg-secondary/50 px-3 py-1 rounded-full">
                       <MapPin size={14} className="text-brand-primary" />
                       {user?.location_city && user?.location_state
@@ -140,7 +140,7 @@ const UserProfilePage = () => {
                 {/* Bio Preview */}
                 {user?.bio && (
                   <div className="flex-1 md:pl-6 md:border-l md:border-border">
-                    <p className="text-sm text-text-secondary line-clamp-2 font-jakarta">"{user.bio}"</p>
+                    <p className="text-sm text-text-secondary line-clamp-2 ">"{user.bio}"</p>
                   </div>
                 )}
               </div>
@@ -236,7 +236,7 @@ const UserProfilePage = () => {
               <div className="space-y-6">
                 <div className="bg-white rounded-[32px] p-8 border border-border shadow-soft">
                   <h2 className="font-logo font-bold text-2xl text-text-primary mb-4">About Me</h2>
-                  <p className="text-text-secondary leading-relaxed font-jakarta">
+                  <p className="text-text-secondary leading-relaxed ">
                     {user.bio || (
                       <span className="italic text-text-tertiary">
                         This user hasn't written a bio yet.

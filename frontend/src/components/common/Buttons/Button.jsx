@@ -17,7 +17,7 @@ const Button = ({
     const baseStyles = 'inline-flex items-center justify-center font-semibold rounded-xl transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]';
 
     const variants = {
-        primary: 'bg-brand-primary text-text-inverted hover:opacity-90 shadow-md hover:shadow-lg focus:ring-brand-primary',
+        primary: 'bg-brand-primary text-text-inverted hover:opacity-90 shadow-brand-primary/20 shadow-md hover:shadow-lg focus:ring-brand-primary',
         secondary: 'bg-transparent border-2 border-brand-secondary text-brand-secondary hover:bg-brand-secondary hover:text-text-inverted focus:ring-brand-secondary',
         danger: 'bg-status-error text-white hover:bg-red-600 shadow-md hover:shadow-lg focus:ring-status-error',
         text: 'bg-transparent text-text-primary hover:bg-bg-secondary hover:underline focus:ring-gray-400',

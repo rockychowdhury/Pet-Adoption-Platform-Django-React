@@ -151,7 +151,7 @@ const ServiceSearchPage = () => {
 
 
     return (
-        <div className="min-h-screen bg-bg-primary font-jakarta">
+        <div className="min-h-screen bg-bg-primary ">
             <Navbar />
 
             <div className="max-w-7xl mx-auto px-6 pb-40 pt-12">

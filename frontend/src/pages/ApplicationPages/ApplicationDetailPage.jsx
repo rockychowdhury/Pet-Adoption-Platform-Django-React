@@ -39,10 +39,10 @@ const ApplicationDetailPage = () => {
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+            <div className="min-h-screen bg-bg-secondary flex items-center justify-center">
                 <div className="text-center">
-                    <div className="animate-spin w-12 h-12 border-4 border-[#1A1A1A] border-t-transparent rounded-full mx-auto mb-4" />
-                    <p className="text-[#8F8F8F] font-medium">Loading application...</p>
+                    <div className="animate-spin w-12 h-12 border-4 border-text-primary border-t-transparent rounded-full mx-auto mb-4" />
+                    <p className="text-text-tertiary font-medium">Loading application...</p>
                 </div>
             </div>
         );
@@ -50,9 +50,9 @@ const ApplicationDetailPage = () => {
 
     if (error || !fullApplication) {
         return (
-            <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+            <div className="min-h-screen bg-bg-secondary flex items-center justify-center">
                 <div className="text-center">
-                    <p className="text-red-500 font-bold text-lg">Application not found</p>
+                    <p className="text-status-error font-bold text-lg">Application not found</p>
                     <Button onClick={() => navigate('/dashboard/applications')} className="mt-4">
                         Back to Applications
                     </Button>
@@ -87,16 +87,16 @@ const ApplicationDetailPage = () => {
 
         return (
             <div className="flex items-center justify-between relative mb-8 px-4">
-                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-[#E5E5E5] -z-10" />
+                <div className="absolute left-0 top-1/2 w-full h-0.5 bg-border -z-10" />
                 {steps.map((step, idx) => {
                     const isActive = !isRejected && currentStepIndex >= idx;
                     const isCurrent = application.status === step.status;
 
                     return (
-                        <div key={idx} className="flex flex-col items-center gap-2 bg-white px-3">
+                        <div key={idx} className="flex flex-col items-center gap-2 bg-bg-surface px-3">
                             <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 transition-all ${isActive
-                                    ? 'bg-[#1A1A1A] border-[#1A1A1A] text-white shadow-lg'
-                                    : 'bg-white border-[#E5E5E5] text-[#E5E5E5]'
+                                ? 'bg-text-primary border-text-primary text-text-inverted shadow-lg'
+                                : 'bg-bg-surface border-border text-border'
                                 }`}>
                                 {isActive ? (
                                     <CheckCircle size={20} strokeWidth={2.5} />
@@ -104,7 +104,7 @@ const ApplicationDetailPage = () => {
                                     <div className="w-2.5 h-2.5 rounded-full bg-current" />
                                 )}
                             </div>
-                            <span className={`text-xs font-bold ${isCurrent ? 'text-[#1A1A1A]' : 'text-[#8F8F8F]'
+                            <span className={`text-xs font-bold ${isCurrent ? 'text-text-primary' : 'text-text-tertiary'
                                 }`}>
                                 {step.label}
                             </span>
@@ -116,19 +116,19 @@ const ApplicationDetailPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F9F8F6] py-8 px-4 font-jakarta">
+        <div className="min-h-screen bg-[#F9F8F6] py-8 px-4 ">
             <div className="max-w-5xl mx-auto">
                 {/* Back Button */}
                 <Button
                     onClick={() => navigate('/dashboard/applications')}
                     variant="ghost"
-                    className="mb-6 pl-0 hover:bg-transparent text-[#8F8F8F] hover:text-[#1A1A1A]"
+                    className="mb-6 pl-0 hover:bg-transparent text-text-tertiary hover:text-text-primary"
                 >
                     <ChevronLeft size={20} className="mr-1" /> Back to Applications
                 </Button>
 
                 {/* Main Card */}
-                <div className="bg-white rounded-[32px] border border-[#E5E5E5] overflow-hidden shadow-sm">
+                <div className="bg-bg-surface rounded-[32px] border border-border overflow-hidden shadow-sm">
                     {/* Header */}
                     <div className="p-8 border-b border-[#E5E5E5]">
                         <div className="flex items-center gap-4 mb-6">
@@ -140,17 +140,17 @@ const ApplicationDetailPage = () => {
                                         className="w-full h-full object-cover"
                                     />
                                 ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-[#E5E5E5]">
+                                    <div className="w-full h-full flex items-center justify-center text-text-muted">
                                         <Calendar size={32} />
                                     </div>
                                 )}
                             </div>
                             <div className="flex-1">
-                                <h1 className="text-2xl font-black text-[#1A1A1A] mb-1">
+                                <h1 className="text-2xl font-black text-text-primary mb-1">
                                     Application for {pet.name}
                                 </h1>
-                                <p className="text-[#5F5F5F] text-sm">
-                                    Status: <span className="font-bold text-[#1A1A1A] uppercase tracking-wide">
+                                <p className="text-text-secondary text-sm">
+                                    Status: <span className="font-bold text-text-primary uppercase tracking-wide">
                                         {application.status.replace(/_/g, ' ')}
                                     </span>
                                 </p>
@@ -163,27 +163,27 @@ const ApplicationDetailPage = () => {
 
                     {/* Meet & Greet Highlight */}
                     {application.status === 'approved_meet_greet' && meetDetails && meetDetails.date && (
-                        <div className="mx-8 mt-8 bg-[#F0FDF4] border border-[#DCFCE7] rounded-2xl p-6">
-                            <h3 className="text-[#166534] font-black uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
+                        <div className="mx-8 mt-8 bg-status-success/5 border border-status-success/20 rounded-2xl p-6">
+                            <h3 className="text-status-success font-black uppercase tracking-widest text-xs mb-4 flex items-center gap-2">
                                 <Calendar size={16} /> Meet & Greet Scheduled
                             </h3>
                             <div className="grid grid-cols-2 gap-6 mb-4">
                                 <div>
-                                    <p className="text-[10px] font-bold text-[#166534] uppercase tracking-wider opacity-70 mb-1">Date</p>
-                                    <p className="text-xl font-black text-[#15803d]">
+                                    <p className="text-[10px] font-bold text-status-success uppercase tracking-wider opacity-70 mb-1">Date</p>
+                                    <p className="text-xl font-black text-status-success">
                                         {format(new Date(meetDetails.date), 'M/dd/yyyy')}
                                     </p>
                                 </div>
                                 <div>
-                                    <p className="text-[10px] font-bold text-[#166534] uppercase tracking-wider opacity-70 mb-1">Time</p>
-                                    <p className="text-xl font-black text-[#15803d]">
+                                    <p className="text-[10px] font-bold text-status-success uppercase tracking-wider opacity-70 mb-1">Time</p>
+                                    <p className="text-xl font-black text-status-success">
                                         {meetDetails.time}
                                     </p>
                                 </div>
                             </div>
                             {meetDetails.message && (
-                                <div className="pt-4 border-t border-[#DCFCE7]">
-                                    <p className="text-[#15803d] text-sm leading-relaxed">{meetDetails.message}</p>
+                                <div className="pt-4 border-t border-status-success/20">
+                                    <p className="text-status-success text-sm leading-relaxed">{meetDetails.message}</p>
                                 </div>
                             )}
                         </div>
@@ -194,12 +194,12 @@ const ApplicationDetailPage = () => {
                         {/* Left Column - Application Message */}
                         <div className="lg:col-span-2">
                             <Card className="p-6 bg-white border border-[#E5E5E5] rounded-2xl">
-                                <h2 className="text-sm font-black uppercase tracking-widest text-[#8F8F8F] mb-4 flex items-center gap-2">
+                                <h2 className="text-sm font-black uppercase tracking-widest text-text-tertiary mb-4 flex items-center gap-2">
                                     <MessageSquare size={16} />
                                     Application Message
                                 </h2>
                                 <div className="prose prose-stone max-w-none">
-                                    <p className="text-[#5F5F5F] leading-relaxed whitespace-pre-wrap text-sm">
+                                    <p className="text-text-secondary leading-relaxed whitespace-pre-wrap text-sm">
                                         {appMessage.intro_message}
                                     </p>
                                 </div>
@@ -208,22 +208,22 @@ const ApplicationDetailPage = () => {
 
                         {/* Right Column - Application Info */}
                         <div>
-                            <Card className="p-6 bg-[#FAFAFA] border border-[#E5E5E5] rounded-2xl">
-                                <h3 className="text-xs font-black uppercase tracking-widest text-[#8F8F8F] mb-6">
+                            <Card className="p-6 bg-bg-secondary/50 border border-border rounded-2xl">
+                                <h3 className="text-xs font-black uppercase tracking-widest text-text-tertiary mb-6">
                                     Application Info
                                 </h3>
                                 <div className="space-y-4">
                                     <div>
-                                        <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider mb-1">
+                                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-1">
                                             Applied On
                                         </p>
-                                        <p className="text-[#1A1A1A] font-bold">
+                                        <p className="text-text-primary font-bold">
                                             {format(new Date(application.submitted_at), 'M/dd/yyyy')}
                                         </p>
                                     </div>
 
                                     <div>
-                                        <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider mb-2">
+                                        <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider mb-2">
                                             Applicant Verified
                                         </p>
                                         <Badge

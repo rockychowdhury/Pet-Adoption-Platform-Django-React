@@ -349,7 +349,11 @@ class AdoptionInquiryViewSet(viewsets.ModelViewSet):
         if AdoptionInquiry.objects.filter(listing=listing, requester=self.request.user).exists():
              raise PermissionDenied("You have already sent an inquiry for this pet.")
              
-        serializer.save(requester=self.request.user)
+        instance = serializer.save(requester=self.request.user)
+
+        # Trigger Async AI Match Analysis
+        from .tasks import analyze_application_match
+        analyze_application_match.delay(instance.id)
 
     @action(detail=True, methods=['post'])
     def update_status(self, request, pk=None):
@@ -415,3 +419,30 @@ class MyListingListView(generics.ListAPIView):
 
     def get_queryset(self):
         return RehomingListing.objects.filter(owner=self.request.user).order_by('-updated_at')
+
+
+class GenerateAIApplicationView(generics.CreateAPIView):
+    """
+    Generates AI-powered application content based on user inputs.
+    """
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def post(self, request, *args, **kwargs):
+        from .services.ai_service import generate_application_content
+        
+        listing_id = request.data.get('listing_id')
+        form_data = request.data.get('form_data', {})
+        
+        if not listing_id:
+            return Response({'error': 'Listing ID is required'}, status=status.HTTP_400_BAD_REQUEST)
+            
+        try:
+            listing = RehomingListing.objects.get(id=listing_id)
+        except RehomingListing.DoesNotExist:
+            return NotFound("Listing not found")
+            
+        try:
+            generated_content = generate_application_content(request.user, listing, form_data)
+            return Response({'content': generated_content})
+        except Exception as e:
+            return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

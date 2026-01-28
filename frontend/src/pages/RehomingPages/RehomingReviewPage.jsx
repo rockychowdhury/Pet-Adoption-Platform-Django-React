@@ -56,7 +56,7 @@ const RehomingReviewPage = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto font-jakarta animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="max-w-2xl mx-auto  animate-in fade-in slide-in-from-right-4 duration-500">
             <h1 className="text-xl font-logo font-bold text-foreground mb-1">Review & Finalize</h1>
             <p className="text-muted-foreground text-xs mb-6">Confirm your choices to publish the listing.</p>
 
@@ -77,10 +77,6 @@ const RehomingReviewPage = () => {
                         <li className="flex gap-2">
                             <span className="font-bold min-w-[70px]">Location:</span>
                             <span>{formData.location_city}, {formData.location_state}</span>
-                        </li>
-                        <li className="flex gap-2">
-                            <span className="font-bold min-w-[70px]">Privacy:</span>
-                            <span className="capitalize">{formData.privacy_level}</span>
                         </li>
                     </ul>
                 </div>

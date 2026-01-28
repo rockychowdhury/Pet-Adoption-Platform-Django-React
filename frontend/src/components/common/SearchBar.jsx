@@ -45,22 +45,22 @@ const SearchBar = ({
     };
 
     return (
-        <div className="flex items-center w-full max-w-[450px] bg-[#F3F4F6]/50 rounded-full px-5 py-2 hover:bg-[#F3F4F6] transition-all focus-within:ring-0 focus-within:bg-[#F3F4F6] group border border-transparent">
-            <Search size={18} className="text-gray-400 shrink-0" />
+        <div className="flex items-center w-full max-w-[450px] bg-bg-secondary/50 rounded-full px-5 py-2 hover:bg-bg-secondary transition-all focus-within:ring-0 focus-within:bg-bg-secondary group border border-transparent">
+            <Search size={18} className="text-text-tertiary shrink-0" />
             <input
                 type="text"
                 value={searchText}
                 onChange={(e) => setSearchText(e.target.value)}
                 onKeyPress={handleKeyPress}
                 placeholder={placeholder}
-                className="w-full bg-transparent border-none focus:ring-0 text-[13px] font-medium text-text-primary placeholder:text-gray-400 px-4 py-1"
+                className="w-full bg-transparent border-none focus:ring-0 text-[13px] font-medium text-text-primary placeholder:text-text-tertiary px-4 py-1"
             />
             {showLocation && (
                 <button
                     onClick={() => setIsLocationModalOpen(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-100 rounded-full text-[#1A1A1A] transition-all font-bold text-[10px] shadow-sm hover:shadow-md shrink-0"
+                    className="flex items-center gap-2 px-3 py-1.5 bg-bg-surface border border-border rounded-full text-text-primary transition-all font-bold text-[10px] shadow-sm hover:shadow-md shrink-0"
                 >
-                    <MapPin size={12} className="text-[#6B8E7B]" />
+                    <MapPin size={12} className="text-brand-primary" />
                     <span>{locationName || "Anywhere"}</span>
                 </button>
             )}

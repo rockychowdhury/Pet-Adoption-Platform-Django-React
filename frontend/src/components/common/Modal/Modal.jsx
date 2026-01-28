@@ -88,7 +88,7 @@ const Modal = ({
             <div className={`${variants.standard} ${className}`}>
                 {/* Header */}
                 <div className="flex justify-between items-center p-6 border-b border-border shrink-0 bg-bg-surface rounded-t-3xl">
-                    <h3 className="text-2xl font-bold text-text-primary font-logo">{title}</h3>
+                    <h3 className="text-2xl font-bold text-text-primary">{title}</h3>
                     <button onClick={onClose} className="text-text-secondary hover:text-brand-primary transition p-1 hover:bg-bg-secondary rounded-full">
                         <X size={24} />
                     </button>

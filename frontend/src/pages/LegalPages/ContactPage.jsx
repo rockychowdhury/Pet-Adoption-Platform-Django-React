@@ -11,7 +11,7 @@ const ContactPage = () => {
     };
 
     return (
-        <div className="bg-bg-primary min-h-screen font-inter text-text-primary py-12 md:py-20">
+        <div className="bg-bg-primary min-h-screen  text-text-primary py-12 md:py-20">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 {/* Header */}
                 <div className="text-center mb-16">

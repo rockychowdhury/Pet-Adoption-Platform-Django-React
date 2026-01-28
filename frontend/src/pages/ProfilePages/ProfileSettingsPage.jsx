@@ -365,14 +365,14 @@ const ProfileSettingsPage = () => {
 
         {/* Bio */}
         <div>
-          <label className="block text-sm font-semibold text-text-primary mb-2 font-jakarta">
+          <label className="block text-sm font-semibold text-text-primary mb-2 ">
             Bio
           </label>
           <textarea
             name="bio"
             defaultValue={profile?.bio || ''}
             maxLength={500}
-            className="w-full min-h-[120px] rounded-2xl border border-border bg-bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20 resize-y transition-shadow font-jakarta"
+            className="w-full min-h-[120px] rounded-2xl border border-border bg-bg-surface px-4 py-3 text-sm text-text-primary placeholder:text-text-tertiary focus:outline-none focus:border-brand-primary focus:ring-1 focus:ring-brand-primary/20 resize-y transition-shadow "
             placeholder="Tell the community a bit about yourself..."
           />
           <p className="mt-1 text-xs text-text-tertiary text-right font-medium">
@@ -545,7 +545,7 @@ const ProfileSettingsPage = () => {
     <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
       <div className="mb-8">
         <h1 className="text-3xl font-bold font-logo text-text-primary mb-2">Settings</h1>
-        <p className="text-text-secondary font-jakarta">Manage your account preferences and profile details.</p>
+        <p className="text-text-secondary ">Manage your account preferences and profile details.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">

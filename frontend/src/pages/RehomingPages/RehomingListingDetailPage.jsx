@@ -117,7 +117,7 @@ const RehomingListingDetailPage = () => {
                 {/* Sidebar */}
                 <div className="space-y-5">
                     {/* Action Card */}
-                    <div className="bg-white p-5 rounded-2xl shadow-xl border border-border sticky top-24">
+                    <div className="bg-bg-surface p-5 rounded-2xl shadow-xl border border-border sticky top-24">
                         <div className="flex justify-between items-center mb-5">
                             <span className="text-xs font-bold text-text-tertiary">Rehoming Fee may apply</span>
                             <div className="flex gap-2">
@@ -143,7 +143,7 @@ const RehomingListingDetailPage = () => {
                                 Contact on WhatsApp
                             </button>
                         ) : (
-                            <div className="w-full py-3.5 mb-3 bg-gray-100 text-gray-400 rounded-xl font-bold text-base text-center cursor-not-allowed">
+                            <div className="w-full py-3.5 mb-3 bg-bg-secondary text-text-tertiary rounded-xl font-bold text-base text-center cursor-not-allowed">
                                 Contact Info Not Available
                             </div>
                         )}

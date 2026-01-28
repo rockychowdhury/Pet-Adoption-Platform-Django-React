@@ -29,7 +29,7 @@ const RehomingSituationPage = () => {
     };
 
     return (
-        <div className="max-w-2xl mx-auto font-jakarta animate-in fade-in slide-in-from-right-4 duration-500">
+        <div className="max-w-2xl mx-auto  animate-in fade-in slide-in-from-right-4 duration-500">
             <h1 className="text-xl font-logo font-bold text-foreground mb-1">The Situation</h1>
             <p className="text-muted-foreground text-xs mb-6">Tell us why you're rehoming and how urgent it is.</p>
 

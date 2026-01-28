@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Mail, Lock, User, Eye, EyeOff, Check } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
-import DarkInput from './DarkInput';
-import DarkButton from './DarkButton';
+import Input from '../common/Form/Input';
+import Button from '../common/Buttons/Button';
 import SocialAuthButtons from './SocialAuthButtons';
 import AuthToggle from './AuthToggle';
 import { Link } from 'react-router-dom';
@@ -37,9 +37,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
     }, [mode]);
 
     const [isLoading, setIsLoading] = useState(false);
-
     const [fieldErrors, setFieldErrors] = useState({});
-
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
@@ -48,22 +46,14 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
             [name]: type === 'checkbox' ? checked : value
         }));
 
-        // Clear global error
-
-
         // Clear specific field error as user corrects it
         if (fieldErrors[name]) {
             setFieldErrors(prev => ({ ...prev, [name]: '' }));
         }
-
-
     };
-
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
         setFieldErrors({});
 
         // Client-side Validation
@@ -108,8 +98,6 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
             if (Object.keys(backendFieldErrors).length > 0) {
                 setFieldErrors(backendFieldErrors);
             }
-
-
         } finally {
             setIsLoading(false);
         }
@@ -122,7 +110,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
 
             {/* Header */}
             <div className="text-center mb-8">
-                <h1 className="text-3xl font-bold text-text-primary mb-2 font-logo">
+                <h1 className="text-3xl font-bold text-text-primary mb-2">
                     {mode === 'login' ? 'Welcome Back' : 'Create Account'}
                 </h1>
                 <p className="text-text-secondary">
@@ -132,10 +120,10 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                 </p>
             </div>
 
-            <form onSubmit={handleSubmit} className="space-y-5">
+            <form onSubmit={handleSubmit} className="space-y-6">
                 {mode === 'register' && (
                     <div className="flex gap-4">
-                        <DarkInput
+                        <Input
                             name="first_name"
                             value={formData.first_name}
                             onChange={handleChange}
@@ -143,7 +131,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                             error={fieldErrors.first_name}
                             required
                         />
-                        <DarkInput
+                        <Input
                             name="last_name"
                             value={formData.last_name}
                             onChange={handleChange}
@@ -154,39 +142,36 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                     </div>
                 )}
 
-                <DarkInput
+                <Input
                     type="email"
                     name="email"
                     value={formData.email}
                     onChange={handleChange}
                     placeholder="Email Address"
-                    startIcon={<Mail size={20} className="text-text-tertiary" />}
+                    startIcon={<Mail size={20} />} // Input handles text color
                     error={fieldErrors.email}
                     required
                 />
 
-                <div className="relative">
-                    <DarkInput
-                        type={showPassword ? "text" : "password"}
-                        name="password"
-                        value={formData.password}
-                        onChange={handleChange}
-                        placeholder={mode === 'register' ? "Create Password" : "Password"}
-                        startIcon={<Lock size={20} className="text-text-tertiary" />}
-
-                        error={fieldErrors.password}
-                        required
-                    />
-                    <button
-                        type="button"
-                        onClick={() => setShowPassword(!showPassword)}
-                        className="absolute right-4 top-1/2 -translate-y-1/2 text-text-tertiary hover:text-text-primary transition-colors"
-                    >
-                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                </div>
-
-                {/* Password Strength Text Removed - Handled by Input Border */}
+                <Input
+                    type={showPassword ? "text" : "password"}
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder={mode === 'register' ? "Create Password" : "Password"}
+                    startIcon={<Lock size={20} />}
+                    endIcon={
+                        <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="hover:text-text-primary transition-colors focus:outline-none"
+                        >
+                            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                        </button>
+                    }
+                    error={fieldErrors.password}
+                    required
+                />
 
                 {mode === 'login' && (
                     <div className="flex justify-end">
@@ -211,11 +196,9 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                     </label>
                 )}
 
-
-
-                <DarkButton type="submit" loading={isLoading}>
+                <Button type="submit" isLoading={isLoading} className="w-full">
                     {mode === 'login' ? 'Sign In' : 'Create Account'}
-                </DarkButton>
+                </Button>
 
                 <div className="relative my-6">
                     <div className="absolute inset-0 flex items-center">

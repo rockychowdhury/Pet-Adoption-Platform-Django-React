@@ -101,7 +101,7 @@ const PrivacyPolicyPage = () => {
     }, []);
 
     return (
-        <div className="bg-bg-primary min-h-screen font-inter text-text-primary">
+        <div className="bg-bg-primary min-h-screen  text-text-primary">
             {/* Header */}
             <div className="bg-bg-surface border-b border-border">
                 <div className="max-w-7xl mx-auto px-6 py-12 md:py-16">

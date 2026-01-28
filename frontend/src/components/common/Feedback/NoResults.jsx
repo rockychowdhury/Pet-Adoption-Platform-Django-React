@@ -18,7 +18,7 @@ const NoResults = ({
                 {backgroundText}
             </div>
 
-            <div className="relative z-10 flex flex-col items-center max-w-2xl mx-auto text-center font-jakarta">
+            <div className="relative z-10 flex flex-col items-center max-w-2xl mx-auto text-center ">
                 {/* Image Section */}
                 <div className="relative mb-12">
                     <motion.div

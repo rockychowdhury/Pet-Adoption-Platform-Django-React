@@ -121,7 +121,7 @@
 
   /* Card Components */
   .card {
-    @apply bg-bg-surface rounded-2xl border border-border shadow-soft transition-all duration-300 hover:shadow-lg;
+    @apply bg-bg-surface rounded-2xl border border-border shadow-sm transition-all duration-300 hover:shadow-lg;
   }
 
   .card-hover {
@@ -229,6 +229,21 @@
     border: 1px solid color-mix(in srgb, var(--color-status-info) 20%, transparent);
   }
 
+  /* Marquee Animation */
+  .animate-marquee {
+    animation: marquee 40s linear infinite;
+  }
+
+  @keyframes marquee {
+    0% {
+      transform: translateX(0);
+    }
+
+    100% {
+      transform: translateX(-50%);
+    }
+  }
+
   /* Divider */
   .divider {
     @apply relative text-center my-6 before:content-[''] before:absolute before:top-1/2 before:left-0 before:right-0 before:h-px before:bg-border;
@@ -237,10 +252,15 @@
   .divider-text {
     @apply relative inline-block px-4 bg-bg-surface text-text-tertiary text-sm font-medium;
   }
+
+  /* Typography Utilities */
+  .text-display-xl {
+    @apply text-5xl sm:text-6xl lg:text-[5.875rem] leading-[0.9] tracking-tighter;
+  }
 }
 
 body {
-  @apply bg-bg-primary text-text-primary font-inter transition-colors duration-300;
+  @apply bg-bg-primary text-text-primary font-sans transition-colors duration-300;
 }
 
 /* Animations */

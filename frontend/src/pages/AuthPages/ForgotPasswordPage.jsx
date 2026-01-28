@@ -3,8 +3,8 @@ import { Link } from 'react-router-dom';
 import { Lock, CheckCircle, Mail } from 'lucide-react';
 import AuthSplitLayout from '../../layouts/AuthSplitLayout';
 import FeatureCarousel from '../../components/Auth/FeatureCarousel';
-import DarkInput from '../../components/Auth/DarkInput';
-import DarkButton from '../../components/Auth/DarkButton';
+import Input from '../../components/common/Form/Input';
+import Button from '../../components/common/Buttons/Button';
 import useAuth from '../../hooks/useAuth';
 
 const ForgotPasswordPage = () => {
@@ -50,7 +50,7 @@ const ForgotPasswordPage = () => {
 
                         {/* Form */}
                         <form onSubmit={handleSubmit} className="space-y-5">
-                            <DarkInput
+                            <Input
                                 type="email"
                                 name="email"
                                 value={email}
@@ -61,9 +61,9 @@ const ForgotPasswordPage = () => {
                                 required
                             />
 
-                            <DarkButton type="submit" loading={isLoading}>
+                            <Button type="submit" isLoading={isLoading} className="w-full">
                                 Send Reset Link
-                            </DarkButton>
+                            </Button>
 
                             <div className="flex justify-center mt-6">
                                 <Link to="/login" className="text-sm font-medium text-brand-primary hover:text-brand-secondary">
@@ -89,9 +89,9 @@ const ForgotPasswordPage = () => {
                             </p>
 
                             <Link to="/login">
-                                <DarkButton type="button">
+                                <Button type="button" className="w-full">
                                     Back to Login
-                                </DarkButton>
+                                </Button>
                             </Link>
                         </div>
                     </>

@@ -11,9 +11,9 @@ import { PawPrint, ArrowRight } from 'lucide-react';
  */
 const AuthSplitLayout = ({ carousel, children }) => {
     return (
-        <div className="flex flex-col md:flex-row min-h-screen w-full bg-bg-primary font-inter text-text-primary">
+        <div className="flex flex-col md:flex-row min-h-screen w-full bg-bg-primary  text-text-primary">
             {/* Left Panel - Carousel */}
-            <div className="w-full md:w-[40%] lg:w-1/2 h-[40vh] md:h-screen md:sticky md:top-0 relative overflow-hidden bg-gray-900">
+            <div className="w-full md:w-[40%] lg:w-1/2 h-[40vh] md:h-screen md:sticky md:top-0 relative overflow-hidden bg-bg-secondary">
                 {/* Logo - Top Left */}
                 <div className="absolute top-6 left-6 md:top-10 md:left-10 z-30">
                     <Link to="/" className="flex items-center gap-2 text-white hover:opacity-80 transition-opacity">
@@ -39,7 +39,7 @@ const AuthSplitLayout = ({ carousel, children }) => {
 
             {/* Right Panel - Forms */}
             <div className="w-full md:w-[60%] lg:w-1/2 min-h-[60vh] md:min-h-screen bg-bg-primary flex items-center justify-center p-4 md:p-12 lg:p-16 overflow-y-auto">
-                <div className="w-full max-w-[480px] bg-bg-surface p-6 md:p-12 shadow-xl rounded-2xl border border-border">
+                <div className="w-full max-w-[440px] bg-bg-surface p-6 md:p-12 shadow-xl rounded-3xl border border-border">
                     {children}
                 </div>
             </div>

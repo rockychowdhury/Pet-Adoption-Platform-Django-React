@@ -25,9 +25,9 @@ const FilterSection = ({ title, children, isOpen: defaultOpen = true }) => {
                 onClick={() => setIsOpen(!isOpen)}
                 className="flex items-center justify-between w-full group mb-3"
             >
-                <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-[#9CA3AF] group-hover:text-[#4B5563] transition-colors">{title}</h3>
+                <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-text-tertiary group-hover:text-text-secondary transition-colors">{title}</h3>
                 <div className={`transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`}>
-                    <ChevronDown size={14} className="text-[#9CA3AF]" />
+                    <ChevronDown size={14} className="text-text-tertiary" />
                 </div>
             </button>
             <AnimatePresence initial={false}>
@@ -86,10 +86,10 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
     }
 
     return (
-        <div className="w-full bg-white/50 backdrop-blur-sm p-4 flex flex-col gap-2 font-jakarta">
+        <div className="w-full bg-white/50 backdrop-blur-sm p-4 flex flex-col gap-2 ">
             {/* Header - Compact */}
             <div className="flex items-center justify-between mb-2 px-1 pb-4 border-b border-gray-100/50">
-                <h2 className="text-[18px] font-black text-[#111827] tracking-tight">Refine Results</h2>
+                <h2 className="text-[18px] font-black text-text-primary tracking-tight">Refine Results</h2>
                 <button
                     onClick={onClearFilters}
                     className="text-[10px] font-black uppercase tracking-widest text-status-error hover:opacity-70 transition-opacity"
@@ -106,7 +106,7 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange('providerType', filters.providerType === option.id ? '' : option.id)}
-                                className={`flex items-center p-3 rounded-2xl border transition-all gap-3 ${filters.providerType === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-lg shadow-[#2D5A41]/20 scale-[1.02]' : 'bg-white border-gray-100 text-[#4B5563] hover:border-gray-300'}`}
+                                className={`flex items-center p-3 rounded-2xl border transition-all gap-3 ${filters.providerType === option.id ? 'bg-brand-primary text-text-inverted border-brand-primary shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'bg-bg-surface border-border text-text-secondary hover:border-border-focus'}`}
                             >
                                 <option.Icon size={18} />
                                 <span className="text-[13px] font-bold">{option.label}</span>
@@ -126,9 +126,9 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             onChange={(e) => setServiceKeyword(e.target.value)}
                             onBlur={handleKeywordCommit}
                             onKeyDown={(e) => e.key === 'Enter' && handleKeywordCommit()}
-                            className="w-full pl-9 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D5A41]/20 focus:border-[#2D5A41] transition-all"
+                            className="w-full pl-9 pr-4 py-2.5 bg-bg-secondary border border-border rounded-xl text-sm font-bold text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary transition-all"
                         />
-                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
                     </div>
                 </FilterSection>
 
@@ -143,7 +143,7 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                                 value={minPrice}
                                 onChange={(e) => setMinPrice(e.target.value)}
                                 onBlur={handlePriceCommit}
-                                className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D5A41]/20 focus:border-[#2D5A41]"
+                                className="w-full pl-6 pr-2 py-2 bg-bg-secondary border border-border rounded-xl text-sm font-bold text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                             />
                         </div>
                         <span className="text-gray-300">-</span>
@@ -155,7 +155,7 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                                 value={maxPrice}
                                 onChange={(e) => setMaxPrice(e.target.value)}
                                 onBlur={handlePriceCommit}
-                                className="w-full pl-6 pr-2 py-2 bg-gray-50 border border-gray-100 rounded-xl text-sm font-bold text-gray-700 focus:outline-none focus:ring-2 focus:ring-[#2D5A41]/20 focus:border-[#2D5A41]"
+                                className="w-full pl-6 pr-2 py-2 bg-bg-secondary border border-border rounded-xl text-sm font-bold text-text-primary focus:outline-none focus:ring-2 focus:ring-brand-primary/20 focus:border-brand-primary"
                             />
                         </div>
                     </div>
@@ -168,7 +168,7 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange('species', filters.species === option.id ? '' : option.id)}
-                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-1.5 ${filters.species === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-lg shadow-[#2D5A41]/20 scale-[1.02]' : 'bg-white border-gray-100 text-[#4B5563] hover:border-gray-300'}`}
+                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-1.5 ${filters.species === option.id ? 'bg-brand-primary text-text-inverted border-brand-primary shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'bg-bg-surface border-border text-text-secondary hover:border-gray-300'}`}
                             >
                                 <option.Icon size={18} />
                                 <span className="text-[10px] font-bold">{option.label}</span>
@@ -184,10 +184,10 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange('availability', filters.availability === option.id ? '' : option.id)}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters.availability === option.id ? 'bg-[#2D5A41]/5 border-[#2D5A41]/20 text-[#2D5A41]' : 'bg-white border-gray-100 text-[#6B7280]'}`}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters.availability === option.id ? 'bg-brand-primary/5 border-brand-primary/20 text-brand-primary' : 'bg-white border-border text-text-secondary'}`}
                             >
                                 <span className="text-[11px] font-bold">{option.label}</span>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters.availability === option.id ? 'bg-[#2D5A41] text-white' : 'bg-gray-100 text-transparent'}`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters.availability === option.id ? 'bg-brand-primary text-text-inverted' : 'bg-bg-secondary text-transparent'}`}>
                                     <Check size={12} strokeWidth={4} />
                                 </div>
                             </button>
@@ -202,10 +202,10 @@ const ServiceFilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange('verification_status', filters.verification_status === 'verified' ? '' : 'verified')}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters.verification_status === 'verified' ? 'bg-[#2D5A41]/5 border-[#2D5A41]/20 text-[#2D5A41]' : 'bg-white border-gray-100 text-[#6B7280]'}`}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters.verification_status === 'verified' ? 'bg-brand-primary/5 border-brand-primary/20 text-brand-primary' : 'bg-white border-border text-text-secondary'}`}
                             >
                                 <span className="text-[11px] font-bold">{option.label}</span>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters.verification_status === 'verified' ? 'bg-[#2D5A41] text-white' : 'bg-gray-100 text-transparent'}`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters.verification_status === 'verified' ? 'bg-brand-primary text-text-inverted' : 'bg-bg-secondary text-transparent'}`}>
                                     <Check size={12} strokeWidth={4} />
                                 </div>
                             </button>

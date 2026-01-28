@@ -31,7 +31,7 @@ const PetProfilePage = () => {
     const traits = pet.personality_traits ? pet.personality_traits.split(',').map(t => t.trim()) : [];
 
     return (
-        <div className="min-h-screen bg-bg-primary pt-24 pb-20 px-4 sm:px-6 lg:px-8 font-inter">
+        <div className="min-h-screen bg-bg-primary pt-24 pb-20 px-4 sm:px-6 lg:px-8 ">
             <div className="max-w-4xl mx-auto">
                 <Link to={`/u/profile`} className="inline-flex items-center text-text-secondary hover:text-brand-secondary mb-6 transition font-medium text-sm">
                     <ArrowLeft size={18} className="mr-2" />

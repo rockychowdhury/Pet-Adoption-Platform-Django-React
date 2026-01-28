@@ -108,7 +108,7 @@ const AboutPage = () => {
     };
 
     return (
-        <div className="bg-bg-primary min-h-screen font-jakarta text-text-primary overflow-x-hidden">
+        <div className="bg-bg-primary min-h-screen  text-text-primary overflow-x-hidden">
 
             {/* Hero Section */}
             <section className="relative pt-32 pb-20 lg:pt-40 lg:pb-32 overflow-hidden">

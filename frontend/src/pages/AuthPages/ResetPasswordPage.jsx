@@ -5,8 +5,8 @@ import AuthSplitLayout from '../../layouts/AuthSplitLayout';
 import FeatureCarousel from '../../components/Auth/FeatureCarousel';
 import { toast } from 'react-toastify';
 import { extractErrorMessage } from '../../utils/errorUtils';
-import DarkInput from '../../components/Auth/DarkInput';
-import DarkButton from '../../components/Auth/DarkButton';
+import Input from '../../components/common/Form/Input';
+import Button from '../../components/common/Buttons/Button';
 import useAuth from '../../hooks/useAuth';
 
 const ResetPasswordPage = () => {
@@ -113,7 +113,7 @@ const ResetPasswordPage = () => {
                             {/* New Password */}
                             <div>
                                 <div className="relative">
-                                    <DarkInput
+                                    <Input
                                         type={showPassword ? 'text' : 'password'}
                                         name="password"
                                         value={formData.password}
@@ -139,7 +139,7 @@ const ResetPasswordPage = () => {
                             {/* Confirm Password */}
                             <div>
                                 <div className="relative">
-                                    <DarkInput
+                                    <Input
                                         type={showConfirmPassword ? 'text' : 'password'}
                                         name="confirmPassword"
                                         value={formData.confirmPassword}
@@ -169,13 +169,14 @@ const ResetPasswordPage = () => {
 
 
                             {/* Submit */}
-                            <DarkButton
+                            <Button
                                 type="submit"
-                                loading={isLoading}
+                                isLoading={isLoading}
                                 disabled={!passwordsMatch}
+                                className="w-full"
                             >
                                 Reset Password
-                            </DarkButton>
+                            </Button>
                         </form>
                     </>
                 ) : (
@@ -198,9 +199,9 @@ const ResetPasswordPage = () => {
                             </p>
 
                             <Link to="/login">
-                                <DarkButton type="button">
+                                <Button type="button" className="w-full">
                                     Go to Login
-                                </DarkButton>
+                                </Button>
                             </Link>
                         </div>
                     </>

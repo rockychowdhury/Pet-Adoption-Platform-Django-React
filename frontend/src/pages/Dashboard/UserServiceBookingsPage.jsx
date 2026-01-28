@@ -55,7 +55,7 @@ const UserServiceBookingsPage = () => {
     const filteredBookings = filterBookings(bookings);
 
     return (
-        <div className="space-y-8 font-jakarta">
+        <div className="space-y-8 ">
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4">
                 <div>
@@ -72,8 +72,8 @@ const UserServiceBookingsPage = () => {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === tab
-                                ? 'bg-[#2D5A41] text-white shadow-lg shadow-[#2D5A41]/20'
-                                : 'text-gray-400 hover:text-gray-600'
+                                ? 'bg-brand-primary text-text-inverted shadow-lg shadow-brand-primary/20'
+                                : 'text-text-muted hover:text-text-secondary'
                                 }`}
                         >
                             {tab}
@@ -203,7 +203,7 @@ const UserServiceBookingsPage = () => {
                                             >
                                                 <ExternalLink size={18} />
                                             </Link>
-                                            <button className="p-2.5 rounded-xl border border-[#111827] bg-[#111827] text-white hover:bg-brand-primary hover:border-brand-primary transition-all group/btn active:scale-95 shadow-sm">
+                                            <button className="p-2.5 rounded-xl border border-text-primary bg-text-primary text-text-inverted hover:bg-brand-primary hover:border-brand-primary transition-all group/btn active:scale-95 shadow-sm">
                                                 <ChevronRight size={18} className="group-hover/btn:translate-x-0.5 transition-transform" />
                                             </button>
                                         </div>

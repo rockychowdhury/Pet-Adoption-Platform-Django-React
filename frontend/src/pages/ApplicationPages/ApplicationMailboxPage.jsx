@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
 import { Send, ArrowLeft, Paperclip, Image as ImageIcon, Info, ShieldCheck } from 'lucide-react';
@@ -12,11 +12,12 @@ import Button from '../../components/common/Buttons/Button';
 const ApplicationMailboxPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
     const api = useAPI();
     const { user } = useAuth();
     const { useGetListingDetail } = useRehoming();
     const { data: listing, isLoading, isError } = useGetListingDetail(id);
-    const [message, setMessage] = useState('');
+    const [message, setMessage] = useState(location.state?.initialMessage || '');
     const [accepted, setAccepted] = useState(false);
 
     const submitMutation = useMutation({
@@ -34,13 +35,13 @@ const ApplicationMailboxPage = () => {
     });
 
     if (isLoading) return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F9F8F6]">
+        <div className="min-h-screen flex items-center justify-center bg-bg-primary">
             <div className="animate-pulse text-brand-primary font-bold tracking-widest uppercase text-xs">Loading Mailbox...</div>
         </div>
     );
 
     if (isError || !listing) return (
-        <div className="min-h-screen flex items-center justify-center bg-[#F9F8F6]">
+        <div className="min-h-screen flex items-center justify-center bg-bg-primary">
             <div className="text-center space-y-4">
                 <p className="text-text-secondary">Listing not found.</p>
                 <Button variant="outline" onClick={() => navigate('/pets')}>Back to Pets</Button>
@@ -62,7 +63,7 @@ const ApplicationMailboxPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-[#F0F2F5] py-8 px-4 font-jakarta">
+        <div className="min-h-screen bg-bg-secondary py-8 px-4 ">
             <div className="max-w-4xl mx-auto space-y-6">
 
                 {/* Header / Navigation */}
@@ -77,9 +78,9 @@ const ApplicationMailboxPage = () => {
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col md:flex-row min-h-[600px] border border-gray-200">
 
                     {/* Left Panel: Context (Like an email sidebar info) */}
-                    <div className="w-full md:w-80 bg-gray-50 border-r border-gray-100 p-6 flex flex-col gap-6">
+                    <div className="w-full md:w-80 bg-bg-secondary border-r border-border p-6 flex flex-col gap-6">
                         <div>
-                            <p className="text-[10px] font-black uppercase tracking-widest text-[#8F8F8F] mb-3">Re: Adoption Inquiry</p>
+                            <p className="text-[10px] font-black uppercase tracking-widest text-text-tertiary mb-3">Re: Adoption Inquiry</p>
                             <div className="bg-white p-4 rounded-xl border border-gray-200 shadow-sm space-y-3">
                                 <div className="aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
                                     <img src={pet.main_photo} alt={pet.name} className="w-full h-full object-cover" />

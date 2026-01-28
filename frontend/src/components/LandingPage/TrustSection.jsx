@@ -65,7 +65,7 @@ const TrustSection = () => {
                         className="text-center mb-20 relative"
                     >
                         <div className="relative inline-block">
-                            <h2 className="text-5xl md:text-7xl font-black text-text-primary mb-8 font-logo leading-[1.1] tracking-tight">
+                            <h2 className="text-5xl md:text-7xl font-black text-text-primary mb-8 leading-[1.1] tracking-tight">
                                 Built on Trust,<br />
                                 <span className="text-brand-primary">Driven by Community</span>
                             </h2>
@@ -106,7 +106,7 @@ const TrustSection = () => {
                                     {card.badge}
                                 </div>
 
-                                <h3 className="text-2xl font-black text-text-primary mb-5 font-jakarta tracking-tight leading-tight">
+                                <h3 className="text-2xl font-black text-text-primary mb-5  tracking-tight leading-tight">
                                     {card.title}
                                 </h3>
                                 <p className="text-text-secondary leading-relaxed font-medium text-[15px] opacity-80">
@@ -129,13 +129,13 @@ const TrustSection = () => {
                         whileInView={{ opacity: 1, scale: 1 }}
                         viewport={{ once: true, margin: "-100px" }}
                         transition={{ duration: 0.8 }}
-                        className="mt-32 p-12 md:p-20 bg-[#638C7D] rounded-[64px] relative overflow-hidden group shadow-2xl shadow-brand-primary/10"
+                        className="mt-32 p-12 md:p-20 bg-brand-primary rounded-[64px] relative overflow-hidden group shadow-2xl shadow-brand-primary/10"
                     >
                         <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-white opacity-5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2 group-hover:scale-125 transition-transform duration-1000"></div>
 
                         <div className="flex flex-col lg:flex-row items-center justify-between gap-12 relative z-10">
                             <div className="space-y-6 text-center lg:text-left">
-                                <h3 className="text-5xl md:text-6xl font-black text-white leading-[1.1] tracking-tight font-logo">
+                                <h3 className="text-5xl md:text-6xl font-black text-white leading-[1.1] tracking-tight">
                                     100% Peer-to-Peer <br />
                                     <span className="text-brand-secondary">Zero Shelter Stress</span>
                                 </h3>
@@ -160,7 +160,7 @@ const TrustSection = () => {
                                     </div>
                                 </div>
                                 <div className="flex flex-col justify-center text-center sm:text-left pr-4">
-                                    <span className="text-white font-black text-2xl leading-none font-jakarta">Verified</span>
+                                    <span className="text-white font-black text-2xl leading-none ">Verified</span>
                                     <span className="text-white/60 text-[10px] font-black uppercase tracking-[0.2em] mt-2">Global Community</span>
                                 </div>
                             </div>

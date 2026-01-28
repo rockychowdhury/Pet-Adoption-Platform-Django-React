@@ -26,7 +26,7 @@ const Footer = () => {
     };
 
     return (
-        <footer className="bg-bg-secondary text-text-primary pt-24 pb-12 font-jakarta overflow-hidden relative">
+        <footer className="bg-bg-secondary text-text-primary pt-24 pb-12  overflow-hidden relative">
             {/* Background Decor */}
             <div className="absolute top-0 left-1/4 w-96 h-96 bg-brand-primary/5 rounded-full blur-[120px] -z-10"></div>
             <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-brand-secondary/5 rounded-full blur-[120px] -z-10"></div>

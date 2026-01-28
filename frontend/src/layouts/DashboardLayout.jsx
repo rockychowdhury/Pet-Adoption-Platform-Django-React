@@ -58,7 +58,7 @@ const DashboardLayout = () => {
     const dashboardLinks = getDashboardLinks();
 
     return (
-        <div className="min-h-screen bg-bg-primary flex font-inter">
+        <div className="min-h-screen bg-bg-primary flex ">
             {/* Sidebar */}
             <aside className="w-72 bg-bg-surface border-r border-border hidden md:flex flex-col fixed h-full z-10">
                 {/* User header */}
@@ -142,7 +142,7 @@ const DashboardLayout = () => {
             </div >
 
             {/* Main Content */}
-            < main className="flex-1 md:ml-72 p-4 md:p-8 pt-20 md:pt-8 bg-gray-50/50 min-h-screen" >
+            < main className="flex-1 md:ml-72 p-4 md:p-8 pt-20 md:pt-8 bg-bg-secondary min-h-screen" >
                 <Outlet />
             </main >
 

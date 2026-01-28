@@ -133,26 +133,26 @@ const MyPetsPage = () => {
                         {/* Search & View Toggle */}
                         <div className="flex w-full xl:w-auto gap-4">
                             <div className="relative flex-1 xl:w-80 group">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-gray-900 transition-colors" size={20} />
+                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-text-tertiary group-focus-within:text-text-primary transition-colors" size={20} />
                                 <input
                                     type="text"
                                     placeholder="Search pets..."
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
-                                    className="w-full bg-gray-50 dark:bg-gray-800 border-none rounded-full py-3.5 pl-12 pr-4 outline-none text-gray-900 dark:text-white placeholder-gray-400 focus:ring-2 focus:ring-gray-200 dark:focus:ring-gray-700 transition-all font-medium"
+                                    className="w-full bg-bg-surface border border-border rounded-full py-3.5 pl-12 pr-4 outline-none text-text-primary placeholder-text-tertiary focus:ring-2 focus:ring-brand-primary/20 transition-all font-medium"
                                 />
                             </div>
 
-                            <div className="bg-gray-100 dark:bg-gray-800 p-1.5 rounded-full flex shrink-0">
+                            <div className="bg-bg-surface p-1.5 rounded-full flex shrink-0 border border-border">
                                 <button
                                     onClick={() => setViewMode('grid')}
-                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'grid' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'grid' ? 'bg-bg-secondary text-text-primary shadow-sm' : 'text-text-tertiary hover:text-text-secondary'}`}
                                 >
                                     <Grid size={18} />
                                 </button>
                                 <button
                                     onClick={() => setViewMode('list')}
-                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'list' ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}
+                                    className={`p-2.5 rounded-full transition-all ${viewMode === 'list' ? 'bg-bg-secondary text-text-primary shadow-sm' : 'text-text-tertiary hover:text-text-secondary'}`}
                                 >
                                     <List size={18} />
                                 </button>
@@ -173,8 +173,8 @@ const MyPetsPage = () => {
                                     );
                                 }}
                                 className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all border ${selectedSpecies.includes(species)
-                                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white'
-                                    : 'bg-white dark:bg-gray-900 text-gray-500 border-gray-200 dark:border-gray-700 hover:border-gray-400'
+                                    ? 'bg-text-primary text-text-inverted border-text-primary'
+                                    : 'bg-bg-surface text-text-secondary border-border hover:border-text-tertiary'
                                     }`}
                             >
                                 {species}
@@ -185,7 +185,7 @@ const MyPetsPage = () => {
                     {/* Content Grid */}
                     {isLoading && !pets ? (
                         <div className="flex justify-center py-32">
-                            <div className="animate-spin rounded-full h-10 w-10 border-4 border-gray-100 border-t-gray-900" />
+                            <div className="animate-spin rounded-full h-10 w-10 border-4 border-border border-t-text-primary" />
                         </div>
                     ) : (
                         <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4' : 'grid-cols-1'}`}>
@@ -193,12 +193,12 @@ const MyPetsPage = () => {
                             {viewMode === 'grid' && activeTab === 'All' && !searchQuery && (
                                 <Link
                                     to="/dashboard/pets/create"
-                                    className="group bg-gray-50 dark:bg-gray-800/50 rounded-3xl p-4 border-2 border-dashed border-gray-200 dark:border-gray-700 hover:border-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-300 flex flex-col items-center justify-center min-h-[420px] cursor-pointer"
+                                    className="group bg-bg-surface rounded-3xl p-4 border-2 border-dashed border-border hover:border-text-tertiary hover:bg-bg-secondary transition-all duration-300 flex flex-col items-center justify-center min-h-[420px] cursor-pointer"
                                 >
-                                    <div className="w-16 h-16 bg-white dark:bg-gray-700 rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform text-gray-400 group-hover:text-gray-900">
+                                    <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center shadow-sm mb-4 group-hover:scale-110 transition-transform text-text-tertiary group-hover:text-text-primary">
                                         <Plus size={32} />
                                     </div>
-                                    <span className="text-lg font-bold text-gray-500 group-hover:text-gray-900 dark:text-gray-300 transition-colors">Create Profile</span>
+                                    <span className="text-lg font-bold text-text-secondary group-hover:text-text-primary transition-colors">Create Profile</span>
                                 </Link>
                             )}
 
@@ -217,11 +217,11 @@ const MyPetsPage = () => {
                             {/* Empty State */}
                             {filteredPets?.length === 0 && !(!searchQuery && activeTab === 'All' && viewMode === 'grid') && (
                                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
-                                    <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-300">
+                                    <div className="w-20 h-20 bg-bg-surface rounded-full flex items-center justify-center mb-4 text-text-tertiary">
                                         <PackageOpen size={40} />
                                     </div>
-                                    <h3 className="text-lg font-bold text-gray-900 mb-2">No pets found</h3>
-                                    <p className="text-gray-500 text-sm">Try adjusting your filters.</p>
+                                    <h3 className="text-lg font-bold text-text-primary mb-2">No pets found</h3>
+                                    <p className="text-text-secondary text-sm">Try adjusting your filters.</p>
                                 </div>
                             )}
                         </div>

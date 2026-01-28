@@ -125,7 +125,7 @@ const FeaturesSection = () => {
                         className="text-center mb-24 relative"
                     >
                         <div className="relative inline-block mb-6">
-                            <h2 className="text-5xl md:text-6xl font-black text-text-primary font-logo leading-tight tracking-tight">
+                            <h2 className="text-5xl md:text-6xl font-black text-text-primary leading-tight tracking-tight">
                                 Everything in <span className="text-brand-primary">One Place</span>
                             </h2>
                             <motion.img
@@ -152,7 +152,7 @@ const FeaturesSection = () => {
                             transition={{ duration: 0.8, delay: 0.2 }}
                             className="lg:w-1/3 lg:sticky lg:top-32 h-fit space-y-8"
                         >
-                            <h3 className="text-4xl md:text-5xl font-black text-text-primary leading-[1.1] font-jakarta tracking-tight">
+                            <h3 className="text-4xl md:text-5xl font-black text-text-primary leading-[1.1]  tracking-tight">
                                 Built for every step of the <span className="text-brand-primary">adoption journey.</span>
                             </h3>
                             <p className="text-text-secondary text-lg leading-relaxed font-medium opacity-80">
@@ -228,7 +228,7 @@ const FeaturesSection = () => {
                                             {feature.tag}
                                         </span>
                                     </div>
-                                    <h4 className="text-2xl font-black text-text-primary mb-4 font-jakarta tracking-tight leading-tight">
+                                    <h4 className="text-2xl font-black text-text-primary mb-4  tracking-tight leading-tight">
                                         {feature.title}
                                     </h4>
                                     <p className="text-text-secondary text-[15px] leading-relaxed mb-6 font-medium opacity-80">

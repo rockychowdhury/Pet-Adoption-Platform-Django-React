@@ -125,7 +125,7 @@ const HowItWorks = () => {
     ];
 
     return (
-        <section className="py-24 bg-bg-primary relative overflow-hidden font-jakarta">
+        <section className="py-24 bg-bg-primary relative overflow-hidden ">
             <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* --- Rehoming Section --- */}
                 <div className="mb-48" ref={rehomingRef}>
@@ -137,7 +137,7 @@ const HowItWorks = () => {
                             transition={{ duration: 0.8 }}
                             className="text-center mb-20 relative"
                         >
-                            <h2 className="text-5xl md:text-6xl font-black text-text-primary mb-8 font-logo tracking-tight relative inline-block">
+                            <h2 className="text-5xl md:text-6xl font-black text-text-primary mb-8 tracking-tight relative inline-block">
                                 Rehoming Your <span className="text-brand-primary">Pet</span>
                             </h2>
                             <p className="text-text-secondary dark:text-text-secondary/90 text-lg max-w-2xl mx-auto font-medium opacity-80 decoration-brand-primary/30">
@@ -173,7 +173,7 @@ const HowItWorks = () => {
                             transition={{ duration: 0.8 }}
                             className="text-center mb-24 relative"
                         >
-                            <h2 className="text-5xl md:text-7xl font-black text-text-primary mb-8 font-logo tracking-tight relative inline-block">
+                            <h2 className="text-5xl md:text-7xl font-black text-text-primary mb-8 tracking-tight relative inline-block">
                                 Adopting a <span className="text-brand-primary">Pet</span>
                                 <motion.img
                                     animate={{ rotate: 360 }}
@@ -184,7 +184,7 @@ const HowItWorks = () => {
                                     style={{ filter: 'brightness(0)' }}
                                 />
                             </h2>
-                            <p className="text-text-secondary dark:text-text-secondary/90 text-xl max-w-3xl mx-auto font-medium opacity-80 leading-relaxed font-jakarta">
+                            <p className="text-text-secondary dark:text-text-secondary/90 text-xl max-w-3xl mx-auto font-medium opacity-80 leading-relaxed ">
                                 Finding your or your family's new best friend is a journey we take together. We've built the tools to make it transparent and safe.
                             </p>
                         </motion.div>
@@ -349,7 +349,7 @@ const HowItWorks = () => {
                                             <MessageCircle size={24} strokeWidth={1.5} />
                                         </div>
                                         <div>
-                                            <h3 className="text-2xl font-black text-text-primary mb-4 font-jakarta tracking-tight leading-tight">
+                                            <h3 className="text-2xl font-black text-text-primary mb-4  tracking-tight leading-tight">
                                                 {faq.question}
                                             </h3>
                                             <p className="text-text-secondary text-lg leading-relaxed font-medium opacity-80 decoration-brand-primary/30">
@@ -371,13 +371,13 @@ const HowItWorks = () => {
                     transition={{ duration: 1, ease: "easeOut" }}
                     className="relative pt-12"
                 >
-                    <div className="bg-[#638C7D] rounded-[56px] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl shadow-brand-primary/10">
+                    <div className="bg-brand-primary rounded-[56px] p-12 md:p-24 text-center relative overflow-hidden shadow-2xl shadow-brand-primary/10">
                         {/* Background Accents - Subtle */}
                         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-[120px] -translate-y-1/2 translate-x-1/2"></div>
                         <div className="absolute bottom-0 left-0 w-96 h-96 bg-brand-secondary/10 rounded-full blur-[120px] translate-y-1/2 -translate-x-1/2"></div>
 
                         <div className="relative z-10 max-w-4xl mx-auto">
-                            <h2 className="text-5xl md:text-7xl font-black text-white mb-8 font-logo tracking-tight leading-tight">
+                            <h2 className="text-5xl md:text-7xl font-black text-white mb-8 tracking-tight leading-tight">
                                 Ready to get <span className="opacity-90">started?</span>
                             </h2>
                             <p className="text-white/80 text-lg md:text-xl mb-12 font-medium leading-relaxed max-w-2xl mx-auto">
@@ -486,7 +486,7 @@ const TimelineStep = ({ item, index }) => {
                             </div>
                         </div>
 
-                        <h3 className="text-2xl font-black text-text-primary mb-4 font-jakarta tracking-tight leading-tight group-hover:text-brand-primary transition-colors">
+                        <h3 className="text-2xl font-black text-text-primary mb-4  tracking-tight leading-tight group-hover:text-brand-primary transition-colors">
                             {item.title}
                         </h3>
                         <p className="text-text-secondary dark:text-text-secondary/90 leading-relaxed text-[15px] font-medium opacity-80 group-hover:opacity-100 transition-opacity">

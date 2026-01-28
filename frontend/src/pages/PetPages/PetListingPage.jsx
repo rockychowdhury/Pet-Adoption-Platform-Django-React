@@ -193,7 +193,7 @@ const PetListingPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-bg-primary font-jakarta">
+        <div className="min-h-screen bg-bg-primary ">
             <div className="max-w-7xl mx-auto px-6 pb-40 pt-8">
 
                 {/* 1. Header & Top Filters Container */}
@@ -202,7 +202,7 @@ const PetListingPage = () => {
                     {/* Top Row: Compact Title + Actions */}
                     <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
                         <div className="flex items-baseline gap-4">
-                            <h1 className="text-3xl md:text-4xl font-logo font-black text-text-primary tracking-tighter leading-none">
+                            <h1 className="text-3xl md:text-4xl font-black text-text-primary tracking-tighter leading-none">
                                 Find a <span className="text-brand-primary">Companion</span>
                             </h1>
                             <div className="flex items-center gap-2">

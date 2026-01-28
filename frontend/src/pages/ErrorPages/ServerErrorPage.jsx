@@ -14,7 +14,7 @@ const ServerErrorPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-bg-primary flex flex-col font-inter relative overflow-hidden">
+        <div className="min-h-screen bg-bg-primary flex flex-col  relative overflow-hidden">
             {/* ... header ... */}
             <header className="px-6 py-6 md:px-12 flex justify-between items-center z-20">
                 <Link to="/">

@@ -106,7 +106,7 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col font-jakarta relative h-full"
+                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col  relative h-full"
             >
                 {/* Hero Zone - Compact Aspect Ratio */}
                 <div className="relative aspect-[3/2] overflow-hidden">
@@ -224,7 +224,7 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
             <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col font-jakarta relative h-full"
+                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col  relative h-full"
             >
                 {/* Hero Zone - Compact Aspect Ratio */}
                 <div className="relative aspect-[3/2] overflow-hidden">
@@ -408,7 +408,7 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
                             <span className="text-[11px] font-bold">{data.locationLabel}</span>
                         </div>
                         {data.isVerified ? (
-                            <div className="flex items-center gap-1 text-[#2D5A41] text-[10px] font-bold pl-0.5">
+                            <div className="flex items-center gap-1 text-brand-primary text-[10px] font-bold pl-0.5">
                                 <ShieldCheck size={10} /> Verified Owner
                             </div>
                         ) : (

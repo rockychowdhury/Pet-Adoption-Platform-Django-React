@@ -101,7 +101,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col font-jakarta relative h-full ${viewMode === 'list' ? 'md:flex-row md:h-48' : ''}`}
+            className={`group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col  relative h-full ${viewMode === 'list' ? 'md:flex-row md:h-48' : ''}`}
         >
             {/* Hero Zone */}
             <div className={`relative overflow-hidden ${viewMode === 'list' ? 'md:w-72 h-48' : 'aspect-[3/2]'}`}>
@@ -129,7 +129,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
 
                     {/* Verified Badge */}
                     {isVerified && (
-                        <div className="px-2 py-1 bg-white/90 backdrop-blur-md text-[#2D5A41] text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm">
+                        <div className="px-2 py-1 bg-bg-surface/90 backdrop-blur-md text-brand-primary text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm">
                             <ShieldCheck size={10} strokeWidth={3} /> Verified
                         </div>
                     )}
@@ -147,7 +147,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                 {/* Header Info */}
                 <div className="flex justify-between items-start">
                     <Link to={`/services/${provider.id}`}>
-                        <h3 className="text-lg font-bold text-[#111827] leading-tight group-hover:text-[#2D5A41] transition-colors line-clamp-1">
+                        <h3 className="text-lg font-bold text-text-primary leading-tight group-hover:text-brand-primary transition-colors line-clamp-1">
                             {name}
                         </h3>
                     </Link>
@@ -161,17 +161,17 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                 </div>
 
                 {/* Location Line */}
-                <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider flex items-center gap-1.5 mt-[-4px]">
-                    <MapPin size={10} className="text-[#2D5A41]" /> {locationLabel}
+                <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider flex items-center gap-1.5 mt-[-4px]">
+                    <MapPin size={10} className="text-brand-primary" /> {locationLabel}
                 </p>
 
                 {/* Key Stats Grid - Matches PetCard Layout */}
                 <div className="grid grid-cols-2 gap-2 py-2 border-t border-gray-100/60 mt-auto md:mt-0">
                     {/* Dynamic Stat 1 (Rate) */}
                     {stats[0] && (
-                        <div className="flex items-center gap-2 text-[#4B5563]">
+                        <div className="flex items-center gap-2 text-text-secondary">
                             {stats[0].label === 'Rate' ? (
-                                <span className="text-[10px] font-black text-[#2D5A41] bg-[#2D5A41]/5 px-2 py-1 rounded-md w-full text-center truncate">
+                                <span className="text-[10px] font-black text-brand-primary bg-brand-primary/5 px-2 py-1 rounded-md w-full text-center truncate">
                                     {stats[0].value}
                                 </span>
                             ) : (
@@ -190,7 +190,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
 
                     {/* Dynamic Stat 2 (Capacity/Status) */}
                     {stats[1] ? (
-                        <div className="flex items-center gap-2 text-[#4B5563]">
+                        <div className="flex items-center gap-2 text-text-secondary">
                             {stats[1].icon && (
                                 (() => {
                                     const Icon = stats[1].icon;
@@ -201,7 +201,7 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                         </div>
                     ) : (
                         // Fallback: Review Count if no 2nd stat
-                        <div className="flex items-center gap-2 text-[#9CA3AF]">
+                        <div className="flex items-center gap-2 text-text-muted">
                             <span className="text-[10px] font-bold">{reviewCount} reviews</span>
                         </div>
                     )}
@@ -212,11 +212,11 @@ const ServiceCard = ({ provider, viewMode = 'grid' }) => {
                 <div className="mt-auto pt-2 flex gap-2">
                     <Link
                         to={`/services/${provider.id}`}
-                        className="flex-1 bg-[#111827] text-white h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-[#2D5A41] hover:shadow-lg transition-all active:scale-[0.98]"
+                        className="flex-1 bg-text-primary text-text-inverted h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-brand-primary hover:shadow-lg transition-all active:scale-[0.98]"
                     >
                         View Profile
                     </Link>
-                    <button className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-[#9CA3AF] hover:text-[#111827] hover:bg-gray-50 transition-all">
+                    <button className="w-9 h-9 rounded-xl border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-all">
                         <Share2 size={16} />
                     </button>
                 </div>

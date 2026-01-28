@@ -1,7 +1,7 @@
 from django.urls import path, include
 from .views import (
     ListingListCreateView, ListingRetrieveUpdateDestroyView, MyListingListView,
-    RehomingRequestViewSet, AdoptionInquiryViewSet
+    RehomingRequestViewSet, AdoptionInquiryViewSet, GenerateAIApplicationView
 )
 from rest_framework.routers import DefaultRouter
 
@@ -14,6 +14,7 @@ router.register(r'inquiries', AdoptionInquiryViewSet, basename='adoption-inquiry
 
 urlpatterns = [
     path('listings/', ListingListCreateView.as_view(), name='listing-list-create'),
+    path('generate-application/', GenerateAIApplicationView.as_view(), name='generate-application'),
     path('my-listings/', MyListingListView.as_view(), name='my-listing-list'),
     path('listings/<int:pk>/', ListingRetrieveUpdateDestroyView.as_view(), name='listing-detail'),
     path('', include(router.urls)),

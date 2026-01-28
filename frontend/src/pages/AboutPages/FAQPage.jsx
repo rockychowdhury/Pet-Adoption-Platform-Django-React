@@ -54,7 +54,7 @@ const FAQPage = () => {
     ];
 
     return (
-        <div className="bg-bg-primary min-h-screen font-inter text-text-primary py-12">
+        <div className="bg-bg-primary min-h-screen  text-text-primary py-12">
             <div className="max-w-3xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <p className="text-brand-primary font-bold uppercase tracking-widest mb-2 text-sm">Support</p>

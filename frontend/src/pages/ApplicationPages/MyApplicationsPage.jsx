@@ -1,25 +1,66 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import {
-    MessageCircle, Calendar, ChevronRight, User, PawPrint, Inbox, Send, Archive,
-    MapPin, Clock, Star, CheckCircle2, Circle, Mail
+    useReactTable,
+    getCoreRowModel,
+    getFilteredRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    flexRender,
+    createColumnHelper
+} from '@tanstack/react-table';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import {
+    Search, Filter, Calendar, MapPin, ChevronLeft, ChevronRight,
+    MoreHorizontal, ArrowUpDown, SlidersHorizontal, Eye, User,
+    CheckCircle2, XCircle, Clock, Send, Inbox, Sparkles
 } from 'lucide-react';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
-import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
+import SideDrawer from '../../components/common/Layout/SideDrawer';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 
+// --- Helpers ---
+const formatDate = (dateString) => {
+    if (!dateString) return 'N/A';
+    return format(new Date(dateString), 'MMM d, yyyy');
+};
+
+const getStatusColor = (status) => {
+    switch (status) {
+        case 'adopted': return 'success';
+        case 'approved_meet_greet': return 'success';
+        case 'pending_review': return 'warning';
+        case 'rejected': return 'error';
+        case 'withdrawn': return 'neutral';
+        default: return 'neutral';
+    }
+};
+
+const getStatusLabel = (status) => status?.replace(/_/g, ' ') || 'Unknown';
+
+// --- Main Page Component ---
 const MyApplicationsPage = () => {
     const api = useAPI();
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('received'); // 'received' | 'submitted' | 'archived'
+    const queryClient = useQueryClient();
+    const navigate = useNavigate();
 
-    // Fetch Applications
-    const { data: applications = [], isLoading, error } = useQuery({
+    // View State
+    const [searchParams, setSearchParams] = useSearchParams();
+    const viewMode = searchParams.get('view') || 'sent'; // 'sent' | 'received'
+    const [globalFilter, setGlobalFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+
+    // Drawer State
+    const [selectedApp, setSelectedApp] = useState(null);
+    const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+
+    // Fetch Data
+    const { data: applications = [], isLoading } = useQuery({
         queryKey: ['applications'],
         queryFn: async () => {
             const res = await api.get('/rehoming/inquiries/');
@@ -27,262 +68,502 @@ const MyApplicationsPage = () => {
         }
     });
 
-    if (error) {
-        toast.error("Failed to load applications.");
-    }
+    // --- Data Processing ---
+    const data = useMemo(() => {
+        if (!user) return [];
 
-    // Split Applications based on user role in the application
-    const { submittedApps, receivedApps, archivedApps } = useMemo(() => {
-        if (!user) return { submittedApps: [], receivedApps: [], archivedApps: [] };
-
-        const submitted = [];
-        const received = [];
-        const archived = [];
-
-        applications.forEach(app => {
-            const status = app.application.status;
-            // Archived: Withdrawn, Declined (Legacy), Rejected
-            if (['withdrawn', 'declined', 'rejected', 'closed'].includes(status)) {
-                archived.push(app);
-                return;
-            }
-
-            if (app.applicant.id === user.id) {
-                submitted.push(app);
+        let filtered = applications.filter(app => {
+            if (viewMode === 'sent') {
+                return app.applicant.id === user.id;
             } else {
-                received.push(app);
+                // Received: Listing owner is me
+                return app.listing.owner?.id === user.id || app.listing.owner === user.id;
             }
         });
 
-        return { submittedApps: submitted, receivedApps: received, archivedApps: archived };
-    }, [applications, user]);
-
-    const currentList = activeTab === 'submitted' ? submittedApps :
-        activeTab === 'archived' ? archivedApps : receivedApps;
-
-    const getStatusVariant = (status) => {
-        switch (status) {
-            case 'accepted':
-            case 'approved_meet_greet':
-            case 'adopted':
-                return 'success';
-            case 'pending':
-            case 'pending_review':
-                return 'warning';
-            case 'declined':
-            case 'rejected':
-                return 'error';
-            case 'withdrawn':
-                return 'neutral';
-            default: return 'neutral';
+        // Apply Status Filter
+        if (statusFilter !== 'all') {
+            filtered = filtered.filter(app => app.application.status === statusFilter);
         }
-    };
 
-    const handleEmail = (email) => {
-        window.location.href = `mailto:${email}`;
-    };
+        return filtered;
+    }, [applications, user, viewMode, statusFilter]);
 
-    const handleWhatsApp = (phone) => {
-        if (!phone) {
-            toast.info("No phone number available.");
-            return;
-        }
-        const cleanPhone = phone.replace(/\D/g, '');
-        window.open(`https://wa.me/${cleanPhone}`, '_blank');
-    };
+    // --- Table Configuration ---
+    const columnHelper = createColumnHelper();
 
-    return (
-        <div className="min-h-screen bg-[#F9F8F6] py-12 px-4 md:px-8 font-jakarta">
-            <div className="max-w-5xl mx-auto space-y-8">
-
-                {/* Header */}
-                <div>
-                    <h1 className="text-3xl font-black font-logo text-[#1A1A1A] tracking-tight">Applications</h1>
-                    <p className="text-[#5F5F5F] mt-2 text-sm">Review adoption applications you've received or submitted.</p>
+    const columns = useMemo(() => [
+        // Pet Column
+        columnHelper.accessor('pet', {
+            header: 'Pet',
+            cell: info => (
+                <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-xl overflow-hidden bg-bg-secondary shrink-0 border border-border">
+                        <img
+                            src={info.row.original.pet.primary_photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80"}
+                            alt={info.row.original.pet.name}
+                            className="w-full h-full object-cover"
+                        />
+                    </div>
+                    <div>
+                        <p className="font-bold text-text-primary text-sm">{info.row.original.pet.name}</p>
+                        <p className="text-[10px] text-text-secondary uppercase tracking-wider font-bold">{info.row.original.pet.breed}</p>
+                    </div>
                 </div>
-
-                {/* Tabs */}
-                <div className="flex items-center gap-8 border-b border-[#E5E5E5]">
-                    <button
-                        onClick={() => setActiveTab('received')}
-                        className={`pb-4 text-sm font-bold flex items-center gap-2 transition-all relative ${activeTab === 'received'
-                            ? 'text-[#1A1A1A]'
-                            : 'text-[#8F8F8F] hover:text-[#1A1A1A]'
-                            }`}
-                    >
-                        Received
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'received' ? 'bg-[#1A1A1A] text-white' : 'bg-[#E5E5E5] text-[#5F5F5F]'
-                            }`}>
-                            {receivedApps.length}
-                        </span>
-                        {activeTab === 'received' && (
-                            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1A1A1A]" />
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('submitted')}
-                        className={`pb-4 text-sm font-bold flex items-center gap-2 transition-all relative ${activeTab === 'submitted'
-                            ? 'text-[#1A1A1A]'
-                            : 'text-[#8F8F8F] hover:text-[#1A1A1A]'
-                            }`}
-                    >
-                        Submitted
-                        <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'submitted' ? 'bg-[#1A1A1A] text-white' : 'bg-[#E5E5E5] text-[#5F5F5F]'
-                            }`}>
-                            {submittedApps.length}
-                        </span>
-                        {activeTab === 'submitted' && (
-                            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1A1A1A]" />
-                        )}
-                    </button>
-
-                    <button
-                        onClick={() => setActiveTab('archived')}
-                        className={`pb-4 text-sm font-bold flex items-center gap-2 transition-all relative ${activeTab === 'archived'
-                            ? 'text-[#1A1A1A]'
-                            : 'text-[#8F8F8F] hover:text-[#1A1A1A]'
-                            }`}
-                    >
-                        Archived
-                        {activeTab === 'archived' && (
-                            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1A1A1A]" />
-                        )}
-                    </button>
-                </div>
-
-
-
-                {/* List */}
-                <div className="space-y-4">
-                    {isLoading ? (
-                        <div className="text-center py-20">
-                            <div className="animate-spin w-8 h-8 border-4 border-[#6B8E7B] border-t-transparent rounded-full mx-auto mb-4" />
-                            <p className="text-xs font-black uppercase tracking-widest text-[#8F8F8F]">Loading Applications...</p>
+            )
+        }),
+        // Counterpart Column (Owner or Applicant)
+        columnHelper.accessor('counterpart', {
+            header: viewMode === 'sent' ? 'Owner' : 'Applicant',
+            cell: info => {
+                const person = viewMode === 'sent' ? info.row.original.listing.owner : info.row.original.applicant;
+                return (
+                    <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-full bg-bg-secondary overflow-hidden shrink-0">
+                            <img src={person?.photo_url || person?.photoURL} alt="" className="w-full h-full object-cover" />
                         </div>
-                    ) : currentList.length > 0 ? (
-                        currentList.map((app) => (
-                            <div key={app.application.id} className="bg-white rounded-[20px] p-6 border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all duration-300">
-                                <div className="flex flex-col md:flex-row gap-6">
+                        <div>
+                            <p className="font-bold text-text-primary text-sm">{person?.full_name || 'Unknown'}</p>
+                            {viewMode === 'received' && (
+                                <p className="text-[10px] text-text-tertiary">{person?.location?.city}, {person?.location?.state}</p>
+                            )}
+                        </div>
+                    </div>
+                );
+            }
+        }),
+        // Match Score Column (Only for Received)
+        ...(viewMode === 'received' ? [
+            columnHelper.accessor('application.match_percentage', {
+                header: ({ column }) => (
+                    <Button variant="ghost" className="p-0 hover:bg-transparent text-xs font-bold text-text-tertiary uppercase tracking-wider flex items-center gap-1" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                        Match %
+                        <ArrowUpDown size={12} />
+                    </Button>
+                ),
+                cell: info => {
+                    const score = info.getValue() || 0;
+                    const isProcessed = info.row.original.application.ai_processed;
 
-                                    {/* Main Photo (Pet) */}
-                                    <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-[#F9F8F6] border border-[#E5E5E5]">
-                                        <img
-                                            src={app.pet.primary_photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80"}
-                                            alt={app.pet.name}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
+                    if (!isProcessed) return <span className="text-xs text-text-tertiary">Pending...</span>;
 
-                                    {/* Info Content */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
-                                            <div>
-                                                <div className="flex items-center gap-3">
-                                                    {/* Applicant Avatar (Small) */}
-                                                    <div className="w-8 h-8 rounded-full bg-[#E5E5E5] overflow-hidden">
-                                                        <img src={activeTab === 'submitted' ? app.listing.owner?.photo_url : app.applicant.photo_url} className="w-full h-full object-cover" alt="" />
-                                                    </div>
-                                                    <div>
-                                                        <h3 className="text-base font-black text-[#1A1A1A] uppercase tracking-tight">
-                                                            {activeTab === 'submitted' ? app.listing.owner?.full_name || 'Owner' : app.applicant.full_name}
-                                                        </h3>
-                                                        <p className="text-xs text-[#8F8F8F]">
-                                                            Applied for <span className="text-[#1A1A1A] font-bold">{app.pet.name}</span>
-                                                        </p>
-                                                    </div>
-                                                </div>
+                    let color = "text-red-500";
+                    if (score >= 80) color = "text-green-600";
+                    else if (score >= 50) color = "text-yellow-600";
 
-                                                <div className="flex items-center gap-3 mt-2 text-[11px] text-[#8F8F8F]">
-                                                    <span>#{app.application.id}</span>
-                                                    <span>•</span>
-                                                    <span className="capitalize">{app.application.status}</span>
-                                                    <span>•</span>
-                                                    <span>Received {format(new Date(app.application.submitted_at), 'MMM d, yyyy')}</span>
-                                                </div>
+                    return (
+                        <div className={`flex items-center gap-1.5 font-black ${color}`}>
+                            <Sparkles size={14} className={score >= 80 ? "fill-green-600" : ""} />
+                            {score}%
+                        </div>
+                    );
+                }
+            })
+        ] : []),
+        // Status Column
+        columnHelper.accessor('application.status', {
+            header: 'Status',
+            cell: info => (
+                <Badge variant={getStatusColor(info.getValue())} className="uppercase tracking-widest text-[10px] font-black px-2.5 py-1">
+                    {getStatusLabel(info.getValue())}
+                </Badge>
+            )
+        }),
+        // Date Column
+        columnHelper.accessor('application.submitted_at', {
+            header: ({ column }) => (
+                <Button variant="ghost" className="p-0 hover:bg-transparent text-xs font-bold text-text-tertiary uppercase tracking-wider flex items-center gap-1" onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}>
+                    Date
+                    <ArrowUpDown size={12} />
+                </Button>
+            ),
+            cell: info => (
+                <div className="flex items-center gap-2 text-text-secondary text-sm font-medium">
+                    <Calendar size={14} className="text-text-tertiary" />
+                    {formatDate(info.getValue())}
+                </div>
+            )
+        }),
+        // Actions Column
+        columnHelper.display({
+            id: 'actions',
+            header: '',
+            cell: info => (
+                <button
+                    className="h-8 w-8 rounded-full flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-secondary transition-colors"
+                    onClick={(e) => {
+                        e.stopPropagation(); // Prevent row click
+                        const appId = info.row.original.application.id;
+                        if (window.innerWidth < 768) {
+                            const route = viewMode === 'sent'
+                                ? `/applications/${appId}`
+                                : `/applications/${appId}/review`;
+                            navigate(route);
+                        } else {
+                            setSelectedApp(info.row.original);
+                            setIsDrawerOpen(true);
+                        }
+                    }}
+                >
+                    <MoreHorizontal size={20} />
+                </button>
+            )
+        })
+    ], [viewMode]);
+
+    const table = useReactTable({
+        data,
+        columns,
+        state: {
+            globalFilter,
+        },
+        onGlobalFilterChange: setGlobalFilter,
+        getCoreRowModel: getCoreRowModel(),
+        getFilteredRowModel: getFilteredRowModel(),
+        getSortedRowModel: getSortedRowModel(),
+        getPaginationRowModel: getPaginationRowModel(),
+        initialState: {
+            pagination: {
+                pageSize: 8,
+            },
+        },
+    });
+
+    // --- Action Handlers ---
+    const updateStatusMutation = useMutation({
+        mutationFn: async ({ id, status, notes }) => {
+            return await api.post(`/rehoming/inquiries/${id}/update_status/`, { status, owner_notes: notes });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['applications']);
+            toast.success("Application updated successfully");
+            setIsDrawerOpen(false);
+        },
+        onError: () => toast.error("Failed to update status")
+    });
+
+    const withdrawMutation = useMutation({
+        mutationFn: async (id) => {
+            return await api.post(`/rehoming/inquiries/${id}/withdraw/`);
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['applications']);
+            toast.success("Application withdrawn successfully");
+            setIsDrawerOpen(false);
+        },
+        onError: (err) => toast.error(err.response?.data?.detail || "Failed to withdraw application")
+    });
+
+    // --- Render ---
+    return (
+        <div className="min-h-screen bg-[#F9F8F6] py-12 px-4 md:px-8">
+            <div className="max-w-7xl mx-auto space-y-8">
+
+                {/* 1. Header & Toggle */}
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                    <div>
+                        <h1 className="text-3xl font-black text-text-primary tracking-tight font-logo">Application Manager</h1>
+                        <p className="text-text-secondary font-medium mt-1">Track and manage all your rehoming activities.</p>
+                    </div>
+
+                    {/* Main Toggle */}
+                    <div className="bg-white p-1.5 rounded-full border border-border shadow-sm flex items-center gap-1 self-start md:self-auto">
+                        <button
+                            onClick={() => setSearchParams(prev => {
+                                const newParams = new URLSearchParams(prev);
+                                newParams.set('view', 'sent');
+                                return newParams;
+                            })}
+                            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${viewMode === 'sent'
+                                ? 'bg-brand-primary text-text-inverted shadow-md'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
+                                }`}
+                        >
+                            <Send size={16} /> Sent Applications
+                        </button>
+                        <button
+                            onClick={() => setSearchParams(prev => {
+                                const newParams = new URLSearchParams(prev);
+                                newParams.set('view', 'received');
+                                return newParams;
+                            })}
+                            className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all flex items-center gap-2 ${viewMode === 'received'
+                                ? 'bg-brand-primary text-text-inverted shadow-md'
+                                : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
+                                }`}
+                        >
+                            <Inbox size={16} /> Received Applications
+                        </button>
+                    </div>
+                </div>
+
+                {/* 2. Filter Bar */}
+                <div className="bg-white rounded-2xl p-4 border border-border shadow-sm flex flex-col md:flex-row gap-4 items-center justify-between">
+                    <div className="flex items-center gap-4 w-full md:w-auto overflow-x-auto no-scrollbar">
+
+
+                        <div className="flex items-center gap-2">
+                            {[
+                                { id: 'all', label: 'All' },
+                                { id: 'pending_review', label: 'Pending' },
+                                { id: 'approved_meet_greet', label: 'Meet & Greet' },
+                                { id: 'adopted', label: 'Adopted' },
+                                { id: 'rejected', label: 'Rejected' },
+                            ].map(filter => (
+                                <button
+                                    key={filter.id}
+                                    onClick={() => setStatusFilter(filter.id)}
+                                    className={`px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider transition-all whitespace-nowrap ${statusFilter === filter.id
+                                        ? 'bg-text-primary text-text-inverted shadow-lg scale-105'
+                                        : 'bg-bg-secondary text-text-secondary hover:bg-bg-secondary/80 hover:text-text-primary'
+                                        }`}
+                                >
+                                    {filter.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    <div className="relative w-full md:w-64">
+                        <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary" />
+                        <input
+                            type="text"
+                            placeholder="Search applications..."
+                            value={globalFilter ?? ''}
+                            onChange={e => setGlobalFilter(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-bg-secondary border-none rounded-xl text-sm font-medium focus:ring-2 focus:ring-brand-primary outline-none"
+                        />
+                    </div>
+                </div>
+
+                {/* 3. Table */}
+                <div className="bg-white rounded-3xl border border-border overflow-hidden shadow-sm">
+                    {isLoading ? (
+                        <div className="p-12 text-center">
+                            <div className="animate-spin w-8 h-8 border-4 border-brand-primary border-t-transparent rounded-full mx-auto mb-4" />
+                            <p className="text-xs font-black uppercase tracking-widest text-text-tertiary">Loading Data...</p>
+                        </div>
+                    ) : data.length === 0 ? (
+                        <div className="p-16 text-center">
+                            <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-text-tertiary">
+                                {viewMode === 'sent' ? <Send size={24} /> : <Inbox size={24} />}
+                            </div>
+                            <h3 className="text-lg font-black text-text-primary mb-2">No applications found</h3>
+                            <p className="text-text-tertiary text-sm">
+                                {viewMode === 'sent' ? "You haven't applied for any pets yet." : "No applications received matching current filters."}
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="overflow-x-auto">
+                            <table className="w-full">
+                                <thead className="bg-[#F9F8F6] border-b border-border">
+                                    {table.getHeaderGroups().map(headerGroup => (
+                                        <tr key={headerGroup.id}>
+                                            {headerGroup.headers.map(header => (
+                                                <th key={header.id} className="px-6 py-4 text-left text-xs font-bold text-text-tertiary uppercase tracking-wider">
+                                                    {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                                                </th>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </thead>
+                                <tbody className="divide-y divide-border">
+                                    {table.getRowModel().rows.map(row => (
+                                        <tr key={row.id} className="hover:bg-bg-secondary/30 transition-colors group cursor-pointer" onClick={() => {
+                                            setSelectedApp(row.original);
+                                            setIsDrawerOpen(true);
+                                        }}>
+                                            {row.getVisibleCells().map(cell => (
+                                                <td key={cell.id} className="px-6 py-4">
+                                                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                                </td>
+                                            ))}
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
+
+                    {/* Pagination */}
+                    {data.length > 0 && (
+                        <div className="px-6 py-4 border-t border-border flex items-center justify-between">
+                            <p className="text-xs font-bold text-text-tertiary">
+                                Page {table.getState().pagination.pageIndex + 1} of {table.getPageCount()}
+                            </p>
+                            <div className="flex gap-2">
+                                <button
+                                    disabled={!table.getCanPreviousPage()}
+                                    onClick={() => table.previousPage()}
+                                    className="h-8 w-8 rounded-full flex items-center justify-center text-text-primary border border-border hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronLeft size={16} />
+                                </button>
+                                <button
+                                    disabled={!table.getCanNextPage()}
+                                    onClick={() => table.nextPage()}
+                                    className="h-8 w-8 rounded-full flex items-center justify-center text-text-primary border border-border hover:bg-bg-secondary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                >
+                                    <ChevronRight size={16} />
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+            </div>
+
+            {/* 4. Details Drawer */}
+            <SideDrawer
+                isOpen={isDrawerOpen}
+                onClose={() => setIsDrawerOpen(false)}
+                title={viewMode === 'sent' ? 'Application Details' : 'Review Application'}
+            >
+                {selectedApp && (
+                    <div className="space-y-8">
+                        {/* Status Banner */}
+                        <div className="bg-bg-secondary p-4 rounded-xl flex items-center justify-between">
+                            <span className="text-sm font-bold text-text-secondary uppercase tracking-wider">Current Status</span>
+                            <Badge variant={getStatusColor(selectedApp.application.status)} className="px-3 py-1 text-sm font-black uppercase tracking-wider">
+                                {getStatusLabel(selectedApp.application.status)}
+                            </Badge>
+                        </div>
+
+                        {/* Meet & Greet Info */}
+                        {selectedApp.application.status === 'approved_meet_greet' && selectedApp.application.owner_notes?.includes('[SCHEDULED:') && (
+                            <div className="bg-green-50 border border-green-200 p-6 rounded-2xl flex items-start gap-4">
+                                <div className="p-3 bg-white rounded-full text-green-700 shadow-sm">
+                                    <Clock size={24} />
+                                </div>
+                                <div>
+                                    <h4 className="text-sm font-black text-green-800 uppercase tracking-wide mb-1">Meet & Greet Scheduled</h4>
+                                    <p className="text-green-900 font-bold text-lg">
+                                        {(() => {
+                                            const match = selectedApp.application.owner_notes.match(/\[SCHEDULED: (.*?)\]/);
+                                            if (match) {
+                                                const date = new Date(match[1]);
+                                                return format(date, 'MMMM d, yyyy @ h:mm a');
+                                            }
+                                            return 'Date & Time details in notes';
+                                        })()}
+                                    </p>
+                                    <p className="text-green-800 text-sm mt-2 font-medium">
+                                        {selectedApp.application.owner_notes.replace(/\[SCHEDULED:.*?\]/, '').trim()}
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Pet Snapshot */}
+                        <div className="flex gap-6 pb-8 border-b border-border">
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-bg-secondary shrink-0">
+                                <img src={selectedApp.pet.primary_photo} alt="" className="w-full h-full object-cover" />
+                            </div>
+                            <div>
+                                <h3 className="text-2xl font-black text-text-primary">{selectedApp.pet.name}</h3>
+                                <p className="text-text-secondary font-medium">{selectedApp.pet.species} • {selectedApp.pet.breed} • {selectedApp.pet.gender}</p>
+                                <div className="flex items-center gap-2 mt-4 text-xs font-bold text-text-tertiary">
+                                    <MapPin size={14} />
+                                    {selectedApp.listing.location.city}, {selectedApp.listing.location.state}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Counterpart Info */}
+                        <div>
+                            <h4 className="text-xs font-black text-text-tertiary uppercase tracking-widest mb-4">
+                                {viewMode === 'sent' ? 'Listing Owner' : 'Applicant Profile'}
+                            </h4>
+                            <div className="bg-white border border-border p-6 rounded-2xl flex items-start gap-4">
+                                <div className="w-16 h-16 rounded-full bg-bg-secondary overflow-hidden shrink-0">
+                                    <img
+                                        src={viewMode === 'sent' ? selectedApp.listing.owner?.photo_url : selectedApp.applicant.photo_url}
+                                        alt=""
+                                        className="w-full h-full object-cover"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <h3 className="text-lg font-black text-text-primary">
+                                        {viewMode === 'sent' ? selectedApp.listing.owner?.full_name : selectedApp.applicant.full_name}
+                                    </h3>
+                                    <div className="grid grid-cols-2 gap-4 mt-4">
+                                        <div>
+                                            <p className="text-[10px] font-bold text-text-secondary uppercase">Verified Items</p>
+                                            <div className="flex flex-col gap-1 mt-1">
+                                                {selectedApp.trust_snapshot.email_verified && <div className="flex items-center gap-1.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> Email Verified</div>}
+                                                {selectedApp.trust_snapshot.identity_verified && <div className="flex items-center gap-1.5 text-xs font-medium text-green-700"><CheckCircle2 size={12} /> Identity Verified</div>}
                                             </div>
-
-                                            <Badge variant={getStatusVariant(app.application.status)} className="uppercase tracking-widest text-[10px] font-black px-3 py-1.5 rounded-lg">
-                                                {app.application.status}
-                                            </Badge>
                                         </div>
-
-                                        {/* Tags Row */}
-                                        <div className="flex flex-wrap gap-2 mb-4">
-                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
-                                                <MapPin size={12} />
-                                                {app.applicant.location.city}, {app.applicant.location.state}
-                                            </div>
-                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
-                                                <Clock size={12} />
-                                                Urgency: {app.listing.urgency}
-                                            </div>
-                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
-                                                <PawPrint size={12} />
-                                                {app.pet.species} • {app.pet.gender} • {app.pet.breed}
-                                            </div>
-                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
-                                                <Star size={12} />
-                                                {app.trust_snapshot.reviews_count} reviews
-                                            </div>
-                                        </div>
-
-                                        {/* Verification Row */}
-                                        <div className="flex items-center gap-4 text-[10px] font-bold text-[#8F8F8F] mb-6 border-t border-[#F5F5F5] pt-3">
-                                            <div className={`flex items-center gap-1.5 ${app.trust_snapshot.email_verified ? 'text-[#10B981]' : ''}`}>
-                                                {app.trust_snapshot.email_verified ? <CheckCircle2 size={12} /> : <Circle size={12} />}
-                                                Email verified
-                                            </div>
-                                            <div className={`flex items-center gap-1.5 ${app.trust_snapshot.identity_verified ? 'text-[#10B981]' : ''}`}>
-                                                {app.trust_snapshot.identity_verified ? <CheckCircle2 size={12} /> : <Circle size={12} />}
-                                                Identity {app.trust_snapshot.identity_verified ? 'verified' : 'not verified'}
-                                            </div>
-                                        </div>
-
-                                        {/* Actions */}
-                                        <div className="flex items-center justify-between">
-                                            <p className="text-[10px] text-[#8F8F8F]">Last updated {format(new Date(app.application.last_updated_at), 'MMM d, yyyy')}</p>
-
-                                            <div className="flex gap-3">
-                                                {activeTab === 'received' && (
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        className="rounded-full h-8 px-4 text-[10px] font-black uppercase tracking-widest border-[#E5E5E5] text-[#1A1A1A] hover:bg-[#F9F8F6] gap-2"
-                                                        onClick={() => handleWhatsApp(app.applicant.phone)}
-                                                    >
-                                                        <MessageCircle size={14} /> WhatsApp
-                                                    </Button>
-                                                )}
-
-                                                <Link to={activeTab === 'received' ? `/applications/${app.application.id}/review` : `/dashboard/applications/${app.application.id}`}>
-                                                    <Button
-                                                        className="rounded-full h-8 px-5 text-[10px] font-black uppercase tracking-widest bg-[#2E7D32] text-white border-none hover:bg-[#1B5E20] shadow-lg shadow-[#2E7D32]/20"
-                                                    >
-                                                        Review Application
-                                                    </Button>
-                                                </Link>
-                                            </div>
+                                        <div>
+                                            <p className="text-[10px] font-bold text-text-secondary uppercase">Trust Score</p>
+                                            <p className="text-xs font-medium text-text-primary mt-1">
+                                                {selectedApp.trust_snapshot.reviews_count} Reviews • {selectedApp.trust_snapshot.average_rating} Stars
+                                            </p>
                                         </div>
                                     </div>
                                 </div>
                             </div>
-                        ))
-                    ) : (
-                        <div className="text-center py-24 bg-white rounded-[32px] border border-[#E5E5E5]">
-                            <div className="w-16 h-16 bg-[#F9F8F6] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8F8F8F]">
-                                {activeTab === 'submitted' ? <Send size={24} /> : <Inbox size={24} />}
-                            </div>
-                            <h3 className="text-lg font-black text-[#1A1A1A] mb-2">No applications found</h3>
-                            <p className="text-[#8F8F8F] text-sm max-w-xs mx-auto">
-                                {activeTab === 'submitted'
-                                    ? "You haven't submitted any adoption applications yet."
-                                    : "You haven't received any new applications."}
-                            </p>
                         </div>
-                    )}
-                </div>
-            </div>
+
+                        {/* Message */}
+                        <div>
+                            <h4 className="text-xs font-black text-text-tertiary uppercase tracking-widest mb-4">Intro Message</h4>
+                            <div className="bg-bg-secondary p-6 rounded-2xl text-text-primary text-sm leading-relaxed whitespace-pre-wrap">
+                                {selectedApp.application_message.intro_message}
+                            </div>
+                        </div>
+
+                        {/* Owner Actions (Only if Received & Pending) */}
+                        {viewMode === 'received' && selectedApp.application.status === 'pending_review' && (
+                            <div className="pt-6 border-t border-border flex gap-3 justify-end">
+                                <Button
+                                    variant="outline"
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => updateStatusMutation.mutate({ id: selectedApp.application.id, status: 'rejected' })}
+                                >
+                                    Reject Application
+                                </Button>
+                                <Button
+                                    className="bg-brand-primary text-text-inverted"
+                                    onClick={() => updateStatusMutation.mutate({ id: selectedApp.application.id, status: 'approved_meet_greet' })}
+                                >
+                                    Approve for Meet & Greet
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Applicant Actions (Withdraw) */}
+                        {viewMode === 'sent' && !['withdrawn', 'rejected', 'adopted'].includes(selectedApp.application.status) && (
+                            <div className="pt-6 border-t border-border flex justify-end">
+                                <Button
+                                    variant="outline"
+                                    className="text-red-600 border-red-200 hover:bg-red-50"
+                                    onClick={() => {
+                                        if (window.confirm("Are you sure you want to withdraw this application? This action cannot be undone.")) {
+                                            withdrawMutation.mutate(selectedApp.application.id);
+                                        }
+                                    }}
+                                >
+                                    Withdraw Application
+                                </Button>
+                            </div>
+                        )}
+
+                        {/* Owner Actions (Approved) */}
+                        {viewMode === 'received' && selectedApp.application.status === 'approved_meet_greet' && (
+                            <div className="pt-6 border-t border-border flex gap-3 justify-end">
+                                <Button
+                                    className="bg-green-600 text-white hover:bg-green-700 border-none"
+                                    onClick={() => updateStatusMutation.mutate({ id: selectedApp.application.id, status: 'adopted' })}
+                                >
+                                    Mark as Adopted
+                                </Button>
+                            </div>
+                        )}
+
+                    </div>
+                )}
+            </SideDrawer>
         </div>
     );
 };

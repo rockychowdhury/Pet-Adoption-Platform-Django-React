@@ -76,10 +76,10 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
     ];
 
     return (
-        <div className="w-full bg-white/50 backdrop-blur-sm p-4 flex flex-col gap-2 font-jakarta">
+        <div className="w-full bg-white/50 backdrop-blur-sm p-4 flex flex-col gap-2 ">
             {/* Header - Compact */}
-            <div className="flex items-center justify-between mb-2 px-1 pb-4 border-b border-gray-100/50">
-                <h2 className="text-[18px] font-black text-[#111827] tracking-tight">Refine Results</h2>
+            <div className="flex items-center justify-between mb-2 px-1 pb-4 border-b border-border/50">
+                <h2 className="text-[18px] font-black text-text-primary tracking-tight">Refine Results</h2>
                 <button
                     onClick={onClearFilters}
                     className="text-[10px] font-black uppercase tracking-widest text-status-error hover:opacity-70 transition-opacity"
@@ -96,7 +96,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: 'species', value: filters.species === option.id ? '' : option.id } })}
-                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-1.5 ${filters.species === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-lg shadow-[#2D5A41]/20 scale-[1.02]' : 'bg-white border-gray-100 text-[#4B5563] hover:border-gray-300'}`}
+                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-1.5 ${filters.species === option.id ? 'bg-brand-primary text-text-inverted border-brand-primary shadow-lg shadow-brand-primary/20 scale-[1.02]' : 'bg-bg-surface border-border text-text-secondary hover:border-gray-300'}`}
                             >
                                 <option.Icon size={18} />
                                 <span className="text-[10px] font-bold">{option.label}</span>
@@ -112,7 +112,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: 'age_range', value: filters.age_range === option.id ? '' : option.id } })}
-                                className={`px-4 py-2 rounded-full text-[11px] font-bold border transition-all ${filters.age_range === option.id ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : 'bg-white border-gray-100 text-[#6B7280] hover:border-gray-200'}`}
+                                className={`px-4 py-2 rounded-full text-[11px] font-bold border transition-all ${filters.age_range === option.id ? 'bg-text-primary text-text-inverted border-text-primary shadow-sm' : 'bg-bg-surface border-border text-text-secondary hover:border-gray-200'}`}
                             >
                                 {option.label}
                             </button>
@@ -127,7 +127,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: 'gender', value: filters.gender === option.id ? '' : option.id } })}
-                                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold border transition-all ${filters.gender === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-md' : 'bg-white border-gray-100 text-[#4B5563] hover:bg-gray-50'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold border transition-all ${filters.gender === option.id ? 'bg-brand-primary text-text-inverted border-brand-primary shadow-md' : 'bg-bg-surface border-border text-text-secondary hover:bg-gray-50'}`}
                             >
                                 {option.label}
                             </button>
@@ -142,7 +142,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: 'size', value: filters.size === option.id ? '' : option.id } })}
-                                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold border transition-all ${filters.size === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41]' : 'bg-white border-gray-100 text-[#4B5563] hover:bg-gray-50'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold border transition-all ${filters.size === option.id ? 'bg-brand-primary text-text-inverted border-brand-primary' : 'bg-bg-surface border-border text-text-secondary hover:bg-gray-50'}`}
                             >
                                 {option.label}
                             </button>
@@ -157,7 +157,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: option.id, checked: filters[option.id] !== 'true', type: 'checkbox' } })}
-                                className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all flex items-center gap-1.5 ${filters[option.id] === 'true' ? 'bg-[#2D5A41]/10 text-[#2D5A41] border-[#2D5A41]/20' : 'bg-white border-gray-100 text-[#6B7280] hover:bg-gray-50'}`}
+                                className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all flex items-center gap-1.5 ${filters[option.id] === 'true' ? 'bg-brand-primary/10 text-brand-primary border-brand-primary/20' : 'bg-bg-surface border-border text-text-secondary hover:bg-gray-50'}`}
                             >
                                 {filters[option.id] === 'true' && <Check size={12} strokeWidth={4} />}
                                 {option.label}
@@ -173,10 +173,10 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: option.id, checked: filters[option.id] !== 'true', type: 'checkbox' } })}
-                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters[option.id] === 'true' ? 'bg-[#2D5A41]/5 border-[#2D5A41]/20 text-[#2D5A41]' : 'bg-white border-gray-100 text-[#6B7280]'}`}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters[option.id] === 'true' ? 'bg-brand-primary/5 border-brand-primary/20 text-brand-primary' : 'bg-bg-surface border-border text-text-secondary'}`}
                             >
                                 <span className="text-[11px] font-bold">{option.label}</span>
-                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters[option.id] === 'true' ? 'bg-[#2D5A41] text-white' : 'bg-gray-100 text-transparent'}`}>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters[option.id] === 'true' ? 'bg-brand-primary text-text-inverted' : 'bg-gray-100 text-transparent'}`}>
                                     <Check size={12} strokeWidth={4} />
                                 </div>
                             </button>

@@ -121,12 +121,12 @@ const UserDashboardOverview = () => {
     };
 
     return (
-        <div className="space-y-8 font-jakarta text-text-primary">
+        <div className="space-y-8  text-text-primary">
 
             {/* Header */}
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 pb-4">
                 <div>
-                    <h1 className="text-3xl font-black font-logo text-text-primary tracking-tight mb-2">
+                    <h1 className="text-3xl font-black text-text-primary tracking-tight mb-2">
                         Welcome back, {user?.first_name || 'Friend'}!
                     </h1>
                     <p className="text-text-secondary font-medium">Here's what's happening with your pets and applications today.</p>
@@ -144,13 +144,13 @@ const UserDashboardOverview = () => {
                     <motion.div
                         key={i}
                         whileHover={{ y: -2 }}
-                        className="bg-white p-5 rounded-3xl border border-border shadow-sm flex items-center gap-4"
+                        className="bg-bg-surface p-5 rounded-3xl border border-border shadow-sm flex items-center gap-4"
                     >
                         <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${stat.bg} ${stat.color}`}>
                             <stat.icon size={24} strokeWidth={2.5} />
                         </div>
                         <div>
-                            <div className="text-2xl font-black font-logo text-text-primary">{stat.value}</div>
+                            <div className="text-2xl font-black text-text-primary">{stat.value}</div>
                             <div className="text-xs font-bold uppercase tracking-wider text-text-secondary">{stat.label}</div>
                         </div>
                     </motion.div>
@@ -164,8 +164,8 @@ const UserDashboardOverview = () => {
                 <div className="lg:col-span-2 space-y-8">
 
                     {/* Quick Actions */}
-                    <div className="bg-white rounded-[2rem] p-8 border border-border shadow-sm">
-                        <h2 className="text-xl font-black font-logo mb-6 flex items-center gap-2">
+                    <div className="bg-bg-surface rounded-[2rem] p-8 border border-border shadow-sm">
+                        <h2 className="text-xl font-black mb-6 flex items-center gap-2">
                             <LayoutDashboard className="text-brand-primary" size={24} />
                             Quick Actions
                         </h2>
@@ -175,9 +175,9 @@ const UserDashboardOverview = () => {
                                     <motion.div
                                         whileHover={{ scale: 1.02 }}
                                         whileTap={{ scale: 0.98 }}
-                                        className="bg-bg-surface p-4 rounded-2xl border border-border hover:border-brand-primary/30 hover:bg-brand-primary/5 transition-colors group h-full"
+                                        className="bg-bg-secondary p-4 rounded-2xl border border-border hover:border-brand-primary/30 hover:bg-brand-primary/5 transition-colors group h-full"
                                     >
-                                        <div className="mb-3 w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-sm text-text-primary group-hover:text-brand-primary transition-colors">
+                                        <div className="mb-3 w-10 h-10 bg-bg-surface rounded-xl flex items-center justify-center shadow-sm text-text-primary group-hover:text-brand-primary transition-colors">
                                             <action.icon size={20} />
                                         </div>
                                         <div className="font-bold text-text-primary">{action.label}</div>
@@ -191,7 +191,7 @@ const UserDashboardOverview = () => {
                     {/* Active Listings */}
                     <div>
                         <div className="flex justify-between items-center mb-6 px-2">
-                            <h2 className="text-xl font-black font-logo flex items-center gap-2">
+                            <h2 className="text-xl font-black flex items-center gap-2">
                                 <PawPrint className="text-brand-primary" size={24} />
                                 My Active Listings
                             </h2>
@@ -201,7 +201,7 @@ const UserDashboardOverview = () => {
                         {activeListings.length > 0 ? (
                             <div className="grid md:grid-cols-2 gap-4">
                                 {activeListings.slice(0, 4).map((listing) => (
-                                    <div key={listing.id} className="bg-white p-4 rounded-3xl border border-border flex gap-4 items-center hover:shadow-md transition-shadow">
+                                    <div key={listing.id} className="bg-bg-surface p-4 rounded-3xl border border-border flex gap-4 items-center hover:shadow-md transition-shadow">
                                         <img
                                             src={listing.pet?.main_photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80'}
                                             alt={listing.pet?.name}
@@ -215,16 +215,16 @@ const UserDashboardOverview = () => {
                                                 <span>{listing.location_city}</span>
                                             </div>
                                             <div className="flex gap-2">
-                                                <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-bg-surface px-2 py-1 rounded-lg">
+                                                <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-bg-secondary px-2 py-1 rounded-lg">
                                                     <Eye size={12} /> {listing.view_count || 0}
                                                 </div>
-                                                <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-bg-surface px-2 py-1 rounded-lg">
+                                                <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-bg-secondary px-2 py-1 rounded-lg">
                                                     <Mail size={12} /> {listing.application_count || 0}
                                                 </div>
                                             </div>
                                         </div>
                                         <Link to={`/pets/${listing.id}`}>
-                                            <button className="p-2 bg-bg-surface rounded-full hover:bg-bg-secondary text-text-primary">
+                                            <button className="p-2 bg-bg-secondary rounded-full hover:bg-bg-surface text-text-primary">
                                                 <ChevronRight size={20} />
                                             </button>
                                         </Link>
@@ -233,7 +233,7 @@ const UserDashboardOverview = () => {
                             </div>
                         ) : (
                             <div className="bg-bg-surface rounded-3xl p-8 text-center border border-border border-dashed">
-                                <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-text-tertiary">
+                                <div className="w-16 h-16 bg-bg-secondary rounded-full flex items-center justify-center mx-auto mb-4 text-text-tertiary">
                                     <PawPrint size={32} />
                                 </div>
                                 <h3 className="font-bold text-lg text-text-primary mb-2">No Active Listings</h3>
@@ -241,7 +241,7 @@ const UserDashboardOverview = () => {
                                     You don't have any pets listed for rehoming right now.
                                 </p>
                                 <Link to="/rehoming/start">
-                                    <button className="px-6 py-2 bg-white border border-border text-text-primary font-bold rounded-full text-sm hover:bg-bg-secondary transition-colors">
+                                    <button className="px-6 py-2 bg-bg-secondary border border-border text-text-primary font-bold rounded-full text-sm hover:bg-bg-surface transition-colors">
                                         Create a Listing
                                     </button>
                                 </Link>
@@ -254,22 +254,22 @@ const UserDashboardOverview = () => {
                 <div className="space-y-8">
 
                     {/* Recent Applications */}
-                    <div className="bg-white rounded-[2rem] border border-border shadow-sm overflow-hidden h-full flex flex-col">
+                    <div className="bg-bg-surface rounded-[2rem] border border-border shadow-sm overflow-hidden h-full flex flex-col">
                         <div className="p-6 border-b border-border">
-                            <h2 className="text-xl font-black font-logo mb-4 flex items-center gap-2">
+                            <h2 className="text-xl font-black mb-4 flex items-center gap-2">
                                 <FileText className="text-brand-primary" size={24} />
                                 Recent Activity
                             </h2>
-                            <div className="flex bg-bg-surface p-1 rounded-xl">
+                            <div className="flex bg-bg-secondary p-1 rounded-xl">
                                 <button
                                     onClick={() => setAppTab('received')}
-                                    className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${appTab === 'received' ? 'bg-white shadow-sm text-brand-primary' : 'text-text-secondary hover:text-text-primary'}`}
+                                    className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${appTab === 'received' ? 'bg-bg-surface shadow-sm text-brand-primary' : 'text-text-secondary hover:text-text-primary'}`}
                                 >
                                     Received
                                 </button>
                                 <button
                                     onClick={() => setAppTab('submitted')}
-                                    className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${appTab === 'submitted' ? 'bg-white shadow-sm text-brand-primary' : 'text-text-secondary hover:text-text-primary'}`}
+                                    className={`flex-1 py-2 text-xs font-bold uppercase tracking-wider rounded-lg transition-all ${appTab === 'submitted' ? 'bg-bg-surface shadow-sm text-brand-primary' : 'text-text-secondary hover:text-text-primary'}`}
                                 >
                                     Submitted
                                 </button>
@@ -324,7 +324,7 @@ const UserDashboardOverview = () => {
                         </div>
 
                         <div className="p-4 border-t border-border bg-bg-surface/50">
-                            <Link to="/dashboard/applications" className="block w-full text-center py-3 bg-white border border-border rounded-xl text-sm font-bold text-text-primary hover:bg-bg-secondary transition-colors shadow-sm">
+                            <Link to="/dashboard/applications" className="block w-full text-center py-3 bg-bg-surface border border-border rounded-xl text-sm font-bold text-text-primary hover:bg-bg-secondary transition-colors shadow-sm">
                                 View All Applications
                             </Link>
                         </div>
