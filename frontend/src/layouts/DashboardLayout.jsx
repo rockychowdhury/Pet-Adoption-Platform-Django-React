@@ -10,7 +10,8 @@ import {
     MessageSquare,
     Star,
     FolderOpen,
-    Home
+    Home,
+    Calendar
 } from 'lucide-react';
 import useAuth from '../hooks/useAuth';
 import Logo from '../components/common/Logo';
@@ -31,20 +32,30 @@ const DashboardLayout = () => {
         return false;
     };
 
-    // Sidebar navigation based on UI spec:
-    // Dashboard, My Pets, My Listings, Applications, Messages, Reviews, Settings
-    const dashboardLinks = [
-        { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
-        { name: 'My Pets', path: '/dashboard/my-pets', icon: PawPrint },
-        // Reuse rehoming manage page as "My Listings"
-        { name: 'My Listings', path: '/dashboard/rehoming', icon: FileText },
-        // Applications focuses on adopter applications view
-        { name: 'Applications', path: '/dashboard/applications', icon: FolderOpen },
-        // Placeholder route for user reviews section
-        { name: 'Reviews', path: '/dashboard/reviews', icon: Star },
-        // Route closest to account settings / profile
-        { name: 'Settings', path: '/dashboard/profile/settings', icon: SettingsIcon },
-    ];
+    // Sidebar navigation based on user role
+    const getDashboardLinks = () => {
+        const isProvider = user?.role === 'service_provider';
+
+        if (isProvider) {
+            return [
+                { name: 'Dashboard', path: '/provider/dashboard', icon: LayoutDashboard },
+                { name: 'My Pets', path: '/dashboard/my-pets', icon: PawPrint },
+                { name: 'Settings', path: '/dashboard/profile/settings', icon: SettingsIcon },
+            ];
+        }
+
+        return [
+            { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+            { name: 'My Pets', path: '/dashboard/my-pets', icon: PawPrint },
+            { name: 'Service Bookings', path: '/dashboard/bookings', icon: Calendar },
+            { name: 'My Listings', path: '/dashboard/rehoming', icon: FileText },
+            { name: 'Applications', path: '/dashboard/applications', icon: FolderOpen },
+            { name: 'Reviews', path: '/dashboard/reviews', icon: Star },
+            { name: 'Settings', path: '/dashboard/profile/settings', icon: SettingsIcon },
+        ];
+    };
+
+    const dashboardLinks = getDashboardLinks();
 
     return (
         <div className="min-h-screen bg-bg-primary flex font-inter">

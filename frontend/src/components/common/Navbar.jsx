@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
-import { Menu, X, Bell, MessageSquare, User, LogOut, ChevronDown, Sun, Moon } from 'lucide-react';
+import { Menu, X, Bell, MessageSquare, User, LogOut, ChevronDown, Sun, Moon, LayoutDashboard, PawPrint, Settings as SettingsIcon } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
 import { useTheme } from '../../context/ThemeContext';
 import Button from './Buttons/Button';
@@ -73,7 +73,7 @@ const Navbar = () => {
                             {/* Show Links on Left ONLY if Search Bar is Visible */}
                             {showSearchBar && (
                                 <div className="hidden xl:flex items-center gap-8">
-                                    <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />
+                                    {user?.role !== 'service_provider' && <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />}
                                     <NavLink to="/services" label="Services" active={isActive('/services')} />
                                     <NavLink to="/about" label="About" active={isActive('/about')} />
                                 </div>
@@ -96,7 +96,7 @@ const Navbar = () => {
                             ) : (
                                 /* Show Links in Center if Search Bar is Hidden */
                                 <div className="hidden md:flex items-center gap-8">
-                                    <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />
+                                    {user?.role !== 'service_provider' && <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />}
                                     <NavLink to="/services" label="Services" active={isActive('/services')} />
                                     <NavLink to="/about" label="About" active={isActive('/about')} />
                                 </div>
@@ -144,27 +144,31 @@ const Navbar = () => {
                                                     <p className="text-xs text-gray-500 truncate">{user.email}</p>
                                                 </div>
                                                 <div className="py-1">
-                                                    <DropdownLink to="/dashboard" icon={<User size={16} />} label="Dashboard" />
+                                                    {user.role === 'service_provider' ? (
+                                                        <DropdownLink to="/provider/dashboard" icon={<LayoutDashboard size={16} />} label="Provider Dashboard" />
+                                                    ) : (
+                                                        <DropdownLink to="/dashboard" icon={<LayoutDashboard size={16} />} label="Dashboard" />
+                                                    )}
+
                                                     <DropdownLink to="/dashboard/profile" icon={<User size={16} />} label="My Profile" />
-                                                    <DropdownLink to="/dashboard/my-pets" icon={<User size={16} />} label="My Pets" />
+                                                    <DropdownLink to="/dashboard/my-pets" icon={<PawPrint size={16} />} label="My Pets" />
 
                                                     {/* Role-based links */}
                                                     {user.role === 'admin' && (
-                                                        <DropdownLink to="/admin" icon={<User size={16} />} label="Admin Panel" />
-                                                    )}
-                                                    {user.role === 'service_provider' && (
-                                                        <DropdownLink to="/provider/dashboard" icon={<User size={16} />} label="Provider Dashboard" />
-                                                    )}
-                                                    {user.role !== 'service_provider' && user.role !== 'admin' && (
-                                                        <DropdownLink to="/become-provider" icon={<User size={16} />} label="Become a Provider" />
+                                                        <DropdownLink to="/admin" icon={<SettingsIcon size={16} />} label="Admin Panel" />
                                                     )}
 
-                                                    <Link
-                                                        to="/rehoming/create"
-                                                        className="flex items-center gap-3 px-4 py-2.5 mx-2 my-1 text-sm text-[#2D5A41] bg-[#2D5A41]/5 rounded-xl hover:bg-[#2D5A41]/10 transition-all font-bold"
-                                                    >
-                                                        List a Pet
-                                                    </Link>
+                                                    {user.role !== 'service_provider' && user.role !== 'admin' && (
+                                                        <>
+                                                            <DropdownLink to="/become-provider" icon={<User size={16} />} label="Become a Provider" />
+                                                            <Link
+                                                                to="/rehoming/create"
+                                                                className="flex items-center gap-3 px-4 py-2.5 mx-2 my-1 text-sm text-[#2D5A41] bg-[#2D5A41]/5 rounded-xl hover:bg-[#2D5A41]/10 transition-all font-bold"
+                                                            >
+                                                                List a Pet
+                                                            </Link>
+                                                        </>
+                                                    )}
                                                 </div>
                                                 <div className="border-t border-gray-50 mt-1 pt-1">
                                                     <button

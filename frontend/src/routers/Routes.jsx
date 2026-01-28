@@ -72,6 +72,7 @@ import ProfileSettingsPage from "../pages/ProfilePages/ProfileSettingsPage";
 import VerificationPage from "../pages/ProfilePages/VerificationPage";
 import MyPetsPage from "../pages/PetPages/MyPetsPage";
 import AddPetPage from "../pages/PetPages/AddPetPage";
+import UserServiceBookingsPage from "../pages/Dashboard/UserServiceBookingsPage";
 
 // Admin
 import AdminDashboard from "../pages/AdminPages/AdminDashboard";
@@ -81,6 +82,7 @@ import ListingModerationPage from "../pages/AdminPages/ListingModerationPage";
 import ReportManagementPage from "../pages/AdminPages/ReportManagementPage";
 import AnalyticsPage from "../pages/AdminPages/AnalyticsPage";
 import RoleRequestsPage from "../pages/AdminPages/RoleRequestsPage";
+import AdminProvidersPage from "../pages/AdminPages/AdminProvidersPage";
 
 // --- Guards imported from PrivateRoute.jsx ---
 
@@ -175,7 +177,7 @@ const router = createBrowserRouter([
                     { path: "/rehoming/listings/:id/applications", element: <OwnerApplicationReviewPage /> },
                     { path: "/applications/:id/review", element: <OwnerApplicationDetailPage /> },
 
-                    { path: "/become-provider", element: <ServiceProviderRegistrationPage /> },
+                    { path: "/service-provider/register", element: <ServiceProviderRegistrationPage /> },
                 ],
             },
 
@@ -217,6 +219,9 @@ const router = createBrowserRouter([
                     { path: "pets/create", element: <AddPetPage /> },
                     { path: "pets/:id/edit", element: <AddPetPage /> },
 
+                    /* Service Bookings */
+                    { path: "bookings", element: <UserServiceBookingsPage /> },
+
                     /* Rehoming */
                     { path: "rehoming", element: <RehomingDashboardPage /> },
 
@@ -252,6 +257,7 @@ const router = createBrowserRouter([
                     { path: "role-requests", element: <RoleRequestsPage /> },
                     { path: "users", element: <UserManagementPage /> },
                     { path: "users/:id", element: <UserDetailPage /> },
+                    { path: "providers", element: <AdminProvidersPage /> },
                     { path: "moderation", element: <ListingModerationPage /> },
                     { path: "reports", element: <ReportManagementPage /> },
                     { path: "analytics", element: <AnalyticsPage /> },
