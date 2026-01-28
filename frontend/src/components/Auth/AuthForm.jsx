@@ -99,7 +99,7 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
                     phone_number: ''
                 });
                 navigate('/verify-email', { state: { email: formData.email } });
-                if (onSuccess) onSuccess();
+                if (onSuccess) onSuccess({ preventRedirect: true });
             }
         } catch (err) {
             console.error(err);

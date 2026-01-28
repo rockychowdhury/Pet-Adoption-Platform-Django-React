@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     phone_number            = models.CharField(max_length=15, blank=True, null=True)
     photoURL                = models.URLField(max_length=200, blank=True, null=True, default='https://i.ibb.co.com/hWK4ZpT/petDP.jpg')
     bio                     = models.TextField(max_length=500, blank=True, null=True)
+    date_of_birth           = models.DateField(blank=True, null=True)
     
     # Location Fields
     location_city           = models.CharField(max_length=100, blank=True, null=True)
@@ -63,6 +64,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     verification_code_expires_at = models.DateTimeField(blank=True, null=True)
     phone_verification_code = models.CharField(max_length=6, blank=True, null=True)
     phone_verification_code_expires_at = models.DateTimeField(blank=True, null=True)
+    phone_verification_sent_at = models.DateTimeField(blank=True, null=True)
 
     # Privacy Settings (JSON)
     # { 'profile_visibility': 'public', 'show_location': true ... }
@@ -120,18 +122,30 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.is_verified and self.account_status == User.AccountStatus.ACTIVE
 
     @property
+    def missing_profile_fields(self):
+        """
+        Returns a list of fields that are missing for profile completion.
+        """
+        missing = []
+        
+        # Data Fields
+        if not self.first_name or not str(self.first_name).strip(): missing.append('first_name')
+        if not self.last_name or not str(self.last_name).strip(): missing.append('last_name')
+        if not self.email: missing.append('email') # Should be present as username
+        
+        if not self.phone_number or not str(self.phone_number).strip(): missing.append('phone_number')
+        if not self.location_city or not str(self.location_city).strip(): missing.append('location_city')
+        if not self.location_state or not str(self.location_state).strip(): missing.append('location_state')
+        if not self.date_of_birth: missing.append('date_of_birth')
+        
+        return missing
+
+    @property
     def profile_is_complete(self):
         """
         Checks if the user has filled out all necessary fields for rehoming.
         """
-        required_fields = [
-            self.first_name,
-            self.last_name,
-            self.phone_number,
-            self.location_city,
-            self.location_state
-        ]
-        return all(required_fields)
+        return len(self.missing_profile_fields) == 0
 
 
 class UserTrustReview(models.Model):

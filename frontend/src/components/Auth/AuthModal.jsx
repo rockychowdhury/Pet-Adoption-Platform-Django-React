@@ -12,8 +12,10 @@ const AuthModal = ({ isOpen, onClose, initialMode = 'login' }) => {
 
     if (!isOpen) return null;
 
-    const handleSuccess = () => {
+    const handleSuccess = (options = {}) => {
         onClose();
+        if (options.preventRedirect) return;
+
         // Navigate based on role after successful login
         const redirectPath = getRoleBasedRedirect(user);
         navigate(redirectPath, { replace: true });

@@ -33,7 +33,7 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
 class PublicUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', 'first_name', 'last_name', 'photoURL', 'role', 'verified_identity', 'pet_owner_verified', 'location_city', 'location_state']
+        fields = ['id', 'first_name', 'last_name', 'photoURL', 'role', 'verified_identity', 'pet_owner_verified', 'location_city', 'location_state', 'phone_number']
 
 class RoleRequestSerializer(serializers.ModelSerializer):
     user_email = serializers.EmailField(source='user.email', read_only=True)
@@ -70,12 +70,13 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'phone_number', 'photoURL', 'bio', 
-                  'location_city', 'location_state', 'location_country', 'zip_code', 'privacy_settings']
+        fields = ['first_name', 'last_name', 'phone_number', 'phone_verified', 'photoURL', 'bio', 
+                  'location_city', 'location_state', 'location_country', 'zip_code', 'privacy_settings', 'date_of_birth']
         extra_kwargs = {
             'first_name': {'required': False},
             'last_name': {'required': False},
             'phone_number': {'required': False},
+            'phone_verified': {'required': False},
             'photoURL': {'required': False},
             'bio': {'required': False},
         }
@@ -95,10 +96,10 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
-            'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'photoURL', 'bio', 
+            'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'photoURL', 'bio', 'date_of_birth',
             'phone_number', 'location_city', 'location_state', 'location_country', 'zip_code',
             'email_verified', 'phone_verified', 'verified_identity', 'pet_owner_verified',
             'is_user', 'is_service_provider', 'is_admin', 
-            'can_create_listing', 'account_status', 'profile_is_complete',
+            'can_create_listing', 'account_status', 'profile_is_complete', 'missing_profile_fields',
             'pets', 'privacy_settings', 'received_reviews'
         ]
