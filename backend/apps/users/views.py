@@ -7,11 +7,12 @@ from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.exceptions import  TokenError
-from rest_framework import viewsets, permissions
+from rest_framework import viewsets, permissions, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from apps.users.permissions import IsOwnerOrReadOnly
 from .serializers import (
     UserRegistrationSerializer, UserUpdateSerializer, UserSerializer, 
-    PublicUserSerializer, RoleRequestSerializer
+    PublicUserSerializer, RoleRequestSerializer, AdminUserDetailSerializer
 )
 from apps.pets.serializers import PetProfileSerializer
 from .utils.email import send_verification_email, send_password_reset_email
@@ -764,7 +765,45 @@ class WhatsAppWebhookView(APIView):
         user.phone_verification_sent_at = None
         user.save()
         
-        return Response({
-            'status': 'verified',
-            'message': 'Phone number verified successfully'
-        }, status=status.HTTP_200_OK)
+        return Response({'status': 'verified'}, status=status.HTTP_200_OK)
+
+class UserManagementViewSet(viewsets.ModelViewSet):
+    """
+    Admin-only ViewSet for managing all users.
+    Allows listing, retrieving, and updating user status.
+    """
+    queryset = User.objects.all().order_by('-date_joined')
+    permission_classes = [permissions.IsAdminUser]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
+    filterset_fields = ['role', 'is_active', 'email_verified', 'is_service_provider']
+    search_fields = ['email', 'first_name', 'last_name']
+    ordering_fields = ['date_joined', 'last_login']
+
+    def get_serializer_class(self):
+        if self.action == 'retrieve':
+            return AdminUserDetailSerializer
+        return UserSerializer
+
+    @action(detail=True, methods=['post'])
+    def suspend(self, request, pk=None):
+        user = self.get_object()
+        user.is_active = False
+        user.save()
+        log_business_event('USER_SUSPENDED', request.user, {'target_user_id': user.id})
+        return Response({'message': 'User suspended successfully', 'status': 'suspended'})
+
+    @action(detail=True, methods=['post'])
+    def reinstate(self, request, pk=None):
+        user = self.get_object()
+        user.is_active = True
+        user.save()
+        log_business_event('USER_REINSTATED', request.user, {'target_user_id': user.id})
+        return Response({'message': 'User reinstated successfully', 'status': 'active'})
+    
+    @action(detail=True, methods=['post'])
+    def verify_identity(self, request, pk=None):
+        user = self.get_object()
+        user.verified_identity = True
+        user.save()
+        log_business_event('USER_IDENTITY_VERIFIED', request.user, {'target_user_id': user.id})
+        return Response({'message': 'User identity verified', 'verified_identity': True})

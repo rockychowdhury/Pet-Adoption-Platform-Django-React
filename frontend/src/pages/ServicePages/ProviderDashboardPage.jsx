@@ -9,12 +9,21 @@ import Badge from '../../components/common/Feedback/Badge';
 import { toast } from 'react-toastify';
 import { format } from 'date-fns';
 
+import ProviderProfileEditor from '../../components/Services/ProviderDashboard/ProviderProfileEditor';
+import { Link } from 'react-router-dom';
+
 const ProviderDashboardPage = () => {
     const { user } = useAuth();
-    const { useGetMyBookings, useBookingAction } = useServices();
+    const { useGetMyBookings, useBookingAction, useGetMyProviderProfile } = useServices();
+
+    // Fetch Data
     const { data: bookings, isLoading: bookingsLoading } = useGetMyBookings();
+    const { data: provider, isLoading: providerLoading } = useGetMyProviderProfile();
     const bookingAction = useBookingAction();
+
+    // UI State
     const [filter, setFilter] = useState('all'); // all, pending, confirmed, completed, cancelled
+    const [showProfileEditor, setShowProfileEditor] = useState(false);
 
     const handleAction = async (id, action, reason = null) => {
         try {
@@ -26,10 +35,28 @@ const ProviderDashboardPage = () => {
         }
     };
 
-    if (bookingsLoading) {
+    if (bookingsLoading || providerLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-bg-primary">
                 <Loader className="animate-spin text-brand-primary" size={32} />
+            </div>
+        );
+    }
+
+    if (!provider) {
+        return (
+            <div className="min-h-screen bg-bg-primary font-jakarta">
+                <Navbar />
+                <div className="max-w-3xl mx-auto px-4 py-12 text-center">
+                    <User size={64} className="mx-auto text-gray-300 mb-4" />
+                    <h2 className="text-2xl font-bold text-text-primary mb-2">Service Provider Profile Not Found</h2>
+                    <p className="text-text-secondary mb-8">
+                        You need to register as a service provider to access this dashboard.
+                    </p>
+                    <Link to="/service-provider/register">
+                        <Button variant="primary">Register Now</Button>
+                    </Link>
+                </div>
             </div>
         );
     }
@@ -43,20 +70,76 @@ const ProviderDashboardPage = () => {
         return b.status === filter;
     }) || [];
 
+    // Calculate Completion (Simple heuristic)
+    const calculateCompletion = () => {
+        let completed = 0;
+        let total = 4; // Basic, Service, Hours, Media
+        if (provider.business_name && provider.description) completed++;
+        if (provider.foster_details || provider.vet_details || provider.trainer_details) completed++;
+        if (provider.hours && provider.hours.length > 0) completed++;
+        if (provider.media && provider.media.length > 0) completed++;
+        return Math.round((completed / total) * 100);
+    };
+
+    const completionPercentage = calculateCompletion();
+
     return (
         <div className="min-h-screen bg-bg-primary font-jakarta">
             <Navbar />
             <div className="max-w-7xl mx-auto px-4 py-8">
-                <div className="flex justify-between items-center mb-8">
+
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold font-merriweather text-text-primary">Provider Dashboard</h1>
-                        <p className="text-text-secondary">Manage your bookings and profile</p>
+                        <p className="text-text-secondary">Welcome back, {provider.business_name || user?.first_name}</p>
                     </div>
-                    {/* Link to Edit Profile (could be implemented later as separate page or modal) */}
-                    <Button variant="outline"><Edit size={16} className="mr-2" /> Edit Profile</Button>
+
+                    <div className="flex items-center gap-4">
+                        {/* Status Badge */}
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium border ${provider.verification_status === 'verified' ? 'bg-green-100 text-green-700 border-green-200' :
+                            provider.verification_status === 'pending' ? 'bg-yellow-100 text-yellow-700 border-yellow-200' :
+                                'bg-red-100 text-red-700 border-red-200'
+                            }`}>
+                            {provider.verification_status === 'verified' ? 'Verified Partner' :
+                                provider.verification_status === 'pending' ? 'Verification Pending' :
+                                    'Unverified'}
+                        </div>
+
+                        <Button
+                            variant="primary"
+                            onClick={() => setShowProfileEditor(!showProfileEditor)}
+                        >
+                            <Edit size={18} className="mr-2" />
+                            {showProfileEditor ? 'Close Editor' : 'Edit Profile'}
+                        </Button>
+                    </div>
                 </div>
 
-                {/* Dashboard Stats (Placeholder) */}
+                {/* Profile Completion Alert */}
+                {completionPercentage < 100 && !showProfileEditor && (
+                    <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-8 flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <AlertCircle className="text-blue-600" size={24} />
+                            <div>
+                                <h3 className="font-bold text-text-primary">Complete Your Profile</h3>
+                                <p className="text-sm text-text-secondary">
+                                    Your profile is {completionPercentage}% complete. Improved profiles get more bookings.
+                                </p>
+                            </div>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => setShowProfileEditor(true)}>Finish Setup</Button>
+                    </div>
+                )}
+
+                {/* Editor Section */}
+                {showProfileEditor && (
+                    <div className="mb-8 animate-slideDown">
+                        <ProviderProfileEditor provider={provider} onClose={() => setShowProfileEditor(false)} />
+                    </div>
+                )}
+
+                {/* Dashboard Stats */}
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
                     <Card className="p-4 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center">
@@ -76,13 +159,30 @@ const ProviderDashboardPage = () => {
                             <p className="text-2xl font-bold text-text-primary">{providerBookings.filter(b => b.status === 'pending').length}</p>
                         </div>
                     </Card>
-                    {/* Add more stats */}
+                    <Card className="p-4 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-green-50 text-green-600 flex items-center justify-center">
+                            <CheckCircle size={24} />
+                        </div>
+                        <div>
+                            <p className="text-text-secondary text-sm">Completed</p>
+                            <p className="text-2xl font-bold text-text-primary">{providerBookings.filter(b => b.status === 'completed').length}</p>
+                        </div>
+                    </Card>
+                    <Card className="p-4 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-purple-50 text-purple-600 flex items-center justify-center">
+                            <User size={24} />
+                        </div>
+                        <div>
+                            <p className="text-text-secondary text-sm">Profile Views</p>
+                            <p className="text-2xl font-bold text-text-primary">--</p>
+                        </div>
+                    </Card>
                 </div>
 
                 {/* Bookings List */}
                 <Card className="p-6">
                     <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                        <h2 className="text-xl font-bold">Bookings</h2>
+                        <h2 className="text-xl font-bold">Bookings Management</h2>
                         <div className="flex gap-2 bg-gray-100 p-1 rounded-lg overflow-x-auto max-w-full">
                             {['all', 'pending', 'confirmed', 'completed', 'cancelled'].map(f => (
                                 <button
@@ -191,5 +291,4 @@ const ProviderDashboardPage = () => {
         </div>
     );
 };
-
 export default ProviderDashboardPage;

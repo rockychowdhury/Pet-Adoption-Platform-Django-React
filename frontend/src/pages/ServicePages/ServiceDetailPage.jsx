@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Check, Phone, Clock, Shield, Calendar, Heart, Share2, Loader } from 'lucide-react';
+import { Star, MapPin, Check, Phone, Clock, Shield, Calendar, Heart, Share2, Loader, X } from 'lucide-react';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
@@ -122,8 +122,80 @@ const ServiceDetailPage = () => {
                                 </div>
                             </section>
                         </>
+                    ) : provider.trainer_details ? (
+                        /* Trainer Specific */
+                        <>
+                            <section>
+                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Training Philosophy</h2>
+                                <Card className="p-6">
+                                    <div className="mb-4">
+                                        <div className="text-sm font-bold text-text-secondary uppercase tracking-wide mb-1">Primary Method</div>
+                                        <div className="text-lg font-medium text-brand-primary capitalize">
+                                            {provider.trainer_details.primary_method.replace('_', ' ')}
+                                        </div>
+                                    </div>
+                                    <p className="text-text-secondary leading-relaxed whitespace-pre-line">
+                                        {provider.trainer_details.training_philosophy}
+                                    </p>
+                                </Card>
+                            </section>
+
+                            <section>
+                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Services & Rates</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    {provider.trainer_details.offers_private_sessions && (
+                                        <div className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
+                                            <span className="font-medium text-text-primary">Private Session</span>
+                                            <span className="text-brand-primary font-bold">${provider.trainer_details.private_session_rate}/hr</span>
+                                        </div>
+                                    )}
+                                    {provider.trainer_details.offers_group_classes && (
+                                        <div className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
+                                            <span className="font-medium text-text-primary">Group Class</span>
+                                            <span className="text-brand-primary font-bold">${provider.trainer_details.group_class_rate}/class</span>
+                                        </div>
+                                    )}
+                                    {provider.trainer_details.offers_board_and_train && (
+                                        <div className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
+                                            <span className="font-medium text-text-primary">Board & Train</span>
+                                            <Badge variant="success">Available</Badge>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {provider.trainer_details.package_options?.length > 0 && (
+                                    <div className="mt-6 space-y-4">
+                                        <h3 className="font-bold text-lg text-text-primary">Packages</h3>
+                                        <div className="grid gap-4">
+                                            {provider.trainer_details.package_options.map((pkg, idx) => (
+                                                <div key={idx} className="p-4 border border-brand-primary/20 bg-brand-primary/5 rounded-xl flex justify-between items-center">
+                                                    <div>
+                                                        <div className="font-bold text-text-primary">{pkg.name}</div>
+                                                        <div className="text-sm text-text-secondary">{pkg.description}</div>
+                                                    </div>
+                                                    <div className="font-bold text-brand-primary text-xl flex items-center gap-2">
+                                                        ${pkg.price}
+                                                        <Button size="sm" onClick={() => handleOpenBooking({ name: pkg.name, price: pkg.price })}>Book</Button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </section>
+
+                            <section>
+                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Specializations</h2>
+                                <div className="flex flex-wrap gap-2">
+                                    {provider.trainer_details.specializations?.map((spec, idx) => (
+                                        <Badge key={idx} variant="info" className="px-3 py-1 text-sm bg-blue-50 text-blue-700 border-blue-100">
+                                            {spec.name}
+                                        </Badge>
+                                    ))}
+                                </div>
+                            </section>
+                        </>
                     ) : provider.foster_details ? (
-                        /* Foster Specific */
                         <>
                             <section>
                                 <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Environment</h2>
@@ -204,7 +276,26 @@ const ServiceDetailPage = () => {
                                         <Calendar size={18} className="shrink-0 mt-0.5" />
                                         <span><strong>{provider.foster_details.current_availability}</strong> availability.</span>
                                     </div>
-                                    <Button variant="primary" className="w-full justify-center" onClick={() => handleOpenBooking()}>Contact Provider</Button>
+                                    <Button variant="primary" className="w-full justify-center" onClick={() => handleOpenBooking({ name: 'Foster Care', price: provider.foster_details.daily_rate })}>Contact Provider</Button>
+                                </div>
+                            </>
+                        ) : provider.trainer_details ? (
+                            <>
+                                <h3 className="font-bold text-lg mb-2">Book Training</h3>
+                                <div className="space-y-2 mb-4">
+                                    {provider.trainer_details.accepting_new_clients ? (
+                                        <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm font-bold">
+                                            <Check size={16} /> Accepting New Clients
+                                        </div>
+                                    ) : (
+                                        <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg text-sm font-bold">
+                                            <X size={16} /> Full Capacity
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="space-y-4">
+                                    <Button variant="primary" className="w-full justify-center" onClick={() => handleOpenBooking()}>Request Consultation</Button>
+                                    <Button variant="outline" className="w-full justify-center">View Packages</Button>
                                 </div>
                             </>
                         ) : null}
@@ -218,7 +309,7 @@ const ServiceDetailPage = () => {
                 provider={provider}
                 initialService={selectedServiceForBooking}
             />
-        </div>
+        </div >
     );
 };
 

@@ -8,12 +8,13 @@ from apps.common.logging_utils import log_business_event
 
 from .models import (
     ServiceProvider, ServiceReview, ServiceCategory, 
-    Species, ServiceOption, ServiceBooking
+    Species, ServiceOption, ServiceBooking, Specialization,
+    BusinessHours, ServiceMedia
 )
 from .serializers import (
     ServiceProviderSerializer, ServiceReviewSerializer,
     ServiceCategorySerializer, SpeciesSerializer, ServiceOptionSerializer,
-    ServiceBookingSerializer, ServiceBookingCreateSerializer
+    ServiceBookingSerializer, ServiceBookingCreateSerializer, SpecializationSerializer
 )
 
 class ServiceCategoryViewSet(viewsets.ReadOnlyModelViewSet):
@@ -29,6 +30,11 @@ class SpeciesViewSet(viewsets.ReadOnlyModelViewSet):
 class ServiceOptionViewSet(viewsets.ReadOnlyModelViewSet):
     queryset = ServiceOption.objects.all()
     serializer_class = ServiceOptionSerializer
+    permission_classes = [permissions.AllowAny]
+
+class SpecializationViewSet(viewsets.ReadOnlyModelViewSet):
+    queryset = Specialization.objects.all()
+    serializer_class = SpecializationSerializer
     permission_classes = [permissions.AllowAny]
 
 class ServiceProviderFilter(django_filters.FilterSet):
@@ -47,7 +53,7 @@ class ServiceProviderFilter(django_filters.FilterSet):
 
     class Meta:
         model = ServiceProvider
-        fields = ['category', 'city', 'state']
+        fields = ['category', 'city', 'state', 'verification_status']
 
     def filter_min_price(self, queryset, name, value):
         # Applies to Foster services or other services with rates/base prices
@@ -91,18 +97,26 @@ class ServiceProviderFilter(django_filters.FilterSet):
 class ServiceProviderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
         queryset = ServiceProvider.objects.all().order_by('-created_at')
+        user = self.request.user
         
         # If detail view, allow access if it's the owner or admin, otherwise must be verified
         if self.action == 'retrieve':
             return queryset
             
-        # For list view (search), only show verified providers unless user is staff
-        # Note: We could also allow a provider to see their own profile in list, but usually not needed
-        user = self.request.user
-        if not user.is_staff:
-             queryset = queryset.filter(verification_status='verified')
-             
-        return queryset
+        # For list action (search), only show verified providers unless user is staff
+        if self.action == 'list':
+             if not user.is_staff:
+                  return queryset.filter(verification_status='verified')
+             return queryset
+        
+        # For detail actions (retrieve, update, etc.), show verified OR owned by user
+        if user.is_authenticated:
+             if user.is_staff:
+                  return queryset
+             # Allow user to see their own profile even if unverified
+             return queryset.filter(Q(verification_status='verified') | Q(user=user))
+            
+        return queryset.filter(verification_status='verified')
     serializer_class = ServiceProviderSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
@@ -137,6 +151,91 @@ class ServiceProviderViewSet(viewsets.ModelViewSet):
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def me(self, request):
+        try:
+            provider = ServiceProvider.objects.get(user=request.user)
+            serializer = self.get_serializer(provider)
+            return Response(serializer.data)
+        except ServiceProvider.DoesNotExist:
+            return Response({"detail": "No service provider profile found."}, status=404)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def update_hours(self, request, pk=None):
+        provider = self.get_object()
+        # Expect list of hour objects
+        hours_data = request.data
+        if not isinstance(hours_data, list):
+            return Response({"error": "Expected a list of hours."}, status=400)
+            
+        # Delete existing
+        provider.hours.all().delete()
+        
+        # Create new
+        new_hours = []
+        for h in hours_data:
+            new_hours.append(BusinessHours(
+                provider=provider,
+                day=h.get('day'),
+                open_time=h.get('open_time') or None,
+                close_time=h.get('close_time') or None,
+                is_closed=h.get('is_closed', False)
+            ))
+        BusinessHours.objects.bulk_create(new_hours)
+        
+        return Response(self.get_serializer(provider).data)
+        
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def update_media(self, request, pk=None):
+        provider = self.get_object()
+        media_list = request.data
+        if not isinstance(media_list, list):
+             return Response({"error": "Expected a list of media items."}, status=400)
+             
+        # Strategy: Get existing IDs. 
+        existing_ids = set(provider.media.values_list('id', flat=True))
+        incoming_ids = set(item.get('id') for item in media_list if item.get('id'))
+        
+        # Delete missing
+        to_delete = existing_ids - incoming_ids
+        ServiceMedia.objects.filter(id__in=to_delete).delete()
+        
+        # Update or Create
+        for item in media_list:
+            if item.get('id') and item.get('id') in existing_ids:
+                # Update
+                media = ServiceMedia.objects.get(id=item.get('id'))
+                media.is_primary = item.get('is_primary', False)
+                # media.file_url = item.get('file_url') # Usually shouldn't change URL of existing unless re-upload
+                media.save()
+            else:
+                # Create
+                ServiceMedia.objects.create(
+                    provider=provider,
+                    file_url=item.get('file_url'),
+                    thumbnail_url=item.get('thumbnail_url'),
+                    is_primary=item.get('is_primary', False),
+                    alt_text=item.get('alt_text', '')
+                )
+                
+                
+        return Response(self.get_serializer(provider).data)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAdminUser])
+    def update_status(self, request, pk=None):
+        provider = self.get_object()
+        status = request.data.get('status')
+        if status not in ['pending', 'verified', 'rejected']:
+             return Response({"error": "Invalid status."}, status=400)
+        
+        provider.verification_status = status
+        provider.save()
+        log_business_event('PROVIDER_STATUS_UPDATED', request.user, {
+            'provider_id': provider.id,
+            'new_status': status
+        })
+        return Response(self.get_serializer(provider).data)
+
 class ServiceBookingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -162,6 +261,7 @@ class ServiceBookingViewSet(viewsets.ModelViewSet):
             
         return queryset.distinct()
 
+    def perform_create(self, serializer):
         # Allow client to create booking
         # Status defaults to pending in model
         instance = serializer.save(client=self.request.user)

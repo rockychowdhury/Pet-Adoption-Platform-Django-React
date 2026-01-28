@@ -182,9 +182,11 @@ const OnboardingForm = ({ categories, onSubmit, isLoading }) => {
         email: '',
         // Specifics
         daily_rate: '',
-        current_availability: '',
-        clinic_type: 'General Practice',
+        monthly_rate: '',
+        capacity: '',
+        clinic_type: 'general',
         emergency_services: false,
+        pricing_info: '',
     });
 
     const selectedCategory = categories.find(c => c.id == formData.category);
@@ -207,18 +209,22 @@ const OnboardingForm = ({ categories, onSubmit, isLoading }) => {
         // Construct Payload
         const payload = {
             ...formData,
+            category_id: formData.category, // Backend expects category_id for writing
             // Nest details based on type
             ...(isFoster && {
                 foster_details: {
                     daily_rate: formData.daily_rate,
-                    current_availability: formData.current_availability,
+                    monthly_rate: formData.monthly_rate || (formData.daily_rate * 30).toFixed(2), // Fallback calculation
+                    capacity: formData.capacity,
+                    current_availability: 'available',
                     environment_details: { type: 'House' } // Default/Placeholder
                 }
             }),
             ...(isVet && {
                 vet_details: {
                     clinic_type: formData.clinic_type,
-                    emergency_services: formData.emergency_services
+                    emergency_services: formData.emergency_services,
+                    pricing_info: formData.pricing_info
                 }
             })
         };
@@ -292,7 +298,8 @@ const OnboardingForm = ({ categories, onSubmit, isLoading }) => {
                                 <h3 className="font-bold text-lg text-brand-primary">Foster Specification</h3>
                                 <div className="grid md:grid-cols-2 gap-6">
                                     <Input label="Daily Rate ($)" type="number" name="daily_rate" value={formData.daily_rate} onChange={handleChange} required />
-                                    <Input label="Capacity (Spots)" type="number" name="current_availability" value={formData.current_availability} onChange={handleChange} required />
+                                    <Input label="Monthly Rate ($)" type="number" name="monthly_rate" value={formData.monthly_rate} onChange={handleChange} placeholder="Optional" />
+                                    <Input label="Capacity (Max Animals)" type="number" name="capacity" value={formData.capacity} onChange={handleChange} required />
                                 </div>
                                 <p className="text-sm text-text-secondary">More detailed environment and species settings can be configured in your dashboard later.</p>
                             </div>
@@ -305,10 +312,10 @@ const OnboardingForm = ({ categories, onSubmit, isLoading }) => {
                                     <div>
                                         <label className="block text-sm font-medium text-text-primary mb-2">Clinic Type</label>
                                         <select name="clinic_type" value={formData.clinic_type} onChange={handleChange} className="w-full px-4 py-3 rounded-lg border border-gray-200">
-                                            <option value="General Practice">General Practice</option>
-                                            <option value="Specialty">Specialty</option>
-                                            <option value="Emergency">Emergency</option>
-                                            <option value="Urgent Care">Urgent Care</option>
+                                            <option value="general">General Practice</option>
+                                            <option value="specialty">Specialty</option>
+                                            <option value="emergency">Emergency</option>
+                                            <option value="mobile">Mobile Vet</option>
                                         </select>
                                     </div>
                                     <div className="flex items-center pt-8">
@@ -318,6 +325,7 @@ const OnboardingForm = ({ categories, onSubmit, isLoading }) => {
                                         </label>
                                     </div>
                                 </div>
+                                <Textarea label="Pricing & Consultation Info" name="pricing_info" value={formData.pricing_info} onChange={handleChange} required rows={3} placeholder="Briefly describe your consultation fees or pricing structure..." />
                             </div>
                         )}
 

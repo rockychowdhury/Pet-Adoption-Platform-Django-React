@@ -1,4 +1,5 @@
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets, permissions, status, filters
+from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from django.utils import timezone
@@ -103,3 +104,17 @@ class AnalyticsView(APIView):
             'pending_requests': RehomingRequest.objects.filter(status='pending').count(),
         }
         return Response(data)
+
+class ModerationLogViewSet(viewsets.ReadOnlyModelViewSet):
+    """
+    Read-only view for audit logs of moderation actions.
+    """
+    from .models import ModerationAction
+    from .serializers import ModerationActionSerializer
+    
+    queryset = ModerationAction.objects.all().order_by('-created_at')
+    serializer_class = ModerationActionSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    search_fields = ['moderator__email', 'target_user__email', 'reason']
+    filterset_fields = ['action_type']

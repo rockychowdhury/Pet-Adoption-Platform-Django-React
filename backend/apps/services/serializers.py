@@ -42,36 +42,52 @@ class BusinessHoursSerializer(serializers.ModelSerializer):
 
 class FosterServiceSerializer(serializers.ModelSerializer):
     species_accepted = SpeciesSerializer(many=True, read_only=True)
+    species_accepted_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Species.objects.all(), source='species_accepted'
+    )
     
     class Meta:
         model = FosterService
         fields = [
             'capacity', 'current_count', 'current_availability', 
-            'species_accepted', 'environment_details', 'care_standards',
+            'species_accepted', 'species_accepted_ids', 'environment_details', 'care_standards',
             'daily_rate', 'weekly_discount', 'monthly_rate',
             'video_url'
         ]
 
 class VeterinaryClinicSerializer(serializers.ModelSerializer):
     services_offered = ServiceOptionSerializer(many=True, read_only=True)
+    services_offered_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=ServiceOption.objects.all(), source='services_offered'
+    )
     species_treated = SpeciesSerializer(many=True, read_only=True)
+    species_treated_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Species.objects.all(), source='species_treated'
+    )
     
     class Meta:
         model = VeterinaryClinic
         fields = [
-            'clinic_type', 'services_offered', 'species_treated',
+            'clinic_type', 'services_offered', 'services_offered_ids', 
+            'species_treated', 'species_treated_ids',
             'pricing_info', 'amenities', 'emergency_services'
         ]
 
 class TrainerServiceSerializer(serializers.ModelSerializer):
     specializations = SpecializationSerializer(many=True, read_only=True)
+    specializations_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Specialization.objects.all(), source='specializations'
+    )
     species_trained = SpeciesSerializer(many=True, read_only=True)
+    species_trained_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Species.objects.all(), source='species_trained'
+    )
     
     class Meta:
         model = TrainerService
         fields = [
-            'specializations', 'primary_method', 'training_philosophy',
-            'certifications', 'years_experience', 'species_trained',
+            'specializations', 'specializations_ids', 'primary_method', 'training_philosophy',
+            'certifications', 'years_experience', 'species_trained', 'species_trained_ids',
             'offers_private_sessions', 'offers_group_classes',
             'offers_board_and_train', 'offers_virtual_training',
             'private_session_rate', 'group_class_rate', 'package_options',
@@ -96,6 +112,12 @@ class ServiceReviewSerializer(serializers.ModelSerializer):
 class ServiceProviderSerializer(serializers.ModelSerializer):
     user = PublicUserSerializer(read_only=True)
     category = ServiceCategorySerializer(read_only=True)
+    category_id = serializers.PrimaryKeyRelatedField(
+        queryset=ServiceCategory.objects.all(), 
+        write_only=True, 
+        source='category',
+        required=True
+    )
     media = ServiceMediaSerializer(many=True, read_only=True)
     hours = BusinessHoursSerializer(many=True, read_only=True)
     reviews = ServiceReviewSerializer(many=True, read_only=True)
@@ -112,7 +134,7 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
     class Meta:
         model = ServiceProvider
         fields = [
-            'id', 'user', 'business_name', 'category', 'description', 'website',
+            'id', 'user', 'business_name', 'category', 'category_id', 'description', 'website',
             'city', 'state', 'zip_code', 'latitude', 'longitude',
             'phone', 'email', 'license_number', 'verification_status',
             'media', 'hours',
@@ -159,13 +181,26 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
             setattr(instance, attr, value)
         instance.save()
         
-        # Update nested
+        # Helper to update nested service
+        def update_nested_service(model, data, related_name, m2m_fields=[]):
+            # Extract M2M data to handle separately
+            m2m_data = {}
+            for field in m2m_fields:
+                if field in data:
+                    m2m_data[field] = data.pop(field)
+            
+            obj, created = model.objects.update_or_create(provider=instance, defaults=data)
+            
+            # Set M2M relationships
+            for field, values in m2m_data.items():
+                getattr(obj, field).set(values)
+
         if foster_data:
-            FosterService.objects.update_or_create(provider=instance, defaults=foster_data)
+            update_nested_service(FosterService, foster_data, 'foster_details', ['species_accepted'])
         elif vet_data:
-            VeterinaryClinic.objects.update_or_create(provider=instance, defaults=vet_data)
+            update_nested_service(VeterinaryClinic, vet_data, 'vet_details', ['services_offered', 'species_treated'])
         elif trainer_data:
-            TrainerService.objects.update_or_create(provider=instance, defaults=trainer_data)
+            update_nested_service(TrainerService, trainer_data, 'trainer_details', ['specializations', 'species_trained'])
             
         return instance
 

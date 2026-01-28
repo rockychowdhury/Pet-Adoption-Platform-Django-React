@@ -18,7 +18,7 @@ const AdminLayout = () => {
         { path: '/admin/users', icon: Users, label: 'Users' },
         { path: '/admin/listings/pending', icon: List, label: 'Listings' },
         { path: '/admin/reports', icon: Flag, label: 'Reports' },
-        { path: '/admin/verifications', icon: Shield, label: 'Verifications' },
+        { path: '/admin/providers', icon: Shield, label: 'Service Providers' },
         { path: '/admin/analytics', icon: BarChart2, label: 'Analytics' },
     ];
 

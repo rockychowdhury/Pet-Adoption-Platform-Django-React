@@ -89,7 +89,7 @@ INSTALLED_APPS = [
     'apps.rehoming',
     'apps.notifications',
     'apps.analytics',
-    'apps.reviews',
+
     'apps.admin_panel',
     'apps.services',
     'apps.common',

@@ -44,10 +44,45 @@ const useAdmin = () => {
         });
     };
 
+    // Providers
+    const useGetProviders = (filters = {}) => {
+        return useQuery({
+            queryKey: ['admin', 'providers', filters],
+            queryFn: async () => {
+                const params = new URLSearchParams();
+                if (filters.search) params.append('search', filters.search);
+                if (filters.status) params.append('verification_status', filters.status); // Not standard filter, might need backend tweak?
+                // Actually the ServiceProviderViewSet filterset uses 'verification_status' implicitly if we add it to the FilterSet or if ModelViewSet standard filtering works.
+                // Let's check FilterSet in views.py. It doesn't explicitly list `verification_status`.
+                // But ModelViewSet with DjangoFilterBackend usually allows filtering by fields if `filterset_fields` is set.
+                // In views.py, `filterset_class` is used. We should check if `verification_status` is there.
+                // It is NOT in `ServiceProviderFilter.Meta.fields`.
+                // So we need to add it to ServiceProviderFilter in views.py to allow filtering by status.
+
+                const res = await api.get(`/services/providers/?${params.toString()}`);
+                return res.data;
+            },
+        });
+    };
+
+    const useUpdateProviderStatus = () => {
+        return useMutation({
+            mutationFn: async ({ id, status }) => {
+                const res = await api.post(`/services/providers/${id}/update_status/`, { status });
+                return res.data;
+            },
+            onSuccess: () => {
+                queryClient.invalidateQueries(['admin', 'providers']);
+            },
+        });
+    };
+
     return {
         useGetRoleRequests,
         useApproveRoleRequest,
         useRejectRoleRequest,
+        useGetProviders,
+        useUpdateProviderStatus,
     };
 };
 

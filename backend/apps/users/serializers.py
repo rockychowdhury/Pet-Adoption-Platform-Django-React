@@ -99,7 +99,19 @@ class UserSerializer(serializers.ModelSerializer):
             'id', 'email', 'first_name', 'last_name', 'full_name', 'role', 'photoURL', 'bio', 'date_of_birth',
             'phone_number', 'location_city', 'location_state', 'location_country', 'zip_code',
             'email_verified', 'phone_verified', 'verified_identity', 'pet_owner_verified',
-            'is_user', 'is_service_provider', 'is_admin', 
             'can_create_listing', 'account_status', 'profile_is_complete', 'missing_profile_fields',
             'pets', 'privacy_settings', 'received_reviews'
         ]
+
+class AdminUserDetailSerializer(UserSerializer):
+    """
+    Detailed serializer for admin use only.
+    Includes sensitive fields and system flags.
+    """
+    class Meta(UserSerializer.Meta):
+        fields = UserSerializer.Meta.fields + [
+            'is_superuser', 'last_login', 'date_joined',
+            'phone_verification_code', 'phone_verification_sent_at',
+            'verification_code' 
+        ]
+        read_only_fields = ['last_login', 'date_joined']

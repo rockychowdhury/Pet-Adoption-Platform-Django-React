@@ -20,12 +20,14 @@ from .views import (
     InitiatePhoneVerifyView,
     VerifyPhoneCodeView,
     WhatsAppWebhookView,
+    UserManagementViewSet,
 )
 from rest_framework.routers import DefaultRouter
 
 router = DefaultRouter()
 router.register(r'pets', UserPetViewSet, basename='user-pets')
 router.register(r'role-requests', RoleRequestViewSet, basename='role-requests')
+router.register(r'admin/users', UserManagementViewSet, basename='admin-users')
 
 urlpatterns = [
     path('',UserProfileView.as_view(),name="user_profile"),

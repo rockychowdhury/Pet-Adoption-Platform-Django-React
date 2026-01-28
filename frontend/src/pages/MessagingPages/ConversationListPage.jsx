@@ -1,1 +1,0 @@
-import React from 'react'; const ConversationListPage = () => <div className='p-8'><h1 className='text-2xl font-bold'>ConversationListPage</h1><p>Coming Soon</p></div>; export default ConversationListPage;
