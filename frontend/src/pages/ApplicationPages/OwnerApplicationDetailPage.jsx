@@ -1,190 +1,274 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Check, X, ChevronLeft, Shield, MessageCircle, Home, Users, Info, Activity } from 'lucide-react';
+import { ChevronLeft, CheckCircle2, Circle, Mail, Phone, MapPin, Calendar, Clock, User } from 'lucide-react';
 import { toast } from 'react-toastify';
-import Card from '../../components/common/Layout/Card';
+import { format, differenceInYears } from 'date-fns';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import useAPI from '../../hooks/useAPI';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
-import Modal from "../../components/common/Modal"; // Assuming a reusable modal exists or inline
+import Modal from "../../components/common/Modal";
 
 const OwnerApplicationDetailPage = () => {
     const { id } = useParams();
     const navigate = useNavigate();
+    const api = useAPI();
+    const queryClient = useQueryClient();
+
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
     const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [actionNote, setActionNote] = useState('');
 
-    // Mock Data
-    const applicant = {
-        name: 'John Doe',
-        image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=facearea&facepad=2&w=200&h=200&q=80',
-        joined: '2022',
-        verified: true,
-        score: 92,
-        email: 'john.doe@example.com',
-        phone: '(555) 987-6543',
-        details: {
-            housing: { type: 'Single-family house', ownership: 'Own', yard: 'Fully Fenced' },
-            household: { adults: 2, children: 'Yes (Ages 8, 12)', pets: '1 Dog (Labrador)' },
-            experience: { level: 'Experienced', history: 'Owned dogs for 15 years.' },
-            lifestyle: { routine: 'Work from home', activity: 'Active (Hikers)' },
-            message: "We have a large fenced yard and another golden retriever who needs a friend. I work from home so the dogs are rarely alone. We go hiking every weekend and would love to include Bella in our adventures."
+    // Fetch Application Details
+    const { data: application, isLoading, error } = useQuery({
+        queryKey: ['application', id],
+        queryFn: async () => {
+            const res = await api.get(`/rehoming/inquiries/${id}/`);
+            return res.data;
         }
-    };
+    });
+
+    const updateStatusMutation = useMutation({
+        mutationFn: async ({ status, notes, rejection_reason }) => {
+            return await api.post(`/rehoming/inquiries/${application.application.id}/update_status/`, {
+                status,
+                owner_notes: notes,
+                rejection_reason
+            });
+        },
+        onSuccess: () => {
+            queryClient.invalidateQueries(['application', id]);
+            toast.success("Application updated successfully");
+            setIsApproveModalOpen(false);
+            setIsRejectModalOpen(false);
+            setActionNote('');
+        },
+        onError: () => toast.error("Failed to update application")
+    });
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin w-12 h-12 border-4 border-[#1A1A1A] border-t-transparent rounded-full mx-auto mb-4" />
+                    <p className="text-[#8F8F8F] font-medium">Loading application...</p>
+                </div>
+            </div>
+        );
+    }
+
+    if (error || !application) {
+        return (
+            <div className="min-h-screen bg-[#F9F8F6] flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-red-500 font-bold text-lg mb-4">Application not found</p>
+                    <Button onClick={() => navigate(-1)}>Back to Applications</Button>
+                </div>
+            </div>
+        );
+    }
+
+    const applicant = application.applicant;
+    const pet = application.pet;
+    const trust = application.trust_snapshot;
+    const appData = application.application;
+    const listing = application.listing;
+
+    const age = applicant.date_of_birth ? differenceInYears(new Date(), new Date(applicant.date_of_birth)) : null;
 
     return (
-        <div className="min-h-screen bg-bg-primary py-8 px-4">
-            <div className="max-w-6xl mx-auto">
-                <Button variant="ghost" className="mb-4 pl-0 hover:bg-transparent hover:text-brand-primary" onClick={() => navigate(-1)}>
-                    <ChevronLeft size={16} className="mr-2" /> Back to Applications
+        <div className="min-h-screen bg-[#F9F8F6] py-8 px-4 font-jakarta">
+            <div className="max-w-4xl mx-auto">
+                {/* Back Button */}
+                <Button
+                    variant="ghost"
+                    className="mb-6 pl-0 hover:bg-transparent text-[#8F8F8F] hover:text-[#1A1A1A]"
+                    onClick={() => navigate(-1)}
+                >
+                    <ChevronLeft size={18} className="mr-2" /> Back to Applications
                 </Button>
 
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                    {/* Main Content */}
-                    <div className="lg:col-span-2 space-y-8">
-                        {/* Header */}
-                        <div className="flex items-center gap-6">
-                            <img src={applicant.image} alt={applicant.name} className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-sm" />
-                            <div>
-                                <h1 className="text-3xl font-bold text-text-primary flex items-center gap-2">
-                                    {applicant.name}
-                                    {applicant.verified && <Check size={20} className="text-status-info bg-status-info/10 rounded-full p-0.5" />}
-                                </h1>
-                                <p className="text-text-secondary">Member since {applicant.joined} • Verified Identity</p>
-                                <div className="mt-2 inline-flex items-center px-3 py-1 rounded-full bg-status-success/10 text-status-success text-sm font-bold border border-status-success/20">
-                                    Readiness Score: {applicant.score}%
-                                </div>
-                            </div>
-                        </div>
+                {/* Main Card */}
+                <div className="bg-white rounded-[32px] border border-[#E5E5E5] overflow-hidden shadow-sm">
 
-                        {/* Sections */}
-                        <Card className="p-8 space-y-8">
-                            {/* Message */}
-                            <div>
-                                <h2 className="text-xl font-bold text-text-primary mb-4 border-b border-border pb-2">Why John Wants to Adopt</h2>
-                                <p className="text-text-secondary leading-relaxed bg-bg-secondary p-4 rounded-xl border border-border italic">
-                                    "{applicant.details.message}"
+                    {/* Header - Application For */}
+                    <div className="px-8 pt-8 pb-6 border-b border-[#E5E5E5]">
+                        <div className="flex items-center gap-4">
+                            <div className="w-20 h-20 rounded-2xl overflow-hidden bg-gray-100 flex-shrink-0">
+                                <img
+                                    src={pet.primary_photo}
+                                    alt={pet.name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-sm text-[#8F8F8F] font-medium mb-1">Application for</p>
+                                <h1 className="text-2xl font-black text-[#1A1A1A]">{pet.name}</h1>
+                                <p className="text-sm text-[#5F5F5F] mt-1">
+                                    {pet.breed} • {pet.gender} • {pet.species}
                                 </p>
                             </div>
-
-                            {/* Housing */}
-                            <div>
-                                <h3 className="flex items-center gap-2 font-bold text-text-primary mb-4">
-                                    <Home size={18} className="text-brand-primary" /> Housing Information
-                                </h3>
-                                <div className="grid grid-cols-3 gap-4">
-                                    <div className="p-3 bg-bg-surface border border-border rounded-xl text-center">
-                                        <p className="text-xs text-text-tertiary uppercase font-bold">Type</p>
-                                        <p className="font-bold">{applicant.details.housing.type}</p>
-                                    </div>
-                                    <div className="p-3 bg-bg-surface border border-border rounded-xl text-center">
-                                        <p className="text-xs text-text-tertiary uppercase font-bold">Ownership</p>
-                                        <p className="font-bold">{applicant.details.housing.ownership}</p>
-                                    </div>
-                                    <div className="p-3 bg-bg-surface border border-border rounded-xl text-center">
-                                        <p className="text-xs text-text-tertiary uppercase font-bold">Yard</p>
-                                        <p className="font-bold">{applicant.details.housing.yard}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Household */}
-                            <div>
-                                <h3 className="flex items-center gap-2 font-bold text-text-primary mb-4">
-                                    <Users size={18} className="text-brand-primary" /> Household
-                                </h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div className="p-4 border border-border rounded-xl">
-                                        <p className="text-sm"><strong>Adults:</strong> {applicant.details.household.adults}</p>
-                                        <p className="text-sm"><strong>Children:</strong> {applicant.details.household.children}</p>
-                                    </div>
-                                    <div className="p-4 border border-border rounded-xl">
-                                        <p className="text-sm font-bold text-text-secondary mb-1">Current Pets</p>
-                                        <p className="font-medium">{applicant.details.household.pets}</p>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Experience & Lifestyle */}
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                <div>
-                                    <h3 className="flex items-center gap-2 font-bold text-text-primary mb-4">
-                                        <Info size={18} className="text-brand-primary" /> Experience
-                                    </h3>
-                                    <div className="space-y-2">
-                                        <p className="text-sm"><span className="font-bold text-gray-500">Level:</span> {applicant.details.experience.level}</p>
-                                        <p className="text-sm"><span className="font-bold text-gray-500">History:</span> {applicant.details.experience.history}</p>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h3 className="flex items-center gap-2 font-bold text-text-primary mb-4">
-                                        <Activity size={18} className="text-brand-primary" /> Lifestyle
-                                    </h3>
-                                    <div className="space-y-2">
-                                        <p className="text-sm"><span className="font-bold text-gray-500">Schedule:</span> {applicant.details.lifestyle.routine}</p>
-                                        <p className="text-sm"><span className="font-bold text-gray-500">Activity:</span> {applicant.details.lifestyle.activity}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </Card>
+                            <Badge
+                                variant={appData.status === 'approved_meet_greet' ? 'success' : appData.status === 'pending_review' ? 'warning' : 'neutral'}
+                                className="text-[10px] font-black uppercase tracking-wider px-3 py-2"
+                            >
+                                {appData.status.replace(/_/g, ' ')}
+                            </Badge>
+                        </div>
                     </div>
 
-                    {/* Sidebar Actions */}
-                    <div className="lg:col-span-1 space-y-6">
-                        <div className="sticky top-24 space-y-6">
-                            <Card className="p-6">
-                                <h3 className="font-bold text-lg mb-4">Quick Actions</h3>
-                                <div className="space-y-3">
-                                    <Button variant="primary" className="w-full justify-center py-3 shadow-lg" onClick={() => setIsApproveModalOpen(true)}>
-                                        <Check size={18} className="mr-2" /> Approve for Meet & Greet
-                                    </Button>
-                                    <p className="text-xs text-center text-text-tertiary px-2">This will share your contact info with the applicant.</p>
+                    {/* Applicant Section */}
+                    <div className="px-8 py-6 bg-[#FAFAFA] border-b border-[#E5E5E5]">
+                        <div className="flex items-start gap-6">
+                            {/* Photo */}
+                            <div className="w-24 h-24 rounded-2xl overflow-hidden bg-white border-2 border-white shadow-sm flex-shrink-0">
+                                <img
+                                    src={applicant.photo_url}
+                                    alt={applicant.full_name}
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
 
-                                    <Button variant="outline" className="w-full justify-center py-3">
-                                        Requests More Info
-                                    </Button>
-
-                                    <Button variant="ghost" className="w-full justify-center text-status-error hover:bg-status-error/10 hover:text-status-error" onClick={() => setIsRejectModalOpen(true)}>
-                                        Reject Application
-                                    </Button>
-                                </div>
-                            </Card>
-
-                            <div className="bg-status-info/10 p-6 rounded-2xl border border-status-info/20">
-                                <div className="flex items-start gap-3">
-                                    <Shield className="text-status-info shrink-0 mt-1" size={20} />
+                            {/* Info */}
+                            <div className="flex-1">
+                                <div className="flex items-start justify-between mb-4">
                                     <div>
-                                        <p className="font-bold text-status-info text-sm mb-1">Safety Reminder</p>
-                                        <p className="text-xs text-status-info leading-relaxed">
-                                            Always meet in a public place for the first time. Bring a friend or family member along.
+                                        <h2 className="text-xl font-black text-[#1A1A1A] mb-1">{applicant.full_name}</h2>
+                                        <p className="text-sm text-[#5F5F5F]">
+                                            {age && `${age} years old • `}
+                                            Member since {format(new Date(applicant.member_since), 'MMM yyyy')}
                                         </p>
                                     </div>
                                 </div>
+
+                                {/* Contact & Location */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+                                    <div className="flex items-center gap-2 text-sm text-[#5F5F5F]">
+                                        <Mail size={16} className="text-[#8F8F8F]" />
+                                        <span>{applicant.email}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-[#5F5F5F]">
+                                        <Phone size={16} className="text-[#8F8F8F]" />
+                                        <span>{applicant.phone}</span>
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-[#5F5F5F] md:col-span-2">
+                                        <MapPin size={16} className="text-[#8F8F8F]" />
+                                        <span>{applicant.location.city}, {applicant.location.state}</span>
+                                    </div>
+                                </div>
+
+                                {/* Verification Badges */}
+                                <div className="flex flex-wrap gap-2">
+                                    {trust.email_verified && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-bold">
+                                            <CheckCircle2 size={14} />
+                                            <span>Email Verified</span>
+                                        </div>
+                                    )}
+                                    {trust.phone_verified && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-bold">
+                                            <CheckCircle2 size={14} />
+                                            <span>Phone Verified</span>
+                                        </div>
+                                    )}
+                                    {trust.identity_verified && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-bold">
+                                            <CheckCircle2 size={14} />
+                                            <span>Identity Verified</span>
+                                        </div>
+                                    )}
+                                    {trust.profile_completed && (
+                                        <div className="flex items-center gap-1.5 px-3 py-1.5 bg-gray-50 text-gray-700 rounded-lg text-xs font-bold">
+                                            <CheckCircle2 size={14} />
+                                            <span>Profile Complete</span>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         </div>
                     </div>
+
+                    {/* Application Message */}
+                    <div className="px-8 py-8">
+                        <h3 className="text-xs font-black uppercase tracking-widest text-[#8F8F8F] mb-4">Application Message</h3>
+                        <div className="bg-[#F9F8F6] rounded-2xl p-6 border border-[#E5E5E5]">
+                            <p className="text-[#1A1A1A] leading-relaxed whitespace-pre-wrap">
+                                {application.application_message.intro_message}
+                            </p>
+                        </div>
+                    </div>
+
+                    {/* Application Details */}
+                    <div className="px-8 pb-8">
+                        <div className="grid grid-cols-2 gap-4 p-6 bg-[#FAFAFA] rounded-2xl border border-[#E5E5E5]">
+                            <div>
+                                <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider mb-1">Submitted</p>
+                                <p className="text-[#1A1A1A] font-bold">{format(new Date(appData.submitted_at), 'MMM d, yyyy')}</p>
+                            </div>
+                            <div>
+                                <p className="text-[10px] font-bold text-[#8F8F8F] uppercase tracking-wider mb-1">Last Updated</p>
+                                <p className="text-[#1A1A1A] font-bold">{format(new Date(appData.last_updated_at), 'MMM d, yyyy')}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Action Buttons */}
+                    {appData.status === 'pending_review' && (
+                        <div className="px-8 pb-8 flex gap-3 justify-end">
+                            <Button
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 font-bold"
+                                onClick={() => setIsRejectModalOpen(true)}
+                            >
+                                Reject Application
+                            </Button>
+                            <Button
+                                className="bg-[#1A1A1A] text-white hover:bg-black font-bold px-6"
+                                onClick={() => setIsApproveModalOpen(true)}
+                            >
+                                Approve for Meet & Greet
+                            </Button>
+                        </div>
+                    )}
+
+                    {appData.status === 'approved_meet_greet' && (
+                        <div className="px-8 pb-8 flex gap-3 justify-end">
+                            <Button
+                                variant="outline"
+                                className="text-red-600 border-red-200 hover:bg-red-50 hover:border-red-300 font-bold"
+                                onClick={() => setIsRejectModalOpen(true)}
+                            >
+                                Reject Application
+                            </Button>
+                            <Button
+                                className="bg-[#2E7D32] text-white hover:bg-[#1B5E20] font-bold px-6"
+                                onClick={() => updateStatusMutation.mutate({ status: 'adopted' })}
+                            >
+                                Mark as Adopted
+                            </Button>
+                        </div>
+                    )}
                 </div>
             </div>
 
             {/* Reject Modal */}
             <Modal isOpen={isRejectModalOpen} onClose={() => setIsRejectModalOpen(false)} title="Reject Application">
                 <div className="space-y-4">
-                    <p className="text-text-secondary">Are you sure you want to reject this application? This action cannot be undone.</p>
-                    <div>
-                        <label className="block text-sm font-bold text-text-primary mb-2">Reason (Optional)</label>
-                        <select className="w-full px-4 py-2 rounded-lg border border-border mb-4">
-                            <option>Not a good match for needs</option>
-                            <option>Housing concerns</option>
-                            <option>Experience level</option>
-                            <option>Found another home</option>
-                        </select>
-                    </div>
-                    <div className="flex gap-3 justify-end">
+                    <p className="text-[#5F5F5F]">Are you sure you want to reject this application? The applicant will be notified.</p>
+                    <textarea
+                        className="w-full h-24 p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none resize-none"
+                        placeholder="Reason for rejection (optional)..."
+                        value={actionNote}
+                        onChange={(e) => setActionNote(e.target.value)}
+                    />
+                    <div className="flex justify-end gap-3">
                         <Button variant="ghost" onClick={() => setIsRejectModalOpen(false)}>Cancel</Button>
-                        <Button variant="primary" className="bg-red-500 border-red-500 hover:bg-red-600 hover:border-red-600" onClick={() => {
-                            toast.success("Application Rejected");
-                            setIsRejectModalOpen(false);
-                            navigate(-1);
-                        }}>Confirm Rejection</Button>
+                        <Button
+                            className="bg-red-500 text-white hover:bg-red-600 border-red-500"
+                            onClick={() => updateStatusMutation.mutate({ status: 'rejected', rejection_reason: actionNote })}
+                        >
+                            Confirm Rejection
+                        </Button>
                     </div>
                 </div>
             </Modal>
@@ -192,21 +276,57 @@ const OwnerApplicationDetailPage = () => {
             {/* Approve Modal */}
             <Modal isOpen={isApproveModalOpen} onClose={() => setIsApproveModalOpen(false)} title="Approve for Meet & Greet">
                 <div className="space-y-4">
-                    <div className="bg-status-success/10 p-4 rounded-xl border border-status-success/20 flex gap-3 text-status-success text-sm">
-                        <Info className="shrink-0" size={18} />
-                        <p>Your contact information will be shared with <strong>{applicant.name}</strong> to arrange a meeting.</p>
+                    <p className="text-[#5F5F5F]">Schedule a Meet & Greet with the applicant. Your contact details will be shared.</p>
+
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-[#1A1A1A] uppercase">Date</label>
+                            <input
+                                type="date"
+                                className="w-full p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none text-sm"
+                                id="meet-date"
+                                min={format(new Date(), 'yyyy-MM-dd')}
+                            />
+                        </div>
+                        <div className="space-y-1">
+                            <label className="text-xs font-bold text-[#1A1A1A] uppercase">Time</label>
+                            <input
+                                type="time"
+                                className="w-full p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none text-sm"
+                                id="meet-time"
+                            />
+                        </div>
                     </div>
-                    <div className="p-4 bg-bg-secondary rounded-xl border border-border">
-                        <p className="text-xs font-bold text-text-tertiary uppercase mb-2">Contact Info to Share</p>
-                        <p className="font-bold">📞 (555) 123-4567</p>
-                        <p className="font-bold">✉️ you@example.com</p>
+
+                    <div className="space-y-1">
+                        <label className="text-xs font-bold text-[#1A1A1A] uppercase">Additional Notes</label>
+                        <textarea
+                            className="w-full h-24 p-3 border border-[#E5E5E5] rounded-xl focus:ring-2 focus:ring-[#1A1A1A] outline-none resize-none"
+                            placeholder="Add location details or special instructions..."
+                            value={actionNote}
+                            onChange={(e) => setActionNote(e.target.value)}
+                        />
                     </div>
-                    <div className="flex gap-3 justify-end">
+
+                    <div className="flex justify-end gap-3">
                         <Button variant="ghost" onClick={() => setIsApproveModalOpen(false)}>Cancel</Button>
-                        <Button variant="primary" onClick={() => {
-                            toast.success("Application Approved! Contact info shared.");
-                            setIsApproveModalOpen(false);
-                        }}>Confirm Approval</Button>
+                        <Button
+                            className="bg-[#1A1A1A] text-white hover:bg-black"
+                            onClick={() => {
+                                const date = document.getElementById('meet-date').value;
+                                const time = document.getElementById('meet-time').value;
+
+                                if (!date || !time) {
+                                    toast.error("Please select both date and time");
+                                    return;
+                                }
+
+                                const combinedNote = `[SCHEDULED: ${date} ${time}] ${actionNote}`;
+                                updateStatusMutation.mutate({ status: 'approved_meet_greet', notes: combinedNote });
+                            }}
+                        >
+                            Confirm Approval
+                        </Button>
                     </div>
                 </div>
             </Modal>

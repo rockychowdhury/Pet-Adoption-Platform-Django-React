@@ -19,7 +19,6 @@ import {
     CheckCircle2,
     XCircle,
     Calendar,
-    MessageSquare,
     AlertCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -42,59 +41,81 @@ const UserDashboardOverview = () => {
     // Only fetch data for regular users (not admins or providers)
     const isRegularUser = user?.role !== 'admin' && user?.role !== 'service_provider';
 
-    // Fetch Active Listings
-    const { data: activeListings = [] } = useQuery({
-        queryKey: ['my-active-listings'],
+    // Fetch My Pets
+    const { data: myPets = [] } = useQuery({
+        queryKey: ['my-pets'],
         queryFn: async () => {
-            const res = await api.get('/pets/?owner=me&status=active');
+            const res = await api.get('/pets/profiles/');
             return res.data.results || res.data;
         },
-        enabled: isRegularUser, // Only run for regular users
+        enabled: isRegularUser,
     });
 
-    // Fetch Applications
-    const { data: allApplications = [] } = useQuery({
-        queryKey: ['my-applications'],
+    // Fetch My Listings
+    const { data: myListings = [] } = useQuery({
+        queryKey: ['my-listings'],
         queryFn: async () => {
-            const res = await api.get('/adoption/applications/');
+            const res = await api.get('/rehoming/my-listings/');
             return res.data.results || res.data;
         },
-        enabled: isRegularUser, // Only run for regular users
+        enabled: isRegularUser,
     });
 
-    // Filter Applications
-    const receivedApps = allApplications.filter(app => app.pet_owner_id === user?.id || app.pet_owner === user?.id || (app.pet_details && app.pet_details.owner === user?.id)); // Adjusting for likely API response structure, assuming backend logic
-    // Actually, based on previous ViewSet: "filter(models.Q(applicant=user) | models.Q(pet__pet_owner=user))"
-    // So we need to separate them on client.
-    // If I am the applicant, it's 'submitted'. If I am the pet owner, it's 'received'.
+    // Fetch Inquiries (Applications)
+    const { data: allInquiries = [] } = useQuery({
+        queryKey: ['my-inquiries'],
+        queryFn: async () => {
+            const res = await api.get('/rehoming/inquiries/');
+            return res.data.results || res.data;
+        },
+        enabled: isRegularUser,
+    });
 
-    // Logic: if app.applicant === user.id -> Submitted. Else -> Received.
-    const submittedApplications = allApplications.filter(app => app.applicant === user?.id || app.applicant_id === user?.id);
-    const receivedApplications = allApplications.filter(app => (app.applicant !== user?.id && app.applicant_id !== user?.id));
+    // Fetch Notifications
+    const { data: notifications = [] } = useQuery({
+        queryKey: ['notifications'],
+        queryFn: async () => {
+            const res = await api.get('/notifications/');
+            return res.data.results || res.data;
+        },
+        enabled: isRegularUser,
+    });
+
+    // Process Listings
+    const activeListings = myListings.filter(l => l.status === 'active');
+
+    // Process Inquiries
+    // Check serializer: inquiry has 'listing' object (with owner) and 'requester' object.
+    const submittedApplications = allInquiries.filter(app => (app.requester_id || app.requester) === user?.id);
+    const receivedApplications = allInquiries.filter(app => app.pet_owner_id === user?.id);
+
+    // Process Notifications
+    const unreadCount = notifications.filter(n => !n.is_read).length;
 
     const stats = [
-        { label: 'Active Listings', value: activeListings.length, icon: PawPrint, color: 'text-brand-primary', bg: 'bg-brand-primary/10' },
+        { label: 'My Pets', value: myPets.length, icon: PawPrint, color: 'text-brand-primary', bg: 'bg-brand-primary/10' },
+        { label: 'Active Listings', value: activeListings.length, icon: Eye, color: 'text-blue-600', bg: 'bg-blue-100' },
         { label: 'Apps Received', value: receivedApplications.length, icon: FileText, color: 'text-purple-600', bg: 'bg-purple-100' },
         { label: 'Apps Submitted', value: submittedApplications.length, icon: CheckCircle2, color: 'text-green-600', bg: 'bg-green-100' },
-        { label: 'Unread Messages', value: 0, icon: Mail, color: 'text-blue-600', bg: 'bg-blue-100' }, // Placeholder
     ];
 
     const quickActions = [
-        { label: 'Create Listing', icon: Plus, to: '/dashboard/rehoming/create', desc: 'Rehome a pet' },
-        { label: 'My Pets', icon: PawPrint, to: '/dashboard/my-pets', desc: 'Manage profiles' },
+        { label: 'Start Rehoming', icon: Plus, to: '/rehoming/start', desc: 'Create a listing' },
         { label: 'Browse Pets', icon: Search, to: '/pets', desc: 'Find a friend' },
         { label: 'Services', icon: MapPin, to: '/services', desc: 'Find vets & more' },
+        { label: 'My Pets', icon: PawPrint, to: '/dashboard/my-pets', desc: 'Manage profiles' },
         ...(user?.role !== 'service_provider' && user?.role !== 'admin' ? [
             { label: 'Become Provider', icon: Users, to: '/become-provider', desc: 'Offer services' }
         ] : []),
-        { label: 'Messages', icon: Mail, to: '/dashboard/messages', desc: 'View inbox' },
     ];
 
     const getStatusColor = (status) => {
-        switch (status) {
-            case 'approved': return 'bg-green-100 text-green-700 border-green-200';
+        switch (status?.toLowerCase()) {
+            case 'accepted': return 'bg-green-100 text-green-700 border-green-200';
+            case 'declined':
             case 'rejected': return 'bg-red-100 text-red-700 border-red-200';
             case 'pending': return 'bg-yellow-100 text-yellow-700 border-yellow-200';
+            case 'withdrawn': return 'bg-gray-100 text-gray-700 border-gray-200';
             default: return 'bg-gray-100 text-gray-700 border-gray-200';
         }
     };
@@ -174,35 +195,35 @@ const UserDashboardOverview = () => {
                                 <PawPrint className="text-brand-primary" size={24} />
                                 My Active Listings
                             </h2>
-                            <Link to="/dashboard/my-pets" className="text-sm font-bold text-brand-primary hover:underline">View All</Link>
+                            <Link to="/dashboard/rehoming?tab=Active" className="text-sm font-bold text-brand-primary hover:underline">View All</Link>
                         </div>
 
                         {activeListings.length > 0 ? (
                             <div className="grid md:grid-cols-2 gap-4">
-                                {activeListings.slice(0, 4).map((pet) => (
-                                    <div key={pet.id} className="bg-white p-4 rounded-3xl border border-border flex gap-4 items-center hover:shadow-md transition-shadow">
+                                {activeListings.slice(0, 4).map((listing) => (
+                                    <div key={listing.id} className="bg-white p-4 rounded-3xl border border-border flex gap-4 items-center hover:shadow-md transition-shadow">
                                         <img
-                                            src={pet.images?.[0]?.image || 'https://via.placeholder.com/150'}
-                                            alt={pet.pet_name}
+                                            src={listing.pet?.main_photo || 'https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&q=80'}
+                                            alt={listing.pet?.name}
                                             className="w-20 h-20 rounded-2xl object-cover bg-bg-secondary"
                                         />
                                         <div className="flex-1 min-w-0">
-                                            <h3 className="font-bold text-lg truncate">{pet.pet_name}</h3>
+                                            <h3 className="font-bold text-lg truncate">{listing.pet?.name}</h3>
                                             <div className="flex items-center gap-2 text-xs text-text-secondary mb-2">
-                                                <span>{pet.breed || 'Mixed'}</span>
+                                                <span>{listing.pet?.species || 'Pet'}</span>
                                                 <span>•</span>
-                                                <span>{pet.age_months}mo</span>
+                                                <span>{listing.location_city}</span>
                                             </div>
                                             <div className="flex gap-2">
                                                 <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-bg-surface px-2 py-1 rounded-lg">
-                                                    <Eye size={12} /> {pet.views || 0}
+                                                    <Eye size={12} /> {listing.view_count || 0}
                                                 </div>
                                                 <div className="flex items-center gap-1 text-xs font-medium text-text-secondary bg-bg-surface px-2 py-1 rounded-lg">
-                                                    <Mail size={12} /> {pet.applications_count || 0}
+                                                    <Mail size={12} /> {listing.application_count || 0}
                                                 </div>
                                             </div>
                                         </div>
-                                        <Link to={`/pets/${pet.id}`}>
+                                        <Link to={`/pets/${listing.id}`}>
                                             <button className="p-2 bg-bg-surface rounded-full hover:bg-bg-secondary text-text-primary">
                                                 <ChevronRight size={20} />
                                             </button>
@@ -219,7 +240,7 @@ const UserDashboardOverview = () => {
                                 <p className="text-text-secondary text-sm mb-6 max-w-sm mx-auto">
                                     You don't have any pets listed for rehoming right now.
                                 </p>
-                                <Link to="/dashboard/rehoming/create">
+                                <Link to="/rehoming/start">
                                     <button className="px-6 py-2 bg-white border border-border text-text-primary font-bold rounded-full text-sm hover:bg-bg-secondary transition-colors">
                                         Create a Listing
                                     </button>
@@ -263,14 +284,14 @@ const UserDashboardOverview = () => {
                                             <div className="flex justify-between items-start mb-2">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center text-brand-primary font-bold text-sm">
-                                                        {appTab === 'received' ? (app.applicant_name?.[0] || 'A') : (app.pet_name?.[0] || 'P')}
+                                                        {appTab === 'received' ? (app.requester_name?.[0] || 'A') : (app.listing_pet_name?.[0] || 'P')}
                                                     </div>
                                                     <div>
                                                         <h4 className="font-bold text-sm text-text-primary">
-                                                            {appTab === 'received' ? `Review for ${app.pet_name}` : `App for ${app.pet_name}`}
+                                                            {appTab === 'received' ? `Inquiry for ${app.listing_pet_name}` : `Inquiry for ${app.listing_pet_name}`}
                                                         </h4>
                                                         <p className="text-xs text-text-secondary">
-                                                            {appTab === 'received' ? `From ${app.applicant_name || 'Applicant'}` : `To ${app.owner_name || 'Owner'}`}
+                                                            {appTab === 'received' ? `From ${app.requester_name || 'Adopter'}` : `To Owner`}
                                                         </p>
                                                     </div>
                                                 </div>
@@ -294,9 +315,9 @@ const UserDashboardOverview = () => {
                                     <div className="w-12 h-12 bg-bg-surface rounded-full flex items-center justify-center mb-3 text-text-tertiary">
                                         <FileText size={20} />
                                     </div>
-                                    <p className="text-sm font-bold text-text-secondary">No applications found</p>
+                                    <p className="text-sm font-bold text-text-secondary">No inquiries found</p>
                                     <p className="text-xs text-text-tertiary mt-1">
-                                        {appTab === 'received' ? "You haven't received any adopter applications yet." : "You haven't submitted any adoption applications yet."}
+                                        {appTab === 'received' ? "You haven't received any inquiries yet." : "You haven't sent any inquiries yet."}
                                     </p>
                                 </div>
                             )}
@@ -307,25 +328,6 @@ const UserDashboardOverview = () => {
                                 View All Applications
                             </Link>
                         </div>
-                    </div>
-
-                    {/* Pending Messages Placeholder */}
-                    <div className="bg-brand-secondary/5 rounded-[2rem] p-6 border border-brand-secondary/10 relative overflow-hidden">
-                        <div className="relative z-10">
-                            <h2 className="text-lg font-black font-logo mb-2 text-brand-secondary-dark flex items-center gap-2">
-                                <MessageSquare size={20} />
-                                Need Help?
-                            </h2>
-                            <p className="text-sm text-text-secondary mb-4 leading-relaxed">
-                                Join our community forum to get advice from experienced pet owners and fosters.
-                            </p>
-                            <Link to="/community">
-                                <button className="px-5 py-2 bg-white text-brand-secondary-dark font-bold rounded-full text-xs shadow-sm hover:shadow-md transition-shadow">
-                                    Visit Community
-                                </button>
-                            </Link>
-                        </div>
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-brand-secondary/10 rounded-full blur-2xl -translate-y-1/2 translate-x-1/2"></div>
                     </div>
 
                 </div>

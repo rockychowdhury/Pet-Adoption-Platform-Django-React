@@ -1,6 +1,8 @@
+
 import React, { useState, useRef } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { toast } from 'react-toastify';
+import { useLocation, useNavigate } from 'react-router-dom';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
 import useImgBB from '../../hooks/useImgBB';
@@ -9,7 +11,8 @@ import Card from '../../components/common/Layout/Card';
 import Input from '../../components/common/Form/Input';
 import Switch from '../../components/common/Form/Switch';
 import Button from '../../components/common/Buttons/Button';
-import { User, Lock, Eye, Bell, Shield, Trash2, Camera, Upload, MapPin, Loader2, Navigation } from 'lucide-react';
+import WhatsAppVerifier from '../../components/Auth/WhatsAppVerifier';
+import { User, Lock, Eye, Bell, Shield, Trash2, Camera, Upload, MapPin, Loader2, Navigation, Phone } from 'lucide-react';
 
 const PROFILE_SECTIONS = [
   { id: 'personal', label: 'Personal Info', icon: User },
@@ -27,8 +30,11 @@ const ProfileSettingsPage = () => {
   const [activeSection, setActiveSection] = useState('personal');
   const [locationLoading, setLocationLoading] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [initialPhoneNumber, setInitialPhoneNumber] = useState('');
   const fileInputRef = useRef(null);
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
+  const location = useLocation();
 
   // Basic user profile fetch
   const { data: profile, isLoading } = useQuery({
@@ -42,12 +48,6 @@ const ProfileSettingsPage = () => {
   });
 
   // Local state for form fields to handle auto-fill easily
-  // We initialize normally, but we might need keys or controlled inputs to force updates from geolocation
-  // Using key prop on the form is a simple way to reset/reload with new defaults if profile changes,
-  // but for geolocation we want to fill existing inputs.
-  // Best approach: Use defaultValue (uncontrolled) and direct DOM manipulation or key-based reset for simplicity 
-  // OR fully controlled components. Given the codebase uses Input usually uncontrolled or simple, 
-  // I will use refs or state for location fields to allow programmatic updates.
   const [locationData, setLocationData] = useState({
     city: '',
     state: '',
@@ -67,6 +67,8 @@ const ProfileSettingsPage = () => {
       if (profile.photoURL) {
         setPreviewImage(profile.photoURL);
       }
+      // Store initial phone number for comparison
+      setInitialPhoneNumber(profile.phone_number || '');
     }
   }, [profile]);
 
@@ -81,6 +83,11 @@ const ProfileSettingsPage = () => {
       toast.success('Profile updated successfully!');
       await queryClient.invalidateQueries(['me']);
       await getUser(); // Refresh auth context
+
+      // Redirect back if applicable
+      if (location.state?.from) {
+        navigate(location.state.from);
+      }
     },
     onError: (err) => {
       console.error(err);
@@ -124,18 +131,7 @@ const ProfileSettingsPage = () => {
     // Upload to ImgBB
     const result = await uploadImage(file);
     if (result && result.success) {
-      // If successful, we just hold the URL in state or immediately save?
-      // usually better to save on "Save Changes", but ImgBB gives a public URL.
-      // Let's store just the URL to submit later, OR we could auto-save.
-      // For a settings form, standard UX is "Save Changes" commits everything.
-      // But here, I'll update the preview image state to be the remote URL content
-      // so when they hit save, it sends the new URL.
-      // Actually, we need to store the remote URL to send in payload. 
-      // Let's assume 'previewImage' is just for display, 
-      // we need a separate ref or state for the 'newPhotoUrl' 
-      setPreviewImage(result.url); // Show the remote URL (or keep local preview, matter less)
-      // We'll trust the previewImage state contains the new URL if it starts with http
-      // Wait, local preview is data:image... remote is http...
+      setPreviewImage(result.url);
     } else {
       // Revert if failed
       if (profile?.photoURL) setPreviewImage(profile.photoURL);
@@ -190,13 +186,19 @@ const ProfileSettingsPage = () => {
       location_state: locationData.state,
       location_country: locationData.country,
       zip_code: locationData.zip_code,
+      date_of_birth: formData.get('date_of_birth'),
       bio: formData.get('bio'),
     };
 
     // If we have a new image URL (that isn't the old one), add it.
-    // Simple check: if previewImage is a URL and different from profile.photoURL
     if (previewImage && previewImage !== profile?.photoURL && previewImage.startsWith('http')) {
       payload.photoURL = previewImage;
+    }
+
+    // Check if phone number changed - if so, reset verification status
+    const newPhoneNumber = formData.get('phone');
+    if (newPhoneNumber && newPhoneNumber !== initialPhoneNumber) {
+      payload.phone_verified = false;
     }
 
     updateProfileMutation.mutate(payload);
@@ -349,6 +351,18 @@ const ProfileSettingsPage = () => {
           </div>
         </div>
 
+        {/* Date of Birth (New) */}
+        <div>
+          <Input
+            label="Date of Birth"
+            name="date_of_birth"
+            type="date"
+            defaultValue={profile?.date_of_birth || ''}
+            className="rounded-xl"
+            placeholder="DD/MM/YYYY"
+          />
+        </div>
+
         {/* Bio */}
         <div>
           <label className="block text-sm font-semibold text-text-primary mb-2 font-jakarta">
@@ -385,7 +399,8 @@ const ProfileSettingsPage = () => {
     <Card className="rounded-[32px] border-border shadow-soft">
       <h2 className="text-xl font-bold font-logo text-text-primary mb-6">Account Security</h2>
 
-      <form id="password-form" onSubmit={handlePasswordSubmit} className="space-y-6">
+      {/* Password Change Section */}
+      <form id="password-form" onSubmit={handlePasswordSubmit} className="space-y-6 mb-8">
         <div className="space-y-4">
           <div className="grid grid-cols-1 gap-5 max-w-md">
             <Input label="Current Password" name="currentPassword" type="password" className="rounded-xl" required placeholder="••••••••" />
@@ -415,6 +430,85 @@ const ProfileSettingsPage = () => {
           </Button>
         </div>
       </form>
+
+      {/* Phone Verification Section */}
+      <div className="border-t border-border pt-8 mt-8">
+        <div className="flex items-start gap-3 mb-6">
+          <div className="w-10 h-10 rounded-full bg-brand-primary/10 flex items-center justify-center shrink-0">
+            <Phone className="text-brand-primary" size={20} />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold text-text-primary mb-1">Phone Verification</h3>
+            <p className="text-sm text-text-secondary">
+              Verify your phone number using WhatsApp for enhanced account security.
+            </p>
+          </div>
+        </div>
+
+        {profile?.phone_verified ? (
+          <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-green-900">Phone Number Verified</p>
+                <p className="text-xs text-green-700 mt-0.5">{profile.phone_number}</p>
+              </div>
+            </div>
+            <p className="text-xs text-green-700 mt-3">
+              Your phone number has been verified. If you update your phone number in Personal Info, you'll need to verify it again.
+            </p>
+          </div>
+        ) : (
+          <div>
+            {!profile?.phone_number ? (
+              <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+                <div className="flex items-start gap-3">
+                  <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center shrink-0">
+                    <span className="text-white font-bold text-lg">!</span>
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-yellow-900 mb-1">No Phone Number</p>
+                    <p className="text-xs text-yellow-700">
+                      Please add your phone number in the Personal Info section first, then come back here to verify it.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setActiveSection('personal')}
+                      className="mt-3 text-xs font-bold text-yellow-800 hover:text-yellow-900 underline"
+                    >
+                      Go to Personal Info →
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div>
+                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
+                  <div className="flex items-start gap-3">
+                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                      <Phone className="text-white" size={16} />
+                    </div>
+                    <div>
+                      <p className="text-sm font-bold text-blue-900 mb-1">Unverified Phone Number</p>
+                      <p className="text-xs text-blue-700">
+                        Current number: <span className="font-semibold">{profile.phone_number}</span>
+                      </p>
+                      <p className="text-xs text-blue-600 mt-2">
+                        Click below to verify using WhatsApp. It's quick, easy, and completely free!
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <WhatsAppVerifier />
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </Card>
   );
 

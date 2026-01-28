@@ -32,12 +32,6 @@ import PetListingPage from "../pages/PetPages/PetListingPage";
 import PetDetailPage from "../pages/PetPages/PetDetailPage";
 import PublicProfilePage from "../pages/ProfilePages/PublicProfilePage";
 
-// Community
-import CommunityFeedPage from "../pages/CommunityPages/CommunityFeedPage";
-import GroupListPage from "../pages/CommunityPages/GroupListPage";
-import GroupDetailPage from "../pages/CommunityPages/GroupDetailPage";
-import EventListPage from "../pages/CommunityPages/EventListPage";
-
 // Services
 import ServiceSearchPage from "../pages/ServicePages/ServiceSearchPage";
 import ServiceDetailPage from "../pages/ServicePages/ServiceDetailPage";
@@ -47,19 +41,17 @@ import ProviderDashboardPage from "../pages/ServicePages/ProviderDashboardPage";
 
 // Rehoming
 import RehomingFlowLayout from "../layouts/RehomingFlowLayout";
-import RehomingLandingPage from '../pages/RehomingPages/RehomingLandingPage';
 import RehomingPetSelectionPage from '../pages/RehomingPages/RehomingPetSelectionPage';
-
-import RehomingCheckInPage from '../pages/RehomingPages/RehomingCheckInPage';
-import RehomingFormPage from "../pages/RehomingPages/RehomingFormPage";
-import RehomingStatusPage from "../pages/RehomingPages/RehomingStatusPage";
+import RehomingSituationPage from "../pages/RehomingPages/RehomingSituationPage";
+import RehomingDetailsPage from "../pages/RehomingPages/RehomingDetailsPage";
+import RehomingReviewPage from "../pages/RehomingPages/RehomingReviewPage";
 import RehomingListingDetailPage from "../pages/RehomingPages/RehomingListingDetailPage";
 import RehomingDashboardPage from "../pages/RehomingPages/RehomingDashboardPage";
-import RehomingRequestPage from "../pages/RehomingPages/RehomingRequestPage";
-// import RehomingInterventionPage from "../pages/RehomingPages/RehomingInterventionPage"; // Legacy, removed
+// import RehomingRequestPage removed
 
 // Applications & Reviews
-import AdoptionProfileSetupPage from "../pages/ApplicationPages/AdoptionProfileSetupPage";
+// Applications & Reviews
+// import AdoptionProfileSetupPage removed
 import AdoptionProfilePage from "../pages/ApplicationPages/AdoptionProfilePage";
 import ApplicationSubmitPage from "../pages/ApplicationPages/ApplicationSubmitPage";
 import MyApplicationsPage from "../pages/ApplicationPages/MyApplicationsPage";
@@ -67,9 +59,10 @@ import ApplicationDetailPage from "../pages/ApplicationPages/ApplicationDetailPa
 import OwnerApplicationReviewPage from "../pages/ApplicationPages/OwnerApplicationReviewPage";
 import OwnerApplicationDetailPage from "../pages/ApplicationPages/OwnerApplicationDetailPage";
 import AdoptionReviewPage from "../pages/ReviewPages/AdoptionReviewPage";
+import AIApplicationPage from "../pages/ApplicationPages/AIApplicationPage";
+import ApplicationMailboxPage from "../pages/ApplicationPages/ApplicationMailboxPage";
 
-// Messaging
-import MessagesPage from "../pages/MessagingPages/MessagesPage";
+// Messages - Removed
 
 // Dashboard (User)
 import UserDashboardOverview from "../pages/Dashboard/UserDashboardOverview";
@@ -125,19 +118,12 @@ const router = createBrowserRouter([
                     { path: "/adopt", element: <Navigate to="/pets" replace /> },
                     { path: "/find-pet", element: <Navigate to="/pets" replace /> },
 
-                    /* Rehoming */
-                    { path: "/rehoming", element: <RehomingLandingPage /> },
+                    /* Rehoming - Authenticated only now */
                     { path: "/rehoming/listings/:id", element: <RehomingListingDetailPage /> },
 
                     /* Services */
                     { path: "/services", element: <ServiceSearchPage /> },
                     { path: "/services/:id", element: <ServiceDetailPage /> },
-
-                    /* Community */
-                    { path: "/community", element: <CommunityFeedPage /> },
-                    { path: "/groups", element: <GroupListPage /> },
-                    { path: "/groups/:id", element: <GroupDetailPage /> },
-                    { path: "/events", element: <EventListPage /> },
 
                     /* Static */
                     { path: "/about", element: <AboutPage /> },
@@ -162,37 +148,30 @@ const router = createBrowserRouter([
                     </PrivateRoute>
                 ),
                 children: [
-                    { path: "/messages", element: <MessagesPage /> },
-                    { path: "/messages/:id", element: <MessagesPage /> },
-
                     { path: "/services/:id/review", element: <ServiceReviewPage /> },
                     { path: "/adoptions/:id/review", element: <AdoptionReviewPage /> },
 
                     /* Rehoming flow */
                     {
                         path: "/rehoming",
+                        element: <RehomingFlowLayout />,
                         children: [
-                            /* Start Flow with Landing Page, not redirect */
-                            { index: true, element: <RehomingLandingPage /> },
-                            {
-                                element: <RehomingFlowLayout />,
-                                children: [
-                                    { path: "select-pet", element: <RehomingPetSelectionPage /> },
+                            { index: true, element: <Navigate to="select-pet" replace /> },
+                            { path: "select-pet", element: <RehomingPetSelectionPage /> },
 
-                                    { path: "check-in", element: <RehomingCheckInPage /> },
-                                    { path: "create-request", element: <RehomingFormPage /> },
-                                    { path: "status", element: <RehomingStatusPage /> },
-                                ]
-                            }
+                            /* Split Form Steps */
+                            { path: "situation", element: <RehomingSituationPage /> },
+                            { path: "details", element: <RehomingDetailsPage /> },
+                            { path: "review", element: <RehomingReviewPage /> },
                         ]
                     },
 
                     /* Applications */
                     { path: "/applications", element: <MyApplicationsPage /> },
                     { path: "/applications/:id", element: <ApplicationDetailPage /> },
-                    { path: "/applications/setup", element: <AdoptionProfileSetupPage /> },
-                    { path: "/applications/profile", element: <AdoptionProfilePage /> },
-                    { path: "/rehoming/listings/:id/apply", element: <RehomingRequestPage /> },
+                    { path: "/applications/profile", element: <AdoptionProfilePage /> }, // Setup removed
+                    { path: "/rehoming/listings/:id/inquiry", element: <ApplicationMailboxPage /> }, // Replaced apply
+                    { path: "/rehoming/listings/:id/apply-ai", element: <AIApplicationPage /> },
                     { path: "/rehoming/listings/:id/applications", element: <OwnerApplicationReviewPage /> },
                     { path: "/applications/:id/review", element: <OwnerApplicationDetailPage /> },
 

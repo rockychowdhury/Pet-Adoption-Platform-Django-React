@@ -15,14 +15,14 @@ const FilterSection = ({ title, children, isOpen: defaultOpen = true }) => {
     const [isOpen, setIsOpen] = useState(defaultOpen);
 
     return (
-        <div className="border-b border-gray-100 last:border-0 py-6">
+        <div className="border-b border-gray-100 last:border-0 py-4">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex items-center justify-between w-full group mb-4"
+                className="flex items-center justify-between w-full group mb-3"
             >
-                <h3 className="text-[13px] font-bold uppercase tracking-widest text-[#4B5563] group-hover:text-[#1F2937] transition-colors">{title}</h3>
-                <div className={`p-1 rounded-full transition-all ${isOpen ? 'bg-gray-100 text-[#1F2937]' : 'text-[#6B7280] group-hover:bg-gray-50'}`}>
-                    {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                <h3 className="text-[11px] font-black uppercase tracking-[0.15em] text-[#9CA3AF] group-hover:text-[#4B5563] transition-colors">{title}</h3>
+                <div className={`transition-transform duration-200 ${isOpen ? '' : '-rotate-90'}`}>
+                    <ChevronDown size={14} className="text-[#9CA3AF]" />
                 </div>
             </button>
             <AnimatePresence initial={false}>
@@ -44,133 +44,94 @@ const FilterSection = ({ title, children, isOpen: defaultOpen = true }) => {
 
 const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
     const speciesOptions = [
-        { id: 'dog', label: 'Dogs', Icon: Dog },
-        { id: 'cat', label: 'Cats', Icon: Cat },
-        { id: 'rabbit', label: 'Rabbits', Icon: Rabbit },
+        { id: 'dog', label: 'Dog', Icon: Dog },
+        { id: 'cat', label: 'Cat', Icon: Cat },
+        { id: 'rabbit', label: 'Rabbit', Icon: Rabbit },
     ];
 
     const ageOptions = [
-        { id: 'under_6_months', label: 'Under 6 months' },
-        { id: '6_12_months', label: '6 months - 1 year' },
-        { id: '1_3_years', label: '1 - 2 years' },
-        { id: '3_10_years', label: '2 - 5 years' },
-        { id: '10_plus_years', label: '5+ years' },
+        { id: 'under_6_months', label: 'Baby' },
+        { id: '6_12_months', label: 'Young' },
+        { id: '1_3_years', label: 'Adult' },
+        { id: '3_10_years', label: 'Senior' },
+        { id: '10_plus_years', label: 'Old' },
     ];
 
     const sizeOptions = [
-        { id: 'xs', label: 'XS' },
-        { id: 's', label: 'S' },
-        { id: 'm', label: 'M' },
-        { id: 'l', label: 'L' },
-        { id: 'xl', label: 'XL' },
+        { id: 'small', label: 'Small' },
+        { id: 'medium', label: 'Medium' },
+        { id: 'large', label: 'Large' },
     ];
 
     const compatibilityOptions = [
-        { id: 'good_with_children', label: 'Good with children' },
-        { id: 'good_with_dogs', label: 'Good with dogs' },
-        { id: 'good_with_cats', label: 'Good with cats' },
-        { id: 'house_trained', label: 'House-trained' },
+        { id: 'good_with_children', label: 'Kids' },
+        { id: 'good_with_dogs', label: 'Dogs' },
+        { id: 'good_with_cats', label: 'Cats' },
+        { id: 'house_trained', label: 'Trained' },
     ];
 
     const verificationOptions = [
-        { id: 'verified_vet', label: 'Vet verified' },
-        { id: 'verified_identity', label: 'Identity verified' },
+        { id: 'verified_identity', label: 'ID Verified' },
+        { id: 'verified_owner', label: 'Owner Verified' },
     ];
 
     return (
-        <div className="w-full bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-2 px-2 pt-1 pb-4 border-b border-gray-100">
-                <h2 className="text-[20px] font-bold text-[#1F2937]">Filters</h2>
+        <div className="w-full bg-white/50 backdrop-blur-sm p-4 flex flex-col gap-2 font-jakarta">
+            {/* Header - Compact */}
+            <div className="flex items-center justify-between mb-2 px-1 pb-4 border-b border-gray-100/50">
+                <h2 className="text-[18px] font-black text-[#111827] tracking-tight">Refine Results</h2>
                 <button
                     onClick={onClearFilters}
-                    className="text-[11px] font-bold uppercase tracking-widest text-[#EF4444] hover:text-[#DC2626] transition-colors"
+                    className="text-[10px] font-black uppercase tracking-widest text-status-error hover:opacity-70 transition-opacity"
                 >
-                    Clear All
+                    Reset
                 </button>
             </div>
 
-            <div className="px-2">
-                {/* Species */}
+            <div className="space-y-1">
+                {/* Species - Compact Icon Grid */}
                 <FilterSection title="Species">
-                    <div className="space-y-3 pb-2 pt-1">
+                    <div className="grid grid-cols-3 gap-2 pb-2">
                         {speciesOptions.map(option => (
-                            <label key={option.id} className="flex items-center justify-between cursor-pointer group">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center transition-all ${filters.species === option.id ? 'bg-[#2D5A41] text-white shadow-md' : 'bg-[#F3F4F6] text-[#374151] group-hover:bg-gray-200'}`}>
-                                        <option.Icon size={20} />
-                                    </div>
-                                    <span className={`text-[14px] font-medium ${filters.species === option.id ? 'text-[#1F2937] font-bold' : 'text-[#374151]'}`}>
-                                        {option.label}
-                                    </span>
-                                </div>
-                                <div className="relative">
-                                    <input
-                                        type="radio"
-                                        name="species"
-                                        value={option.id}
-                                        checked={filters.species === option.id}
-                                        onChange={onFilterChange}
-                                        className="sr-only"
-                                    />
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${filters.species === option.id ? 'border-[#2D5A41]' : 'border-gray-200'}`}>
-                                        {filters.species === option.id && <div className="w-2.5 h-2.5 rounded-full bg-[#2D5A41]" />}
-                                    </div>
-                                </div>
-                            </label>
+                            <button
+                                key={option.id}
+                                onClick={() => onFilterChange({ target: { name: 'species', value: filters.species === option.id ? '' : option.id } })}
+                                className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all gap-1.5 ${filters.species === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-lg shadow-[#2D5A41]/20 scale-[1.02]' : 'bg-white border-gray-100 text-[#4B5563] hover:border-gray-300'}`}
+                            >
+                                <option.Icon size={18} />
+                                <span className="text-[10px] font-bold">{option.label}</span>
+                            </button>
                         ))}
                     </div>
                 </FilterSection>
 
-                {/* Age Range */}
-                <FilterSection title="Age Range">
-                    <div className="space-y-3 pb-2">
+                {/* Age Range - Pill Group */}
+                <FilterSection title="Life Stage">
+                    <div className="flex flex-wrap gap-2 pb-2">
                         {ageOptions.map(option => (
-                            <label key={option.id} className="flex items-center gap-3 cursor-pointer group hover:bg-gray-50 p-2 rounded-lg -mx-2 transition-colors">
-                                <div className="relative">
-                                    <input
-                                        type="radio"
-                                        name="age_range"
-                                        value={option.id}
-                                        checked={filters.age_range === option.id}
-                                        onChange={onFilterChange}
-                                        className="sr-only"
-                                    />
-                                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${filters.age_range === option.id ? 'border-[#2D5A41]' : 'border-gray-200 group-hover:border-gray-300'}`}>
-                                        {filters.age_range === option.id && <div className="w-2.5 h-2.5 rounded-full bg-[#2D5A41]" />}
-                                    </div>
-                                </div>
-                                <span className={`text-[14px] font-medium ${filters.age_range === option.id ? 'text-[#1F2937]' : 'text-[#374151]'}`}>
-                                    {option.label}
-                                </span>
-                            </label>
+                            <button
+                                key={option.id}
+                                onClick={() => onFilterChange({ target: { name: 'age_range', value: filters.age_range === option.id ? '' : option.id } })}
+                                className={`px-4 py-2 rounded-full text-[11px] font-bold border transition-all ${filters.age_range === option.id ? 'bg-gray-900 text-white border-gray-900 shadow-sm' : 'bg-white border-gray-100 text-[#6B7280] hover:border-gray-200'}`}
+                            >
+                                {option.label}
+                            </button>
                         ))}
                     </div>
                 </FilterSection>
 
-                {/* Adoption Fee */}
-                <FilterSection title="Adoption Fee">
-                    <div className="px-1 pb-4">
-                        <div className="flex justify-between items-center mb-4">
-                            <span className="text-[13px] text-[#4B5563] font-medium">Max Price</span>
-                            <span className="text-[14px] font-bold text-[#2D5A41]">
-                                {filters.max_fee ? `$${filters.max_fee}` : 'Any'}
-                            </span>
-                        </div>
-                        <input
-                            type="range"
-                            name="max_fee"
-                            min="0"
-                            max="500"
-                            step="10"
-                            value={filters.max_fee || 500}
-                            onChange={onFilterChange}
-                            className="w-full h-1.5 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-[#2D5A41]"
-                        />
-                        <div className="flex justify-between mt-2 text-[10px] text-gray-400 font-bold uppercase tracking-wider">
-                            <span>$0</span>
-                            <span>$500+</span>
-                        </div>
+                {/* Gender - Segmented Controls */}
+                <FilterSection title="Gender">
+                    <div className="flex gap-2 pb-2">
+                        {[{ id: 'male', label: 'Male' }, { id: 'female', label: 'Female' }].map(option => (
+                            <button
+                                key={option.id}
+                                onClick={() => onFilterChange({ target: { name: 'gender', value: filters.gender === option.id ? '' : option.id } })}
+                                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold border transition-all ${filters.gender === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-md' : 'bg-white border-gray-100 text-[#4B5563] hover:bg-gray-50'}`}
+                            >
+                                {option.label}
+                            </button>
+                        ))}
                     </div>
                 </FilterSection>
 
@@ -181,7 +142,7 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                             <button
                                 key={option.id}
                                 onClick={() => onFilterChange({ target: { name: 'size', value: filters.size === option.id ? '' : option.id } })}
-                                className={`flex-1 py-2.5 rounded-lg text-[12px] font-bold border transition-all ${filters.size === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41] shadow-md transform scale-105' : 'bg-[#F9FAFB] text-[#374151] border-gray-100 hover:border-gray-200 hover:bg-gray-50'}`}
+                                className={`flex-1 py-2.5 rounded-xl text-[11px] font-bold border transition-all ${filters.size === option.id ? 'bg-[#2D5A41] text-white border-[#2D5A41]' : 'bg-white border-gray-100 text-[#4B5563] hover:bg-gray-50'}`}
                             >
                                 {option.label}
                             </button>
@@ -189,65 +150,50 @@ const FilterSidebar = ({ filters, onFilterChange, onClearFilters }) => {
                     </div>
                 </FilterSection>
 
-                {/* Compatibility */}
-                <FilterSection title="Compatibility">
-                    <div className="space-y-4 pb-2">
+                {/* Compatibility - Toggle Chips */}
+                <FilterSection title="Friendly With">
+                    <div className="flex flex-wrap gap-2 pb-2">
                         {compatibilityOptions.map(option => (
-                            <label key={option.id} className="flex items-center justify-between cursor-pointer group">
-                                <span className="text-[14px] font-medium text-[#374151] group-hover:text-[#1F2937] transition-colors">{option.label}</span>
-                                <div className="relative cursor-pointer">
-                                    <input
-                                        type="checkbox"
-                                        name={option.id}
-                                        checked={filters[option.id] === 'true'}
-                                        onChange={onFilterChange}
-                                        className="sr-only"
-                                    />
-                                    <div className={`w-11 h-6 rounded-full transition-all duration-300 ease-in-out relative ${filters[option.id] === 'true' ? 'bg-[#2D5A41]' : 'bg-gray-200'}`}>
-                                        <div className={`absolute top-1 left-1 w-4 h-4 rounded-full bg-white shadow-sm transition-all duration-300 ease-in-out transform ${filters[option.id] === 'true' ? 'translate-x-5' : ''}`} />
-                                    </div>
-                                </div>
-                            </label>
+                            <button
+                                key={option.id}
+                                onClick={() => onFilterChange({ target: { name: option.id, checked: filters[option.id] !== 'true', type: 'checkbox' } })}
+                                className={`px-3 py-2 rounded-xl text-[11px] font-bold border transition-all flex items-center gap-1.5 ${filters[option.id] === 'true' ? 'bg-[#2D5A41]/10 text-[#2D5A41] border-[#2D5A41]/20' : 'bg-white border-gray-100 text-[#6B7280] hover:bg-gray-50'}`}
+                            >
+                                {filters[option.id] === 'true' && <Check size={12} strokeWidth={4} />}
+                                {option.label}
+                            </button>
                         ))}
                     </div>
                 </FilterSection>
 
                 {/* Verification */}
-                <FilterSection title="Verification">
-                    <div className="space-y-3 pb-2">
+                <FilterSection title="Trust & Safety">
+                    <div className="space-y-2 pb-2">
                         {verificationOptions.map(option => (
-                            <label key={option.id} className="flex items-center gap-3 cursor-pointer group bg-gray-50/50 p-2.5 rounded-lg border border-transparent hover:border-gray-100 transition-all">
-                                <div className="relative">
-                                    <input
-                                        type="checkbox"
-                                        name={option.id}
-                                        checked={filters[option.id] === 'true'}
-                                        onChange={onFilterChange}
-                                        className="sr-only"
-                                    />
-                                    <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-all ${filters[option.id] === 'true' ? 'bg-[#2D5A41] border-[#2D5A41]' : 'bg-white border-gray-200 group-hover:border-gray-300'}`}>
-                                        {filters[option.id] === 'true' && <Check size={12} className="text-white stroke-[4]" />}
-                                    </div>
+                            <button
+                                key={option.id}
+                                onClick={() => onFilterChange({ target: { name: option.id, checked: filters[option.id] !== 'true', type: 'checkbox' } })}
+                                className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl border transition-all ${filters[option.id] === 'true' ? 'bg-[#2D5A41]/5 border-[#2D5A41]/20 text-[#2D5A41]' : 'bg-white border-gray-100 text-[#6B7280]'}`}
+                            >
+                                <span className="text-[11px] font-bold">{option.label}</span>
+                                <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all ${filters[option.id] === 'true' ? 'bg-[#2D5A41] text-white' : 'bg-gray-100 text-transparent'}`}>
+                                    <Check size={12} strokeWidth={4} />
                                 </div>
-                                <span className={`text-[14px] font-medium ${filters[option.id] === 'true' ? 'text-[#1F2937]' : 'text-[#374151]'}`}>
-                                    {option.label}
-                                </span>
-                            </label>
+                            </button>
                         ))}
                     </div>
                 </FilterSection>
 
-                <div className="pt-2 pb-8">
-                    <div className="bg-amber-50/80 rounded-2xl p-5 flex gap-4 border border-amber-100/50">
-                        <div className="w-8 h-8 rounded-full bg-white/80 flex items-center justify-center shrink-0 shadow-sm">
-                            <ShieldCheck size={18} className="text-[#92400E]" />
+                {/* Safety Tip */}
+                <div className="mt-4 pb-6">
+                    <div className="bg-amber-50 rounded-2xl p-4 border border-amber-100/50 flex flex-col gap-2">
+                        <div className="flex items-center gap-2 text-amber-800">
+                            <ShieldCheck size={16} />
+                            <span className="text-[10px] font-black uppercase tracking-wider">Safety First</span>
                         </div>
-                        <div>
-                            <h4 className="text-[12px] font-bold text-[#92400E] uppercase mb-1">Adopt Safely</h4>
-                            <p className="text-[10px] font-medium text-[#92400E]/80 leading-snug">
-                                Never send money before meeting a pet in person.
-                            </p>
-                        </div>
+                        <p className="text-[10px] font-bold text-amber-800/60 leading-tight">
+                            Meet pets in public and never pay before handover.
+                        </p>
                     </div>
                 </div>
             </div>

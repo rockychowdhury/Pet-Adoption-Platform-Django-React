@@ -37,6 +37,12 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
             city: pet.location_city || 'Nearby',
             state: pet.location_state || '',
 
+            // Physical & Health from nested pet
+            size: p.size_category || 'N/A',
+            weight: p.weight_kg ? `${parseFloat(p.weight_kg).toFixed(2)} kg` : 'N/A',
+            isNeutered: p.spayed_neutered,
+            isChipped: p.microchipped,
+
             // Badges & Status
             status: pet.status,
             urgency: pet.urgency, // 'immediate', 'soon', 'flexible'
@@ -49,8 +55,8 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
             // Trust
             isVerified: o.verified_identity || o.pet_owner_verified,
 
-            // Traits (Placeholder or from pet data if available)
-            traits: [] // We can add extraction if API provides it in future
+            // Traits from nested pet
+            traits: p.traits || []
         };
 
         // Construct formatting
@@ -212,7 +218,109 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
         );
     }
 
-    // --- Public Rehoming Listing Card (The New Design) ---
+    // --- Compact Listing Card (New Design) ---
+    if (variant === 'compact-listing' || variant === 'listing-compact') {
+        return (
+            <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col font-jakarta relative h-full"
+            >
+                {/* Hero Zone - Compact Aspect Ratio */}
+                <div className="relative aspect-[3/2] overflow-hidden">
+                    <Link to={`/pets/${data.id}`}>
+                        <img
+                            src={data.photo}
+                            alt={data.name}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        />
+                    </Link>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50" />
+
+                    {/* Top Badges */}
+                    <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                        {data.urgency === 'immediate' ? (
+                            <div className="px-2 py-1 bg-status-error text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm animate-pulse-slow">
+                                <Clock size={10} strokeWidth={3} /> Immediate
+                            </div>
+                        ) : data.urgency === 'urgent' ? (
+                            <div className="px-2 py-1 bg-brand-secondary text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-sm">
+                                Urgent
+                            </div>
+                        ) : null}
+                    </div>
+
+                    {/* Bookmark Interaction */}
+                    <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-status-error transition-all shadow-lg hover:scale-110">
+                        <Heart size={14} />
+                    </button>
+                </div>
+
+                {/* Body - Reduced Padding - Matching Profile Card */}
+                <div className="p-4 flex flex-col gap-3 flex-1">
+
+                    {/* Header Info - Compact */}
+                    <div className="flex justify-between items-start">
+                        <Link to={`/pets/${data.id}`}>
+                            <h3 className="text-lg font-bold text-text-primary leading-tight group-hover:text-brand-primary transition-colors">{data.name}</h3>
+                        </Link>
+                        {data.gender && (
+                            <div className="flex items-center gap-2 text-text-secondary">
+                                <span className={`text-sm font-bold ${data.gender.toLowerCase() === 'female' ? 'text-brand-secondary' : 'text-brand-primary'}`}>
+                                    {data.gender.toLowerCase() === 'female' ? '♀' : data.gender.toLowerCase() === 'male' ? '♂' : '?'}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+
+                    <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5 mt-[-4px]">
+                        {data.species} • <span className="text-brand-primary/80">{data.breed}</span>
+                    </p>
+
+                    {/* Stats Grid - Single Row / Compact Grid */}
+                    <div className="grid grid-cols-2 gap-2 py-2 border-t border-border/40">
+                        <div className="flex items-center gap-2 text-text-secondary">
+                            <Cake size={14} className="text-brand-orange" />
+                            <span className="text-xs font-bold">{data.age}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-text-secondary">
+                            <MapPin size={14} className="text-brand-primary" />
+                            <span className="text-xs font-bold truncate">{data.locationLabel}</span>
+                        </div>
+                    </div>
+
+                    {/* Size and Weight if available */}
+                    <div className="flex flex-wrap gap-1.5 overflow-hidden pb-1">
+                        {data.size && data.size !== 'N/A' && (
+                            <span className="px-2 py-1 bg-bg-secondary text-text-secondary text-[9px] font-bold rounded-md whitespace-nowrap border border-border/50 uppercase">
+                                {data.size}
+                            </span>
+                        )}
+                        {data.isNeutered && (
+                            <span className="px-2 py-1 bg-brand-primary/10 text-brand-primary text-[9px] font-bold rounded-md whitespace-nowrap border border-brand-primary/20 uppercase">
+                                Spayed
+                            </span>
+                        )}
+                    </div>
+
+                    {/* Footer Actions - Shorter Height */}
+                    <div className="mt-auto pt-2 flex gap-2">
+                        <Link
+                            to={`/pets/${data.id}`}
+                            className="flex-1 bg-text-primary text-text-inverted h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-brand-primary hover:shadow-lg transition-all"
+                        >
+                            View Companion
+                        </Link>
+                        <button className="w-9 h-9 rounded-xl border border-border/50 flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-secondary transition-all">
+                            <Share2 size={16} />
+                        </button>
+                    </div>
+                </div>
+            </motion.div>
+        );
+    }
+
+    // --- Public Rehoming Listing Card (The Original/Large Layout) ---
     // Matches docs/listcard.txt
 
     return (
@@ -223,15 +331,17 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
         >
             {/* 1. Media Section */}
             <div className={`relative overflow-hidden ${viewMode === 'list' ? 'lg:w-72 h-64 lg:h-auto' : 'aspect-[4/3] w-full'}`}>
-                <img
-                    src={data.photo}
-                    alt={data.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                />
+                <Link to={`/pets/${data.id}`} className="block h-full">
+                    <img
+                        src={data.photo}
+                        alt={data.name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+                    />
+                </Link>
                 <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent opacity-80" />
 
                 {/* Top Badges */}
-                <div className="absolute top-3 inset-x-3 flex justify-between items-start">
+                <div className="absolute top-3 inset-x-3 flex justify-between items-start pointer-events-none">
                     {/* Urgency Badge (Left) */}
                     <div className="flex flex-col gap-1.5">
                         {data.isUrgent ? (
@@ -251,7 +361,7 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
                     </div>
 
                     {/* Bookmark Interaction (Right) */}
-                    <button className="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-status-error transition-all hover:scale-110 shadow-sm">
+                    <button className="pointer-events-auto w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-status-error transition-all hover:scale-110 shadow-sm">
                         <Heart size={16} />
                     </button>
                 </div>
@@ -263,9 +373,11 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
                 {/* Identity Block */}
                 <div>
                     <div className="flex justify-between items-start">
-                        <h3 className="text-2xl font-bold text-text-primary leading-none mb-1.5 group-hover:text-brand-primary transition-colors">
-                            {data.name}
-                        </h3>
+                        <Link to={`/pets/${data.id}`}>
+                            <h3 className="text-2xl font-bold text-text-primary leading-none mb-1.5 group-hover:text-brand-primary transition-colors">
+                                {data.name}
+                            </h3>
+                        </Link>
                         {/* Gender Icon Visual */}
                         {data.gender && (
                             <span className={`text-[12px] px-2 py-0.5 rounded-full font-bold uppercase ${data.gender.toLowerCase() === 'male' ? 'bg-blue-50 text-blue-600' : data.gender.toLowerCase() === 'female' ? 'bg-pink-50 text-pink-600' : 'bg-gray-50 text-gray-500'}`}>

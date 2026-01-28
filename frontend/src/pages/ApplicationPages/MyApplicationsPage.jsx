@@ -1,25 +1,28 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
-import { MessageCircle, Calendar, ChevronRight, User, PawPrint, Inbox, Send } from 'lucide-react';
+import {
+    MessageCircle, Calendar, ChevronRight, User, PawPrint, Inbox, Send, Archive,
+    MapPin, Clock, Star, CheckCircle2, Circle, Mail
+} from 'lucide-react';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
 import Card from '../../components/common/Layout/Card';
 import Button from '../../components/common/Buttons/Button';
 import Badge from '../../components/common/Feedback/Badge';
 import { toast } from 'react-toastify';
+import { format } from 'date-fns';
 
 const MyApplicationsPage = () => {
     const api = useAPI();
     const { user } = useAuth();
-    const [activeTab, setActiveTab] = useState('submitted'); // 'submitted' | 'received'
-    const [filter, setFilter] = useState('All');
+    const [activeTab, setActiveTab] = useState('received'); // 'received' | 'submitted' | 'archived'
 
     // Fetch Applications
     const { data: applications = [], isLoading, error } = useQuery({
         queryKey: ['applications'],
         queryFn: async () => {
-            const res = await api.get('/adoption/applications/');
+            const res = await api.get('/rehoming/inquiries/');
             return res.data.results || res.data;
         }
     });
@@ -28,186 +31,257 @@ const MyApplicationsPage = () => {
         toast.error("Failed to load applications.");
     }
 
-    // Split Applications
-    const { submittedApps, receivedApps } = useMemo(() => {
-        if (!user) return { submittedApps: [], receivedApps: [] };
+    // Split Applications based on user role in the application
+    const { submittedApps, receivedApps, archivedApps } = useMemo(() => {
+        if (!user) return { submittedApps: [], receivedApps: [], archivedApps: [] };
 
         const submitted = [];
         const received = [];
+        const archived = [];
 
         applications.forEach(app => {
-            if (app.applicant_id === user.id) {
+            const status = app.application.status;
+            // Archived: Withdrawn, Declined (Legacy), Rejected
+            if (['withdrawn', 'declined', 'rejected', 'closed'].includes(status)) {
+                archived.push(app);
+                return;
+            }
+
+            if (app.applicant.id === user.id) {
                 submitted.push(app);
-            } else if (app.pet_owner_id === user.id) {
+            } else {
                 received.push(app);
             }
         });
 
-        return { submittedApps: submitted, receivedApps: received };
+        return { submittedApps: submitted, receivedApps: received, archivedApps: archived };
     }, [applications, user]);
 
-    const currentList = activeTab === 'submitted' ? submittedApps : receivedApps;
+    const currentList = activeTab === 'submitted' ? submittedApps :
+        activeTab === 'archived' ? archivedApps : receivedApps;
 
     const getStatusVariant = (status) => {
-        switch (status) { // Matching backend status choices
-            case 'approved_meet_greet': return 'success';
-            case 'meet_greet_success': return 'success';
-            case 'adopted': return 'success';
-            case 'rejected': return 'error';
-            case 'returned': return 'error';
-            case 'info_requested': return 'info';
-            case 'pending_review': return 'warning';
-            case 'trial_period': return 'purple'; // Custom variant if supported, else info
+        switch (status) {
+            case 'accepted':
+            case 'approved_meet_greet':
+            case 'adopted':
+                return 'success';
+            case 'pending':
+            case 'pending_review':
+                return 'warning';
+            case 'declined':
+            case 'rejected':
+                return 'error';
+            case 'withdrawn':
+                return 'neutral';
             default: return 'neutral';
         }
     };
 
-    const getStatusLabel = (status) => {
-        // Transform snake_case to Title Case
-        return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
+    const handleEmail = (email) => {
+        window.location.href = `mailto:${email}`;
     };
 
-    const filteredApps = useMemo(() => {
-        if (filter === 'All') return currentList;
-        // Simple filter logic - strictly matching status key would be better but keeping simple for UI
-        return currentList.filter(app => app.status.includes(filter.toLowerCase().replace(' ', '_')));
-    }, [currentList, filter]);
+    const handleWhatsApp = (phone) => {
+        if (!phone) {
+            toast.info("No phone number available.");
+            return;
+        }
+        const cleanPhone = phone.replace(/\D/g, '');
+        window.open(`https://wa.me/${cleanPhone}`, '_blank');
+    };
 
     return (
-        <div className="min-h-screen bg-bg-primary py-8 px-4 md:px-8 max-w-6xl mx-auto">
-            <div className="mb-8">
-                <h1 className="text-3xl font-black font-logo text-text-primary tracking-tight">Adoption Applications</h1>
-                <p className="text-text-secondary mt-2">Manage your journey to finding or rehoming a pet.</p>
-            </div>
+        <div className="min-h-screen bg-[#F9F8F6] py-12 px-4 md:px-8 font-jakarta">
+            <div className="max-w-5xl mx-auto space-y-8">
 
-            {/* Main Tabs (Submitted vs Received) */}
-            <div className="flex p-1 bg-bg-surface border border-border rounded-xl w-full max-w-md mb-8">
-                <button
-                    onClick={() => { setActiveTab('submitted'); setFilter('All'); }}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'submitted'
-                        ? 'bg-white shadow-sm text-brand-primary'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
-                        }`}
-                >
-                    <Send size={16} />
-                    Submitted
-                    <span className="ml-1 bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full text-xs">
-                        {submittedApps.length}
-                    </span>
-                </button>
-                <button
-                    onClick={() => { setActiveTab('received'); setFilter('All'); }}
-                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 rounded-lg text-sm font-bold transition-all ${activeTab === 'received'
-                        ? 'bg-white shadow-sm text-brand-primary'
-                        : 'text-text-secondary hover:text-text-primary hover:bg-bg-secondary'
-                        }`}
-                >
-                    <Inbox size={16} />
-                    Received
-                    <span className="ml-1 bg-brand-primary/10 text-brand-primary px-2 py-0.5 rounded-full text-xs">
-                        {receivedApps.length}
-                    </span>
-                </button>
-            </div>
+                {/* Header */}
+                <div>
+                    <h1 className="text-3xl font-black font-logo text-[#1A1A1A] tracking-tight">Applications</h1>
+                    <p className="text-[#5F5F5F] mt-2 text-sm">Review adoption applications you've received or submitted.</p>
+                </div>
 
-            {/* Status Filters */}
-            <div className="flex gap-2 overflow-x-auto pb-4 mb-6 scrollbar-hide">
-                {['All', 'Pending Review', 'Info Requested', 'Approved', 'Adopted', 'Rejected'].map(status => (
+                {/* Tabs */}
+                <div className="flex items-center gap-8 border-b border-[#E5E5E5]">
                     <button
-                        key={status}
-                        onClick={() => setFilter(status)}
-                        className={`px-4 py-2 rounded-full text-xs font-bold whitespace-nowrap transition-colors border ${filter === status
-                            ? 'bg-gray-900 text-white border-gray-900'
-                            : 'bg-white text-gray-500 border-gray-200 hover:border-gray-300'
+                        onClick={() => setActiveTab('received')}
+                        className={`pb-4 text-sm font-bold flex items-center gap-2 transition-all relative ${activeTab === 'received'
+                            ? 'text-[#1A1A1A]'
+                            : 'text-[#8F8F8F] hover:text-[#1A1A1A]'
                             }`}
                     >
-                        {status}
+                        Received
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'received' ? 'bg-[#1A1A1A] text-white' : 'bg-[#E5E5E5] text-[#5F5F5F]'
+                            }`}>
+                            {receivedApps.length}
+                        </span>
+                        {activeTab === 'received' && (
+                            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1A1A1A]" />
+                        )}
                     </button>
-                ))}
-            </div>
 
-            {/* List */}
-            <div className="space-y-4">
-                {isLoading ? (
-                    <div className="text-center py-20 text-text-tertiary">Loading applications...</div>
-                ) : filteredApps.length > 0 ? (
-                    filteredApps.map(app => (
-                        <Link to={`/dashboard/applications/${app.id}`} key={app.id}>
-                            <Card className="group hover:border-brand-primary/40 hover:shadow-md transition-all duration-300 mb-4 cursor-pointer">
-                                <div className="flex flex-col sm:flex-row p-5 gap-6 items-center">
-                                    {/* Pet Image */}
-                                    <div className="w-20 h-20 rounded-xl overflow-hidden shrink-0 bg-bg-secondary border border-border">
-                                        {app.pet_image ? (
-                                            <img src={app.pet_image} alt={app.pet_name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-text-tertiary">
-                                                <PawPrint size={24} />
-                                            </div>
-                                        )}
+                    <button
+                        onClick={() => setActiveTab('submitted')}
+                        className={`pb-4 text-sm font-bold flex items-center gap-2 transition-all relative ${activeTab === 'submitted'
+                            ? 'text-[#1A1A1A]'
+                            : 'text-[#8F8F8F] hover:text-[#1A1A1A]'
+                            }`}
+                    >
+                        Submitted
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] ${activeTab === 'submitted' ? 'bg-[#1A1A1A] text-white' : 'bg-[#E5E5E5] text-[#5F5F5F]'
+                            }`}>
+                            {submittedApps.length}
+                        </span>
+                        {activeTab === 'submitted' && (
+                            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1A1A1A]" />
+                        )}
+                    </button>
+
+                    <button
+                        onClick={() => setActiveTab('archived')}
+                        className={`pb-4 text-sm font-bold flex items-center gap-2 transition-all relative ${activeTab === 'archived'
+                            ? 'text-[#1A1A1A]'
+                            : 'text-[#8F8F8F] hover:text-[#1A1A1A]'
+                            }`}
+                    >
+                        Archived
+                        {activeTab === 'archived' && (
+                            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-[#1A1A1A]" />
+                        )}
+                    </button>
+                </div>
+
+
+
+                {/* List */}
+                <div className="space-y-4">
+                    {isLoading ? (
+                        <div className="text-center py-20">
+                            <div className="animate-spin w-8 h-8 border-4 border-[#6B8E7B] border-t-transparent rounded-full mx-auto mb-4" />
+                            <p className="text-xs font-black uppercase tracking-widest text-[#8F8F8F]">Loading Applications...</p>
+                        </div>
+                    ) : currentList.length > 0 ? (
+                        currentList.map((app) => (
+                            <div key={app.application.id} className="bg-white rounded-[20px] p-6 border border-[#E5E5E5] shadow-sm hover:shadow-md transition-all duration-300">
+                                <div className="flex flex-col md:flex-row gap-6">
+
+                                    {/* Main Photo (Pet) */}
+                                    <div className="w-24 h-24 rounded-2xl overflow-hidden shrink-0 bg-[#F9F8F6] border border-[#E5E5E5]">
+                                        <img
+                                            src={app.pet.primary_photo || "https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=300&q=80"}
+                                            alt={app.pet.name}
+                                            className="w-full h-full object-cover"
+                                        />
                                     </div>
 
-                                    {/* Content */}
-                                    <div className="flex-1 text-center sm:text-left min-w-0 w-full">
-                                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-2 mb-2">
+                                    {/* Info Content */}
+                                    <div className="flex-1 min-w-0">
+                                        <div className="flex flex-col md:flex-row md:justify-between md:items-start gap-4 mb-4">
                                             <div>
-                                                <h3 className="text-xl font-bold text-text-primary flex items-center justify-center sm:justify-start gap-2">
-                                                    {app.pet_name}
-                                                    <span className="text-sm font-medium text-text-tertiary">
-                                                        ({app.pet_breed || 'Unknown Breed'})
-                                                    </span>
-                                                </h3>
-                                                <p className="text-sm text-text-secondary mt-1 flex items-center justify-center sm:justify-start gap-2">
-                                                    {activeTab === 'submitted' ? (
-                                                        <>Listed by <span className="font-bold text-text-primary">{app.owner_name}</span></>
-                                                    ) : (
-                                                        <>Applicant: <span className="font-bold text-text-primary">{app.applicant}</span></>
-                                                    )}
-                                                </p>
+                                                <div className="flex items-center gap-3">
+                                                    {/* Applicant Avatar (Small) */}
+                                                    <div className="w-8 h-8 rounded-full bg-[#E5E5E5] overflow-hidden">
+                                                        <img src={activeTab === 'submitted' ? app.listing.owner?.photo_url : app.applicant.photo_url} className="w-full h-full object-cover" alt="" />
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-base font-black text-[#1A1A1A] uppercase tracking-tight">
+                                                            {activeTab === 'submitted' ? app.listing.owner?.full_name || 'Owner' : app.applicant.full_name}
+                                                        </h3>
+                                                        <p className="text-xs text-[#8F8F8F]">
+                                                            Applied for <span className="text-[#1A1A1A] font-bold">{app.pet.name}</span>
+                                                        </p>
+                                                    </div>
+                                                </div>
+
+                                                <div className="flex items-center gap-3 mt-2 text-[11px] text-[#8F8F8F]">
+                                                    <span>#{app.application.id}</span>
+                                                    <span>•</span>
+                                                    <span className="capitalize">{app.application.status}</span>
+                                                    <span>•</span>
+                                                    <span>Received {format(new Date(app.application.submitted_at), 'MMM d, yyyy')}</span>
+                                                </div>
                                             </div>
-                                            <Badge variant={getStatusVariant(app.status)} className="self-center md:self-start">
-                                                {getStatusLabel(app.status)}
+
+                                            <Badge variant={getStatusVariant(app.application.status)} className="uppercase tracking-widest text-[10px] font-black px-3 py-1.5 rounded-lg">
+                                                {app.application.status}
                                             </Badge>
                                         </div>
 
-                                        <div className="flex items-center justify-center sm:justify-start gap-4 text-xs text-text-tertiary mt-4 sm:mt-2">
-                                            <span className="flex items-center gap-1">
-                                                <Calendar size={14} /> Applied {new Date(app.created_at).toLocaleDateString()}
-                                            </span>
-                                            {activeTab === 'received' && app.readiness_score !== undefined && (
-                                                <span className={`flex items-center gap-1 font-bold ${app.readiness_score >= 80 ? 'text-green-600' :
-                                                        app.readiness_score >= 50 ? 'text-yellow-600' : 'text-text-tertiary'
-                                                    }`}>
-                                                    <User size={14} /> Match Score: {app.readiness_score}%
-                                                </span>
-                                            )}
+                                        {/* Tags Row */}
+                                        <div className="flex flex-wrap gap-2 mb-4">
+                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
+                                                <MapPin size={12} />
+                                                {app.applicant.location.city}, {app.applicant.location.state}
+                                            </div>
+                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
+                                                <Clock size={12} />
+                                                Urgency: {app.listing.urgency}
+                                            </div>
+                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
+                                                <PawPrint size={12} />
+                                                {app.pet.species} • {app.pet.gender} • {app.pet.breed}
+                                            </div>
+                                            <div className="px-3 py-1.5 bg-[#F9F8F6] rounded-full text-[10px] font-bold text-[#5F5F5F] flex items-center gap-1.5">
+                                                <Star size={12} />
+                                                {app.trust_snapshot.reviews_count} reviews
+                                            </div>
+                                        </div>
+
+                                        {/* Verification Row */}
+                                        <div className="flex items-center gap-4 text-[10px] font-bold text-[#8F8F8F] mb-6 border-t border-[#F5F5F5] pt-3">
+                                            <div className={`flex items-center gap-1.5 ${app.trust_snapshot.email_verified ? 'text-[#10B981]' : ''}`}>
+                                                {app.trust_snapshot.email_verified ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                                                Email verified
+                                            </div>
+                                            <div className={`flex items-center gap-1.5 ${app.trust_snapshot.identity_verified ? 'text-[#10B981]' : ''}`}>
+                                                {app.trust_snapshot.identity_verified ? <CheckCircle2 size={12} /> : <Circle size={12} />}
+                                                Identity {app.trust_snapshot.identity_verified ? 'verified' : 'not verified'}
+                                            </div>
+                                        </div>
+
+                                        {/* Actions */}
+                                        <div className="flex items-center justify-between">
+                                            <p className="text-[10px] text-[#8F8F8F]">Last updated {format(new Date(app.application.last_updated_at), 'MMM d, yyyy')}</p>
+
+                                            <div className="flex gap-3">
+                                                {activeTab === 'received' && (
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        className="rounded-full h-8 px-4 text-[10px] font-black uppercase tracking-widest border-[#E5E5E5] text-[#1A1A1A] hover:bg-[#F9F8F6] gap-2"
+                                                        onClick={() => handleWhatsApp(app.applicant.phone)}
+                                                    >
+                                                        <MessageCircle size={14} /> WhatsApp
+                                                    </Button>
+                                                )}
+
+                                                <Link to={activeTab === 'received' ? `/applications/${app.application.id}/review` : `/dashboard/applications/${app.application.id}`}>
+                                                    <Button
+                                                        className="rounded-full h-8 px-5 text-[10px] font-black uppercase tracking-widest bg-[#2E7D32] text-white border-none hover:bg-[#1B5E20] shadow-lg shadow-[#2E7D32]/20"
+                                                    >
+                                                        Review Application
+                                                    </Button>
+                                                </Link>
+                                            </div>
                                         </div>
                                     </div>
-
-                                    <div className="shrink-0 text-brand-primary opacity-0 group-hover:opacity-100 transition-opacity -translate-x-2 group-hover:translate-x-0 hidden sm:block">
-                                        <ChevronRight size={24} />
-                                    </div>
                                 </div>
-                            </Card>
-                        </Link>
-                    ))
-                ) : (
-                    <div className="text-center py-20 bg-bg-surface rounded-3xl border border-dashed border-border">
-                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4 text-text-tertiary shadow-sm">
-                            {activeTab === 'submitted' ? <Inbox size={32} /> : <PawPrint size={32} />}
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-24 bg-white rounded-[32px] border border-[#E5E5E5]">
+                            <div className="w-16 h-16 bg-[#F9F8F6] rounded-full flex items-center justify-center mx-auto mb-4 text-[#8F8F8F]">
+                                {activeTab === 'submitted' ? <Send size={24} /> : <Inbox size={24} />}
+                            </div>
+                            <h3 className="text-lg font-black text-[#1A1A1A] mb-2">No applications found</h3>
+                            <p className="text-[#8F8F8F] text-sm max-w-xs mx-auto">
+                                {activeTab === 'submitted'
+                                    ? "You haven't submitted any adoption applications yet."
+                                    : "You haven't received any new applications."}
+                            </p>
                         </div>
-                        <h3 className="text-lg font-bold text-text-primary mb-2">No applications found</h3>
-                        <p className="text-text-secondary text-sm max-w-xs mx-auto mb-6">
-                            {activeTab === 'submitted'
-                                ? "You haven't submitted any adoption applications yet."
-                                : "You haven't received any applications for your pets yet."}
-                        </p>
-                        {activeTab === 'submitted' && (
-                            <Link to="/pets">
-                                <Button variant="primary">Browse Pets</Button>
-                            </Link>
-                        )}
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );

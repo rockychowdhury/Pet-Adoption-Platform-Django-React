@@ -12,7 +12,6 @@ class RehomingRequest(models.Model):
     
     STATUS_CHOICES = [
         ('draft', 'Draft'),
-        ('cooling_period', 'Cooling Period'),
         ('confirmed', 'Confirmed'),  # Ready to create listing
         ('listed', 'Listed'),       # Listing has been created
         ('cancelled', 'Cancelled'),  # Owner changed mind
@@ -67,8 +66,6 @@ class RehomingRequest(models.Model):
     # Status & Timeline
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     
-    cooling_period_start = models.DateTimeField(null=True, blank=True)
-    cooling_period_end = models.DateTimeField(null=True, blank=True)
     confirmed_at = models.DateTimeField(null=True, blank=True)
     cancelled_at = models.DateTimeField(null=True, blank=True)
     cancellation_reason = models.TextField(blank=True)
@@ -90,14 +87,6 @@ class RehomingRequest(models.Model):
     
     def __str__(self):
         return f"Rehoming Request for {self.pet.name} - {self.status}"
-    
-    @property
-    def is_in_cooling_period(self):
-        """Check if still in cooling period"""
-        if self.status != 'cooling_period' or not self.cooling_period_end:
-            return False
-        from django.utils import timezone
-        return timezone.now() < self.cooling_period_end
     
     @property
     def can_proceed_to_listing(self):
@@ -215,12 +204,16 @@ class RehomingListing(models.Model):
     def __str__(self):
         return f"Listing for {self.pet.name} - {self.status}"
     
-    def mark_as_rehomed(self):
+    def mark_as_rehomed(self, new_owner=None):
         """Mark pet and listing as rehomed"""
         from django.utils import timezone
         self.status = 'rehomed'
         self.rehomed_at = timezone.now()
+        
         self.pet.status = 'rehomed'
+        if new_owner:
+            self.pet.owner = new_owner
+            
         self.pet.save()
         self.save()
 
@@ -235,16 +228,22 @@ class AdoptionInquiry(models.Model):
 
     message = models.TextField(help_text="Introductory message to the owner")
 
+    STATUS_CHOICES = [
+        ('pending_review', 'Pending Review'),
+        ('approved_meet_greet', 'Approved for Meet & Greet'),
+        ('adopted', 'Adopted'),
+        ('rejected', 'Rejected'),
+        ('withdrawn', 'Withdrawn'),
+    ]
+
     status = models.CharField(
-        max_length=20,
-        choices=[
-            ('pending','Pending'),
-            ('accepted','Accepted'),
-            ('declined','Declined'),
-            ('withdrawn','Withdrawn')
-        ],
-        default='pending'
+        max_length=50,
+        choices=STATUS_CHOICES,
+        default='pending_review'
     )
+    
+    owner_notes = models.TextField(blank=True, null=True, help_text="Notes from the owner regarding this application")
+    rejection_reason = models.TextField(blank=True, null=True, help_text="Reason for rejection")
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

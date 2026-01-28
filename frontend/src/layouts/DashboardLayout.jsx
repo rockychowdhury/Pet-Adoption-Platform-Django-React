@@ -40,7 +40,6 @@ const DashboardLayout = () => {
         { name: 'My Listings', path: '/dashboard/rehoming', icon: FileText },
         // Applications focuses on adopter applications view
         { name: 'Applications', path: '/dashboard/applications', icon: FolderOpen },
-        { name: 'Messages', path: '/messages', icon: MessageSquare },
         // Placeholder route for user reviews section
         { name: 'Reviews', path: '/dashboard/reviews', icon: Star },
         // Route closest to account settings / profile

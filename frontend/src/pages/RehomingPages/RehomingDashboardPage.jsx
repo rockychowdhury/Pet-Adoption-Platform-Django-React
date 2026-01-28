@@ -13,15 +13,15 @@ import ConfirmationModal from '../../components/common/Modal/ConfirmationModal';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import HistoryTable from './components/HistoryTable';
-import CountdownTimer from '../../components/common/CountdownTimer';
 
 const RehomingDashboardPage = () => {
     const queryClient = useQueryClient();
-    const { useGetListings, useDeleteListing, useGetRehomingRequests, usePublishRehomingRequest } = useRehoming();
+    const { useGetListings, useDeleteListing, useGetRehomingRequests, usePublishRehomingRequest, useCreateListing } = useRehoming();
     const { data: listings } = useGetListings({ owner: 'me' });
     const { data: requests } = useGetRehomingRequests();
     const deleteListingMutation = useDeleteListing();
     const publishMutation = usePublishRehomingRequest();
+    const { mutate: createListing } = useCreateListing();
 
     // State
     const [searchParams, setSearchParams] = useSearchParams();
@@ -40,8 +40,6 @@ const RehomingDashboardPage = () => {
     const tabs = [
         { id: 'All', label: 'All Listings' },
         { id: 'Active', label: 'Active' },
-        { id: 'Cooling Period', label: 'Cooling Period' },
-        { id: 'Draft', label: 'Drafts' }, // Drafts + Confirmed
         { id: 'History', label: 'History' } // Rehomed + Cancelled + Closed
     ];
 
@@ -61,7 +59,7 @@ const RehomingDashboardPage = () => {
             pet: r.pet_details,
             created_at: r.created_at,
             location_city: r.location_city,
-            cooling_period_end: r.cooling_period_end
+            // cooling_period_end removed
         });
 
         const activeListings = listingsList.map(normalizeListing);
@@ -71,22 +69,13 @@ const RehomingDashboardPage = () => {
         switch (activeTab) {
             case 'All':
                 // "All listing should fetech all rehoming request that are not rehomed"
-                // Showing Active Listings + Ongoing Requests
+                // Showing Active Listings + Ongoing Requests (if any exist that failed creation)
                 const allListings = activeListings.filter(l => !['rehomed', 'adopted', 'closed'].includes(l.status));
-                const allRequests = activeRequests.filter(r => !['cancelled', 'expired', 'listed'].includes(r.status));
-                items = [...allListings, ...allRequests];
+                // Include confirmed/draft requests just in case they exist from legacy or errors, but don't give them a tab
+                items = [...allListings];
                 break;
             case 'Active':
                 items = activeListings.filter(l => l.status === 'active');
-                break;
-            case 'Cooling Period':
-                // "Request for rehome that are in cooling period status"
-                items = activeRequests.filter(r => r.status === 'cooling_period');
-                break;
-            case 'Draft':
-                // "Draft will show all the rehoming request that are not in cooling period and also not listed"
-                // This includes 'draft' (internal) and 'confirmed' (ready to list)
-                items = activeRequests.filter(r => ['draft', 'confirmed'].includes(r.status));
                 break;
             case 'History':
                 // "History will show the rehoming history"
@@ -134,7 +123,6 @@ const RehomingDashboardPage = () => {
 
         // Special Request Statuses
         if (item.type === 'request') {
-            if (status === 'cooling_period') return { bg: 'bg-blue-500/90', text: 'Cooling Period', icon: Clock };
             if (status === 'confirmed') return { bg: 'bg-green-500/90', text: 'Ready to Publish', icon: CheckCircle2 };
             if (status === 'listed') return { bg: 'bg-brand-secondary/90', text: 'Listed', icon: CheckCircle2 };
             if (status === 'draft') return { bg: 'bg-gray-400/90', text: 'Draft Request', icon: Edit2 };
@@ -342,17 +330,6 @@ const RehomingDashboardPage = () => {
                                                             <span className="text-[11px] font-bold">{item.view_count || 0} Views</span>
                                                         </div>
                                                     )}
-                                                    {item.type === 'request' && item.status === 'cooling_period' && (
-                                                        <div className="col-span-2">
-                                                            <CountdownTimer
-                                                                targetDate={item.cooling_period_end}
-                                                                onComplete={() => {
-                                                                    queryClient.invalidateQueries(['myRehomingRequests']);
-                                                                    toast.info("Cooling period ended. Status updated.");
-                                                                }}
-                                                            />
-                                                        </div>
-                                                    )}
                                                 </div>
 
                                                 {/* Meta Info */}
@@ -398,29 +375,21 @@ const RehomingDashboardPage = () => {
                                                             {item.status === 'confirmed' ? (
                                                                 <button
                                                                     onClick={() => {
-                                                                        publishMutation.mutate(item.id, {
-                                                                            onSuccess: () => toast.success("Listing published successfully!"),
-                                                                            onError: () => toast.error("Failed to publish listing.")
+                                                                        createListing({ request_id: item.id }, {
+                                                                            onSuccess: () => toast.success("Listing created successfully!"),
+                                                                            onError: () => toast.error("Failed to create listing.")
                                                                         });
                                                                     }}
-                                                                    disabled={publishMutation.isPending}
-                                                                    className="flex-1 bg-green-600 text-white h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-green-700 hover:shadow-lg transition-all duration-300 disabled:opacity-50"
+                                                                    className="flex-1 bg-green-600 text-white h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-green-700 hover:shadow-lg transition-all duration-300"
                                                                 >
-                                                                    {publishMutation.isPending ? 'Publishing...' : 'Publish Listing'}
+                                                                    Create Listing
                                                                 </button>
-                                                            ) : item.status === 'draft' ? (
+                                                            ) : (
                                                                 <Link
                                                                     to={`/rehoming/create?resume=${item.id}`}
                                                                     className="flex-1 bg-gray-800 text-white h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-gray-900 transition-all duration-300"
                                                                 >
                                                                     Resume
-                                                                </Link>
-                                                            ) : (
-                                                                <Link
-                                                                    to="/rehoming/status"
-                                                                    className="flex-1 bg-blue-100 text-blue-700 h-10 rounded-full flex items-center justify-center text-[10px] font-black uppercase tracking-[0.2em] hover:bg-blue-200 transition-all duration-300"
-                                                                >
-                                                                    View Status
                                                                 </Link>
                                                             )}
                                                         </>
@@ -433,7 +402,7 @@ const RehomingDashboardPage = () => {
                             )}
 
                             {/* Empty State */}
-                            {filteredItems.length === 0 && !(!searchQuery && activeTab === 'All' && viewMode === 'grid') && (
+                            {filteredItems.length === 0 && activeTab !== 'History' && !(!searchQuery && activeTab === 'All' && viewMode === 'grid') && (
                                 <div className="col-span-full flex flex-col items-center justify-center py-20 text-center">
                                     <div className="w-20 h-20 bg-gray-50 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4 text-gray-300">
                                         <PackageOpen size={40} />

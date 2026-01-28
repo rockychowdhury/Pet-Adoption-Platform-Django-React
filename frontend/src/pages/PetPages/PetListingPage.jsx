@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-    Search, LayoutGrid, List as ListIcon, Loader2, X, MapPin, ChevronLeft, ChevronRight
+    Search, List as ListIcon, Loader2, X, MapPin, ChevronLeft, ChevronRight, Plus
 } from 'lucide-react';
 import { useSearchParams } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,15 +11,16 @@ import CreatePetModal from '../../components/Pet/CreatePetModal';
 import FilterSidebar from '../../components/Pet/FilterSidebar';
 import PetCard from '../../components/Pet/PetCard';
 import LocationPickerModal from '../../components/Pet/LocationPickerModal';
-import SortDropdown from '../../components/Pet/SortDropdown';
 
 const PetListingPage = () => {
     const { user } = useAuth();
     const { useGetListings } = useRehoming();
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-    const [isFilterMobileOpen, setIsFilterMobileOpen] = useState(false);
+
+    // Unified Filter Drawer State (Mobile & Desktop)
+    const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
+
     const [page, setPage] = useState(1);
-    const [viewMode, setViewMode] = useState('grid');
     const [searchParams, setSearchParams] = useSearchParams();
 
     // IP Location State
@@ -39,31 +40,21 @@ const PetListingPage = () => {
         good_with_dogs: '',
         good_with_children: '',
         house_trained: '',
-        special_needs: '',
         verified_owner: '',
         verified_identity: '',
-        verified_vet: '',
-        max_fee: '',
-        energy_level: '',
         location: searchParams.get('location') || '',
         radius: parseInt(searchParams.get('radius')) || 50,
-        // Backend expects 'lat'/'lng' if radius is used, 
-        // effectively we need to decode them from URL if we were storing them,
-        // OR the user re-selects via LocationPickerModal effectively.
-        // For simple text location, we treat it as search in backend if lat/lng missing.
+        // Backend expects 'lat'/'lng'
         ordering: '-published_at'
     });
 
     const [allPets, setAllPets] = useState([]);
 
-    // Filter out radius if no location is provided to avoid empty results
+    // Filter out radius if no location is provided
     const fetchFilters = { ...filters };
     if (!fetchFilters.location) {
         delete fetchFilters.radius;
     }
-    // Note: To make radius search work authentically, we'd need lat/long in state.
-    // Assuming LocationPickerModal returns lat/long and we store it or pass it.
-    // For now we rely on the implementation where we might pass lat/long if available.
 
     const { data, isLoading: loading, refetch } = useGetListings({ ...fetchFilters, page });
     const totalCount = data?.count || 0;
@@ -91,13 +82,9 @@ const PetListingPage = () => {
 
     const handleLocationSelect = (locationData) => {
         const { name, radius, lat, lng } = locationData;
-
-        // Update URL
         const newParams = new URLSearchParams(searchParams);
         newParams.set('location', name);
         newParams.set('radius', radius);
-        // Ideally we'd store lat/lng in URL too if we want persistence, 
-        // or just rely on text search for city name if lat/lng missing.
         if (lat) newParams.set('lat', lat);
         if (lng) newParams.set('lng', lng);
 
@@ -160,7 +147,6 @@ const PetListingPage = () => {
 
     const clearFilters = () => {
         setSearchParams({});
-        // Local state update via useEffect on URL change
     };
 
     const removeFilter = (key) => {
@@ -180,7 +166,7 @@ const PetListingPage = () => {
         }
     };
 
-    // Derived Active Filters
+    // Derived Active Filters for Chips
     const getActiveFilters = () => {
         const active = [];
         if (filters.species) active.push({ key: 'species', label: `Species: ${filters.species} ` });
@@ -198,208 +184,216 @@ const PetListingPage = () => {
         visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
     };
 
+    // Quick Species Select Helper
+    const toggleSpecies = (speciesId) => {
+        const newVal = filters.species === speciesId ? '' : speciesId;
+        setFilters(prev => ({ ...prev, species: newVal }));
+        setAllPets([]);
+        setPage(1);
+    };
+
     return (
-        <div className="min-h-screen bg-bg-primary font-jakarta"> {/* Using lighter background */}
-            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 pb-40 pt-8">
-                <div className="flex flex-col xl:flex-row gap-12 py-8">
+        <div className="min-h-screen bg-bg-primary font-jakarta">
+            <div className="max-w-7xl mx-auto px-6 pb-40 pt-8">
 
-                    {/* Filter Sidebar - Sticky */}
-                    <aside className="hidden xl:block w-72 shrink-0">
-                        <div className="sticky top-28 max-h-[calc(100vh-8rem)] overflow-y-auto pr-2 scrollbar-none">
-                            <FilterSidebar
-                                filters={filters}
-                                onFilterChange={handleFilterChange}
-                                onClearFilters={clearFilters}
-                            />
-                        </div>
-                    </aside>
+                {/* 1. Header & Top Filters Container */}
+                <div className="flex flex-col gap-6 mb-8">
 
-                    {/* Main Content */}
-                    <div className="flex-1">
-
-                        {/* Header & Controls */}
-                        <div className="flex flex-col gap-6 mb-10">
-                            <div className="flex flex-wrap items-center justify-between gap-4">
-                                <div>
-                                    <h1 className="text-3xl font-bold text-text-primary mb-2 tracking-tight">
-                                        Find a Companion
-                                    </h1>
-                                    <p className="text-text-secondary text-sm font-medium">
-                                        {totalCount} pets waiting for a new home
-                                    </p>
-                                </div>
-
-                                {/* Location & Controls */}
-                                <div className="flex items-center gap-3 ml-auto">
-                                    {/* Location Button */}
-                                    <button
-                                        onClick={() => setIsLocationModalOpen(true)}
-                                        className={`flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all text-sm font-bold ${filters.location
-                                                ? 'bg-brand-primary/10 border-brand-primary/20 text-brand-primary'
-                                                : suggestedLocation
-                                                    ? 'bg-amber-50 border-amber-200 text-amber-700'
-                                                    : 'bg-white border-gray-200 text-text-secondary hover:border-gray-300'
-                                            }`}
-                                    >
-                                        <MapPin size={16} />
-                                        <span>
-                                            {filters.location || suggestedLocation || "Set Location"}
-                                        </span>
-                                        {filters.location && <span className="text-xs opacity-70">({filters.radius}mi)</span>}
-                                    </button>
-
-                                    <SortDropdown currentSort={filters.ordering} onSortChange={handleSortChange} />
-
-                                    {/* View Toggle */}
-                                    <div className="flex bg-white border border-gray-200 p-1 rounded-lg">
-                                        <button onClick={() => setViewMode('grid')} className={`p-2 rounded-md transition-all ${viewMode === 'grid' ? 'bg-gray-100 text-text-primary' : 'text-text-tertiary hover:text-text-secondary'}`}>
-                                            <LayoutGrid size={18} />
-                                        </button>
-                                        <button onClick={() => setViewMode('list')} className={`p-2 rounded-md transition-all ${viewMode === 'list' ? 'bg-gray-100 text-text-primary' : 'text-text-tertiary hover:text-text-secondary'}`}>
-                                            <ListIcon size={18} />
-                                        </button>
-                                    </div>
-                                </div>
+                    {/* Top Row: Compact Title + Actions */}
+                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
+                        <div className="flex items-baseline gap-4">
+                            <h1 className="text-3xl md:text-4xl font-logo font-black text-text-primary tracking-tighter leading-none">
+                                Find a <span className="text-brand-primary">Companion</span>
+                            </h1>
+                            <div className="flex items-center gap-2">
+                                <div className="h-0.5 w-6 bg-brand-secondary rounded-full opacity-50"></div>
+                                <p className="text-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">
+                                    {totalCount} pets waiting
+                                </p>
                             </div>
+                        </div>
 
-                            {/* Active Filter Chips */}
-                            <AnimatePresence>
+                        <div className="flex items-center gap-3 w-full md:w-auto">
+                            {/* Location Button */}
+                            <button
+                                onClick={() => setIsLocationModalOpen(true)}
+                                className={`flex-1 md:flex-none flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl transition-all text-xs font-bold shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 hover:border-gray-200 active:scale-95 ${filters.location
+                                    ? 'bg-brand-primary/5 text-brand-primary border-brand-primary/20'
+                                    : suggestedLocation
+                                        ? 'bg-amber-50/50 text-amber-800 border-amber-100'
+                                        : 'bg-white text-text-secondary hover:text-text-primary'
+                                    }`}
+                            >
+                                <MapPin size={16} className={filters.location ? "fill-brand-primary/20" : ""} />
+                                <span className="max-w-[120px] truncate">
+                                    {filters.location || suggestedLocation || "Set Location"}
+                                </span>
+                            </button>
+
+                            {/* Filter Drawer Trigger */}
+                            <button
+                                onClick={() => setIsFilterDrawerOpen(true)}
+                                className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl transition-all text-xs font-bold shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 hover:border-gray-200 active:scale-95 ${activeFilters.length > 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-text-secondary hover:text-text-primary'}`}
+                            >
+                                <ListIcon size={16} />
+                                <span className="hidden sm:inline">Filters</span>
                                 {activeFilters.length > 0 && (
-                                    <motion.div
-                                        initial={{ opacity: 0, height: 0 }}
-                                        animate={{ opacity: 1, height: 'auto' }}
-                                        exit={{ opacity: 0, height: 0 }}
-                                        className="flex flex-wrap gap-2"
-                                    >
-                                        {activeFilters.map(filter => (
-                                            <button
-                                                key={filter.key}
-                                                onClick={() => removeFilter(filter.key)}
-                                                className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-gray-200 text-xs font-bold text-text-secondary hover:border-status-error hover:text-status-error transition-all shadow-sm group"
-                                            >
-                                                {filter.label}
-                                                <X size={14} className="group-hover:scale-110" />
-                                            </button>
-                                        ))}
-                                        <button onClick={clearFilters} className="text-xs font-bold text-status-error uppercase tracking-wider hover:underline px-2">
-                                            Clear All
-                                        </button>
-                                    </motion.div>
+                                    <span className="bg-white text-gray-900 w-4 h-4 flex items-center justify-center rounded-full text-[9px]">
+                                        {activeFilters.length}
+                                    </span>
                                 )}
-                            </AnimatePresence>
+                            </button>
                         </div>
+                    </div>
 
-                        {/* Results Grid */}
-                        {loading && allPets.length === 0 ? (
-                            <div className="grid gap-8 grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3">
-                                {[1, 2, 3, 4, 5, 6].map(i => (
-                                    <div key={i} className="bg-white h-[400px] rounded-[24px] animate-pulse border border-gray-100"></div>
-                                ))}
-                            </div>
-                        ) : allPets.length > 0 ? (
-                            <>
+                    {/* Active Filter Chips (Replacing Species Section) */}
+                    <div className="min-h-[44px] flex items-center">
+                        <AnimatePresence mode="wait">
+                            {activeFilters.length > 0 ? (
                                 <motion.div
-                                    variants={containerVariants}
-                                    initial="hidden"
-                                    animate="visible"
-                                    className={`grid gap-8 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 2xl:grid-cols-3' : 'grid-cols-1'} `}
+                                    key="active-filters"
+                                    initial={{ opacity: 0, y: 5 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    exit={{ opacity: 0, y: -5 }}
+                                    className="flex flex-wrap gap-2 items-center"
                                 >
-                                    {allPets.map(pet => (
-                                        <PetCard key={pet.id} pet={pet} viewMode={viewMode} variant="listing" />
+                                    <span className="text-[10px] font-black uppercase tracking-widest text-text-tertiary mr-2">Filtering by:</span>
+                                    {activeFilters.map(filter => (
+                                        <button
+                                            key={filter.key}
+                                            onClick={() => removeFilter(filter.key)}
+                                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[10px] font-bold text-text-secondary hover:border-status-error hover:text-status-error transition-all shadow-sm group"
+                                        >
+                                            {filter.label}
+                                            <X size={12} className="group-hover:rotate-90 transition-transform" />
+                                        </button>
                                     ))}
+                                    <button
+                                        onClick={clearFilters}
+                                        className="text-[10px] font-black text-status-error uppercase tracking-widest hover:bg-status-error/5 px-3 py-1.5 rounded-xl transition-colors"
+                                    >
+                                        Reset All
+                                    </button>
                                 </motion.div>
-
-                                {/* Pagination (Simple) */}
-                                {totalCount > 24 && (
-                                    <div className="mt-16 flex items-center justify-center gap-4">
-                                        <button
-                                            onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                            disabled={page === 1 || loading}
-                                            className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-200 text-text-secondary hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                                        >
-                                            <ChevronLeft size={20} />
-                                        </button>
-                                        <span className="text-sm font-bold text-text-secondary">Page {page}</span>
-                                        <button
-                                            onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                            disabled={!hasNextPage || loading}
-                                            className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-200 text-text-secondary hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                                        >
-                                            <ChevronRight size={20} />
-                                        </button>
-                                    </div>
-                                )}
-                            </>
-                        ) : (
-                            <NoResults
-                                title="No matching companions found"
-                                description="Try adjusting your filters or expanding your search radius."
-                                onReset={clearFilters}
-                                icon={Search}
-                            />
-                        )}
+                            ) : (
+                                <motion.p
+                                    key="no-filters"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    className="text-[11px] font-medium text-text-tertiary italic"
+                                >
+                                    Browse all available companions or use filters to narrow down.
+                                </motion.p>
+                            )}
+                        </AnimatePresence>
                     </div>
                 </div>
+                {/* Results Grid - Full Width 4 Columns */}
+                {loading && allPets.length === 0 ? (
+                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                            <div key={i} className="bg-white h-[320px] rounded-[24px] animate-pulse border border-gray-100"></div>
+                        ))}
+                    </div>
+                ) : allPets.length > 0 ? (
+                    <>
+                        <motion.div
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                        >
+                            {allPets.map(pet => (
+                                <PetCard key={pet.id} pet={pet} viewMode="grid" variant="compact-listing" />
+                            ))}
+                        </motion.div>
+
+                        {/* Pagination */}
+                        {totalCount > 24 && (
+                            <div className="mt-16 flex items-center justify-center gap-4">
+                                <button
+                                    onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    disabled={page === 1 || loading}
+                                    className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-200 text-text-secondary hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                                >
+                                    <ChevronLeft size={20} />
+                                </button>
+                                <span className="text-sm font-bold text-text-secondary">Page {page}</span>
+                                <button
+                                    onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    disabled={!hasNextPage || loading}
+                                    className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-200 text-text-secondary hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
+                                >
+                                    <ChevronRight size={20} />
+                                </button>
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    <NoResults
+                        title="No matching companions found"
+                        description="Try adjusting your filters or expanding your search radius."
+                        onReset={clearFilters}
+                        icon={Search}
+                    />
+                )}
             </div>
 
-            {/* Mobile Filter Overlay */}
+            {/* Filter Drawer (Right Side) */}
             <AnimatePresence>
-                {isFilterMobileOpen && (
+                {isFilterDrawerOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100] lg:hidden"
+                        className="fixed inset-0 z-[100]"
                     >
-                        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setIsFilterMobileOpen(false)} />
+                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            className="absolute right-0 top-0 bottom-0 w-full max-w-sm bg-bg-primary shadow-2xl overflow-y-auto"
+                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                            className="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-white shadow-2xl flex flex-col"
                         >
-                            <div className="p-6 border-b border-gray-100 flex items-center justify-between sticky top-0 bg-bg-primary z-20">
+                            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-20">
                                 <h2 className="text-xl font-bold text-text-primary">Filters</h2>
-                                <button onClick={() => setIsFilterMobileOpen(false)} className="p-2 hover:bg-gray-100 rounded-full">
+                                <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                                     <X size={24} />
                                 </button>
                             </div>
-                            <div className="p-6">
+
+                            <div className="flex-1 overflow-y-auto p-6">
                                 <FilterSidebar
                                     filters={filters}
                                     onFilterChange={handleFilterChange}
-                                    onClearFilters={() => { clearFilters(); setIsFilterMobileOpen(false); }}
+                                    onClearFilters={() => { clearFilters(); setIsFilterDrawerOpen(false); }}
                                 />
+                            </div>
+
+                            <div className="p-6 border-t border-gray-100 bg-gray-50">
+                                <button
+                                    onClick={() => setIsFilterDrawerOpen(false)}
+                                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]"
+                                >
+                                    Show {totalCount} Results
+                                </button>
                             </div>
                         </motion.div>
                     </motion.div>
                 )}
             </AnimatePresence>
 
-            {/* Mobile Filter FAB */}
-            <div className="fixed bottom-6 right-6 lg:hidden z-50">
-                <button
-                    onClick={() => setIsFilterMobileOpen(true)}
-                    className="h-14 px-6 bg-brand-primary text-white rounded-full font-bold shadow-lg flex items-center gap-2"
-                >
-                    Filters {activeFilters.length > 0 && <span className="bg-white text-brand-primary text-xs w-5 h-5 flex items-center justify-center rounded-full">{activeFilters.length}</span>}
-                </button>
-            </div>
-
             {/* Admin Create Action */}
             {(user?.role === 'shelter' || user?.role === 'admin') && (
-                <motion.div
-                    initial={{ scale: 0 }}
-                    animate={{ scale: 1 }}
-                    className="fixed bottom-8 left-8 z-40 hidden xl:block"
-                >
+                <div className="fixed bottom-8 left-8 z-40">
                     <button
                         onClick={() => setIsCreateModalOpen(true)}
-                        className="w-16 h-16 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
+                        className="w-14 h-14 bg-brand-primary text-white rounded-full flex items-center justify-center shadow-xl hover:scale-110 transition-transform"
                     >
-                        <span className="text-3xl">+</span>
+                        <Plus size={28} />
                     </button>
-                </motion.div>
+                </div>
             )}
 
             <CreatePetModal

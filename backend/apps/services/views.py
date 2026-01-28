@@ -4,6 +4,7 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
 from django.db.models import Q
+from apps.common.logging_utils import log_business_event
 
 from .models import (
     ServiceProvider, ServiceReview, ServiceCategory, 
@@ -116,14 +117,23 @@ class ServiceProviderViewSet(viewsets.ModelViewSet):
         if ServiceProvider.objects.filter(user=user).exists():
              raise permissions.exceptions.PermissionDenied("You already have a Service Provider profile.")
 
-        serializer.save(user=user)
+        instance = serializer.save(user=user)
+        log_business_event('SERVICE_PROVIDER_PROFILE_CREATED', user, {
+            'provider_id': instance.id,
+            'business_name': instance.business_name
+        })
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def review(self, request, pk=None):
         provider = self.get_object()
         serializer = ServiceReviewSerializer(data=request.data)
         if serializer.is_valid():
-            serializer.save(provider=provider, reviewer=request.request.user)
+            review = serializer.save(provider=provider, reviewer=request.user)
+            log_business_event('SERVICE_REVIEW_CREATED', request.user, {
+                'review_id': review.id,
+                'provider_id': provider.id,
+                'rating': review.rating_overall
+            })
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
 
@@ -152,10 +162,14 @@ class ServiceBookingViewSet(viewsets.ModelViewSet):
             
         return queryset.distinct()
 
-    def perform_create(self, serializer):
         # Allow client to create booking
         # Status defaults to pending in model
-        serializer.save(client=self.request.user)
+        instance = serializer.save(client=self.request.user)
+        log_business_event('SERVICE_BOOKING_CREATED', self.request.user, {
+            'booking_id': instance.id,
+            'provider_id': instance.provider.id,
+            'pet_id': instance.pet.id
+        })
 
     @action(detail=True, methods=['post'])
     def accept(self, request, pk=None):
@@ -169,6 +183,10 @@ class ServiceBookingViewSet(viewsets.ModelViewSet):
             
         booking.status = 'confirmed'
         booking.save()
+        log_business_event('SERVICE_BOOKING_ACCEPTED', request.user, {
+            'booking_id': booking.id,
+            'client_id': booking.client.id
+        })
         return Response(ServiceBookingSerializer(booking).data)
 
     @action(detail=True, methods=['post'])
