@@ -87,10 +87,8 @@ INSTALLED_APPS = [
     'apps.users',
     'apps.pets',
     'apps.rehoming',
-    'apps.community',
     'apps.notifications',
     'apps.analytics',
-    'apps.messaging',
     'apps.reviews',
     'apps.admin_panel',
     'apps.services',
@@ -139,12 +137,24 @@ AUTH_USER_MODEL ='users.User'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+if config('SQL_DATABASE', default=None):
+    DATABASES = {
+        'default': {
+            'ENGINE': config('SQL_ENGINE', default='django.db.backends.postgresql'),
+            'NAME': config('SQL_DATABASE'),
+            'USER': config('SQL_USER'),
+            'PASSWORD': config('SQL_PASSWORD'),
+            'HOST': config('SQL_HOST'),
+            'PORT': config('SQL_PORT'),
+        }
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'db.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -222,3 +232,8 @@ EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
 EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
 DEFAULT_FROM_EMAIL = config('EMAIL_HOST_USER', default='noreply@petcircle.com')
 
+# WhatsApp Verification (Meta Cloud API)
+WHATSAPP_ACCESS_TOKEN = config('WHATSAPP_ACCESS_TOKEN', default='')
+WHATSAPP_PHONE_NUMBER_ID = config('WHATSAPP_PHONE_NUMBER_ID', default='')
+WHATSAPP_VERIFY_TOKEN = config('WHATSAPP_VERIFY_TOKEN', default='test_verify_token_123')
+META_APP_SECRET = config('META_APP_SECRET', default='')

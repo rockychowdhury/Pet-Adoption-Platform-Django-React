@@ -9,8 +9,6 @@ from django.conf.urls.static import static
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/user/', include('apps.users.urls')),
-    path('api/community/', include('apps.community.urls')),
-    path('api/messaging/', include('apps.messaging.urls')),
     # path('api/adoption/', include('apps.adoption.urls')), # Deprecated
     # path('api/reviews/', include('apps.reviews.urls')), # Deprecated
     path('api/rehoming/', include('apps.rehoming.urls')),
