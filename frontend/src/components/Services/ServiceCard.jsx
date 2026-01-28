@@ -6,168 +6,224 @@ import {
     ShieldCheck,
     Heart,
     Share2,
-    Clock,
     Stethoscope,
     Home,
-    Dog,
-    Cat,
-    Phone
+    GraduationCap,
+    Clock,
+    CheckCircle2
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ServiceCard = ({ provider, viewMode = 'grid' }) => {
-    // Logic to determine type based on content or category
+    // -------------------------------------------------------------------------
+    // 1. Data Normalization
+    // -------------------------------------------------------------------------
+
+    // Determine Type
     const isVet = !!provider.vet_details || provider.category?.slug === 'veterinary' || provider.category?.name?.toLowerCase().includes('vet');
     const isFoster = !!provider.foster_details || provider.category?.slug === 'foster' || provider.category?.name?.toLowerCase().includes('foster');
+    const isTrainer = !!provider.trainer_details || provider.category?.slug === 'training' || provider.category?.name?.toLowerCase().includes('train');
 
     // Visual Helpers
     const heroImage = provider.media?.find(m => m.is_primary)?.file_url || provider.media?.[0]?.file_url || 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&q=80';
 
-    // Mock Data / Fallbacks
-    const rating = provider.avg_rating || 'New';
+    // Basic Info
+    const name = provider.business_name;
+    const rating = provider.avg_rating || 0;
     const reviewCount = provider.reviews_count || 0;
-    const distance = provider.distance ? `${provider.distance} miles away` : ''; // API might need to return distance annotation
+    const city = provider.city || 'Nearby';
+    const state = provider.state || '';
+    const locationLabel = state ? `${city}, ${state}` : city;
+    const isVerified = provider.verification_status === 'verified' || provider.is_verified;
 
-    // Formatting Price/Details
-    let priceDisplay = 'Contact for details';
+    // Service Type Label & Color
+    let typeLabel = provider.category?.name || 'Service';
+    let typeIcon = null;
+    let typeColor = 'text-gray-600 bg-gray-50 border-gray-200';
+
+    if (isVet) {
+        typeLabel = provider.vet_details?.clinic_type ? `${provider.vet_details.clinic_type} Clinic` : 'Veterinary';
+        typeIcon = Stethoscope;
+        typeColor = 'text-blue-600 bg-blue-50 border-blue-100';
+    } else if (isFoster) {
+        typeLabel = 'Foster Home';
+        typeIcon = Home;
+        typeColor = 'text-pink-600 bg-pink-50 border-pink-100'; // Matching PetCard "Girl" color vibe roughly or distinct
+    } else if (isTrainer) {
+        typeLabel = 'Professional Trainer';
+        typeIcon = GraduationCap;
+        typeColor = 'text-amber-600 bg-amber-50 border-amber-100';
+    }
+
+    // Dynamic Stats / Badges
+    const stats = [];
+
+    // Pricing / Rate
+    let priceDisplay = '';
     if (isFoster && provider.foster_details?.daily_rate) {
         priceDisplay = `$${provider.foster_details.daily_rate}/day`;
     } else if (isVet && provider.vet_details?.base_price) {
-        priceDisplay = `Exam from $${provider.vet_details.base_price}`;
+        priceDisplay = `from $${provider.vet_details.base_price}`;
+    } else if (isTrainer && provider.trainer_details?.private_session_rate) {
+        priceDisplay = `$${provider.trainer_details.private_session_rate}/hr`;
     }
 
-    // Foster Specifics
-    const capacityStatus = provider.foster_details?.current_availability > 0 ? 'Available' : 'Full';
-    const capacityColor = capacityStatus === 'Available' ? 'bg-green-500' : 'bg-red-500';
+    if (priceDisplay) {
+        stats.push({ icon: null, label: 'Rate', value: priceDisplay, isPrimary: true });
+    }
 
+    // Availability / Emergency
+    if (isVet && provider.vet_details?.is_emergency) {
+        stats.push({ icon: Clock, label: 'Emergency', value: '24/7', color: 'text-red-500' });
+    } else if (isFoster) {
+        const spots = provider.foster_details?.current_availability || 0;
+        stats.push({
+            icon: CheckCircle2,
+            label: 'Capacity',
+            value: spots > 0 ? `${spots} Spots` : 'Full',
+            color: spots > 0 ? 'text-green-600' : 'text-gray-400'
+        });
+    } else if (isTrainer) {
+        const accepting = provider.trainer_details?.accepting_new_clients;
+        stats.push({
+            icon: CheckCircle2,
+            label: 'Status',
+            value: accepting ? 'Open' : 'Full',
+            color: accepting ? 'text-green-600' : 'text-gray-400'
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Render Component (Matches PetCard "Compact Listing")
+    // -------------------------------------------------------------------------
     return (
         <motion.div
             layout
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`group bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden ${viewMode === 'list' ? 'flex flex-col md:flex-row' : 'flex flex-col'}`}
+            className={`group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col font-jakarta relative h-full ${viewMode === 'list' ? 'md:flex-row md:h-48' : ''}`}
         >
-            {/* Visual Header */}
-            <div className={`relative shrink-0 overflow-hidden ${viewMode === 'list' ? 'w-full md:w-72 h-48 md:h-auto' : 'w-full h-48'}`}>
-                <img
-                    src={heroImage}
-                    alt={provider.business_name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+            {/* Hero Zone */}
+            <div className={`relative overflow-hidden ${viewMode === 'list' ? 'md:w-72 h-48' : 'aspect-[3/2]'}`}>
+                <Link to={`/services/${provider.id}`} className="block h-full">
+                    <img
+                        src={heroImage}
+                        alt={name}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                    />
+                </Link>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50" />
 
-                {/* Badges Overlay */}
-                <div className="absolute top-3 left-3 flex gap-2">
-                    {provider.is_verified && (
-                        <div className="bg-white/90 backdrop-blur-sm text-[#2D5A41] px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider flex items-center gap-1 shadow-sm">
-                            <ShieldCheck size={12} fill="currentColor" /> Verified
-                        </div>
-                    )}
-                    {isVet && provider.vet_details?.is_emergency && (
-                        <div className="bg-red-500 text-white px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider shadow-sm">
-                            24/7 Emergency
+                {/* Top Badges */}
+                <div className="absolute top-3 left-3 flex flex-col gap-1.5">
+                    {/* Service Type Badge */}
+                    <div className={`px-2 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-sm nav-blur border ${typeColor}`}>
+                        {typeIcon && (
+                            (() => {
+                                const Icon = typeIcon;
+                                return <Icon size={10} strokeWidth={3} />;
+                            })()
+                        )}
+                        {typeLabel}
+                    </div>
+
+                    {/* Verified Badge */}
+                    {isVerified && (
+                        <div className="px-2 py-1 bg-white/90 backdrop-blur-md text-[#2D5A41] text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm">
+                            <ShieldCheck size={10} strokeWidth={3} /> Verified
                         </div>
                     )}
                 </div>
 
-                <button className="absolute top-3 right-3 p-2 bg-white/20 backdrop-blur-sm hover:bg-white text-white hover:text-red-500 rounded-full transition-all duration-300">
-                    <Heart size={18} />
+                {/* Bookmark Interaction */}
+                <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-red-500 transition-all shadow-lg hover:scale-110">
+                    <Heart size={14} />
                 </button>
             </div>
 
-            {/* Content Body */}
-            <div className="flex-1 p-5 flex flex-col">
-                <div className="flex justify-between items-start mb-2">
-                    <div>
-                        <div className="flex items-center gap-2 mb-1">
-                            {isFoster ? (
-                                <span className={`w-2 h-2 rounded-full ${capacityColor}`}></span>
-                            ) : null}
-                            <span className="text-[11px] font-bold text-[#6B7280] uppercase tracking-wider">
-                                {isVet ? (provider.clinic_type || 'Veterinary Clinic') : (isFoster ? 'Foster Care' : provider.category?.name)}
-                            </span>
-                        </div>
-                        <h3 className="text-lg font-bold text-[#1F2937] group-hover:text-[#2D5A41] transition-colors leading-tight">
-                            {provider.business_name}
+            {/* Body */}
+            <div className="p-4 flex flex-col gap-3 flex-1">
+
+                {/* Header Info */}
+                <div className="flex justify-between items-start">
+                    <Link to={`/services/${provider.id}`}>
+                        <h3 className="text-lg font-bold text-[#111827] leading-tight group-hover:text-[#2D5A41] transition-colors line-clamp-1">
+                            {name}
                         </h3>
-                    </div>
-                    <div className="text-right">
-                        <div className="flex items-center gap-1 text-yellow-500 font-bold text-sm justify-end">
-                            <Star size={14} fill="currentColor" />
-                            {rating}
+                    </Link>
+                    {/* Rating */}
+                    {rating > 0 && (
+                        <div className="flex items-center gap-1 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-100">
+                            <Star size={10} fill="currentColor" strokeWidth={0} />
+                            <span className="text-[11px] font-black">{rating}</span>
                         </div>
-                        <span className="text-[10px] text-[#9CA3AF] font-medium block">
-                            {typeof reviewCount === 'number' ? `(${reviewCount} reviews)` : ''}
-                        </span>
-                    </div>
-                </div>
-
-                <div className="flex items-center gap-1.5 text-sm text-[#4B5563] mb-4">
-                    <MapPin size={14} className="text-[#9CA3AF]" />
-                    {provider.city}, {provider.state}
-                    {distance && (
-                        <>
-                            <span className="text-[#9CA3AF]">•</span>
-                            <span className="text-[#6B7280]">{distance}</span>
-                        </>
                     )}
                 </div>
 
-                {/* Key Details Grid */}
-                <div className="grid grid-cols-2 gap-y-2 gap-x-4 mb-5 pt-4 border-t border-gray-50">
-                    {isFoster ? (
-                        <>
-                            <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Availability</p>
-                                <p className="text-[13px] font-medium text-[#374151] truncate">
-                                    {provider.foster_details?.current_availability || 0} spots
-                                </p>
-                            </div>
-                            <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Rate</p>
-                                <p className="text-[13px] font-bold text-[#2D5A41] truncate">{priceDisplay}</p>
-                            </div>
-                            {provider.foster_details?.environment_details?.has_fenced_yard && (
-                                <div className="col-span-2 mt-1 flex items-center gap-1 text-xs text-green-700">
-                                    <ShieldCheck size={12} /> Fenced Yard Verified
-                                </div>
+                {/* Location Line */}
+                <p className="text-[10px] font-bold text-[#6B7280] uppercase tracking-wider flex items-center gap-1.5 mt-[-4px]">
+                    <MapPin size={10} className="text-[#2D5A41]" /> {locationLabel}
+                </p>
+
+                {/* Key Stats Grid - Matches PetCard Layout */}
+                <div className="grid grid-cols-2 gap-2 py-2 border-t border-gray-100/60 mt-auto md:mt-0">
+                    {/* Dynamic Stat 1 (Rate) */}
+                    {stats[0] && (
+                        <div className="flex items-center gap-2 text-[#4B5563]">
+                            {stats[0].label === 'Rate' ? (
+                                <span className="text-[10px] font-black text-[#2D5A41] bg-[#2D5A41]/5 px-2 py-1 rounded-md w-full text-center truncate">
+                                    {stats[0].value}
+                                </span>
+                            ) : (
+                                <>
+                                    {stats[0].icon && (
+                                        (() => {
+                                            const Icon = stats[0].icon;
+                                            return <Icon size={14} className={stats[0].color} />;
+                                        })()
+                                    )}
+                                    <span className="text-xs font-bold">{stats[0].value}</span>
+                                </>
                             )}
-                        </>
+                        </div>
+                    )}
+
+                    {/* Dynamic Stat 2 (Capacity/Status) */}
+                    {stats[1] ? (
+                        <div className="flex items-center gap-2 text-[#4B5563]">
+                            {stats[1].icon && (
+                                (() => {
+                                    const Icon = stats[1].icon;
+                                    return <Icon size={14} className={stats[1].color} />;
+                                })()
+                            )}
+                            <span className="text-xs font-bold">{stats[1].value}</span>
+                        </div>
                     ) : (
-                        // Vet Details
-                        <>
-                            <div className="col-span-2 mb-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Known For</p>
-                                <p className="text-[13px] font-medium text-[#374151] truncate">
-                                    {provider.vet_details?.services_offered?.slice(0, 3).map(s => s.name).join(', ') || 'General Care'}
-                                </p>
-                            </div>
-                            <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Hours</p>
-                                <p className="text-[13px] font-medium text-[#374151]">See Profile</p>
-                            </div>
-                            <div className="col-span-1">
-                                <p className="text-[10px] font-bold text-[#9CA3AF] uppercase">Rate</p>
-                                <p className="text-[13px] font-medium text-[#2D5A41]">{priceDisplay}</p>
-                            </div>
-                        </>
+                        // Fallback: Review Count if no 2nd stat
+                        <div className="flex items-center gap-2 text-[#9CA3AF]">
+                            <span className="text-[10px] font-bold">{reviewCount} reviews</span>
+                        </div>
                     )}
                 </div>
 
-                {/* Actions */}
-                <div className="mt-auto flex gap-3 pt-2">
+
+                {/* Footer Actions */}
+                <div className="mt-auto pt-2 flex gap-2">
                     <Link
                         to={`/services/${provider.id}`}
-                        className="flex-1 bg-[#2D5A41] text-white py-2.5 rounded-lg text-sm font-bold flex items-center justify-center hover:bg-[#234532] transition-colors shadow-sm"
+                        className="flex-1 bg-[#111827] text-white h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-[#2D5A41] hover:shadow-lg transition-all active:scale-[0.98]"
                     >
                         View Profile
                     </Link>
-                    <button className="flex items-center justify-center w-10 h-10 rounded-lg border border-gray-200 text-[#4B5563] hover:bg-gray-50 hover:text-[#1F2937] transition-colors">
-                        <Share2 size={18} />
+                    <button className="w-9 h-9 rounded-xl border border-gray-200 flex items-center justify-center text-[#9CA3AF] hover:text-[#111827] hover:bg-gray-50 transition-all">
+                        <Share2 size={16} />
                     </button>
                 </div>
+
             </div>
         </motion.div>
     );
 };
 
-export default ServiceCard;
+export default React.memo(ServiceCard);

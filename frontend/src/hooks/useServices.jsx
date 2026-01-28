@@ -21,24 +21,30 @@ const useServices = () => {
         queryFn: async () => (await api.get('/services/options/')).data
     });
 
+    const useGetSpecializations = () => useQuery({
+        queryKey: ['specializations'],
+        queryFn: async () => (await api.get('/services/specializations/')).data
+    });
+
     // --- Provider Queries ---
     const useGetProviders = (filters) => {
         return useQuery({
             queryKey: ['serviceProviders', filters],
             queryFn: async () => {
                 const params = new URLSearchParams();
-                if (filters.providerType) params.append('category', filters.providerType); // Slug
+                if (filters.providerType) params.append('category', filters.providerType); // This should be handled by ServiceSearchPage mapping to 'category'
+                if (filters.category) params.append('category', filters.category);
+
                 if (filters.location) params.append('location_city', filters.location);
                 if (filters.search) params.append('search', filters.search);
-                if (filters.radius) params.append('radius', filters.radius); // Backend needs to handle this if implemented, else client side filter
+                if (filters.radius) params.append('radius', filters.radius);
 
-                // Array params
-                if (filters.species && filters.species.length > 0) params.append('species', filters.species.join(','));
-
-                if (filters.minPrice) params.append('min_price', filters.minPrice);
-                if (filters.maxPrice) params.append('max_price', filters.maxPrice);
-                if (filters.availability === 'Available') params.append('availability', 'available');
-                if (filters.services && filters.services.length > 0) params.append('services', filters.services.join(','));
+                // Handling for filters passed from ServiceFilterSidebar (min_price, max_price, species, services)
+                if (filters.species) params.append('species', filters.species);
+                if (filters.min_price) params.append('min_price', filters.min_price);
+                if (filters.max_price) params.append('max_price', filters.max_price);
+                if (filters.availability) params.append('availability', filters.availability);
+                if (filters.services) params.append('services', filters.services);
 
                 if (filters.sort) params.append('ordering', filters.sort); // Use ordering for sort
 
@@ -59,6 +65,17 @@ const useServices = () => {
         });
     };
 
+    const useGetMyProviderProfile = () => {
+        return useQuery({
+            queryKey: ['myServiceProvider'],
+            queryFn: async () => {
+                const response = await api.get('/services/providers/me/');
+                return response.data;
+            },
+            retry: false // Don't retry if 404
+        });
+    };
+
     const useCreateProviderProfile = () => {
         return useMutation({
             mutationFn: async (data) => await api.post('/services/providers/', data),
@@ -74,6 +91,27 @@ const useServices = () => {
             mutationFn: async ({ id, data }) => await api.patch(`/services/providers/${id}/`, data),
             onSuccess: (_, variables) => {
                 queryClient.invalidateQueries(['serviceProvider', variables.id]);
+                queryClient.invalidateQueries(['myServiceProvider']);
+            }
+        });
+    };
+
+    const useUpdateProviderHours = () => {
+        return useMutation({
+            mutationFn: async ({ id, data }) => await api.post(`/services/providers/${id}/update_hours/`, data),
+            onSuccess: (_, variables) => {
+                queryClient.invalidateQueries(['serviceProvider', variables.id]);
+                queryClient.invalidateQueries(['myServiceProvider']);
+            }
+        });
+    };
+
+    const useUpdateProviderMedia = () => {
+        return useMutation({
+            mutationFn: async ({ id, data }) => await api.post(`/services/providers/${id}/update_media/`, data),
+            onSuccess: (_, variables) => {
+                queryClient.invalidateQueries(['serviceProvider', variables.id]);
+                queryClient.invalidateQueries(['myServiceProvider']);
             }
         });
     };
@@ -121,10 +159,14 @@ const useServices = () => {
         useGetCategories,
         useGetSpecies,
         useGetServiceOptions,
+        useGetSpecializations,
         useGetProviders,
         useGetProvider,
+        useGetMyProviderProfile,
         useCreateProviderProfile,
         useUpdateProviderProfile,
+        useUpdateProviderHours,
+        useUpdateProviderMedia,
         useCreateBooking,
         useGetMyBookings,
         useBookingAction,

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, Calendar, PawPrint, CheckCircle, AlertCircle, Loader } from 'lucide-react';
+import { X, Calendar, PawPrint, CheckCircle, AlertCircle, Loader, ArrowRight } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import DatePicker from 'react-datepicker';
 import "react-datepicker/dist/react-datepicker.css";
@@ -13,6 +13,7 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
     const [step, setStep] = useState(1);
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
+    const [selectedTime, setSelectedTime] = useState('09:00'); // Default time
     const [selectedPet, setSelectedPet] = useState(null);
     const [notes, setNotes] = useState('');
 
@@ -22,6 +23,9 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
     const { useGetMyPets } = usePets();
     const { data: myPets, isLoading: petsLoading } = useGetMyPets();
 
+    // Determine booking type logic
+    const isAppointment = provider?.category?.slug === 'veterinary' || provider?.category?.slug === 'training' || provider?.category?.name?.toLowerCase().includes('vet');
+
     const handleNext = () => setStep(prev => prev + 1);
     const handleBack = () => setStep(prev => prev - 1);
 
@@ -29,16 +33,25 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
         if (!selectedPet || !provider) return;
 
         try {
+            // Combine Date + Time for Start Date if appointment
+            let finalStart = new Date(startDate);
+            let finalEnd = new Date(endDate);
+
+            if (isAppointment) {
+                const [hours, minutes] = selectedTime.split(':');
+                finalStart.setHours(parseInt(hours), parseInt(minutes));
+                finalEnd = new Date(finalStart);
+                finalEnd.setHours(finalStart.getHours() + 1); // Default 1 hour duration
+            }
+
             await createBooking.mutateAsync({
                 provider: provider.id,
                 pet: selectedPet.id,
-                service_details: {
-                    service_name: initialService?.name || 'General Service',
-                    price: initialService?.price || provider.price || 0
-                },
-                start_date: startDate.toISOString(),
-                end_date: endDate.toISOString(),
-                notes: notes
+                service_option: initialService?.id || null, // Pass ID if available
+                booking_type: isAppointment ? 'standard' : 'recurring', // or logic based on duration
+                start_date: finalStart.toISOString(),
+                end_date: finalEnd.toISOString(),
+                special_requirements: notes // Map 'notes' to 'special_requirements'
             });
             toast.success('Booking request sent!');
             onClose();
@@ -75,40 +88,71 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
                         <div className="space-y-6">
                             <div>
                                 <h3 className="text-lg font-bold mb-2 flex items-center gap-2">
-                                    <Calendar className="text-brand-primary" size={20} /> Select Dates
+                                    <Calendar className="text-brand-primary" size={20} /> Select Date & Time
                                 </h3>
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Start Date</label>
-                                        <DatePicker
-                                            selected={startDate}
-                                            onChange={(date) => setStartDate(date)}
-                                            selectsStart
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            className="w-full p-2 border rounded-lg"
-                                            minDate={new Date()}
-                                        />
+
+                                <div className="space-y-4">
+                                    {/* Date Picker */}
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                                                {isAppointment ? 'Date' : 'Start Date'}
+                                            </label>
+                                            <DatePicker
+                                                selected={startDate}
+                                                onChange={(date) => {
+                                                    setStartDate(date);
+                                                    if (isAppointment) setEndDate(date); // For appointments, end date is same day usually
+                                                }}
+                                                selectsStart
+                                                startDate={startDate}
+                                                endDate={endDate}
+                                                className="w-full p-2 border border-border rounded-lg"
+                                                minDate={new Date()}
+                                            />
+                                        </div>
+                                        {!isAppointment && (
+                                            <div>
+                                                <label className="block text-xs font-bold text-gray-500 uppercase mb-1">End Date</label>
+                                                <DatePicker
+                                                    selected={endDate}
+                                                    onChange={(date) => setEndDate(date)}
+                                                    selectsEnd
+                                                    startDate={startDate}
+                                                    endDate={endDate}
+                                                    minDate={startDate}
+                                                    className="w-full p-2 border border-border rounded-lg"
+                                                />
+                                            </div>
+                                        )}
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-bold text-gray-500 uppercase mb-1">End Date</label>
-                                        <DatePicker
-                                            selected={endDate}
-                                            onChange={(date) => setEndDate(date)}
-                                            selectsEnd
-                                            startDate={startDate}
-                                            endDate={endDate}
-                                            minDate={startDate}
-                                            className="w-full p-2 border rounded-lg"
-                                        />
-                                    </div>
+
+                                    {/* Time Slot Picker (Only for appointments) */}
+                                    {isAppointment && (
+                                        <div>
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Preferred Time</label>
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
+                                                {['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(time => (
+                                                    <button
+                                                        key={time}
+                                                        onClick={() => setSelectedTime(time)}
+                                                        className={`px-3 py-2 text-sm rounded-lg border transition-all ${selectedTime === time
+                                                            ? 'bg-brand-primary text-white border-brand-primary'
+                                                            : 'bg-white text-gray-700 border-gray-200 hover:border-brand-primary/50'}`}
+                                                    >
+                                                        {time}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
                             <div>
                                 <label className="block text-sm font-medium mb-1">Additional Notes</label>
                                 <textarea
-                                    className="w-full p-3 border rounded-lg focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none"
+                                    className="w-full p-3 border border-border rounded-lg focus:ring-2 focus:ring-brand-primary/20 outline-none resize-none"
                                     rows={3}
                                     placeholder="Any special instructions or questions?..."
                                     value={notes}
@@ -172,8 +216,12 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
                                         <span className="font-bold">{initialService?.name || 'General Service'}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-gray-600">Dates:</span>
-                                        <span className="font-bold">{format(startDate, 'MMM dd')} - {format(endDate, 'MMM dd, yyyy')}</span>
+                                        <span className="text-gray-600 font-medium">When:</span>
+                                        <span className="font-bold text-right">
+                                            {format(startDate, 'MMM dd, yyyy')}
+                                            {isAppointment && <span className="block text-brand-primary">{selectedTime}</span>}
+                                            {!isAppointment && <> - {format(endDate, 'MMM dd')}</>}
+                                        </span>
                                     </div>
                                     <div className="flex justify-between">
                                         <span className="text-gray-600">For:</span>
