@@ -47,6 +47,7 @@ const useServices = () => {
                 if (filters.services) params.append('services', filters.services);
 
                 if (filters.sort) params.append('ordering', filters.sort); // Use ordering for sort
+                if (filters.page) params.append('page', filters.page);
 
                 const response = await api.get(`/services/providers/?${params.toString()}`);
                 return response.data;
@@ -69,10 +70,25 @@ const useServices = () => {
         return useQuery({
             queryKey: ['myServiceProvider'],
             queryFn: async () => {
-                const response = await api.get('/services/providers/me/');
-                return response.data;
+                try {
+                    const response = await api.get('/services/providers/me/');
+                    return response.data;
+                } catch (error) {
+                    if (error.response?.status === 404) return null;
+                    throw error;
+                }
             },
-            retry: false // Don't retry if 404
+            retry: false
+        });
+    };
+
+    const useGetDashboardStats = () => {
+        return useQuery({
+            queryKey: ['providerDashboardStats'],
+            queryFn: async () => {
+                const response = await api.get('/services/providers/dashboard_stats/');
+                return response.data;
+            }
         });
     };
 
@@ -112,6 +128,16 @@ const useServices = () => {
             onSuccess: (_, variables) => {
                 queryClient.invalidateQueries(['serviceProvider', variables.id]);
                 queryClient.invalidateQueries(['myServiceProvider']);
+            }
+        });
+    };
+
+    const useSubmitProviderApplication = () => {
+        return useMutation({
+            mutationFn: async (id) => await api.post(`/services/providers/${id}/submit_application/`),
+            onSuccess: () => {
+                queryClient.invalidateQueries(['myServiceProvider']);
+                queryClient.invalidateQueries(['userProfile']);
             }
         });
     };
@@ -167,11 +193,13 @@ const useServices = () => {
         useUpdateProviderProfile,
         useUpdateProviderHours,
         useUpdateProviderMedia,
+        useSubmitProviderApplication,
         useCreateBooking,
         useGetMyBookings,
         useBookingAction,
         useCreateRoleRequest,
-        useGetMyRoleRequests
+        useGetMyRoleRequests,
+        useGetDashboardStats
     };
 };
 

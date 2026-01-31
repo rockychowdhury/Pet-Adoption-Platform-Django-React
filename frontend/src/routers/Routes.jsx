@@ -37,6 +37,7 @@ import ServiceSearchPage from "../pages/ServicePages/ServiceSearchPage";
 import ServiceDetailPage from "../pages/ServicePages/ServiceDetailPage";
 import ServiceReviewPage from "../pages/ServicePages/ServiceReviewPage";
 import ServiceProviderRegistrationPage from "../pages/ServicePages/ServiceProviderRegistrationPage";
+import BecomeProviderPage from "../pages/ServicePages/BecomeProviderPage";
 import ProviderDashboardPage from "../pages/ServicePages/ProviderDashboardPage";
 
 // Rehoming
@@ -83,6 +84,11 @@ import ReportManagementPage from "../pages/AdminPages/ReportManagementPage";
 import AnalyticsPage from "../pages/AdminPages/AnalyticsPage";
 import RoleRequestsPage from "../pages/AdminPages/RoleRequestsPage";
 import AdminProvidersPage from "../pages/AdminPages/AdminProvidersPage";
+
+// Payment
+import PaymentCheckoutPage from "../pages/Payment/PaymentCheckoutPage";
+import PaymentSuccessPage from "../pages/Payment/PaymentSuccessPage";
+import PaymentFailurePage from "../pages/Payment/PaymentFailurePage";
 
 // --- Guards imported from PrivateRoute.jsx ---
 
@@ -177,6 +183,12 @@ const router = createBrowserRouter([
                     { path: "/rehoming/listings/:id/applications", element: <OwnerApplicationReviewPage /> },
                     { path: "/applications/:id/review", element: <OwnerApplicationDetailPage /> },
 
+                    /* Payment */
+                    { path: "/checkout/:bookingId", element: <PaymentCheckoutPage /> },
+                    { path: "/checkout/success/:bookingId", element: <PaymentSuccessPage /> },
+                    { path: "/checkout/failure", element: <PaymentFailurePage /> },
+
+                    { path: "/become-provider", element: <BecomeProviderPage /> },
                     { path: "/service-provider/register", element: <ServiceProviderRegistrationPage /> },
                 ],
             },
@@ -184,10 +196,13 @@ const router = createBrowserRouter([
             /* =======================
                SERVICE PROVIDER ROUTES
             ======================== */
+            /* =======================
+               SERVICE PROVIDER ROUTES
+            ======================== */
             {
                 element: (
                     <ServiceProviderRoute>
-                        <MainLayout />
+                        <Outlet />
                     </ServiceProviderRoute>
                 ),
                 children: [

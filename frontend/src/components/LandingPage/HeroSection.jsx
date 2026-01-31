@@ -80,10 +80,10 @@ const HeroSection = () => {
                                 variants={itemVariants}
                                 className="text-display-xl font-black text-text-primary relative"
                             >
-                                The Community <br />
+                                Safe Rehoming & <br />
                                 <span className="text-brand-primary relative inline-block">
-                                    Driven
-                                </span> Pet <br /> Network
+                                    Verified
+                                </span> Pet <br /> Care
                             </motion.h1>
                         </motion.div>
 
@@ -93,7 +93,7 @@ const HeroSection = () => {
                             className="mb-10 max-w-lg relative"
                         >
                             <p className="text-text-secondary text-xl  leading-relaxed font-medium opacity-80">
-                                A warm, trusted space where pet lovers meet, share stories, and save lives through the power of community.
+                                The trusted platform for responsible rehoming and connecting with verified foster carers and veterinary clinics.
                             </p>
                         </motion.div>
 
@@ -132,9 +132,9 @@ const HeroSection = () => {
                                     Find a Pet
                                 </Button>
                             </Link>
-                            <Link to="/community">
+                            <Link to="/services">
                                 <Button variant="outline" size="lg" className="rounded-full px-10 py-5 h-auto text-xs uppercase tracking-[0.2em] bg-bg-surface border-border/60 hover:bg-bg-secondary">
-                                    Join Community
+                                    Find Services
                                 </Button>
                             </Link>
                         </motion.div>
@@ -206,11 +206,13 @@ const HeroSection = () => {
                         <div className="flex items-center gap-12 animate-marquee whitespace-nowrap">
                             {[...Array(12)].map((_, i) => (
                                 <div key={i} className="flex items-center gap-12 text-[11px] font-black tracking-[0.4em] uppercase">
-                                    <span>COMMUNITY FIRST</span>
+                                    <span>RESPONSIBLE REHOMING</span>
                                     <span className="opacity-30">•</span>
-                                    <span>DIRECT REHOMING</span>
+                                    <span>VERIFIED PROVIDERS</span>
                                     <span className="opacity-30">•</span>
-                                    <span>VERIFIED TRUST</span>
+                                    <span>TRUSTED CARE</span>
+                                    <span className="opacity-30">•</span>
+                                    <span>SAFETY FIRST</span>
                                     <span className="opacity-30">•</span>
                                 </div>
                             ))}

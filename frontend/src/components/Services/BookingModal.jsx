@@ -16,6 +16,8 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
     const [selectedTime, setSelectedTime] = useState('09:00'); // Default time
     const [selectedPet, setSelectedPet] = useState(null);
     const [notes, setNotes] = useState('');
+    const [availableSlots, setAvailableSlots] = useState([]);
+    const [loadingAvailability, setLoadingAvailability] = useState(false);
 
     const { useCreateBooking } = useServices();
     const createBooking = useCreateBooking();
@@ -23,8 +25,77 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
     const { useGetMyPets } = usePets();
     const { data: myPets, isLoading: petsLoading } = useGetMyPets();
 
+    // Fetch availability when date changes
+    const fetchAvailability = async (date) => {
+        if (!provider || !date) return;
+
+        setLoadingAvailability(true);
+        try {
+            const response = await fetch('/api/services/bookings/check_availability/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${localStorage.getItem('access_token')}`
+                },
+                body: JSON.stringify({
+                    provider_id: provider.id,
+                    date: format(date, 'yyyy-MM-dd')
+                })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setAvailableSlots(data.available_slots || []);
+                // Set first available slot as default
+                const firstAvailable = data.available_slots?.find(slot => slot.available);
+                if (firstAvailable) {
+                    setSelectedTime(firstAvailable.time);
+                }
+            }
+        } catch (error) {
+            console.error('Failed to fetch availability:', error);
+            toast.error('Could not load available times');
+        } finally {
+            setLoadingAvailability(false);
+        }
+    };
+
+    // Fetch availability when date changes and it's an appointment
+    React.useEffect(() => {
+        if (isAppointment && startDate && isOpen) {
+            fetchAvailability(startDate);
+        }
+    }, [startDate, isAppointment, isOpen]);
+
     // Determine booking type logic
-    const isAppointment = provider?.category?.slug === 'veterinary' || provider?.category?.slug === 'training' || provider?.category?.name?.toLowerCase().includes('vet');
+    const getBookingType = () => {
+        if (!provider) return 'range';
+
+        // Check specifics first
+        if (provider.vet_details) return 'appointment';
+        if (provider.groomer_details) return 'appointment';
+        if (provider.foster_details) return 'range';
+
+        // Check service name if passed
+        if (initialService) {
+            const name = initialService.name?.toLowerCase() || '';
+            if (name.includes('walk') || name.includes('visit') || name.includes('groom') || name.includes('consultation')) return 'appointment';
+            if (name.includes('sitting') || name.includes('boarding')) return 'range';
+        }
+
+        // Fallback to category check
+        const catName = provider.category?.name?.toLowerCase() || '';
+        const catSlug = provider.category?.slug?.toLowerCase() || '';
+
+        if (catSlug === 'veterinary' || catName.includes('vet')) return 'appointment';
+        if (catSlug === 'training' || catName.includes('train')) return 'appointment';
+        if (catSlug === 'groomer' || catName.includes('groom')) return 'appointment';
+        if (catSlug === 'walking' || catName.includes('walking')) return 'appointment';
+
+        return 'range'; // Default for Sitting, Foster, etc.
+    };
+
+    const isAppointment = getBookingType() === 'appointment';
 
     const handleNext = () => setStep(prev => prev + 1);
     const handleBack = () => setStep(prev => prev - 1);
@@ -44,18 +115,25 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
                 finalEnd.setHours(finalStart.getHours() + 1); // Default 1 hour duration
             }
 
-            await createBooking.mutateAsync({
+            const response = await createBooking.mutateAsync({
                 provider: provider.id,
                 pet: selectedPet.id,
-                service_option: initialService?.id || null, // Pass ID if available
-                booking_type: isAppointment ? 'standard' : 'recurring', // or logic based on duration
-                start_date: finalStart.toISOString(),
-                end_date: finalEnd.toISOString(),
-                special_requirements: notes // Map 'notes' to 'special_requirements'
+                service_option: initialService?.id || null,
+                booking_type: isAppointment ? 'standard' : 'recurring',
+                booking_date: finalStart.toISOString().split('T')[0], // YYYY-MM-DD
+                booking_time: isAppointment ? selectedTime : null,
+                start_datetime: finalStart.toISOString(),
+                end_datetime: finalEnd.toISOString(),
+                special_requirements: notes
             });
-            toast.success('Booking request sent!');
+
+            // Redirect to payment checkout
+            toast.success('Booking created! Redirecting to checkout...');
             onClose();
             setStep(1); // Reset
+
+            // Use window.location to navigate (or pass navigate if available)
+            window.location.href = `/checkout/${response.id}`;
         } catch (error) {
             console.error(error);
             toast.error('Failed to create booking.');
@@ -130,19 +208,42 @@ const BookingModal = ({ isOpen, onClose, provider, initialService }) => {
                                     {/* Time Slot Picker (Only for appointments) */}
                                     {isAppointment && (
                                         <div>
-                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">Preferred Time</label>
-                                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2">
-                                                {['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(time => (
-                                                    <button
-                                                        key={time}
-                                                        onClick={() => setSelectedTime(time)}
-                                                        className={`px-3 py-2 text-sm rounded-lg border transition-all ${selectedTime === time
-                                                            ? 'bg-brand-primary text-white border-brand-primary'
-                                                            : 'bg-white text-gray-700 border-gray-200 hover:border-brand-primary/50'}`}
-                                                    >
-                                                        {time}
-                                                    </button>
-                                                ))}
+                                            <label className="block text-xs font-bold text-gray-500 uppercase mb-1">
+                                                Preferred Time
+                                                {loadingAvailability && <span className="ml-2 text-xs font-normal text-gray-400">(Loading...)</span>}
+                                            </label>
+                                            <div className="grid grid-cols-3 sm:grid-cols-4 gap-2 max-h-48 overflow-y-auto">
+                                                {availableSlots.length > 0 ? (
+                                                    availableSlots.map((slot) => (
+                                                        <button
+                                                            key={slot.time}
+                                                            onClick={() => setSelectedTime(slot.time)}
+                                                            disabled={!slot.available}
+                                                            className={`px-3 py-2 text-sm rounded-lg border transition-all ${selectedTime === slot.time
+                                                                ? 'bg-brand-primary text-white border-brand-primary'
+                                                                : slot.available
+                                                                    ? 'bg-white text-gray-700 border-gray-200 hover:border-brand-primary/50'
+                                                                    : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50'
+                                                                }`}
+                                                        >
+                                                            {slot.time}
+                                                            {!slot.available && <span className="text-[10px] block">Booked</span>}
+                                                        </button>
+                                                    ))
+                                                ) : (
+                                                    // Fallback to default times if no availability data
+                                                    ['09:00', '10:00', '11:00', '13:00', '14:00', '15:00', '16:00', '17:00'].map(time => (
+                                                        <button
+                                                            key={time}
+                                                            onClick={() => setSelectedTime(time)}
+                                                            className={`px-3 py-2 text-sm rounded-lg border transition-all ${selectedTime === time
+                                                                ? 'bg-brand-primary text-white border-brand-primary'
+                                                                : 'bg-white text-gray-700 border-gray-200 hover:border-brand-primary/50'}`}
+                                                        >
+                                                            {time}
+                                                        </button>
+                                                    ))
+                                                )}
                                             </div>
                                         </div>
                                     )}

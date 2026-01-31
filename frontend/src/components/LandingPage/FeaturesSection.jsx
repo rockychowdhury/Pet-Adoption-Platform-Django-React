@@ -33,18 +33,18 @@ const FeaturesSection = () => {
 
     const features = [
         {
-            title: "Community Forum",
-            tag: "COMMUNITY",
-            icon: <Users size={20} />,
-            description: "Swap stories, get behaviour tips, and learn from other owners, foster parents, and rehomers all in one warm feed.",
-            subtext: "React with likes, hearts, and thoughtful comments."
+            title: "Verified Service Directory",
+            tag: "SERVICES",
+            icon: <Users size={20} />, // or Stethoscope if imported, but Users is fine or I can import Stethoscope
+            description: "Find trusted veterinary clinics and foster care providers with verified credentials and community reviews.",
+            subtext: "Search by location, service type, and rating."
         },
         {
-            title: "Direct Owner Chat",
-            tag: "CHAT",
+            title: "Mediated Communication",
+            tag: "PRIVACY",
             icon: <MessageSquare size={20} />,
-            description: "Message current owners directly to clarify history, medical records, or personality quirks before you meet.",
-            subtext: "Secure, direct messaging with verified owners."
+            description: "Communicate safely with other users through our platform. Your personal contact details stay private until you're ready.",
+            subtext: "Secure messaging with safety filters."
         },
         {
             title: "Schedule Meet & Greets",
@@ -54,11 +54,11 @@ const FeaturesSection = () => {
             subtext: "Automatic reminders and clear visit details."
         },
         {
-            title: "Share Pets & Updates",
-            tag: "SHARING",
-            icon: <Share2 size={20} />,
-            description: "Turn any pet profile into a beautiful share card for social media or the community feed with one click.",
-            subtext: "Boost reach for overlooked and long-stay pets."
+            title: "Behavioral Disclosures",
+            tag: "TRANSPARENCY",
+            icon: <FileText size={20} />,
+            description: "Detailed pet profiles include mandatory behavioral history and medical records to ensure the right match.",
+            subtext: "Honest, transparent rehoming."
         },
         {
             title: "Rehomer Dashboards",
@@ -70,8 +70,8 @@ const FeaturesSection = () => {
         {
             title: "Adoption Requests",
             tag: "WORKFLOW",
-            icon: <FileText size={20} />,
-            description: "Track every application from 'New' to 'PetCircle' with notes, documents, and conversations in a single timeline.",
+            icon: <Layout size={20} />, // Changed icon to Layout as FileText used above, or keep FileText
+            description: "Track every application from 'New' to 'Adopted' with notes, documents, and conversations in a single timeline.",
             subtext: "Less email back-and-forth, more happy matches."
         }
     ];
@@ -139,7 +139,7 @@ const FeaturesSection = () => {
                         </div>
 
                         <p className="text-text-secondary text-xl max-w-3xl mx-auto font-medium opacity-80 leading-relaxed">
-                            See exactly how PetCircle supports communities — from first social post to the final transfer papers.
+                            See exactly how PetCare+ supports responsible rehoming — from first listing to the final transfer papers.
                         </p>
                     </motion.div>
 
@@ -156,7 +156,7 @@ const FeaturesSection = () => {
                                 Built for every step of the <span className="text-brand-primary">adoption journey.</span>
                             </h3>
                             <p className="text-text-secondary text-lg leading-relaxed font-medium opacity-80">
-                                Whether you are discovering your first pet or rehoming a pet, you get clear tools for community, communication, visits, and paperwork — without juggling different apps.
+                                Whether you are discovering your first pet, finding a vet, or rehoming a pet, you get clear tools for communication, visits, and paperwork — without juggling different apps.
                             </p>
 
                             {/* Toggle */}
@@ -191,7 +191,7 @@ const FeaturesSection = () => {
                                         <>
                                             <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Direct contact with owners</span>
                                             <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Verified pet history & medicals</span>
-                                            <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Community support & forums</span>
+                                            <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Verified Service Providers</span>
                                             <span className="px-4 py-2 bg-bg-secondary rounded-xl text-sm font-medium text-text-primary">Guided meeting process</span>
                                         </>
                                     ) : (

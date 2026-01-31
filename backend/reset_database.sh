@@ -1,12 +1,12 @@
 #!/bin/bash
 
-# PetCircle Database Reset and Migration Script
+# PetCarePlus Database Reset and Migration Script
 # This script resets the database, creates fresh migrations, and populates with seed data
 
 set -e  # Exit on error
 
 echo "================================================"
-echo "PetCircle Database Reset and Migration Script"
+echo "PetCarePlus Database Reset and Migration Script"
 echo "================================================"
 echo ""
 
@@ -17,7 +17,7 @@ RED='\033[0;31m'
 NC='\033[0m' # No Color
 
 # Navigate to backend directory
-cd /home/rocky/Projects/Pet-Adoption-Platform-Django-React/backend
+cd /home/rocky/Projects/PetCarePlus-Django-React/backend
 
 # Activate virtual environment
 echo -e "${YELLOW}Activating virtual environment...${NC}"
@@ -67,8 +67,8 @@ echo -e "${GREEN}✓ Migrations applied${NC}"
 
 # Create superuser
 echo -e "${YELLOW}Creating superuser...${NC}"
-echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin@petcircle.com', 'admin123', first_name='Admin', last_name='User') if not User.objects.filter(email='admin@petcircle.com').exists() else None" | python manage.py shell
-echo -e "${GREEN}✓ Superuser created (email: admin@petcircle.com, password: admin123)${NC}"
+echo "from django.contrib.auth import get_user_model; User = get_user_model(); User.objects.create_superuser('admin@petcareplus.com', 'admin123', first_name='Admin', last_name='User') if not User.objects.filter(email='admin@petcareplus.com').exists() else None" | python manage.py shell
+echo -e "${GREEN}✓ Superuser created (email: admin@petcareplus.com, password: admin123)${NC}"
 
 # Populate with seed data
 echo -e "${YELLOW}Populating database with seed data...${NC}"
@@ -81,7 +81,7 @@ echo -e "${GREEN}Database setup complete!${NC}"
 echo -e "${GREEN}================================================${NC}"
 echo ""
 echo -e "Superuser credentials:"
-echo -e "  Email: ${YELLOW}admin@petcircle.com${NC}"
+echo -e "  Email: ${YELLOW}admin@petcareplus.com${NC}"
 echo -e "  Password: ${YELLOW}admin123${NC}"
 echo ""
 echo -e "You can now run: ${YELLOW}python manage.py runserver${NC}"

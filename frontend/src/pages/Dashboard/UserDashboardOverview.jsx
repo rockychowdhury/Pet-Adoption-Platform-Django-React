@@ -1,9 +1,9 @@
-
 import React, { useState, useEffect } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { Link, useNavigate } from 'react-router-dom';
 import useAPI from '../../hooks/useAPI';
 import useAuth from '../../hooks/useAuth';
+import useServices from '../../hooks/useServices';
 import {
     LayoutDashboard,
     Plus,
@@ -19,7 +19,10 @@ import {
     CheckCircle2,
     XCircle,
     Calendar,
-    AlertCircle
+    AlertCircle,
+    Briefcase,
+    ArrowRight,
+    CheckCircle
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -28,6 +31,9 @@ const UserDashboardOverview = () => {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [appTab, setAppTab] = useState('received'); // 'received' | 'submitted'
+
+    const { useGetMyProviderProfile } = useServices();
+    const { data: providerProfile, isLoading: isProviderLoading } = useGetMyProviderProfile();
 
     // Redirect based on role
     useEffect(() => {
@@ -104,9 +110,7 @@ const UserDashboardOverview = () => {
         { label: 'Browse Pets', icon: Search, to: '/pets', desc: 'Find a friend' },
         { label: 'Services', icon: MapPin, to: '/services', desc: 'Find vets & more' },
         { label: 'My Pets', icon: PawPrint, to: '/dashboard/my-pets', desc: 'Manage profiles' },
-        ...(user?.role !== 'service_provider' && user?.role !== 'admin' ? [
-            { label: 'Become Provider', icon: Users, to: '/become-provider', desc: 'Offer services' }
-        ] : []),
+        { label: 'My Pets', icon: PawPrint, to: '/dashboard/my-pets', desc: 'Manage profiles' },
     ];
 
     const getStatusColor = (status) => {
@@ -185,6 +189,66 @@ const UserDashboardOverview = () => {
                                     </motion.div>
                                 </Link>
                             ))}
+
+                            {/* --- Provider Status or Call to Action --- */}
+                            {isProviderLoading ? (
+                                <div className="bg-bg-secondary p-4 rounded-2xl border border-border animate-pulse h-full"></div>
+                            ) : providerProfile ? (
+                                <div className="bg-bg-secondary p-4 rounded-2xl border border-border hover:border-brand-primary/30 hover:bg-brand-primary/5 transition-colors group h-full relative overflow-hidden">
+                                    <div className="absolute top-0 right-0 w-24 h-24 bg-brand-secondary/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+
+                                    <div className="flex justify-between items-start mb-3 relative z-10">
+                                        <div className="mb-3 w-10 h-10 bg-bg-surface rounded-xl flex items-center justify-center shadow-sm text-text-primary group-hover:text-brand-primary transition-colors">
+                                            {providerProfile.is_verified ? <CheckCircle size={20} /> : <Clock size={20} />}
+                                        </div>
+                                        <span className={`px-2 py-1 rounded text-[10px] font-bold uppercase ${providerProfile.is_verified ? 'bg-green-100 text-green-700' :
+                                            providerProfile.verification_status === 'pending' ? 'bg-yellow-100 text-yellow-700' :
+                                                'bg-gray-100 text-gray-600'
+                                            }`}>
+                                            {providerProfile.verification_status || 'Draft'}
+                                        </span>
+                                    </div>
+
+                                    <div className="font-bold text-text-primary relative z-10">Provider Profile</div>
+                                    <p className="text-xs text-text-secondary mb-2 relative z-10">
+                                        {providerProfile.is_verified
+                                            ? "Manage your services and bookings."
+                                            : "Your application status."}
+                                    </p>
+
+                                    {providerProfile.is_verified ? (
+                                        <Link to="/provider/dashboard" className="text-brand-primary font-semibold text-xs hover:underline flex items-center relative z-10">
+                                            Go to Dashboard <ArrowRight size={14} className="ml-1" />
+                                        </Link>
+                                    ) : providerProfile.verification_status === 'draft' ? (
+                                        <Link to="/become-provider" className="text-brand-primary font-semibold text-xs hover:underline flex items-center relative z-10">
+                                            Resume Application <ArrowRight size={14} className="ml-1" />
+                                        </Link>
+                                    ) : (
+                                        <span className="text-text-secondary text-xs flex items-center relative z-10 cursor-default">
+                                            Under Review
+                                        </span>
+                                    )}
+                                </div>
+                            ) : (
+                                <Link to="/become-provider">
+                                    <motion.div
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        className="bg-brand-primary text-white p-4 rounded-2xl shadow-sm hover:shadow-lg transition-all group h-full relative overflow-hidden"
+                                    >
+                                        <div className="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-bl-full -mr-4 -mt-4 transition-transform group-hover:scale-110"></div>
+                                        <div className="mb-3 w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shadow-sm text-white">
+                                            <Briefcase size={20} />
+                                        </div>
+                                        <div className="font-bold text-white">Become a Provider</div>
+                                        <p className="text-brand-accent/90 text-xs mb-2">Offer services & earn money.</p>
+                                        <div className="flex items-center font-semibold text-xs">
+                                            Get Started <ArrowRight size={14} className="ml-1 group-hover:translate-x-1 transition-transform" />
+                                        </div>
+                                    </motion.div>
+                                </Link>
+                            )}
                         </div>
                     </div>
 

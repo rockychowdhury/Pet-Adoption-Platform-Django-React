@@ -38,8 +38,9 @@ class FosterServiceAdmin(ModelAdmin):
 
 @admin.register(ServiceBooking)
 class ServiceBookingAdmin(ModelAdmin):
-    list_display = ('provider', 'client', 'pet', 'status', 'start_date')
-    list_filter = ('status', 'booking_type')
+    list_display = ['id', 'provider', 'client', 'pet', 'booking_date', 'status']
+    list_filter = ['status', 'booking_type', 'payment_status']
+    search_fields = ['provider__business_name', 'client__email', 'pet__name']
 
 @admin.register(ServiceMedia)
 class ServiceMediaAdmin(ModelAdmin):

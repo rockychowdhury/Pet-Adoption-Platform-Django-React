@@ -5,222 +5,193 @@ import {
     Star,
     ShieldCheck,
     Heart,
-    Share2,
     Stethoscope,
     Home,
     GraduationCap,
-    Clock,
-    CheckCircle2
+    Scissors,
+    Armchair
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const ServiceCard = ({ provider, viewMode = 'grid' }) => {
     // -------------------------------------------------------------------------
-    // 1. Data Normalization
+    // 1. Data Parsing
     // -------------------------------------------------------------------------
+    const {
+        business_name,
+        avg_rating,
+        reviews_count,
+        city,
+        state,
+        media,
+        category,
+        vet_details,
+        trainer_details,
+        foster_details,
+        groomer_details,
+        sitter_details
+    } = provider;
 
-    // Determine Type
-    const isVet = !!provider.vet_details || provider.category?.slug === 'veterinary' || provider.category?.name?.toLowerCase().includes('vet');
-    const isFoster = !!provider.foster_details || provider.category?.slug === 'foster' || provider.category?.name?.toLowerCase().includes('foster');
-    const isTrainer = !!provider.trainer_details || provider.category?.slug === 'training' || provider.category?.name?.toLowerCase().includes('train');
-
-    // Visual Helpers
-    const heroImage = provider.media?.find(m => m.is_primary)?.file_url || provider.media?.[0]?.file_url || 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&q=80';
-
-    // Basic Info
-    const name = provider.business_name;
-    const rating = provider.avg_rating || 0;
-    const reviewCount = provider.reviews_count || 0;
-    const city = provider.city || 'Nearby';
-    const state = provider.state || '';
+    const heroImage = media?.find(m => m.is_primary)?.file_url || media?.[0]?.file_url || 'https://images.unsplash.com/photo-1516733725897-1aa73b87c8e8?auto=format&fit=crop&q=80';
+    const rating = parseFloat(avg_rating || 0).toFixed(1);
+    const reviewCount = reviews_count || 0;
     const locationLabel = state ? `${city}, ${state}` : city;
-    const isVerified = provider.verification_status === 'verified' || provider.is_verified;
 
-    // Service Type Label & Color
-    let typeLabel = provider.category?.name || 'Service';
-    let typeIcon = null;
-    let typeColor = 'text-gray-600 bg-gray-50 border-gray-200';
+    // Service Type Config
+    let TypeIcon = Stethoscope;
+    let typeLabel = category?.name || 'Service';
 
-    if (isVet) {
-        typeLabel = provider.vet_details?.clinic_type ? `${provider.vet_details.clinic_type} Clinic` : 'Veterinary';
-        typeIcon = Stethoscope;
-        typeColor = 'text-blue-600 bg-blue-50 border-blue-100';
-    } else if (isFoster) {
-        typeLabel = 'Foster Home';
-        typeIcon = Home;
-        typeColor = 'text-pink-600 bg-pink-50 border-pink-100'; // Matching PetCard "Girl" color vibe roughly or distinct
-    } else if (isTrainer) {
-        typeLabel = 'Professional Trainer';
-        typeIcon = GraduationCap;
-        typeColor = 'text-amber-600 bg-amber-50 border-amber-100';
-    }
-
-    // Dynamic Stats / Badges
-    const stats = [];
-
-    // Pricing / Rate
+    // Tags aggregation
+    const tags = [];
     let priceDisplay = '';
-    if (isFoster && provider.foster_details?.daily_rate) {
-        priceDisplay = `$${provider.foster_details.daily_rate}/day`;
-    } else if (isVet && provider.vet_details?.base_price) {
-        priceDisplay = `from $${provider.vet_details.base_price}`;
-    } else if (isTrainer && provider.trainer_details?.private_session_rate) {
-        priceDisplay = `$${provider.trainer_details.private_session_rate}/hr`;
+    let pricingUnit = '';
+
+    if (category?.slug === 'veterinary' || vet_details) {
+        TypeIcon = Stethoscope;
+        typeLabel = 'Veterinary';
+        if (vet_details?.clinic_type) tags.push(vet_details.clinic_type.replace('_', ' '));
+        if (vet_details?.emergency_services) tags.push('Emergency');
+        if (vet_details?.base_price) {
+            priceDisplay = `$${Math.round(vet_details.base_price)}`;
+            pricingUnit = 'visit'; // or 'starts at'
+        }
+    } else if (category?.slug === 'training' || trainer_details) {
+        TypeIcon = GraduationCap;
+        typeLabel = 'Pet Trainer';
+        if (trainer_details?.primary_method) tags.push(trainer_details.primary_method.replace('_', ' '));
+        if (trainer_details?.offers_group_classes) tags.push('Group Classes');
+        if (trainer_details?.offers_board_and_train) tags.push('Board & Train');
+        if (trainer_details?.private_session_rate) {
+            priceDisplay = `$${Math.round(trainer_details.private_session_rate)}`;
+            pricingUnit = '/ hour';
+        }
+    } else if (category?.slug === 'foster' || foster_details) {
+        TypeIcon = Home;
+        typeLabel = 'Foster Home';
+        if (foster_details?.current_availability === 'available') tags.push('Available Now');
+        tags.push(`${foster_details?.capacity || 0} Capacity`);
+        if (foster_details?.daily_rate) {
+            priceDisplay = `$${Math.round(foster_details.daily_rate)}`;
+            pricingUnit = '/ day';
+        }
+    } else if (category?.slug === 'grooming' || groomer_details) {
+        TypeIcon = Scissors;
+        typeLabel = 'Grooming';
+        if (groomer_details?.salon_type) tags.push(groomer_details.salon_type);
+        if (groomer_details?.base_price) {
+            priceDisplay = `$${Math.round(groomer_details.base_price)}`;
+            pricingUnit = 'starts at';
+        }
+    } else if (category?.slug === 'pet_sitting' || sitter_details) {
+        TypeIcon = Armchair;
+        typeLabel = 'Pet Sitter';
+        if (sitter_details?.offers_dog_walking) tags.push('Dog Walking');
+        if (sitter_details?.offers_house_sitting) tags.push('House Sitting');
+        if (sitter_details?.walking_rate) {
+            priceDisplay = `$${Math.round(sitter_details.walking_rate)}`;
+            pricingUnit = '/ walk';
+        }
     }
 
-    if (priceDisplay) {
-        stats.push({ icon: null, label: 'Rate', value: priceDisplay, isPrimary: true });
-    }
-
-    // Availability / Emergency
-    if (isVet && provider.vet_details?.is_emergency) {
-        stats.push({ icon: Clock, label: 'Emergency', value: '24/7', color: 'text-red-500' });
-    } else if (isFoster) {
-        const spots = provider.foster_details?.current_availability || 0;
-        stats.push({
-            icon: CheckCircle2,
-            label: 'Capacity',
-            value: spots > 0 ? `${spots} Spots` : 'Full',
-            color: spots > 0 ? 'text-green-600' : 'text-gray-400'
-        });
-    } else if (isTrainer) {
-        const accepting = provider.trainer_details?.accepting_new_clients;
-        stats.push({
-            icon: CheckCircle2,
-            label: 'Status',
-            value: accepting ? 'Open' : 'Full',
-            color: accepting ? 'text-green-600' : 'text-gray-400'
-        });
-    }
+    // Limit tags for display
+    const visibleTags = tags.slice(0, 3);
 
     // -------------------------------------------------------------------------
-    // 2. Render Component (Matches PetCard "Compact Listing")
+    // 2. Render
     // -------------------------------------------------------------------------
     return (
         <motion.div
             layout
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 overflow-hidden flex flex-col  relative h-full ${viewMode === 'list' ? 'md:flex-row md:h-48' : ''}`}
+            exit={{ opacity: 0, scale: 0.95 }}
+            className={`group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col ${viewMode === 'list' ? 'md:flex-row' : ''} h-full`}
         >
-            {/* Hero Zone */}
-            <div className={`relative overflow-hidden ${viewMode === 'list' ? 'md:w-72 h-48' : 'aspect-[3/2]'}`}>
-                <Link to={`/services/${provider.id}`} className="block h-full">
+            {/* Image Section */}
+            <div className={`relative overflow-hidden bg-gray-100 ${viewMode === 'list' ? 'w-full md:w-72 h-48 md:h-auto' : 'aspect-[4/3] w-full'}`}>
+                <Link to={`/services/${provider.id}`} className="block w-full h-full">
                     <img
                         src={heroImage}
-                        alt={name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                        alt={business_name}
+                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
                 </Link>
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50" />
-
-                {/* Top Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                    {/* Service Type Badge */}
-                    <div className={`px-2 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg flex items-center gap-1.5 shadow-sm nav-blur border ${typeColor}`}>
-                        {typeIcon && (
-                            (() => {
-                                const Icon = typeIcon;
-                                return <Icon size={10} strokeWidth={3} />;
-                            })()
-                        )}
-                        {typeLabel}
-                    </div>
-
-                    {/* Verified Badge */}
-                    {isVerified && (
-                        <div className="px-2 py-1 bg-bg-surface/90 backdrop-blur-md text-brand-primary text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm">
-                            <ShieldCheck size={10} strokeWidth={3} /> Verified
-                        </div>
-                    )}
-                </div>
-
-                {/* Bookmark Interaction */}
-                <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-red-500 transition-all shadow-lg hover:scale-110">
-                    <Heart size={14} />
-                </button>
+                {/* Heart Button */}
+                {/* <button className="absolute top-3 right-3 p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-red-500 transition-colors">
+                    <Heart size={18} />
+                </button> */}
             </div>
 
-            {/* Body */}
-            <div className="p-4 flex flex-col gap-3 flex-1">
-
-                {/* Header Info */}
-                <div className="flex justify-between items-start">
-                    <Link to={`/services/${provider.id}`}>
-                        <h3 className="text-lg font-bold text-text-primary leading-tight group-hover:text-brand-primary transition-colors line-clamp-1">
-                            {name}
-                        </h3>
-                    </Link>
-                    {/* Rating */}
-                    {rating > 0 && (
-                        <div className="flex items-center gap-1 text-amber-500 bg-amber-50 px-1.5 py-0.5 rounded-md border border-amber-100">
-                            <Star size={10} fill="currentColor" strokeWidth={0} />
-                            <span className="text-[11px] font-black">{rating}</span>
-                        </div>
-                    )}
+            {/* Content Section */}
+            <div className="p-5 flex flex-col flex-1">
+                {/* Category Label */}
+                <div className="flex items-center gap-2 mb-2 text-text-tertiary">
+                    <TypeIcon size={14} strokeWidth={2} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">{typeLabel}</span>
                 </div>
 
-                {/* Location Line */}
-                <p className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider flex items-center gap-1.5 mt-[-4px]">
-                    <MapPin size={10} className="text-brand-primary" /> {locationLabel}
-                </p>
+                {/* Title */}
+                <Link to={`/services/${provider.id}`} className="block mb-2">
+                    <h3 className="text-lg font-bold text-text-primary leading-tight group-hover:text-brand-primary transition-colors line-clamp-1">
+                        {business_name}
+                    </h3>
+                </Link>
 
-                {/* Key Stats Grid - Matches PetCard Layout */}
-                <div className="grid grid-cols-2 gap-2 py-2 border-t border-gray-100/60 mt-auto md:mt-0">
-                    {/* Dynamic Stat 1 (Rate) */}
-                    {stats[0] && (
-                        <div className="flex items-center gap-2 text-text-secondary">
-                            {stats[0].label === 'Rate' ? (
-                                <span className="text-[10px] font-black text-brand-primary bg-brand-primary/5 px-2 py-1 rounded-md w-full text-center truncate">
-                                    {stats[0].value}
-                                </span>
-                            ) : (
-                                <>
-                                    {stats[0].icon && (
-                                        (() => {
-                                            const Icon = stats[0].icon;
-                                            return <Icon size={14} className={stats[0].color} />;
-                                        })()
-                                    )}
-                                    <span className="text-xs font-bold">{stats[0].value}</span>
-                                </>
-                            )}
+                {/* Rating & Location Row */}
+                <div className="flex flex-col gap-1 mb-4">
+                    {/* Stars */}
+                    <div className="flex items-center gap-1.5">
+                        <div className="flex text-amber-400 gap-0.5">
+                            {[1, 2, 3, 4, 5].map((star) => (
+                                <Star
+                                    key={star}
+                                    size={14}
+                                    fill={star <= Math.round(rating) ? "currentColor" : "none"}
+                                    strokeWidth={2}
+                                    className={star > Math.round(rating) ? "text-gray-300" : ""}
+                                />
+                            ))}
                         </div>
-                    )}
+                        <span className="text-sm font-bold text-gray-900">{rating}</span>
+                        <span className="text-xs text-gray-500">({reviewCount})</span>
+                    </div>
 
-                    {/* Dynamic Stat 2 (Capacity/Status) */}
-                    {stats[1] ? (
-                        <div className="flex items-center gap-2 text-text-secondary">
-                            {stats[1].icon && (
-                                (() => {
-                                    const Icon = stats[1].icon;
-                                    return <Icon size={14} className={stats[1].color} />;
-                                })()
-                            )}
-                            <span className="text-xs font-bold">{stats[1].value}</span>
-                        </div>
-                    ) : (
-                        // Fallback: Review Count if no 2nd stat
-                        <div className="flex items-center gap-2 text-text-muted">
-                            <span className="text-[10px] font-bold">{reviewCount} reviews</span>
-                        </div>
-                    )}
+                    {/* Location */}
+                    <div className="flex items-center gap-1.5 text-text-secondary mt-1">
+                        <MapPin size={14} />
+                        <span className="text-xs font-medium">{locationLabel}</span>
+                    </div>
                 </div>
 
+                {/* Tags */}
+                <div className="flex flex-wrap gap-2 mb-6 mt-auto">
+                    {visibleTags.map((tag, idx) => (
+                        <span key={idx} className="px-2.5 py-1 bg-gray-50 border border-gray-100 rounded-lg text-[10px] font-bold text-text-secondary capitalize">
+                            {tag}
+                        </span>
+                    ))}
+                </div>
 
-                {/* Footer Actions */}
-                <div className="mt-auto pt-2 flex gap-2">
+                {/* Footer / Price & Action */}
+                <div className="flex items-end justify-between pt-4 border-t border-gray-100">
+                    <div>
+                        {priceDisplay ? (
+                            <>
+                                <span className="text-lg font-black text-text-primary">{priceDisplay}</span>
+                                <span className="text-xs text-text-tertiary ml-1 font-medium">{pricingUnit}</span>
+                            </>
+                        ) : (
+                            <span className="text-sm font-bold text-text-tertiary">Contact for price</span>
+                        )}
+                    </div>
+
                     <Link
                         to={`/services/${provider.id}`}
-                        className="flex-1 bg-text-primary text-text-inverted h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-brand-primary hover:shadow-lg transition-all active:scale-[0.98]"
+                        className="px-6 py-2.5 bg-brand-primary/5 text-brand-primary rounded-full text-xs font-bold hover:bg-brand-primary hover:text-white transition-all shadow-sm hover:shadow-md active:scale-95 border border-transparent hover:border-brand-primary/20"
                     >
-                        View Profile
+                        Details
                     </Link>
-                    <button className="w-9 h-9 rounded-xl border border-border flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-secondary transition-all">
-                        <Share2 size={16} />
-                    </button>
                 </div>
-
             </div>
         </motion.div>
     );

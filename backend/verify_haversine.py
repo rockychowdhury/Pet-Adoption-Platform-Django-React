@@ -2,8 +2,8 @@ import os
 import django
 import sys
 
-sys.path.append('/home/rocky/Projects/Pet-Adoption-Platform-Django-React/backend')
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PetCircle.settings')
+sys.path.append('/home/rocky/Projects/PetCarePlus-Django-React/backend')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'PetCarePlus.settings')
 django.setup()
 
 from apps.common.utils import annotated_distance_queryset

@@ -446,39 +446,39 @@ const ProfileSettingsPage = () => {
         </div>
 
         {profile?.phone_verified ? (
-          <div className="bg-green-50 border border-green-200 rounded-2xl p-6">
+          <div className="bg-status-success/10 border border-status-success/20 rounded-2xl p-6">
             <div className="flex items-center gap-3 mb-2">
-              <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+              <div className="w-8 h-8 rounded-full bg-status-success flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="3">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                 </svg>
               </div>
               <div>
-                <p className="text-sm font-bold text-green-900">Phone Number Verified</p>
-                <p className="text-xs text-green-700 mt-0.5">{profile.phone_number}</p>
+                <p className="text-sm font-bold text-status-success">Phone Number Verified</p>
+                <p className="text-xs text-status-success/80 mt-0.5">{profile.phone_number}</p>
               </div>
             </div>
-            <p className="text-xs text-green-700 mt-3">
+            <p className="text-xs text-status-success/90 mt-3">
               Your phone number has been verified. If you update your phone number in Personal Info, you'll need to verify it again.
             </p>
           </div>
         ) : (
           <div>
             {!profile?.phone_number ? (
-              <div className="bg-yellow-50 border border-yellow-200 rounded-2xl p-6">
+              <div className="bg-status-warning/10 border border-status-warning/20 rounded-2xl p-6">
                 <div className="flex items-start gap-3">
-                  <div className="w-8 h-8 rounded-full bg-yellow-500 flex items-center justify-center shrink-0">
+                  <div className="w-8 h-8 rounded-full bg-status-warning flex items-center justify-center shrink-0">
                     <span className="text-white font-bold text-lg">!</span>
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-yellow-900 mb-1">No Phone Number</p>
-                    <p className="text-xs text-yellow-700">
+                    <p className="text-sm font-bold text-status-warning mb-1">No Phone Number</p>
+                    <p className="text-xs text-status-warning/90">
                       Please add your phone number in the Personal Info section first, then come back here to verify it.
                     </p>
                     <button
                       type="button"
                       onClick={() => setActiveSection('personal')}
-                      className="mt-3 text-xs font-bold text-yellow-800 hover:text-yellow-900 underline"
+                      className="mt-3 text-xs font-bold text-status-warning/90 hover:text-status-warning underline"
                     >
                       Go to Personal Info →
                     </button>
@@ -487,17 +487,17 @@ const ProfileSettingsPage = () => {
               </div>
             ) : (
               <div>
-                <div className="bg-blue-50 border border-blue-200 rounded-2xl p-4 mb-6">
+                <div className="bg-status-info/10 border border-status-info/20 rounded-2xl p-4 mb-6">
                   <div className="flex items-start gap-3">
-                    <div className="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center shrink-0">
+                    <div className="w-8 h-8 rounded-full bg-status-info flex items-center justify-center shrink-0">
                       <Phone className="text-white" size={16} />
                     </div>
                     <div>
-                      <p className="text-sm font-bold text-blue-900 mb-1">Unverified Phone Number</p>
-                      <p className="text-xs text-blue-700">
+                      <p className="text-sm font-bold text-status-info mb-1">Unverified Phone Number</p>
+                      <p className="text-xs text-status-info/90">
                         Current number: <span className="font-semibold">{profile.phone_number}</span>
                       </p>
-                      <p className="text-xs text-blue-600 mt-2">
+                      <p className="text-xs text-status-info/80 mt-2">
                         Click below to verify using WhatsApp. It's quick, easy, and completely free!
                       </p>
                     </div>
@@ -542,16 +542,16 @@ const ProfileSettingsPage = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+    <div className="max-w-7xl mx-auto space-y-6">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold font-logo text-text-primary mb-2">Settings</h1>
-        <p className="text-text-secondary ">Manage your account preferences and profile details.</p>
+        <h1 className="text-2xl font-black font-logo text-text-primary mb-1">Settings</h1>
+        <p className="text-text-secondary font-medium text-sm">Manage your account preferences and profile details.</p>
       </div>
 
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Sidebar */}
         <aside className="w-full lg:w-64 shrink-0">
-          <div className="bg-white rounded-[24px] border border-border p-3 sticky top-24 shadow-sm">
+          <div className="bg-bg-surface rounded-2xl border border-border p-3 sticky top-24 shadow-sm">
             <nav className="space-y-1">
               {PROFILE_SECTIONS.map((section) => {
                 const active = activeSection === section.id;
@@ -563,7 +563,7 @@ const ProfileSettingsPage = () => {
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
                     className={`
-                            w-full flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-bold transition-all relative overflow-hidden group
+                            w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-bold transition-all relative overflow-hidden group
                             ${active
                         ? isDanger
                           ? 'bg-status-error text-white shadow-lg shadow-status-error/20'

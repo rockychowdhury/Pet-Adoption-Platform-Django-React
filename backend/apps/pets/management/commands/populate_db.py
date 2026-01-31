@@ -285,4 +285,4 @@ class Command(BaseCommand):
             )
             self.stdout.write(self.style.SUCCESS('Created Foster Provider'))
 
-        self.stdout.write(self.style.SUCCESS('Successfully populated database with PetCircle data!'))
+        self.stdout.write(self.style.SUCCESS('Successfully populated database with PetCarePlus data!'))

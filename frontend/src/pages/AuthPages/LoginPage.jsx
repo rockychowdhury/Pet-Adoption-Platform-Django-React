@@ -18,9 +18,15 @@ const LoginPage = () => {
         }
     }, [user, navigate]);
 
-    const handleLoginSuccess = () => {
-        // Get fresh user from context after login
-        const redirectPath = getRoleBasedRedirect(user);
+    const handleLoginSuccess = (userData) => {
+        // Handle both "user object" or "options object" if inconsistent, but here we expect user object or null
+        if (userData?.preventRedirect) return;
+
+        // Use fresh user data if provided, otherwise fallback to context (which might be stale)
+        const currentUser = userData || user;
+        const redirectPath = getRoleBasedRedirect(currentUser);
+
+        console.log("Login Success. Redirecting to:", redirectPath, "User:", currentUser);
         navigate(redirectPath, { replace: true });
     };
 

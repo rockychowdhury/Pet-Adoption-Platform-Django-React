@@ -1,24 +1,76 @@
-import React, { useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
-import { Star, MapPin, Check, Phone, Clock, Shield, Calendar, Heart, Share2, Loader, X } from 'lucide-react';
-import Card from '../../components/common/Layout/Card';
-import Button from '../../components/common/Buttons/Button';
-import Badge from '../../components/common/Feedback/Badge';
+import React, { useState, useEffect } from 'react';
+import { useParams, useSearchParams } from 'react-router-dom';
+import { Loader } from 'lucide-react';
+import { toast, Toaster } from 'react-hot-toast';
 import useServices from '../../hooks/useServices';
+
+// Components
+import ServiceHero from '../../components/Services/ServiceDetail/ServiceHero';
+import ServiceTabs from '../../components/Services/ServiceDetail/ServiceTabs';
+import OverviewTab from '../../components/Services/ServiceDetail/Tabs/OverviewTab';
+import ServicesTab from '../../components/Services/ServiceDetail/Tabs/ServicesTab';
+import ReviewsTab from '../../components/Services/ServiceDetail/Tabs/ReviewsTab';
+import AboutTab from '../../components/Services/ServiceDetail/Tabs/AboutTab';
 import BookingModal from '../../components/Services/BookingModal';
+import ServiceGalleryModal from '../../components/Services/ServiceDetail/ServiceGalleryModal';
+import ContactModal from '../../components/Services/ServiceDetail/ContactModal';
 
 const ServiceDetailPage = () => {
     const { id } = useParams();
+    const [searchParams] = useSearchParams();
     const { useGetProvider } = useServices();
     const { data: provider, isLoading } = useGetProvider(id);
-    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
-    const [selectedServiceForBooking, setSelectedServiceForBooking] = useState(null);
 
+    // State
+    const [activeTab, setActiveTab] = useState('overview');
+    const [isBookingModalOpen, setIsBookingModalOpen] = useState(false);
+    const [isContactModalOpen, setIsContactModalOpen] = useState(false);
+    const [isGalleryOpen, setIsGalleryOpen] = useState(false);
+    const [selectedServiceForBooking, setSelectedServiceForBooking] = useState(null);
+    const [isFavorite, setIsFavorite] = useState(false); // Mock state for now
+
+    // Initial Tab from URL
+    useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab && ['overview', 'services', 'reviews', 'about'].includes(tab)) {
+            setActiveTab(tab);
+        }
+    }, [searchParams]);
+
+    // Handlers
     const handleOpenBooking = (service = null) => {
         setSelectedServiceForBooking(service);
         setIsBookingModalOpen(true);
     };
 
+    const handleShare = async () => {
+        try {
+            await navigator.clipboard.writeText(window.location.href);
+            toast.success("Link copied to clipboard!");
+        } catch (err) {
+            console.error('Failed to copy link:', err);
+            toast.error("Failed to copy link");
+        }
+    };
+
+    const handleToggleFavorite = () => {
+        setIsFavorite(!isFavorite);
+        toast.success(isFavorite ? "Removed from favorites" : "Added to favorites");
+    };
+
+    const scrollToMap = () => {
+        setActiveTab('about');
+        setTimeout(() => {
+            document.getElementById('map-section')?.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+    };
+
+    const handleSwitchTab = (tabName) => {
+        setActiveTab(tabName);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // Render Loading
     if (isLoading) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
@@ -27,6 +79,7 @@ const ServiceDetailPage = () => {
         );
     }
 
+    // Render Error
     if (!provider) {
         return (
             <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7]">
@@ -35,272 +88,42 @@ const ServiceDetailPage = () => {
         );
     }
 
-    // Determine type based on category slug or name
-    const isVet = provider.category?.slug === 'veterinary' || provider.category?.name?.toLowerCase().includes('vet');
-    const serviceType = provider.category?.name || 'Service Provider';
-
-    // Helper to get image
-    const heroImage = provider.media?.find(m => m.is_primary)?.file_url || provider.media?.[0]?.file_url || 'https://images.unsplash.com/photo-1599443015574-be5fe8a05783?auto=format&fit=crop&q=80&w=1200';
-
-    // Helper for address
-    const fullAddress = `${provider.address_line1}, ${provider.city}, ${provider.state}`;
+    const galleryImages = provider.media || [];
 
     return (
-        <div className="min-h-screen bg-[#FDFBF7] pb-12">
-            {/* Hero Image */}
-            <div className="h-64 md:h-96 w-full relative">
-                <img src={heroImage} alt={provider.business_name} className="w-full h-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-4 md:p-8 max-w-7xl mx-auto">
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-4">
-                        <div className="text-white">
-                            <Badge variant="info" className="mb-2 bg-blue-500/20 text-blue-100 backdrop-blur-md border-blue-400/30">{serviceType}</Badge>
-                            <h1 className="text-3xl md:text-5xl font-bold font-merriweather mb-2">{provider.business_name}</h1>
-                            <div className="flex flex-wrap items-center gap-4 text-sm md:text-base">
-                                <span className="flex items-center gap-1 text-yellow-400 font-bold"><Star fill="currentColor" size={18} /> {provider.avg_rating || 'New'} ({provider.reviews_count} reviews)</span>
-                                <span className="flex items-center gap-1 opacity-90"><MapPin size={18} /> {fullAddress}</span>
-                                {provider.is_verified && <span className="flex items-center gap-1 text-green-300"><Shield size={18} /> Verified Provider</span>}
-                            </div>
-                        </div>
-                        <div className="flex gap-3">
-                            <Button variant="ghost" className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"><Share2 size={20} /></Button>
-                            <Button variant="ghost" className="bg-white/20 text-white hover:bg-white/30 backdrop-blur-sm"><Heart size={20} /></Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div className="min-h-screen bg-white pb-24">
+            <ServiceHero
+                provider={provider}
+                onBook={() => handleOpenBooking()}
+                onContact={() => setIsContactModalOpen(true)}
+                onShare={handleShare}
+                onFavorite={handleToggleFavorite}
+                isFavorite={isFavorite}
+                onOpenGallery={() => setIsGalleryOpen(true)}
+            />
 
-            <div className="max-w-7xl mx-auto px-4 py-8 grid grid-cols-1 lg:grid-cols-3 gap-8">
-                {/* Main Content */}
-                <div className="lg:col-span-2 space-y-8">
-                    {/* About */}
-                    <section>
-                        <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">About</h2>
-                        <p className="text-text-secondary leading-relaxed whitespace-pre-line">{provider.description}</p>
-                    </section>
+            <ServiceTabs activeTab={activeTab} onTabChange={setActiveTab} />
 
-                    {/* Services / Vet Specific */}
-                    {isVet && provider.vet_details ? (
-                        <>
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Services & Pricing</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {provider.vet_details.services_offered?.map((svc, idx) => (
-                                        <div key={idx} className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
-                                            <span className="font-medium text-text-primary">{svc.name}</span>
-                                            <span className="text-brand-primary font-bold">{svc.base_price ? `$${svc.base_price}+` : 'Call for price'}</span>
-                                        </div>
-                                    ))}
-                                </div>
-                                {provider.vet_details.pricing_info && (
-                                    <p className="mt-4 text-sm text-text-secondary">{provider.vet_details.pricing_info}</p>
-                                )}
-                            </section>
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+                {activeTab === 'overview' && (
+                    <OverviewTab
+                        provider={provider}
+                        onViewMap={scrollToMap}
+                        onReadReviews={() => handleSwitchTab('reviews')}
+                    />
+                )}
 
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Hours</h2>
-                                <div className="bg-white border border-border rounded-xl overflow-hidden">
-                                    {provider.hours?.map((h, idx) => (
-                                        <div key={idx} className="flex justify-between p-4 border-b border-border last:border-0 hover:bg-gray-50">
-                                            <span className="font-medium text-text-secondary">{h.day_display}</span>
-                                            <span className="font-bold text-text-primary">
-                                                {h.is_closed ? 'Closed' : `${h.open_time} - ${h.close_time}`}
-                                            </span>
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
+                {activeTab === 'services' && (
+                    <ServicesTab provider={provider} onBook={handleOpenBooking} />
+                )}
 
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Amenities</h2>
-                                <div className="flex flex-wrap gap-3">
-                                    {provider.vet_details.amenities?.map((item, idx) => (
-                                        <div key={idx} className="px-4 py-2 bg-green-50 text-green-800 rounded-full text-sm font-medium flex items-center gap-2">
-                                            <Check size={16} /> {item}
-                                        </div>
-                                    ))}
-                                </div>
-                            </section>
-                        </>
-                    ) : provider.trainer_details ? (
-                        /* Trainer Specific */
-                        <>
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Training Philosophy</h2>
-                                <Card className="p-6">
-                                    <div className="mb-4">
-                                        <div className="text-sm font-bold text-text-secondary uppercase tracking-wide mb-1">Primary Method</div>
-                                        <div className="text-lg font-medium text-brand-primary capitalize">
-                                            {provider.trainer_details.primary_method.replace('_', ' ')}
-                                        </div>
-                                    </div>
-                                    <p className="text-text-secondary leading-relaxed whitespace-pre-line">
-                                        {provider.trainer_details.training_philosophy}
-                                    </p>
-                                </Card>
-                            </section>
+                {activeTab === 'reviews' && (
+                    <ReviewsTab provider={provider} />
+                )}
 
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Services & Rates</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    {provider.trainer_details.offers_private_sessions && (
-                                        <div className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
-                                            <span className="font-medium text-text-primary">Private Session</span>
-                                            <span className="text-brand-primary font-bold">${provider.trainer_details.private_session_rate}/hr</span>
-                                        </div>
-                                    )}
-                                    {provider.trainer_details.offers_group_classes && (
-                                        <div className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
-                                            <span className="font-medium text-text-primary">Group Class</span>
-                                            <span className="text-brand-primary font-bold">${provider.trainer_details.group_class_rate}/class</span>
-                                        </div>
-                                    )}
-                                    {provider.trainer_details.offers_board_and_train && (
-                                        <div className="flex justify-between items-center p-4 bg-white border border-border rounded-xl">
-                                            <span className="font-medium text-text-primary">Board & Train</span>
-                                            <Badge variant="success">Available</Badge>
-                                        </div>
-                                    )}
-                                </div>
-
-                                {provider.trainer_details.package_options?.length > 0 && (
-                                    <div className="mt-6 space-y-4">
-                                        <h3 className="font-bold text-lg text-text-primary">Packages</h3>
-                                        <div className="grid gap-4">
-                                            {provider.trainer_details.package_options.map((pkg, idx) => (
-                                                <div key={idx} className="p-4 border border-brand-primary/20 bg-brand-primary/5 rounded-xl flex justify-between items-center">
-                                                    <div>
-                                                        <div className="font-bold text-text-primary">{pkg.name}</div>
-                                                        <div className="text-sm text-text-secondary">{pkg.description}</div>
-                                                    </div>
-                                                    <div className="font-bold text-brand-primary text-xl flex items-center gap-2">
-                                                        ${pkg.price}
-                                                        <Button size="sm" onClick={() => handleOpenBooking({ name: pkg.name, price: pkg.price })}>Book</Button>
-                                                    </div>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </section>
-
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Specializations</h2>
-                                <div className="flex flex-wrap gap-2">
-                                    {provider.trainer_details.specializations?.map((spec, idx) => (
-                                        <Badge key={idx} variant="info" className="px-3 py-1 text-sm bg-blue-50 text-blue-700 border-blue-100">
-                                            {spec.name}
-                                        </Badge>
-                                    ))}
-                                </div>
-                            </section>
-                        </>
-                    ) : provider.foster_details ? (
-                        <>
-                            <section>
-                                <h2 className="text-2xl font-bold text-text-primary mb-4 font-merriweather">Environment</h2>
-                                <Card className="p-6">
-                                    <pre className="text-sm font-sans whitespace-pre-wrap text-text-secondary">
-                                        {JSON.stringify(provider.foster_details.environment_details, null, 2)}
-                                    </pre>
-                                </Card>
-                            </section>
-                        </>
-                    ) : null}
-
-                    {/* Review Teaser */}
-                    <div className="pt-8 border-t border-border">
-                        <div className="flex items-center justify-between mb-6">
-                            <h2 className="text-2xl font-bold text-text-primary font-merriweather">Reviews</h2>
-                            <Link to={`/services/${id}/review`}>
-                                <Button variant="outline">Write a Review</Button>
-                            </Link>
-                        </div>
-                        {/* Show latest review if exists */}
-                        {provider.reviews && provider.reviews.length > 0 ? (
-                            <Card className="p-6">
-                                <div className="flex items-center justify-between mb-4">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 bg-gray-200 rounded-full" />
-                                        <div>
-                                            <p className="font-bold text-text-primary">{provider.reviews[0].reviewer?.first_name || 'User'}</p>
-                                            <p className="text-xs text-text-secondary">Verified Client</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex text-yellow-400">
-                                        <Star size={16} fill="currentColor" /> <span className="ml-1 text-sm font-bold">{provider.reviews[0].rating}</span>
-                                    </div>
-                                </div>
-                                <p className="text-text-secondary text-sm">
-                                    "{provider.reviews[0].comment}"
-                                </p>
-                            </Card>
-                        ) : (
-                            <p className="text-text-secondary italic">No reviews yet.</p>
-                        )}
-                    </div>
-                </div>
-
-                {/* Sidebar */}
-                <div className="lg:col-span-1 space-y-6">
-                    <Card className="p-6 sticky top-24">
-                        {isVet ? (
-                            <>
-                                <h3 className="font-bold text-lg mb-2">Contact Clinic</h3>
-                                <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg mb-4 w-fit">
-                                    <Clock size={16} />
-                                    <span className="text-sm font-bold">Open Now</span>
-                                </div>
-                                <div className="space-y-4">
-                                    <Button variant="primary" className="w-full justify-center" onClick={() => window.open(`tel:${provider.phone}`)}>
-                                        <Phone size={18} className="mr-2" /> {provider.phone}
-                                    </Button>
-                                    <Button variant="outline" className="w-full justify-center" onClick={() => handleOpenBooking()}>Request Appointment</Button>
-                                    <Button variant="ghost" className="w-full justify-center text-text-secondary">Get Directions</Button>
-                                </div>
-                            </>
-                        ) : provider.foster_details ? (
-                            <>
-                                <div className="flex justify-between items-end mb-4 pb-4 border-b border-border">
-                                    <div>
-                                        <h3 className="font-bold text-lg">Daily Rate</h3>
-                                        <p className="text-xs text-text-secondary">Includes basic care & walks</p>
-                                    </div>
-                                    <div className="text-right">
-                                        <span className="text-3xl font-bold text-brand-primary">${provider.foster_details.daily_rate}</span>
-                                        <span className="text-text-secondary text-sm">/day</span>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <div className="bg-yellow-50 text-yellow-800 p-3 rounded-xl flex items-start gap-2 text-sm">
-                                        <Calendar size={18} className="shrink-0 mt-0.5" />
-                                        <span><strong>{provider.foster_details.current_availability}</strong> availability.</span>
-                                    </div>
-                                    <Button variant="primary" className="w-full justify-center" onClick={() => handleOpenBooking({ name: 'Foster Care', price: provider.foster_details.daily_rate })}>Contact Provider</Button>
-                                </div>
-                            </>
-                        ) : provider.trainer_details ? (
-                            <>
-                                <h3 className="font-bold text-lg mb-2">Book Training</h3>
-                                <div className="space-y-2 mb-4">
-                                    {provider.trainer_details.accepting_new_clients ? (
-                                        <div className="flex items-center gap-2 text-green-600 bg-green-50 px-3 py-2 rounded-lg text-sm font-bold">
-                                            <Check size={16} /> Accepting New Clients
-                                        </div>
-                                    ) : (
-                                        <div className="flex items-center gap-2 text-red-600 bg-red-50 px-3 py-2 rounded-lg text-sm font-bold">
-                                            <X size={16} /> Full Capacity
-                                        </div>
-                                    )}
-                                </div>
-                                <div className="space-y-4">
-                                    <Button variant="primary" className="w-full justify-center" onClick={() => handleOpenBooking()}>Request Consultation</Button>
-                                    <Button variant="outline" className="w-full justify-center">View Packages</Button>
-                                </div>
-                            </>
-                        ) : null}
-                    </Card>
-                </div>
+                {activeTab === 'about' && (
+                    <AboutTab provider={provider} onContact={() => setIsContactModalOpen(true)} />
+                )}
             </div>
 
             <BookingModal
@@ -309,7 +132,20 @@ const ServiceDetailPage = () => {
                 provider={provider}
                 initialService={selectedServiceForBooking}
             />
-        </div >
+
+            <ServiceGalleryModal
+                isOpen={isGalleryOpen}
+                onClose={() => setIsGalleryOpen(false)}
+                images={galleryImages}
+            />
+
+            <ContactModal
+                isOpen={isContactModalOpen}
+                onClose={() => setIsContactModalOpen(false)}
+                provider={provider}
+            />
+            <Toaster position="bottom-center" />
+        </div>
     );
 };
 

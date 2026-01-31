@@ -4,12 +4,12 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import Logo from './Logo';
 import { Menu, X, Bell, LayoutDashboard, User, PawPrint, Settings as SettingsIcon, LogOut, Sun, Moon } from 'lucide-react';
 import useAuth from '../../hooks/useAuth';
+import useServices from '../../hooks/useServices';
 import { useTheme } from '../../context/ThemeContext';
 import Button from './Buttons/Button';
 import IconButton from './Buttons/IconButton';
 import Avatar from './Display/Avatar';
 import AuthModal from '../Auth/AuthModal';
-import SearchBar from './SearchBar';
 import NavLink from './Navigation/NavLink';
 import MobileNavLink from './Navigation/MobileNavLink';
 import DropdownLink from './Navigation/DropdownLink';
@@ -23,13 +23,13 @@ const Navbar = () => {
     const [authMode, setAuthMode] = useState('login');
 
     const { user, logout } = useAuth();
+    const { useGetMyProviderProfile } = useServices();
+    // Only fetch if user logged in and not already a provider (optimization)
+    const { data: providerProfile } = useGetMyProviderProfile();
+
     const { theme, toggleTheme } = useTheme();
     const navigate = useNavigate();
     const location = useLocation();
-
-    const queryParams = new URLSearchParams(location.search);
-    const currentSearch = queryParams.get('search') || '';
-    const currentLocation = queryParams.get('location') || '';
 
     const handleLogout = () => {
         logout();
@@ -47,19 +47,6 @@ const Navbar = () => {
         return location.pathname.startsWith(path);
     };
 
-    const handleSearch = ({ search, location: searchLocation, radius }) => {
-        const params = new URLSearchParams();
-        if (search) params.set('search', search);
-        if (searchLocation) params.set('location', searchLocation);
-        if (radius) params.set('radius', radius);
-
-        const isPetsPage = location.pathname === '/pets';
-        navigate(`/pets?${params.toString()}`, { replace: isPetsPage });
-    };
-
-    const showSearchBar = ['/pets', '/services'].includes(location.pathname);
-    const showLocation = location.pathname.startsWith('/pets');
-
     return (
         <>
             <nav className="fixed top-0 left-0 w-full z-[100] bg-bg-surface border-b border-border/50 h-24 flex items-center shadow-[0_2px_15px_-3px_rgba(0,0,0,0.02)] transition-all duration-300">
@@ -71,38 +58,15 @@ const Navbar = () => {
                             <Link to="/" className="shrink-0">
                                 <Logo />
                             </Link>
-
-                            {/* Show Links on Left ONLY if Search Bar is Visible */}
-                            {showSearchBar && (
-                                <div className="hidden xl:flex items-center gap-8">
-                                    {user?.role !== 'service_provider' && <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />}
-                                    <NavLink to="/services" label="Services" active={isActive('/services')} />
-                                    <NavLink to="/about" label="About" active={isActive('/about')} />
-                                </div>
-                            )}
                         </div>
 
-                        {/* Center Container: Search Bar OR Nav Links */}
+                        {/* Center Container: Nav Links */}
                         <div className="hidden md:flex flex-1 justify-center max-w-2xl lg:max-w-3xl xl:max-w-4xl">
-                            {showSearchBar ? (
-                                <SearchBar
-                                    onSearch={handleSearch}
-                                    placeholder={
-                                        location.pathname.startsWith('/services') ? "Search services..." :
-                                            "Search by breed, name or personality..."
-                                    }
-                                    showLocation={showLocation}
-                                    initialSearch={currentSearch}
-                                    initialLocation={currentLocation}
-                                />
-                            ) : (
-                                /* Show Links in Center if Search Bar is Hidden */
-                                <div className="hidden md:flex items-center gap-8">
-                                    {user?.role !== 'service_provider' && <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />}
-                                    <NavLink to="/services" label="Services" active={isActive('/services')} />
-                                    <NavLink to="/about" label="About" active={isActive('/about')} />
-                                </div>
-                            )}
+                            <div className="hidden md:flex items-center gap-8">
+                                {user?.role !== 'service_provider' && <NavLink to="/pets" label="Find a Pet" active={isActive('/pets')} />}
+                                <NavLink to="/services" label="Services" active={isActive('/services')} />
+                                <NavLink to="/about" label="About" active={isActive('/about')} />
+                            </div>
                         </div>
 
                         {/* Desktop Actions - Right */}
@@ -162,7 +126,15 @@ const Navbar = () => {
 
                                                     {user.role !== 'service_provider' && user.role !== 'admin' && (
                                                         <>
-                                                            <DropdownLink to="/become-provider" icon={<User size={16} />} label="Become a Provider" />
+                                                            {/* Provider Status Logic */}
+                                                            {providerProfile?.application_status === 'draft' ? (
+                                                                <DropdownLink to="/become-provider" icon={<User size={16} />} label="Finish Application" />
+                                                            ) : providerProfile?.application_status === 'submitted' ? (
+                                                                <DropdownLink to="/become-provider" icon={<User size={16} />} label="Application Pending" />
+                                                            ) : (
+                                                                <DropdownLink to="/become-provider" icon={<User size={16} />} label="Become a Provider" />
+                                                            )}
+
                                                             <Link
                                                                 to="/rehoming/create"
                                                                 className="flex items-center gap-3 px-4 py-2.5 mx-2 my-1 text-sm text-brand-primary bg-brand-primary/10 rounded-xl hover:bg-brand-primary/20 transition-all font-bold"

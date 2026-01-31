@@ -9,62 +9,46 @@ import useServices from '../../hooks/useServices';
 import NoResults from '../../components/common/Feedback/NoResults';
 import ServiceFilterSidebar from '../../components/Services/ServiceFilterSidebar';
 import ServiceCard from '../../components/Services/ServiceCard';
-import SortDropdown from '../../components/Pet/SortDropdown'; // Reusing generic sort
+import SortDropdown from '../../components/Pet/SortDropdown';
 import LocationPickerModal from '../../components/Pet/LocationPickerModal';
 
 const ServiceSearchPage = () => {
     const [searchParams, setSearchParams] = useSearchParams();
-    const location = useLocation();
 
-    // Unified Filter Drawer State (Mobile & Desktop)
+    // Unified Filter Drawer State
     const [isFilterDrawerOpen, setIsFilterDrawerOpen] = useState(false);
     const [viewMode, setViewMode] = useState('grid');
+    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
     // State from URL
     const providerType = searchParams.get('providerType') || '';
     const search = searchParams.get('search') || '';
     const city = searchParams.get('location') || '';
     const radius = searchParams.get('radius') || '25';
-    const sortBy = searchParams.get('sort') || '-created_at';
+    const sortBy = searchParams.get('ordering') || '-created_at';
+    const [page, setPage] = useState(1);
     const species = searchParams.get('species') || '';
     const availability = searchParams.get('availability') || '';
     const verificationStatus = searchParams.get('verification_status') || '';
 
-
-    // Map internal type to API Category Slug if present
-    // If providerType is empty, categorySlug is undefined -> fetch ALL
+    // Map internal type to API Category Slug
     const categorySlug = providerType === 'vet' ? 'veterinary' : providerType === 'trainer' ? 'training' : providerType === 'foster' ? 'foster' : undefined;
 
-    // Location State
+    // Location & IP Detection
     const [suggestedLocation, setSuggestedLocation] = useState(null);
-    const [isLocationModalOpen, setIsLocationModalOpen] = useState(false);
 
-    // IP-Based Location Detection on Mount
     useEffect(() => {
-        const detectLocation = async () => {
-            if (!city) { // Only detect if no location is currently set
-                try {
-                    const response = await fetch('https://ipwho.is/');
-                    if (!response.ok) throw new Error('Location detection failed');
-                    const data = await response.json();
+        if (!city) {
+            fetch('https://ipwho.is/')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) setSuggestedLocation(`${data.city}, ${data.region_code}`);
+                })
+                .catch(err => console.error("Location detection failed", err));
+        }
+    }, [city]);
 
-                    if (data.success && data.city && data.region_code) {
-                        const locationString = `${data.city}, ${data.region_code}`;
-                        setSuggestedLocation(locationString);
-                    }
-                } catch (error) {
-                    console.error("Auto-location detection error:", error);
-                }
-            }
-        };
-
-        detectLocation();
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
-    // Handle Location Selection
-    const handleLocationSelect = (locationData) => {
-        const { name, radius } = locationData;
+    const handleLocationSelect = ({ name, radius }) => {
         const newParams = new URLSearchParams(searchParams);
         newParams.set('location', name);
         newParams.set('radius', radius);
@@ -72,60 +56,47 @@ const ServiceSearchPage = () => {
         setIsLocationModalOpen(false);
     };
 
-    // Construct Query Params
+    // Query Construction
     const queryParams = {
         category: categorySlug,
         search,
         location: city,
-        radius: city ? radius : undefined, // Only send radius if location exists
-        ordering: sortBy, // Changed sort to ordering to match backend standard
+        radius: city ? radius : undefined,
+        ordering: sortBy,
         species,
         availability,
         verification_status: verificationStatus,
+        page,
         ...Object.fromEntries(searchParams.entries())
     };
-
-    // Cleanup undefined
+    // Cleanup
     if (!queryParams.category) delete queryParams.category;
     if (!queryParams.radius) delete queryParams.radius;
 
 
-    // Query Hook
     const { useGetProviders } = useServices();
-    const { data: providers, isLoading } = useGetProviders(queryParams);
+    const { data: providersData, isLoading } = useGetProviders(queryParams);
+
+    // Handle pagination vs list response
+    const providersList = Array.isArray(providersData) ? providersData : (providersData?.results || []);
+    const totalCount = providersData?.count || providersList.length;
+    const hasNextPage = !!providersData?.next;
 
     const handleFilterChange = (key, value) => {
         const newParams = new URLSearchParams(searchParams);
-
-        // Handle explicit removals
-        if (value === '' || value === null) {
-            newParams.delete(key);
-        } else {
-            newParams.set(key, value);
-        }
-
-        // Reset page on filter change
+        if (value === '' || value === null) newParams.delete(key);
+        else newParams.set(key, value);
         newParams.delete('page');
-
         setSearchParams(newParams);
+        setPage(1);
     };
 
     const handleClearFilters = () => {
-        setSearchParams({}); // Clear all
+        setSearchParams({});
+        setPage(1);
     };
 
-    const providersList = Array.isArray(providers) ? providers : (providers?.results || []);
-
-    // Sort Options
-    const sortOptions = [
-        { value: '-created_at', label: 'Newest' }, // Default
-        { value: 'recommended', label: 'Recommended' },
-        // { value: 'distance', label: 'Nearest to Me' }, // Needs backend support
-        { value: '-avg_rating', label: 'Highest Rated' },
-        { value: '-reviews_count', label: 'Most Reviewed' },
-    ];
-
-    // Derived Active Filters
+    // Toggle logic helper
     const getActiveFilters = () => {
         const active = [];
         if (providerType) active.push({ key: 'providerType', label: providerType === 'vet' ? 'Veterinary' : providerType === 'trainer' ? 'Training' : 'Foster' });
@@ -137,196 +108,209 @@ const ServiceSearchPage = () => {
     }
     const activeFilters = getActiveFilters();
 
-    const removeFilter = (key) => {
-        const newParams = new URLSearchParams(searchParams);
-        newParams.delete(key);
-        if (key === 'location') newParams.delete('radius');
-        setSearchParams(newParams);
-    }
-
-    const containerVariants = {
-        hidden: { opacity: 0 },
-        visible: { opacity: 1, transition: { staggerChildren: 0.1 } }
-    };
-
+    const sortOptions = [
+        { value: '-created_at', label: 'Newest' },
+        { value: 'recommended', label: 'Recommended' },
+        { value: '-avg_rating', label: 'Highest Rated' },
+        { value: '-reviews_count', label: 'Most Reviewed' },
+    ];
 
     return (
-        <div className="min-h-screen bg-bg-primary ">
+        <div className="min-h-screen bg-gray-50">
             <Navbar />
 
-            <div className="max-w-7xl mx-auto px-6 pb-40 pt-12">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                {/* 1. Header & Top Filters Container */}
-                <div className="flex flex-col gap-6 mb-8">
-                    {/* Top Row: Compact Title + Actions */}
-                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                        <div className="flex items-baseline gap-4">
-                            <h1 className="text-3xl md:text-4xl font-logo font-black text-text-primary tracking-tighter leading-none">
-                                Find <span className="text-brand-primary">Care</span>
-                            </h1>
-                            <div className="flex items-center gap-2">
-                                <div className="h-0.5 w-6 bg-brand-secondary rounded-full opacity-50"></div>
-                                <p className="text-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">
-                                    {providersList.length} providers
-                                </p>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            {/* Location Button */}
-                            <button
-                                onClick={() => setIsLocationModalOpen(true)}
-                                className={`flex-1 md:flex-none flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl transition-all text-xs font-bold shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 hover:border-gray-200 active:scale-95 ${city
-                                    ? 'bg-brand-primary/5 text-brand-primary border-brand-primary/20'
-                                    : suggestedLocation
-                                        ? 'bg-amber-50/50 text-amber-800 border-amber-100'
-                                        : 'bg-white text-text-secondary hover:text-text-primary'
-                                    }`}
-                            >
-                                <MapPin size={16} className={city ? "fill-brand-primary/20" : ""} />
-                                <span className="max-w-[120px] truncate">
-                                    {city || suggestedLocation || "Set Location"}
-                                </span>
-                            </button>
-
-                            {/* Sort Dropdown */}
-                            <SortDropdown
-                                currentSort={sortBy}
-                                onSortChange={(val) => handleFilterChange('sort', val)}
-                                options={sortOptions}
-                            />
-
-                            {/* Filter Drawer Trigger */}
-                            <button
-                                onClick={() => setIsFilterDrawerOpen(true)}
-                                className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl transition-all text-xs font-bold shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 hover:border-gray-200 active:scale-95 ${activeFilters.length > 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-text-secondary hover:text-text-primary'}`}
-                            >
-                                <List size={16} />
-                                <span className="hidden sm:inline">Filters</span>
-                                {activeFilters.length > 0 && (
-                                    <span className="bg-white text-gray-900 w-4 h-4 flex items-center justify-center rounded-full text-[9px]">
-                                        {activeFilters.length}
-                                    </span>
-                                )}
-                            </button>
-                        </div>
+                {/* Search & Toolbar Row */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+                    {/* Search Input - Left Aligned & Wide */}
+                    <div className="relative flex-1 w-full max-w-md">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search by name, service, or keyword..."
+                            value={search}
+                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:ring-1 focus:ring-brand-primary focus:border-brand-primary outline-none transition-all"
+                        />
                     </div>
 
-                    {/* Active Filter Chips */}
-                    <div className="min-h-[44px] flex items-center">
-                        <AnimatePresence mode="wait">
-                            {activeFilters.length > 0 ? (
-                                <motion.div
-                                    key="active-filters"
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -5 }}
-                                    className="flex flex-wrap gap-2 items-center"
-                                >
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-text-tertiary mr-2">Filtering by:</span>
-                                    {activeFilters.map(filter => (
-                                        <button
-                                            key={filter.key}
-                                            onClick={() => removeFilter(filter.key)}
-                                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[10px] font-bold text-text-secondary hover:border-status-error hover:text-status-error transition-all shadow-sm group"
-                                        >
-                                            {filter.label}
-                                            <X size={12} className="group-hover:rotate-90 transition-transform" />
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={handleClearFilters}
-                                        className="text-[10px] font-black text-status-error uppercase tracking-widest hover:bg-status-error/5 px-3 py-1.5 rounded-xl transition-colors"
-                                    >
-                                        Reset All
-                                    </button>
-                                </motion.div>
-                            ) : (
-                                <motion.p
-                                    key="no-filters"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="text-[11px] font-medium text-text-tertiary italic"
-                                >
-                                    Browse all available service providers.
-                                </motion.p>
-                            )}
-                        </AnimatePresence>
+                    {/* Right Side Controls */}
+                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                        <span className="text-xs font-bold text-gray-500 hidden xl:block">
+                            Showing {totalCount} providers
+                        </span>
+
+                        <SortDropdown
+                            currentSort={sortBy}
+                            onSortChange={(val) => handleFilterChange('ordering', val)}
+                            options={sortOptions}
+                        />
+
+                        {/* View Toggle */}
+                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+                            <button
+                                onClick={() => setViewMode('grid')}
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'grid' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                <LayoutGrid size={18} />
+                            </button>
+                            <button
+                                onClick={() => setViewMode('list')}
+                                className={`p-2 rounded-lg transition-all ${viewMode === 'list' ? 'bg-gray-100 text-gray-900' : 'text-gray-400 hover:text-gray-600'}`}
+                            >
+                                <ListIcon size={18} />
+                            </button>
+                        </div>
                     </div>
                 </div>
 
-                {/* Results Grid - Full Width 4 Columns Logic */}
-                {isLoading ? (
-                    <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-                        {[1, 2, 3, 4, 5, 6].map(i => (
-                            <div key={i} className="bg-white h-[380px] rounded-2xl animate-pulse shadow-sm border border-gray-100" />
-                        ))}
-                    </div>
-                ) : (
-                    <div className={`grid gap-6 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
-                        <AnimatePresence mode="popLayout">
-                            {providersList.map((provider) => (
-                                <ServiceCard
-                                    key={provider.id}
-                                    provider={provider}
-                                    viewMode={viewMode}
-                                />
-                            ))}
-                        </AnimatePresence>
+                {/* Main Content Layout */}
+                <div className="flex gap-8 items-start">
 
-                        {providersList.length === 0 && (
-                            <div className="col-span-full py-12">
-                                <NoResults
-                                    title="No service providers found"
-                                    description="We couldn't find any providers matching your current filters. Try expanding your search area or removing filters."
-                                    onReset={handleClearFilters}
-                                    icon={Search}
-                                />
+                    {/* Left Sidebar - Persistent */}
+                    <div className="w-64 shrink-0 hidden lg:block sticky top-28">
+                        <ServiceFilterSidebar
+                            filters={Object.fromEntries(searchParams.entries())}
+                            onFilterChange={handleFilterChange}
+                            onClearFilters={handleClearFilters}
+                        />
+                    </div>
+
+                    {/* Right Content - Grid */}
+                    <div className="flex-1 min-w-0">
+
+                        {/* Mobile Filter Trigger (Visible only on small screens) */}
+                        <div className="lg:hidden mb-4">
+                            <button
+                                onClick={() => setIsFilterDrawerOpen(true)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm"
+                            >
+                                <Filter size={18} />
+                                <span>Filters & Location</span>
+                                {activeFilters.length > 0 && (
+                                    <span className="ml-1 bg-brand-primary text-white px-2 py-0.5 rounded-full text-xs">{activeFilters.length}</span>
+                                )}
+                            </button>
+                        </div>
+
+                        {/* Active Filters List (Optional to keep, helpful for UX) */}
+                        {activeFilters.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                {activeFilters.map(filter => (
+                                    <span key={filter.key} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-700 shadow-sm">
+                                        {filter.label}
+                                        <button onClick={() => {
+                                            const newParams = new URLSearchParams(searchParams);
+                                            newParams.delete(filter.key);
+                                            if (filter.key === 'location') newParams.delete('radius');
+                                            setSearchParams(newParams);
+                                        }} className="hover:text-red-500 ml-1"><X size={14} /></button>
+                                    </span>
+                                ))}
+                                <button onClick={handleClearFilters} className="text-xs text-status-error font-bold hover:underline px-2">Clear All</button>
+                            </div>
+                        )}
+
+                        {isLoading ? (
+                            <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                                    <div key={i} className="bg-white rounded-2xl h-[300px] animate-pulse border border-gray-100 shadow-sm" />
+                                ))}
+                            </div>
+                        ) : (
+                            <div className={`grid gap-4 ${viewMode === 'grid' ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4' : 'grid-cols-1'}`}>
+                                <AnimatePresence mode="popLayout">
+                                    {providersList.map((provider) => (
+                                        <ServiceCard
+                                            key={provider.id}
+                                            provider={provider}
+                                            viewMode={viewMode}
+                                        />
+                                    ))}
+                                </AnimatePresence>
+
+                                {providersList.length === 0 && (
+                                    <div className="col-span-full py-20">
+                                        <NoResults
+                                            title="No providers found"
+                                            description="Try adjusting your filters or search area."
+                                            onReset={handleClearFilters}
+                                        />
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* Pagination */}
+                        {!isLoading && totalCount > 0 && (
+                            <div className="mt-12 flex items-center justify-center gap-2">
+                                <button
+                                    onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    disabled={page === 1}
+                                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all font-bold bg-white"
+                                >
+                                    <ChevronRight className="rotate-180" size={18} />
+                                </button>
+
+                                {Array.from({ length: Math.min(5, Math.ceil(totalCount / 12)) }, (_, i) => { // Assuming default page size around 12-20
+                                    const p = i + 1;
+                                    return (
+                                        <button
+                                            key={p}
+                                            onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                            className={`w-10 h-10 flex items-center justify-center rounded-lg font-bold transition-all ${page === p
+                                                ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/30'
+                                                : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                }`}
+                                        >
+                                            {p}
+                                        </button>
+                                    );
+                                })}
+
+                                <button
+                                    onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                    disabled={!hasNextPage}
+                                    className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all font-bold bg-white"
+                                >
+                                    <ChevronRight size={18} />
+                                </button>
                             </div>
                         )}
                     </div>
-                )}
+                </div>
             </div>
 
-            {/* Filter Drawer (Right Side) */}
+            {/* Mobile Filter Drawer (Only for < lg screens) */}
             <AnimatePresence>
                 {isFilterDrawerOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100]"
+                        className="fixed inset-0 z-50 flex justify-end lg:hidden"
                     >
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
-                            transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-white shadow-2xl flex flex-col"
+                            className="relative w-full max-w-xs bg-white h-full shadow-xl flex flex-col"
                         >
-                            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-20">
-                                <h2 className="text-xl font-bold text-text-primary">Filters</h2>
-                                <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                                    <X size={24} />
-                                </button>
+                            <div className="p-5 border-b flex justify-between items-center bg-gray-50">
+                                <h2 className="font-bold text-lg">Filters</h2>
+                                <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 hover:bg-gray-200 rounded-full"><X size={20} /></button>
                             </div>
-
-                            <div className="flex-1 overflow-y-auto p-6">
+                            <div className="flex-1 overflow-y-auto p-5">
                                 <ServiceFilterSidebar
                                     filters={Object.fromEntries(searchParams.entries())}
                                     onFilterChange={handleFilterChange}
-                                    onClearFilters={() => { handleClearFilters(); setIsFilterDrawerOpen(false); }}
+                                    onClearFilters={handleClearFilters}
                                 />
                             </div>
-
-                            <div className="p-6 border-t border-gray-100 bg-gray-50">
-                                <button
-                                    onClick={() => setIsFilterDrawerOpen(false)}
-                                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]"
-                                >
-                                    Show Results
-                                </button>
+                            <div className="p-5 border-t bg-gray-50">
+                                <Button width="full" onClick={() => setIsFilterDrawerOpen(false)}>Show {totalCount} Results</Button>
                             </div>
                         </motion.div>
                     </motion.div>
@@ -339,8 +323,7 @@ const ServiceSearchPage = () => {
                 onSelect={handleLocationSelect}
                 initialRadius={radius}
             />
-
-        </div>
+        </div >
     );
 };
 

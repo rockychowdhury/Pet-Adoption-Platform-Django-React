@@ -76,8 +76,8 @@ const AuthForm = ({ initialMode = 'login', onSuccess }) => {
 
         try {
             if (mode === 'login') {
-                await login({ email: formData.email, password: formData.password });
-                if (onSuccess) onSuccess();
+                const user = await login({ email: formData.email, password: formData.password });
+                if (onSuccess) onSuccess(user);
                 else navigate('/dashboard');
             } else {
                 // Register

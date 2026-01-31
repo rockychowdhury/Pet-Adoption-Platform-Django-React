@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from .models import UserReport, ModerationAction
 from apps.users.serializers import UserSerializer, PublicUserSerializer
+from apps.users.models import RoleRequest
 from django.contrib.auth import get_user_model
 
 User = get_user_model()
@@ -17,6 +18,26 @@ class UserReportSerializer(serializers.ModelSerializer):
             'report_type', 'description', 'status', 'admin_notes', 'created_at', 'resolved_at'
         ]
         read_only_fields = ['reporter', 'created_at', 'resolved_at']
+
+class RoleRequestSerializer(serializers.ModelSerializer):
+    user_email = serializers.EmailField(source='user.email', read_only=True)
+    user_name = serializers.CharField(source='user.full_name', read_only=True)
+    provider_profile = serializers.SerializerMethodField()
+    
+    class Meta:
+        model = RoleRequest
+        fields = [
+            'id', 'user', 'user_email', 'user_name', 
+            'requested_role', 'reason', 'status', 'admin_notes',
+            'created_at', 'updated_at', 'provider_profile'
+        ]
+        read_only_fields = ['user', 'requested_role', 'reason', 'created_at', 'updated_at']
+
+    def get_provider_profile(self, obj):
+        if obj.requested_role == 'service_provider' and hasattr(obj.user, 'service_provider_profile'):
+            from apps.services.serializers import ServiceProviderSerializer
+            return ServiceProviderSerializer(obj.user.service_provider_profile).data
+        return None
 
 # Admin-specific serializers
 class AdminUserListSerializer(serializers.ModelSerializer):

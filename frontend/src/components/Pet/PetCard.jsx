@@ -218,103 +218,114 @@ const PetCard = ({ pet, viewMode = 'grid', variant = 'listing', onDelete, onTogg
         );
     }
 
-    // --- Compact Listing Card (New Design) ---
+    // --- Compact Listing Card (New Design - Matching ServiceCard) ---
     if (variant === 'compact-listing' || variant === 'listing-compact') {
+        const SpeciesIcon = data.species?.toLowerCase() === 'cat' ? Cake : // Replace with Cat icon if imported, using Cake as placeholder or fix imports
+            data.species?.toLowerCase() === 'dog' ? Home : // Replace with Dog icon
+                Heart; // Fallback
+
         return (
             <motion.div
-                initial={{ opacity: 0, y: 20 }}
+                layout
+                initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="group bg-white rounded-[20px] shadow-sm hover:shadow-xl transition-all duration-300 border border-border/50 overflow-hidden flex flex-col  relative h-full"
+                exit={{ opacity: 0, scale: 0.95 }}
+                className="group bg-white rounded-2xl border border-gray-200 overflow-hidden hover:shadow-xl transition-all duration-300 flex flex-col h-full"
             >
-                {/* Hero Zone - Compact Aspect Ratio */}
-                <div className="relative aspect-[3/2] overflow-hidden">
-                    <Link to={`/pets/${data.id}`}>
+                {/* Image Section - 4:3 Aspect Ratio to match Services */}
+                <div className="relative aspect-[4/3] overflow-hidden bg-gray-100">
+                    <Link to={`/pets/${data.id}`} className="block w-full h-full">
                         <img
                             src={data.photo}
                             alt={data.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         />
                     </Link>
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-50" />
 
-                    {/* Top Badges */}
-                    <div className="absolute top-3 left-3 flex flex-col gap-1.5">
-                        {data.urgency === 'immediate' ? (
-                            <div className="px-2 py-1 bg-status-error text-white text-[9px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm animate-pulse-slow">
-                                <Clock size={10} strokeWidth={3} /> Immediate
-                            </div>
-                        ) : data.urgency === 'urgent' ? (
-                            <div className="px-2 py-1 bg-brand-secondary text-white text-[9px] font-black uppercase tracking-widest rounded-lg shadow-sm">
-                                Urgent
-                            </div>
-                        ) : null}
-                    </div>
-
-                    {/* Bookmark Interaction */}
-                    <button className="absolute top-3 right-3 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white hover:bg-white hover:text-status-error transition-all shadow-lg hover:scale-110">
-                        <Heart size={14} />
+                    {/* Top Right Heart (Optional, similar to ServiceCard commented out, but good for Pets) */}
+                    <button className="absolute top-3 right-3 p-2 rounded-full bg-white/20 backdrop-blur-md text-white hover:bg-white hover:text-brand-primary transition-all shadow-sm opacity-0 group-hover:opacity-100">
+                        <Heart size={16} />
                     </button>
+
+                    {/* Urgency Badge if Urgent */}
+                    {data.isUrgent && (
+                        <div className="absolute top-3 left-3 px-2 py-1 bg-status-error text-white text-[10px] font-black uppercase tracking-widest rounded-lg flex items-center gap-1.5 shadow-sm">
+                            <Clock size={12} strokeWidth={3} /> Immediate
+                        </div>
+                    )}
                 </div>
 
-                {/* Body - Reduced Padding - Matching Profile Card */}
-                <div className="p-4 flex flex-col gap-3 flex-1">
+                {/* Content Section - Matches ServiceCard p-5 */}
+                <div className="p-5 flex flex-col flex-1">
 
-                    {/* Header Info - Compact */}
-                    <div className="flex justify-between items-start">
-                        <Link to={`/pets/${data.id}`}>
-                            <h3 className="text-lg font-bold text-text-primary leading-tight group-hover:text-brand-primary transition-colors">{data.name}</h3>
-                        </Link>
-                        {data.gender && (
-                            <div className="flex items-center gap-2 text-text-secondary">
-                                <span className={`text-sm font-bold ${data.gender.toLowerCase() === 'female' ? 'text-brand-secondary' : 'text-brand-primary'}`}>
-                                    {data.gender.toLowerCase() === 'female' ? '♀' : data.gender.toLowerCase() === 'male' ? '♂' : '?'}
-                                </span>
-                            </div>
-                        )}
+                    {/* Species/Breed Label - Top Header */}
+                    <div className="flex items-center gap-2 mb-1.5 text-text-tertiary">
+                        <span className="text-[10px] font-black uppercase tracking-widest truncate">
+                            {data.species} • {data.breed}
+                        </span>
                     </div>
 
-                    <p className="text-[10px] font-bold text-text-secondary uppercase tracking-wider flex items-center gap-1.5 mt-[-4px]">
-                        {data.species} • <span className="text-brand-primary/80">{data.breed}</span>
-                    </p>
+                    {/* Title */}
+                    <Link to={`/pets/${data.id}`} className="block mb-2">
+                        <h3 className="text-lg font-bold text-text-primary leading-tight group-hover:text-brand-primary transition-colors line-clamp-1">
+                            {data.name}
+                        </h3>
+                    </Link>
 
-                    {/* Stats Grid - Single Row / Compact Grid */}
-                    <div className="grid grid-cols-2 gap-2 py-2 border-t border-border/40">
-                        <div className="flex items-center gap-2 text-text-secondary">
-                            <Cake size={14} className="text-brand-orange" />
-                            <span className="text-xs font-bold">{data.age}</span>
+                    {/* Meta Row (Age, Gender, Location) - Replaces Rating */}
+                    <div className="flex flex-col gap-1 mb-4">
+                        <div className="flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                            <span>{data.age}</span>
+                            <span className="text-gray-300">•</span>
+                            <span className="capitalize">{data.gender}</span>
+                            <span className="text-gray-300">•</span>
+                            <span className="capitalize">{data.size}</span>
                         </div>
-                        <div className="flex items-center gap-2 text-text-secondary">
-                            <MapPin size={14} className="text-brand-primary" />
-                            <span className="text-xs font-bold truncate">{data.locationLabel}</span>
+
+                        <div className="flex items-center gap-1.5 text-text-secondary mt-1">
+                            <MapPin size={14} />
+                            <span className="text-xs font-medium truncate">{data.locationLabel}</span>
                         </div>
                     </div>
 
-                    {/* Size and Weight if available */}
-                    <div className="flex flex-wrap gap-1.5 overflow-hidden pb-1">
-                        {data.size && data.size !== 'N/A' && (
-                            <span className="px-2 py-1 bg-bg-secondary text-text-secondary text-[9px] font-bold rounded-md whitespace-nowrap border border-border/50 uppercase">
-                                {data.size}
+                    {/* Traits Tags */}
+                    <div className="flex flex-wrap gap-2 mb-6 mt-auto">
+                        {data.traits.slice(0, 2).map((trait, i) => (
+                            <span key={i} className="px-2.5 py-1 bg-gray-50 border border-gray-100 rounded-lg text-[10px] font-bold text-text-secondary capitalize">
+                                {trait}
+                            </span>
+                        ))}
+                        {data.traits.length > 2 && (
+                            <span className="px-2.5 py-1 text-text-tertiary text-[10px] font-bold">
+                                +{data.traits.length - 2}
                             </span>
                         )}
-                        {data.isNeutered && (
-                            <span className="px-2 py-1 bg-brand-primary/10 text-brand-primary text-[9px] font-bold rounded-md whitespace-nowrap border border-brand-primary/20 uppercase">
-                                Spayed
-                            </span>
-                        )}
                     </div>
 
-                    {/* Footer Actions - Shorter Height */}
-                    <div className="mt-auto pt-2 flex gap-2">
+
+                    {/* Footer / Status & Action */}
+                    {/* Footer / Status & Action */}
+                    <div className="flex items-center justify-between pt-4 border-t border-gray-100 mt-2">
+                        {/* Status */}
+                        <div>
+                            {data.isVerified ? (
+                                <div className="flex items-center gap-1.5 text-brand-primary text-[10px] font-bold uppercase tracking-wider">
+                                    <ShieldCheck size={14} strokeWidth={2.5} /> Verified
+                                </div>
+                            ) : (
+                                <span className="text-[10px] font-bold text-text-tertiary uppercase tracking-wider">Available</span>
+                            )}
+                        </div>
+
+                        {/* View Button - Updated Style */}
                         <Link
                             to={`/pets/${data.id}`}
-                            className="flex-1 bg-text-primary text-text-inverted h-9 rounded-xl flex items-center justify-center text-[10px] font-black uppercase tracking-wider hover:bg-brand-primary hover:shadow-lg transition-all"
+                            className="px-6 py-2 bg-white border border-gray-100 text-brand-primary rounded-full text-sm font-bold shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all"
                         >
-                            View Companion
+                            View
                         </Link>
-                        <button className="w-9 h-9 rounded-xl border border-border/50 flex items-center justify-center text-text-tertiary hover:text-text-primary hover:bg-bg-secondary transition-all">
-                            <Share2 size={16} />
-                        </button>
                     </div>
+
                 </div>
             </motion.div>
         );

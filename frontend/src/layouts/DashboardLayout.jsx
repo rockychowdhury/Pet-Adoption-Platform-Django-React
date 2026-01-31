@@ -130,7 +130,7 @@ const DashboardLayout = () => {
                 </div>
             </aside>
 
-            < div className="md:hidden fixed top-0 w-full bg-bg-surface border-b border-border z-20 px-4 py-3 flex justify-between items-center" >
+            <div className="md:hidden fixed top-0 w-full bg-bg-surface border-b border-border z-20 px-4 py-3 flex justify-between items-center">
                 <Link to="/">
                     <Logo className="scale-75 origin-left" />
                 </Link>
@@ -139,15 +139,15 @@ const DashboardLayout = () => {
                         <User size={20} />
                     </Link>
                 </div>
-            </div >
+            </div>
 
             {/* Main Content */}
-            < main className="flex-1 md:ml-72 p-4 md:p-8 pt-20 md:pt-8 bg-bg-secondary min-h-screen" >
+            <main className="flex-1 md:ml-72 p-4 md:p-8 pt-20 bg-bg-secondary min-h-screen">
                 <Outlet />
-            </main >
+            </main>
 
             {/* Mobile Bottom Nav */}
-            < nav className="md:hidden fixed bottom-0 left-0 w-full bg-bg-surface border-t border-border flex justify-around py-3 z-20" >
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-bg-surface border-t border-border flex justify-around py-3 z-20">
                 {
                     dashboardLinks.slice(0, 5).map((link) => {
                         const active = isActive(link.path);
@@ -164,8 +164,8 @@ const DashboardLayout = () => {
                         );
                     })
                 }
-            </nav >
-        </div >
+            </nav>
+        </div>
     );
 };
 

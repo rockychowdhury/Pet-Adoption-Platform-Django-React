@@ -26,6 +26,7 @@ export default {
           primary: 'var(--color-brand-primary)',
           secondary: 'var(--color-brand-secondary)',
           accent: 'var(--color-brand-accent)',
+          ai: 'var(--color-brand-ai)',
         },
         border: {
           DEFAULT: 'var(--color-border)',

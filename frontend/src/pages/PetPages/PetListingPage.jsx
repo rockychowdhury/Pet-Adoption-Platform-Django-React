@@ -193,177 +193,192 @@ const PetListingPage = () => {
     };
 
     return (
-        <div className="min-h-screen bg-bg-primary ">
-            <div className="max-w-7xl mx-auto px-6 pb-40 pt-8">
+        <div className="min-h-screen bg-gray-50 ">
+            <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-                {/* 1. Header & Top Filters Container */}
-                <div className="flex flex-col gap-6 mb-8">
+                {/* Search & Toolbar Row */}
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 mb-8">
+                    {/* Search Input - Left Aligned & Wide */}
+                    {/* Search Input - Left Aligned & Compact */}
+                    <div className="relative flex-1 w-full max-w-md"> {/* Reduced width from max-w-2xl */}
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={20} />
+                        <input
+                            type="text"
+                            placeholder="Search by breed, name..."
+                            value={filters.search}
+                            onChange={(e) => handleFilterChange({ target: { name: 'search', value: e.target.value } })}
+                            className="w-full pl-12 pr-4 py-3 bg-white border border-gray-200 rounded-xl text-sm text-gray-900 placeholder:text-gray-400 shadow-sm focus:ring-1 focus:ring-brand-primary focus:border-brand-primary outline-none transition-all"
+                        />
+                    </div>
 
-                    {/* Top Row: Compact Title + Actions */}
-                    <div className="flex flex-col md:flex-row gap-4 items-start md:items-center justify-between">
-                        <div className="flex items-baseline gap-4">
-                            <h1 className="text-3xl md:text-4xl font-black text-text-primary tracking-tighter leading-none">
-                                Find a <span className="text-brand-primary">Companion</span>
-                            </h1>
-                            <div className="flex items-center gap-2">
-                                <div className="h-0.5 w-6 bg-brand-secondary rounded-full opacity-50"></div>
-                                <p className="text-text-secondary text-[10px] font-black uppercase tracking-[0.2em]">
-                                    {totalCount} pets waiting
-                                </p>
+                    {/* Right Side Stats & Toggles */}
+                    <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+                        <span className="text-xs font-bold text-gray-500 hidden xl:block">
+                            Showing {totalCount} pets
+                        </span>
+
+                        {/* Sort Dropdown */}
+                        <div className="relative">
+                            <select
+                                value={filters.ordering}
+                                onChange={(e) => handleSortChange(e.target.value)}
+                                className="appearance-none bg-white border border-gray-200 text-gray-700 text-sm font-bold px-4 py-2.5 pr-8 rounded-xl shadow-sm outline-none hover:border-gray-300 cursor-pointer focus:ring-2 focus:ring-brand-primary/10"
+                            >
+                                <option value="-published_at">Newest First</option>
+                                <option value="created_at">Oldest First</option>
+                                <option value="name">Name (A-Z)</option>
+                            </select>
+                            <div className="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                                <ChevronRight size={14} className="rotate-90" />
                             </div>
                         </div>
+                    </div>
+                </div>
 
-                        <div className="flex items-center gap-3 w-full md:w-auto">
-                            {/* Location Button */}
-                            <button
-                                onClick={() => setIsLocationModalOpen(true)}
-                                className={`flex-1 md:flex-none flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-2xl transition-all text-xs font-bold shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 hover:border-gray-200 active:scale-95 ${filters.location
-                                    ? 'bg-brand-primary/5 text-brand-primary border-brand-primary/20'
-                                    : suggestedLocation
-                                        ? 'bg-amber-50/50 text-amber-800 border-amber-100'
-                                        : 'bg-white text-text-secondary hover:text-text-primary'
-                                    }`}
-                            >
-                                <MapPin size={16} className={filters.location ? "fill-brand-primary/20" : ""} />
-                                <span className="max-w-[120px] truncate">
-                                    {filters.location || suggestedLocation || "Set Location"}
-                                </span>
-                            </button>
+                {/* Main Content Layout */}
+                <div className="flex gap-8 items-start">
 
-                            {/* Filter Drawer Trigger */}
+                    {/* Left Sidebar - Persistent (Desktop) */}
+                    <div className="w-64 shrink-0 hidden lg:block sticky top-28">
+                        <FilterSidebar
+                            filters={filters}
+                            onFilterChange={handleFilterChange}
+                            onClearFilters={clearFilters}
+                        />
+                    </div>
+
+                    {/* Right Content - Grid */}
+                    <div className="flex-1 min-w-0">
+
+                        {/* Mobile Filter Trigger */}
+                        <div className="lg:hidden mb-4">
                             <button
                                 onClick={() => setIsFilterDrawerOpen(true)}
-                                className={`flex items-center gap-2.5 px-6 py-3.5 rounded-2xl transition-all text-xs font-bold shadow-[0_2px_15px_rgba(0,0,0,0.02)] border border-gray-100 hover:border-gray-200 active:scale-95 ${activeFilters.length > 0 ? 'bg-gray-900 text-white border-gray-900' : 'bg-white text-text-secondary hover:text-text-primary'}`}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-3 bg-white border border-gray-200 text-gray-700 rounded-xl font-bold shadow-sm"
                             >
-                                <ListIcon size={16} />
-                                <span className="hidden sm:inline">Filters</span>
+                                <ListIcon size={18} />
+                                <span>Filters & Location</span>
                                 {activeFilters.length > 0 && (
-                                    <span className="bg-white text-gray-900 w-4 h-4 flex items-center justify-center rounded-full text-[9px]">
-                                        {activeFilters.length}
-                                    </span>
+                                    <span className="ml-1 bg-brand-primary text-white px-2 py-0.5 rounded-full text-xs">{activeFilters.length}</span>
                                 )}
                             </button>
                         </div>
-                    </div>
 
-                    {/* Active Filter Chips (Replacing Species Section) */}
-                    <div className="min-h-[44px] flex items-center">
-                        <AnimatePresence mode="wait">
-                            {activeFilters.length > 0 ? (
-                                <motion.div
-                                    key="active-filters"
-                                    initial={{ opacity: 0, y: 5 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    exit={{ opacity: 0, y: -5 }}
-                                    className="flex flex-wrap gap-2 items-center"
-                                >
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-text-tertiary mr-2">Filtering by:</span>
-                                    {activeFilters.map(filter => (
-                                        <button
-                                            key={filter.key}
-                                            onClick={() => removeFilter(filter.key)}
-                                            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white border border-gray-200 text-[10px] font-bold text-text-secondary hover:border-status-error hover:text-status-error transition-all shadow-sm group"
-                                        >
-                                            {filter.label}
-                                            <X size={12} className="group-hover:rotate-90 transition-transform" />
-                                        </button>
-                                    ))}
-                                    <button
-                                        onClick={clearFilters}
-                                        className="text-[10px] font-black text-status-error uppercase tracking-widest hover:bg-status-error/5 px-3 py-1.5 rounded-xl transition-colors"
-                                    >
-                                        Reset All
-                                    </button>
-                                </motion.div>
-                            ) : (
-                                <motion.p
-                                    key="no-filters"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    className="text-[11px] font-medium text-text-tertiary italic"
-                                >
-                                    Browse all available companions or use filters to narrow down.
-                                </motion.p>
-                            )}
-                        </AnimatePresence>
-                    </div>
-                </div>
-                {/* Results Grid - Full Width 4 Columns */}
-                {loading && allPets.length === 0 ? (
-                    <div className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                        {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
-                            <div key={i} className="bg-white h-[320px] rounded-[24px] animate-pulse border border-gray-100"></div>
-                        ))}
-                    </div>
-                ) : allPets.length > 0 ? (
-                    <>
-                        <motion.div
-                            variants={containerVariants}
-                            initial="hidden"
-                            animate="visible"
-                            className="grid gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                        >
-                            {allPets.map(pet => (
-                                <PetCard key={pet.id} pet={pet} viewMode="grid" variant="compact-listing" />
-                            ))}
-                        </motion.div>
-
-                        {/* Pagination */}
-                        {totalCount > 24 && (
-                            <div className="mt-16 flex items-center justify-center gap-4">
-                                <button
-                                    onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                    disabled={page === 1 || loading}
-                                    className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-200 text-text-secondary hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                                >
-                                    <ChevronLeft size={20} />
-                                </button>
-                                <span className="text-sm font-bold text-text-secondary">Page {page}</span>
-                                <button
-                                    onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                    disabled={!hasNextPage || loading}
-                                    className="w-12 h-12 flex items-center justify-center rounded-full bg-white border border-gray-200 text-text-secondary hover:bg-gray-50 disabled:opacity-50 transition-all shadow-sm"
-                                >
-                                    <ChevronRight size={20} />
-                                </button>
+                        {/* Active Filter Chips */}
+                        {activeFilters.length > 0 && (
+                            <div className="flex flex-wrap gap-2 mb-6">
+                                {activeFilters.map(filter => (
+                                    <span key={filter.key} className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-gray-200 text-xs font-bold text-gray-700 shadow-sm">
+                                        {filter.label}
+                                        <button onClick={() => removeFilter(filter.key)} className="hover:text-red-500 ml-1"><X size={14} /></button>
+                                    </span>
+                                ))}
+                                <button onClick={clearFilters} className="text-xs text-status-error font-bold hover:underline px-2">Clear All</button>
                             </div>
                         )}
-                    </>
-                ) : (
-                    <NoResults
-                        title="No matching companions found"
-                        description="Try adjusting your filters or expanding your search radius."
-                        onReset={clearFilters}
-                        icon={Search}
-                    />
-                )}
+
+
+                        {/* Results Grid - Full Width 4 Columns */}
+                        {loading && allPets.length === 0 ? (
+                            <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                                {[1, 2, 3, 4, 5, 6, 7, 8].map(i => (
+                                    <div key={i} className="bg-white h-[300px] rounded-2xl animate-pulse border border-gray-100 shadow-sm"></div>
+                                ))}
+                            </div>
+                        ) : allPets.length > 0 ? (
+                            <>
+                                <motion.div
+                                    variants={containerVariants}
+                                    initial="hidden"
+                                    animate="visible"
+                                    className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                                >
+                                    {allPets.map(pet => (
+                                        <PetCard key={pet.id} pet={pet} viewMode="grid" variant="compact-listing" />
+                                    ))}
+                                </motion.div>
+
+                                {/* Pagination */}
+                                {/* Pagination */}
+                                {totalCount > 0 && (
+                                    <div className="mt-16 flex items-center justify-center gap-2">
+                                        <button
+                                            onClick={() => { setPage(p => Math.max(1, p - 1)); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                            disabled={page === 1 || loading}
+                                            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all font-bold bg-white"
+                                        >
+                                            <ChevronLeft size={18} />
+                                        </button>
+
+                                        {/* Simple Numbered Pagination Logic */}
+                                        {Array.from({ length: Math.min(5, Math.ceil(totalCount / 24)) }, (_, i) => {
+                                            const p = i + 1; // 1-based index
+                                            // TODO: Make this smarter for large page counts (dots), simply showing first 5 for now as dummy or active window
+                                            // Better logic: show active, neighbors, first, last.
+                                            // For MVP/Demo: Just standard simple list if pages < 7, else complex. Assuming low data count for now.
+                                            return (
+                                                <button
+                                                    key={p}
+                                                    onClick={() => { setPage(p); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                                    className={`w-10 h-10 flex items-center justify-center rounded-lg font-bold transition-all ${page === p
+                                                        ? 'bg-brand-primary text-white shadow-md shadow-brand-primary/30'
+                                                        : 'bg-white border border-gray-200 text-gray-600 hover:bg-gray-50'
+                                                        }`}
+                                                >
+                                                    {p}
+                                                </button>
+                                            );
+                                        })}
+
+                                        <button
+                                            onClick={() => { setPage(p => p + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
+                                            disabled={!hasNextPage || loading}
+                                            className="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-30 disabled:hover:bg-transparent transition-all font-bold bg-white"
+                                        >
+                                            <ChevronRight size={18} />
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="py-20">
+                                <NoResults
+                                    title="No matching companions found"
+                                    description="Try adjusting your filters or expanding your search radius."
+                                    onReset={clearFilters}
+                                    icon={Search}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
             </div>
 
-            {/* Filter Drawer (Right Side) */}
+            {/* Filter Drawer (Mobile) */}
             <AnimatePresence>
                 {isFilterDrawerOpen && (
                     <motion.div
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[100]"
+                        className="fixed inset-0 z-[100] lg:hidden"
                     >
-                        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
+                        <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => setIsFilterDrawerOpen(false)} />
                         <motion.div
                             initial={{ x: '100%' }}
                             animate={{ x: 0 }}
                             exit={{ x: '100%' }}
                             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                            className="absolute right-0 top-0 bottom-0 w-full max-w-[400px] bg-white shadow-2xl flex flex-col"
+                            className="absolute right-0 top-0 bottom-0 w-full max-w-xs bg-white shadow-2xl flex flex-col"
                         >
-                            <div className="p-6 border-b border-gray-100 flex items-center justify-between bg-white z-20">
-                                <h2 className="text-xl font-bold text-text-primary">Filters</h2>
+                            <div className="p-5 border-b border-gray-100 flex items-center justify-between bg-white z-20">
+                                <h2 className="text-lg font-bold text-gray-900">Filters</h2>
                                 <button onClick={() => setIsFilterDrawerOpen(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
-                                    <X size={24} />
+                                    <X size={20} />
                                 </button>
                             </div>
 
-                            <div className="flex-1 overflow-y-auto p-6">
+                            <div className="flex-1 overflow-y-auto p-5">
                                 <FilterSidebar
                                     filters={filters}
                                     onFilterChange={handleFilterChange}
@@ -371,10 +386,10 @@ const PetListingPage = () => {
                                 />
                             </div>
 
-                            <div className="p-6 border-t border-gray-100 bg-gray-50">
+                            <div className="p-5 border-t border-gray-100 bg-gray-50">
                                 <button
                                     onClick={() => setIsFilterDrawerOpen(false)}
-                                    className="w-full py-3.5 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]"
+                                    className="w-full py-3 bg-gray-900 text-white rounded-xl font-bold hover:bg-gray-800 transition-all shadow-lg active:scale-[0.98]"
                                 >
                                     Show {totalCount} Results
                                 </button>

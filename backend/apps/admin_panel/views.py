@@ -118,3 +118,82 @@ class ModerationLogViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = [DjangoFilterBackend, filters.SearchFilter]
     search_fields = ['moderator__email', 'target_user__email', 'reason']
     filterset_fields = ['action_type']
+
+class RoleRequestViewSet(viewsets.ModelViewSet):
+    """
+    Admin only viewset for managing role requests.
+    Supports approving and rejecting requests with atomic updates.
+    """
+    from apps.users.models import RoleRequest
+    from .serializers import RoleRequestSerializer
+    
+    queryset = RoleRequest.objects.all().order_by('-created_at')
+    serializer_class = RoleRequestSerializer
+    permission_classes = [permissions.IsAuthenticated, IsAdmin]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter]
+    filterset_fields = ['status', 'requested_role']
+    search_fields = ['user__email', 'user__first_name', 'user__last_name']
+    
+    def get_queryset(self):
+        # Admins see all
+        return self.queryset
+
+    @action(detail=True, methods=['post'])
+    def approve(self, request, pk=None):
+        role_request = self.get_object()
+        
+        if role_request.status != 'pending':
+             return Response({"error": "Request is not pending"}, status=400)
+             
+        # Approve
+        from django.db import transaction
+        from apps.common.logging_utils import log_business_event
+        
+        with transaction.atomic():
+            # 1. Update Request
+            role_request.status = 'approved'
+            role_request.admin_notes = request.data.get('admin_notes', '')
+            role_request.save()
+            
+            # 2. Update User Role
+            user = role_request.user
+            user.role = role_request.requested_role
+            if not user.is_active: # Ensure active if promoting
+                user.is_active = True
+            user.save()
+            
+            # 3. Update Service Provider Profile (if applicable)
+            if hasattr(user, 'service_provider_profile'):
+                provider = user.service_provider_profile
+                provider.verification_status = 'verified'
+                provider.application_status = 'approved'
+                provider.save()
+                
+            log_business_event('ROLE_REQUEST_APPROVED', request.user, {
+                'request_id': role_request.id,
+                'target_user_id': user.id,
+                'role': role_request.requested_role
+            })
+            
+        return Response({'status': 'approved'})
+
+    @action(detail=True, methods=['post'])
+    def reject(self, request, pk=None):
+        role_request = self.get_object()
+        
+        if role_request.status != 'pending':
+             return Response({"error": "Request is not pending"}, status=400)
+             
+        with transaction.atomic():
+            role_request.status = 'rejected'
+            role_request.admin_notes = request.data.get('admin_notes', '')
+            role_request.save()
+            
+            # Update Provider Application Status
+            user = role_request.user
+            if hasattr(user, 'service_provider_profile'):
+                provider = user.service_provider_profile
+                provider.application_status = 'rejected'
+                provider.save()
+        
+        return Response({'status': 'rejected'})

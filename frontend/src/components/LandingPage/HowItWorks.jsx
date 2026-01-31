@@ -213,7 +213,7 @@ const HowItWorks = () => {
 
                                 <h3 className="text-4xl font-black text-text-primary mb-6 font-logo tracking-tight">Smart Discovery</h3>
                                 <p className="text-text-secondary text-lg mb-10 font-medium opacity-80 leading-relaxed max-w-xl">
-                                    Find your perfect match based on lifestyle compatibility, not just looks. Our AI-driven filters prioritize local community matches to ensure a sustainable bond.
+                                    Find your perfect match based on lifestyle compatibility, not just looks. Our AI-driven filters prioritize local matches to ensure a sustainable bond.
                                 </p>
 
                                 <div className="mt-auto flex flex-wrap gap-3">
@@ -277,9 +277,9 @@ const HowItWorks = () => {
                                 <div className="w-16 h-16 text-brand-primary bg-brand-primary/10 rounded-2xl border border-brand-primary/20 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-500">
                                     <MessageCircle size={32} strokeWidth={1.5} />
                                 </div>
-                                <h3 className="text-2xl font-black text-text-primary mb-3 font-logo tracking-tight">Secure Chat</h3>
+                                <h3 className="text-2xl font-black text-text-primary mb-3 font-logo tracking-tight">Mediated Communication</h3>
                                 <p className="text-text-secondary text-sm font-medium opacity-80 leading-relaxed">
-                                    Communicate safely within our platform. Keep your personal contact info private until you're ready to meet.
+                                    Communicate securely through our platform. We mediate contact to protect your privacy until you're ready to proceed.
                                 </p>
                             </motion.div>
 

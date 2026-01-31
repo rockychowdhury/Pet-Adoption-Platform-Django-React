@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { X } from 'lucide-react';
 
 const SideDrawer = ({ isOpen, onClose, title, children }) => {
@@ -13,7 +14,7 @@ const SideDrawer = ({ isOpen, onClose, title, children }) => {
         };
     }, [isOpen]);
 
-    return (
+    return createPortal(
         <>
             {/* Overlay */}
             <div
@@ -45,7 +46,8 @@ const SideDrawer = ({ isOpen, onClose, title, children }) => {
                     </div>
                 </div>
             </div>
-        </>
+        </>,
+        document.body
     );
 };
 

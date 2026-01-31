@@ -3,7 +3,8 @@ from .models import (
     ServiceCategory, Species, Specialization, ServiceOption,
     ServiceProvider, ServiceMedia, BusinessHours,
     FosterService, VeterinaryClinic, TrainerService,
-    ServiceBooking, ServiceReview
+    GroomerService, PetSitterService,
+    ServiceBooking, ServiceReview, ProviderAvailabilityBlock
 )
 from apps.users.serializers import PublicUserSerializer
 from apps.pets.serializers import PetProfileSerializer
@@ -65,13 +66,24 @@ class VeterinaryClinicSerializer(serializers.ModelSerializer):
         many=True, write_only=True, queryset=Species.objects.all(), source='species_treated'
     )
     
+    base_price = serializers.SerializerMethodField()
+
     class Meta:
         model = VeterinaryClinic
         fields = [
             'clinic_type', 'services_offered', 'services_offered_ids', 
             'species_treated', 'species_treated_ids',
-            'pricing_info', 'amenities', 'emergency_services'
+            'pricing_info', 'amenities', 'emergency_services', 'base_price'
         ]
+
+    def get_base_price(self, obj):
+        # Extract price from pricing_info string (e.g., "Starts at $75")
+        import re
+        if obj.pricing_info:
+            match = re.search(r'\$(\d+)', obj.pricing_info)
+            if match:
+                return float(match.group(1))
+        return None
 
 class TrainerServiceSerializer(serializers.ModelSerializer):
     specializations = SpecializationSerializer(many=True, read_only=True)
@@ -95,6 +107,34 @@ class TrainerServiceSerializer(serializers.ModelSerializer):
             'video_url'
         ]
 
+class GroomerServiceSerializer(serializers.ModelSerializer):
+    species_accepted = SpeciesSerializer(many=True, read_only=True)
+    species_accepted_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Species.objects.all(), source='species_accepted'
+    )
+    
+    class Meta:
+        model = GroomerService
+        fields = [
+            'salon_type', 'base_price', 'service_menu', 
+            'species_accepted', 'species_accepted_ids', 'amenities'
+        ]
+
+class PetSitterServiceSerializer(serializers.ModelSerializer):
+    species_accepted = SpeciesSerializer(many=True, read_only=True)
+    species_accepted_ids = serializers.PrimaryKeyRelatedField(
+        many=True, write_only=True, queryset=Species.objects.all(), source='species_accepted'
+    )
+    
+    class Meta:
+        model = PetSitterService
+        fields = [
+            'offers_dog_walking', 'offers_house_sitting', 'offers_drop_in_visits',
+            'walking_rate', 'house_sitting_rate', 'drop_in_rate',
+            'species_accepted', 'species_accepted_ids',
+            'years_experience', 'is_insured', 'has_transport', 'service_radius_km'
+        ]
+
 class ServiceReviewSerializer(serializers.ModelSerializer):
     reviewer = PublicUserSerializer(read_only=True)
     rating = serializers.IntegerField(source='rating_overall', read_only=True)
@@ -105,9 +145,52 @@ class ServiceReviewSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'provider', 'reviewer', 'rating', 'comment', 
             'rating_communication', 'rating_cleanliness', 'rating_quality', 'rating_value',
-            'service_type', 'verified_client', 'created_at'
+            'category', 'verified_client', 'provider_response', 'response_date', 'created_at'
         ]
-        read_only_fields = ['provider', 'reviewer', 'created_at']
+        read_only_fields = ['provider', 'reviewer', 'response_date', 'created_at']
+
+
+class ProviderAvailabilityBlockSerializer(serializers.ModelSerializer):
+    """Serializer for provider availability blocks"""
+    
+    class Meta:
+        model = ProviderAvailabilityBlock
+        fields = [
+            'id', 'block_date', 'start_time', 'end_time',
+            'is_all_day', 'is_recurring', 'recurrence_pattern',
+            'day_of_week', 'reason', 'created_at', 'updated_at'
+        ]
+        read_only_fields = ['created_at', 'updated_at']
+    
+    def validate(self, data):
+        """Validate availability block data"""
+        # If recurring, must have day_of_week and recurrence_pattern
+        if data.get('is_recurring'):
+            if data.get('day_of_week') is None or not data.get('recurrence_pattern'):
+                raise serializers.ValidationError(
+                    "Recurring blocks require day_of_week and recurrence_pattern"
+                )
+        
+        # If not recurring, must have block_date
+        if not data.get('is_recurring') and not data.get('block_date'):
+            raise serializers.ValidationError(
+                "Non-recurring blocks require block_date"
+            )
+        
+        # If not all-day, must have times
+        if not data.get('is_all_day'):
+            if not data.get('start_time') or not data.get('end_time'):
+                raise serializers.ValidationError(
+                    "Non all-day blocks require start_time and end_time"
+                )
+            
+            # End time must be after start time
+            if data.get('end_time') <= data.get('start_time'):
+                raise serializers.ValidationError(
+                    "end_time must be after start_time"
+                )
+        
+        return data
 
 class ServiceProviderSerializer(serializers.ModelSerializer):
     user = PublicUserSerializer(read_only=True)
@@ -125,8 +208,15 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
     foster_details = FosterServiceSerializer(required=False)
     vet_details = VeterinaryClinicSerializer(required=False)
     trainer_details = TrainerServiceSerializer(required=False)
+    groomer_details = GroomerServiceSerializer(required=False)
+    sitter_details = PetSitterServiceSerializer(required=False)
     
     avg_rating = serializers.FloatField(read_only=True)
+    avg_communication = serializers.FloatField(read_only=True)
+    avg_cleanliness = serializers.FloatField(read_only=True)
+    avg_quality = serializers.FloatField(read_only=True)
+    avg_value = serializers.FloatField(read_only=True)
+    
     reviews_count = serializers.IntegerField(source='review_count', read_only=True)
     is_verified = serializers.SerializerMethodField()
     distance = serializers.SerializerMethodField()
@@ -135,11 +225,14 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
         model = ServiceProvider
         fields = [
             'id', 'user', 'business_name', 'category', 'category_id', 'description', 'website',
-            'city', 'state', 'zip_code', 'latitude', 'longitude',
+            'address_line1', 'address_line2', 'city', 'state', 'zip_code', 'latitude', 'longitude',
             'phone', 'email', 'license_number', 'verification_status',
             'media', 'hours',
-            'is_verified', 'reviews', 'reviews_count', 'avg_rating', 'distance',
-            'foster_details', 'vet_details', 'trainer_details',
+            'is_verified', 'reviews', 'reviews_count', 'avg_rating', 
+            'avg_communication', 'avg_cleanliness', 'avg_quality', 'avg_value',
+            'distance',
+            'foster_details', 'vet_details', 'trainer_details', 
+            'groomer_details', 'sitter_details',
             'created_at'
         ]
         read_only_fields = ['user', 'created_at', 'avg_rating', 'reviews_count']
@@ -156,6 +249,8 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
         foster_data = validated_data.pop('foster_details', None)
         vet_data = validated_data.pop('vet_details', None)
         trainer_data = validated_data.pop('trainer_details', None)
+        groomer_data = validated_data.pop('groomer_details', None)
+        sitter_data = validated_data.pop('sitter_details', None)
         
         provider = ServiceProvider.objects.create(**validated_data)
         
@@ -168,6 +263,15 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
             VeterinaryClinic.objects.create(provider=provider, **vet_data)
         elif trainer_data:
             TrainerService.objects.create(provider=provider, **trainer_data)
+        elif groomer_data:
+            # Handle M2M manually for create if needed, but Serializer usually handles nestedcreate if set up right? 
+            # DRF default nested create doesn't support M2M well without custom logic usually.
+            # Mirroring logic below.
+            s = GroomerService.objects.create(provider=provider, **{k:v for k,v in groomer_data.items() if k != 'species_accepted'})
+            s.species_accepted.set(groomer_data.get('species_accepted', []))
+        elif sitter_data:
+            s = PetSitterService.objects.create(provider=provider, **{k:v for k,v in sitter_data.items() if k != 'species_accepted'})
+            s.species_accepted.set(sitter_data.get('species_accepted', []))
             
         return provider
     
@@ -175,6 +279,8 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
         foster_data = validated_data.pop('foster_details', None)
         vet_data = validated_data.pop('vet_details', None)
         trainer_data = validated_data.pop('trainer_details', None)
+        groomer_data = validated_data.pop('groomer_details', None)
+        sitter_data = validated_data.pop('sitter_details', None)
         
         # Update provider fields
         for attr, value in validated_data.items():
@@ -201,6 +307,10 @@ class ServiceProviderSerializer(serializers.ModelSerializer):
             update_nested_service(VeterinaryClinic, vet_data, 'vet_details', ['services_offered', 'species_treated'])
         elif trainer_data:
             update_nested_service(TrainerService, trainer_data, 'trainer_details', ['specializations', 'species_trained'])
+        elif groomer_data:
+            update_nested_service(GroomerService, groomer_data, 'groomer_details', ['species_accepted'])
+        elif sitter_data:
+            update_nested_service(PetSitterService, sitter_data, 'sitter_details', ['species_accepted'])
             
         return instance
 
@@ -214,7 +324,8 @@ class ServiceBookingSerializer(serializers.ModelSerializer):
         model = ServiceBooking
         fields = [
             'id', 'provider', 'client', 'pet', 'service_option', 
-            'booking_type', 'start_date', 'end_date', 
+            'booking_type', 'booking_date', 'booking_time', 
+            'start_datetime', 'end_datetime',
             'agreed_price', 'deposit_paid', 'special_requirements',
             'status', 'payment_status', 'cancellation_reason',
             'created_at', 'updated_at', 'duration_hours'
@@ -226,7 +337,8 @@ class ServiceBookingCreateSerializer(serializers.ModelSerializer):
         model = ServiceBooking
         fields = [
             'provider', 'pet', 'service_option', 
-            'booking_type', 'start_date', 'end_date', 
+            'booking_type', 'booking_date', 'booking_time',
+            'start_datetime', 'end_datetime',
             'special_requirements'
         ]
     

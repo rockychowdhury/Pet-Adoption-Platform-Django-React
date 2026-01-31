@@ -43,7 +43,7 @@ services:
 
   celery:
     build: ./backend
-    command: celery -A PetCircle worker -l info
+    command: celery -A PetCarePlus worker -l info
     volumes:
       - ./backend:/app
     environment:

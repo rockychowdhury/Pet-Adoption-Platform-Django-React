@@ -30,8 +30,14 @@ const MediaGalleryEditor = ({ customMedia = [], onSave, isLoading }) => {
         try {
             const uploadedUrls = [];
             for (const file of files) {
-                const url = await uploadImage(file);
-                if (url) uploadedUrls.push({ file_url: url, is_new: true });
+                const result = await uploadImage(file);
+                if (result && result.success) {
+                    uploadedUrls.push({
+                        file_url: result.url,
+                        thumbnail_url: result.thumbnail,
+                        is_new: true
+                    });
+                }
             }
             setMediaList(prev => [...prev, ...uploadedUrls]);
             toast.success("Images uploaded successfully!");

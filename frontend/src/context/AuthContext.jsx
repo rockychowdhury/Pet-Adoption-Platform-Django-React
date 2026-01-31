@@ -30,11 +30,13 @@ const AuthProvider = ({ children }) => {
             const response = await api.get('/user/');
             if (response.status === 200) {
                 setUser(response.data);
+                return response.data;
             }
         } catch (error) {
             // detailed logging for debugging
             console.log("Failed to fetch user:", error);
             setUser(null);
+            return null;
         } finally {
             setLoading(false);
         }
@@ -91,7 +93,7 @@ const AuthProvider = ({ children }) => {
             const response = await api.post('/user/token/', credentials);
             if (response.status === 200) {
                 toast.success("Welcome back!");
-                await getUser();
+                return await getUser();
             }
         } catch (err) {
             setLoading(false);

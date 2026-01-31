@@ -89,8 +89,8 @@ const RoleRequestsPage = () => {
                         key={status}
                         onClick={() => setFilter(status)}
                         className={`px-4 py-2 rounded-lg text-sm font-bold uppercase tracking-wider transition-all ${filter === status
-                                ? 'bg-white shadow-sm text-brand-primary'
-                                : 'text-text-secondary hover:text-text-primary'
+                            ? 'bg-white shadow-sm text-brand-primary'
+                            : 'text-text-secondary hover:text-text-primary'
                             }`}
                     >
                         {status}
@@ -174,22 +174,89 @@ const RoleRequestsPage = () => {
             {/* Review Modal */}
             {selectedRequest && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-                    <Card className="w-full max-w-2xl p-6">
-                        <h2 className="text-2xl font-bold font-logo mb-4">Review Request</h2>
+                    <Card className="w-full max-w-2xl p-6 max-h-[90vh] overflow-y-auto">
+                        <div className="flex justify-between items-start mb-4">
+                            <h2 className="text-2xl font-bold font-logo">Review Request</h2>
+                            <button onClick={() => setSelectedRequest(null)} className="p-1 hover:bg-gray-100 rounded-full">
+                                <XCircle size={24} className="text-gray-400" />
+                            </button>
+                        </div>
 
-                        <div className="space-y-4 mb-6">
-                            <div>
-                                <p className="text-sm font-bold text-text-secondary">User:</p>
-                                <p className="text-lg">{selectedRequest.user_email}</p>
+                        <div className="space-y-6 mb-6">
+                            {/* Request Info */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                    <p className="text-sm font-bold text-text-secondary">User</p>
+                                    <p className="text-lg">{selectedRequest.user_email}</p>
+                                    <p className="text-sm text-text-tertiary">{selectedRequest.user_name}</p>
+                                </div>
+                                <div>
+                                    <p className="text-sm font-bold text-text-secondary">Requested Role</p>
+                                    <p className="text-lg capitalize font-bold text-brand-primary">
+                                        {selectedRequest.requested_role.replace('_', ' ')}
+                                    </p>
+                                </div>
                             </div>
+
+                            {/* Service Provider Details (If Available) */}
+                            {selectedRequest.provider_profile && (
+                                <div className="bg-gray-50 p-4 rounded-xl border border-gray-200">
+                                    <h3 className="font-bold text-lg mb-3 flex items-center gap-2">
+                                        <FileText size={18} /> Provider Application Details
+                                    </h3>
+
+                                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <p className="text-sm text-text-secondary">Business Name</p>
+                                            <p className="font-bold">{selectedRequest.provider_profile.business_name}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm text-text-secondary">Category</p>
+                                            <p className="font-bold">{selectedRequest.provider_profile.category?.name || 'N/A'}</p>
+                                        </div>
+                                    </div>
+
+                                    <div className="mb-4">
+                                        <p className="text-sm text-text-secondary">Description</p>
+                                        <p className="text-sm bg-white p-2 rounded border border-gray-100 mt-1">
+                                            {selectedRequest.provider_profile.description}
+                                        </p>
+                                    </div>
+
+                                    <div className="grid md:grid-cols-2 gap-4 text-sm">
+                                        <div>
+                                            <p className="text-text-secondary">Contact</p>
+                                            <p>{selectedRequest.provider_profile.phone}</p>
+                                            <p>{selectedRequest.provider_profile.email}</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-text-secondary">Location</p>
+                                            <p>{selectedRequest.provider_profile.city}, {selectedRequest.provider_profile.state}</p>
+                                        </div>
+                                    </div>
+
+                                    {/* Specific Details */}
+                                    {(selectedRequest.provider_profile.vet_details || selectedRequest.provider_profile.foster_details || selectedRequest.provider_profile.trainer_details) && (
+                                        <div className="mt-4 pt-4 border-t border-gray-200">
+                                            <p className="font-bold text-sm mb-2">Service Specifics</p>
+                                            {selectedRequest.provider_profile.vet_details && (
+                                                <Badge variant="blue">Veterinary Clinic ({selectedRequest.provider_profile.vet_details.clinic_type})</Badge>
+                                            )}
+                                            {selectedRequest.provider_profile.foster_details && (
+                                                <Badge variant="green">Foster Home (Starting ${selectedRequest.provider_profile.foster_details.daily_rate}/day)</Badge>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+
                             <div>
-                                <p className="text-sm font-bold text-text-secondary">Requested Role:</p>
-                                <p className="text-lg capitalize">{selectedRequest.requested_role.replace('_', ' ')}</p>
+                                <p className="text-sm font-bold text-text-secondary">Request Reason</p>
+                                <p className="text-text-primary italic bg-bg-surface p-3 rounded-lg border border-border mt-1">
+                                    "{selectedRequest.reason}"
+                                </p>
                             </div>
-                            <div>
-                                <p className="text-sm font-bold text-text-secondary">Reason:</p>
-                                <p className="text-text-primary">{selectedRequest.reason}</p>
-                            </div>
+
                             <div>
                                 <label className="block text-sm font-bold text-text-secondary mb-2">
                                     Admin Notes {filter === 'pending' && '(Required for rejection)'}:
@@ -204,7 +271,7 @@ const RoleRequestsPage = () => {
                             </div>
                         </div>
 
-                        <div className="flex gap-3">
+                        <div className="flex gap-3 pt-4 border-t border-gray-100">
                             <Button
                                 variant="primary"
                                 className="flex-1 bg-green-600 hover:bg-green-700 justify-center"
@@ -222,15 +289,6 @@ const RoleRequestsPage = () => {
                             >
                                 <XCircle size={18} className="mr-2" />
                                 Reject
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                onClick={() => {
-                                    setSelectedRequest(null);
-                                    setAdminNotes('');
-                                }}
-                            >
-                                Cancel
                             </Button>
                         </div>
                     </Card>

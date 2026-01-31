@@ -3,7 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 import django_filters
-from django.db.models import Q
+from django.db.models import Q, Sum
 from apps.common.logging_utils import log_business_event
 
 from .models import (
@@ -53,19 +53,25 @@ class ServiceProviderFilter(django_filters.FilterSet):
 
     class Meta:
         model = ServiceProvider
-        fields = ['category', 'city', 'state', 'verification_status']
+        fields = ['category', 'city', 'state', 'verification_status', 'nearby']
+    
+    nearby = django_filters.CharFilter(method='filter_nearby')
 
     def filter_min_price(self, queryset, name, value):
         # Applies to Foster services or other services with rates/base prices
         return queryset.filter(
             Q(foster_details__daily_rate__gte=value) |
-            Q(trainer_details__private_session_rate__gte=value)
+            Q(trainer_details__private_session_rate__gte=value) | 
+            Q(groomer_details__base_price__gte=value) |
+            Q(sitter_details__walking_rate__gte=value)
         )
 
     def filter_max_price(self, queryset, name, value):
         return queryset.filter(
             Q(foster_details__daily_rate__lte=value) |
-            Q(trainer_details__private_session_rate__lte=value)
+            Q(trainer_details__private_session_rate__lte=value) |
+            Q(groomer_details__base_price__lte=value) |
+            Q(sitter_details__walking_rate__lte=value)
         )
 
     def filter_species(self, queryset, name, value):
@@ -75,8 +81,14 @@ class ServiceProviderFilter(django_filters.FilterSet):
             Q(foster_details__species_accepted__name__icontains=value) |
             Q(vet_details__species_treated__slug__iexact=value) |
             Q(vet_details__species_treated__name__icontains=value) |
+            Q(vet_details__species_treated__slug__iexact=value) |
+            Q(vet_details__species_treated__name__icontains=value) |
             Q(trainer_details__species_trained__slug__iexact=value) |
-            Q(trainer_details__species_trained__name__icontains=value)
+            Q(trainer_details__species_trained__name__icontains=value) |
+            Q(groomer_details__species_accepted__slug__iexact=value) |
+            Q(groomer_details__species_accepted__name__icontains=value) |
+            Q(sitter_details__species_accepted__slug__iexact=value) |
+            Q(sitter_details__species_accepted__name__icontains=value)
         ).distinct()
 
     def filter_availability(self, queryset, name, value):
@@ -91,29 +103,67 @@ class ServiceProviderFilter(django_filters.FilterSet):
         # Filter by ServiceOption name or Category
         return queryset.filter(
             Q(vet_details__services_offered__name__icontains=value) |
-            Q(category__name__icontains=value)
+            Q(category__name__icontains=value) |
+            # For groomers, check json menu?? Not easy with basic filter. 
+            # Check salon type for groomer
+            Q(groomer_details__salon_type__icontains=value)
         ).distinct()
+
+    def filter_nearby(self, queryset, name, value):
+        """
+        Simple bounding box filtering for 'nearby' functionality.
+        Expected format: lat,lng,radius_km (optional, default 10)
+        Example: ?nearby=23.8103,90.4125,5
+        """
+        try:
+            parts = value.split(',')
+            lat = float(parts[0])
+            lng = float(parts[1])
+            radius_km = float(parts[2]) if len(parts) > 2 else 10.0
+            
+            # 1 degree lat ~= 111km
+            lat_delta = radius_km / 111.0
+            # 1 degree lng ~= 111km * cos(lat)
+            import math
+            lng_delta = radius_km / (111.0 * math.cos(math.radians(lat)))
+            
+            return queryset.filter(
+                latitude__range=(lat - lat_delta, lat + lat_delta),
+                longitude__range=(lng - lng_delta, lng + lng_delta)
+            )
+        except (ValueError, IndexError):
+            return queryset
 
 class ServiceProviderViewSet(viewsets.ModelViewSet):
     def get_queryset(self):
-        queryset = ServiceProvider.objects.all().order_by('-created_at')
+        from django.db.models import Avg, Sum, Count, F
+        
+        queryset = ServiceProvider.objects.annotate(
+            avg_communication=Avg('reviews__rating_communication'),
+            avg_cleanliness=Avg('reviews__rating_cleanliness'),
+            avg_quality=Avg('reviews__rating_quality'),
+            avg_value=Avg('reviews__rating_value')
+        ).order_by('-created_at')
+        
         user = self.request.user
         
         # If detail view, allow access if it's the owner or admin, otherwise must be verified
         if self.action == 'retrieve':
             return queryset
             
-        # For list action (search), only show verified providers unless user is staff
+        # For list actions
         if self.action == 'list':
-             if not user.is_staff:
-                  return queryset.filter(verification_status='verified')
-             return queryset
+             # Admin saw everything
+             if user.is_staff:
+                  return queryset
+             # Public sees verified
+             return queryset.filter(verification_status='verified')
         
-        # For detail actions (retrieve, update, etc.), show verified OR owned by user
+        # For authenticated user queries (dashboard etc)
         if user.is_authenticated:
              if user.is_staff:
                   return queryset
-             # Allow user to see their own profile even if unverified
+             # Allow user to see their own profile even if unverified/draft
              return queryset.filter(Q(verification_status='verified') | Q(user=user))
             
         return queryset.filter(verification_status='verified')
@@ -125,17 +175,50 @@ class ServiceProviderViewSet(viewsets.ModelViewSet):
     
     def perform_create(self, serializer):
         user = self.request.user
-        if not user.is_service_provider and not user.is_staff:
-             raise permissions.exceptions.PermissionDenied("You must be a Service Provider to create a profile.")
+        # Allow any user to create a provider profile (as draft)
         
         if ServiceProvider.objects.filter(user=user).exists():
              raise permissions.exceptions.PermissionDenied("You already have a Service Provider profile.")
 
-        instance = serializer.save(user=user)
+        # Force status to draft initially
+        instance = serializer.save(user=user, application_status='draft')
         log_business_event('SERVICE_PROVIDER_PROFILE_CREATED', user, {
             'provider_id': instance.id,
             'business_name': instance.business_name
         })
+
+    def perform_update(self, serializer):
+        # Prevent updates if status is submitted (locked)
+        instance = serializer.instance
+        if instance.application_status == 'submitted' and not self.request.user.is_staff:
+             raise permissions.exceptions.PermissionDenied("Your application is under review and cannot be edited.")
+        serializer.save()
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
+    def submit_application(self, request, pk=None):
+        provider = self.get_object()
+        user = request.user
+        
+        if provider.user != user:
+             return Response({"error": "Not authorized"}, status=403)
+             
+        if provider.application_status != 'draft':
+             return Response({"error": "Application is not in draft status."}, status=400)
+             
+        # Create Role Request
+        from apps.users.models import RoleRequest, User
+        RoleRequest.objects.create(
+            user=user,
+            requested_role=User.UserRole.SERVICE_PROVIDER,
+            reason="Application submitted via provider portal.",
+            status='pending'
+        )
+        
+        provider.application_status = 'submitted'
+        provider.save()
+        
+        log_business_event('PROVIDER_APPLICATION_SUBMITTED', user, {'provider_id': provider.id})
+        return Response(self.get_serializer(provider).data)
 
     @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated])
     def review(self, request, pk=None):
@@ -150,6 +233,79 @@ class ServiceProviderViewSet(viewsets.ModelViewSet):
             })
             return Response(serializer.data, status=201)
         return Response(serializer.errors, status=400)
+
+    @action(detail=True, methods=['post'], permission_classes=[permissions.IsAuthenticated], url_path='reviews/(?P<review_id>[^/.]+)/respond')
+    def respond_to_review(self, request, pk=None, review_id=None):
+        """Allow provider to respond to a review"""
+        provider = self.get_object()
+        
+        # Check provider owns this profile
+        if provider.user != request.user:
+            return Response({"error": "Not authorized"}, status=403)
+        
+        try:
+            review = ServiceReview.objects.get(id=review_id, provider=provider)
+        except ServiceReview.DoesNotExist:
+            return Response({"error": "Review not found"}, status=404)
+        
+        response_text = request.data.get('response')
+        if not response_text:
+            return Response({"error": "Response text is required"}, status=400)
+        
+        # Update review with response
+        from django.utils import timezone
+        review.provider_response = response_text
+        review.response_date = timezone.now()
+        review.save()
+        
+        serializer = ServiceReviewSerializer(review)
+        return Response(serializer.data)
+    
+    @action(detail=True, methods=['get', 'post'], permission_classes=[permissions.IsAuthenticated])
+    def availability_blocks(self, request, pk=None):
+        """List or create availability blocks for a provider"""
+        provider = self.get_object()
+        
+        # Check ownership
+        if provider.user != request.user:
+            return Response({"error": "Not authorized"}, status=403)
+        
+        if request.method == 'GET':
+            from .models import ProviderAvailabilityBlock
+            from .serializers import ProviderAvailabilityBlockSerializer
+            blocks = ProviderAvailabilityBlock.objects.filter(provider=provider)
+            serializer = ProviderAvailabilityBlockSerializer(blocks, many=True)
+            return Response(serializer.data)
+        
+        elif request.method == 'POST':
+            from .serializers import ProviderAvailabilityBlockSerializer
+            serializer = ProviderAvailabilityBlockSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save(provider=provider)
+                return Response(serializer.data, status=201)
+            return Response(serializer.errors, status=400)
+    
+    @action(
+        detail=True,
+        methods=['delete'],
+        permission_classes=[permissions.IsAuthenticated],
+        url_path='availability_blocks/(?P<block_id>[^/.]+)'
+    )
+    def delete_availability_block(self, request, pk=None, block_id=None):
+        """Delete a specific availability block"""
+        provider = self.get_object()
+        
+        # Check ownership
+        if provider.user != request.user:
+            return Response({"error": "Not authorized"}, status=403)
+        
+        try:
+            from .models import ProviderAvailabilityBlock
+            block = ProviderAvailabilityBlock.objects.get(id=block_id, provider=provider)
+            block.delete()
+            return Response({"message": "Block deleted successfully"}, status=204)
+        except ProviderAvailabilityBlock.DoesNotExist:
+            return Response({"error": "Block not found"}, status=404)
 
     @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
     def me(self, request):
@@ -236,6 +392,70 @@ class ServiceProviderViewSet(viewsets.ModelViewSet):
         })
         return Response(self.get_serializer(provider).data)
 
+    @action(detail=False, methods=['get'], permission_classes=[permissions.IsAuthenticated])
+    def dashboard_stats(self, request):
+        """
+        Get aggregated stats for the logged-in provider.
+        """
+        user = request.user
+        if not hasattr(user, 'service_provider_profile'):
+             return Response({"error": "User is not a service provider"}, status=403)
+        
+        provider = user.service_provider_profile
+        bookings = ServiceBooking.objects.filter(provider=provider)
+        
+        from django.utils import timezone
+        now = timezone.now()
+        thirty_days_ago = now - timezone.timedelta(days=30)
+        
+        total_bookings = bookings.count()
+        pending_bookings = bookings.filter(status='pending').count()
+        completed_bookings = bookings.filter(status='completed').count()
+        
+        # Earnings (sum of agreed_price for non-cancelled/refunded bookings)
+        valid_bookings = bookings.exclude(status='cancelled').exclude(payment_status='refunded')
+        total_earnings = valid_bookings.aggregate(total=Sum('agreed_price'))['total'] or 0
+        
+        # Monthly stats
+        month_bookings = bookings.filter(created_at__gte=thirty_days_ago).count()
+        month_earnings = valid_bookings.filter(created_at__gte=thirty_days_ago).aggregate(total=Sum('agreed_price'))['total'] or 0
+        
+        # Recent bookings (upcoming, ordered by booking_date)
+        from .serializers import ServiceBookingSerializer
+        recent_bookings = bookings.filter(
+            booking_date__gte=now.date()
+        ).order_by('booking_date', 'booking_time')[:5]
+        
+        # Recent reviews
+        from .serializers import ServiceReviewSerializer
+        all_recent_reviews = provider.reviews.order_by('-created_at')
+        pending_reviews_count = all_recent_reviews.filter(provider_response__isnull=True).count()
+        recent_reviews = all_recent_reviews[:5]
+        
+        # Today's schedule
+        today_bookings = bookings.filter(
+            booking_date=now.date(),
+            status__in=['confirmed', 'pending']
+        ).order_by('booking_time')
+        
+        return Response({
+            "total_bookings": total_bookings,
+            "pending_bookings": pending_bookings,
+            "completed_bookings": completed_bookings,
+            "total_earnings": total_earnings,
+            "this_month": {
+                "bookings": month_bookings,
+                "earnings": month_earnings
+            },
+            "rating": provider.average_rating,
+            "reviews": provider.review_count,
+            "pending_reviews_count": pending_reviews_count,
+            "recent_bookings": ServiceBookingSerializer(recent_bookings, many=True).data,
+            "recent_reviews": ServiceReviewSerializer(recent_reviews, many=True).data,
+            "today_schedule": ServiceBookingSerializer(today_bookings, many=True).data,
+        })
+
+
 class ServiceBookingViewSet(viewsets.ModelViewSet):
     permission_classes = [permissions.IsAuthenticated]
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
@@ -311,4 +531,117 @@ class ServiceBookingViewSet(viewsets.ModelViewSet):
         booking.status = 'cancelled'
         booking.cancellation_reason = request.data.get('reason', 'Cancelled by user')
         booking.save()
+        booking.save()
         return Response(ServiceBookingSerializer(booking).data)
+
+    @action(detail=False, methods=['post'])
+    def check_availability(self, request):
+        """
+        Check if a provider is available for specific dates.
+        Returns structured time slot data.
+        Input: provider_id, date (YYYY-MM-DD)
+        """
+        provider_id = request.data.get('provider_id')
+        date_str = request.data.get('date')
+        
+        if not all([provider_id, date_str]):
+            return Response({"error": "Missing required fields (provider_id, date)"}, status=400)
+        
+        try:
+            from datetime import datetime, timedelta
+            from django.utils import timezone
+            from .models import BusinessHours, ServiceProvider # Import BusinessHours and ServiceProvider
+            
+            provider = ServiceProvider.objects.get(id=provider_id)
+            target_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+            day_of_week = target_date.weekday()  # 0=Monday
+            
+            # Get business hours for this day
+            try:
+                business_hour = provider.hours.get(day=day_of_week)
+                if business_hour.is_closed:
+                    return Response({
+                        "is_available": False,
+                        "reason": "Provider is closed on this day",
+                        "available_slots": []
+                    })
+                open_time = business_hour.open_time
+                close_time = business_hour.close_time
+            except BusinessHours.DoesNotExist: # Catch specific exception
+                # Default hours if not set
+                from datetime import time
+                open_time = time(9, 0)
+                close_time = time(18, 0)
+            
+            # Generate time slots (60-minute intervals)
+            available_slots = []
+            current_time = datetime.combine(target_date, open_time)
+            end_time = datetime.combine(target_date, close_time)
+            slot_duration = timedelta(hours=1)
+            
+            # Get all confirmed/pending bookings for this day
+            day_start = timezone.make_aware(datetime.combine(target_date, time(0, 0)))
+            day_end = timezone.make_aware(datetime.combine(target_date, time(23, 59, 59, 999999))) # Ensure it covers the whole day
+            
+            bookings = ServiceBooking.objects.filter(
+                provider=provider,
+                status__in=['confirmed', 'pending'],
+                start_datetime__gte=day_start,
+                start_datetime__lt=day_end
+            )
+            
+            # Build slot list
+            while current_time < end_time:
+                slot_start = timezone.make_aware(current_time)
+                slot_end = slot_start + slot_duration
+                
+                # Check if this slot conflicts with any booking
+                conflicts = bookings.filter(
+                    start_datetime__lt=slot_end,
+                    end_datetime__gt=slot_start
+                ).count()
+                
+                # Check capacity for foster services
+                is_available = True
+                capacity = 1
+                
+                if hasattr(provider, 'foster_details'):
+                    capacity = provider.foster_details.capacity or 1
+                    is_available = conflicts < capacity
+                else:
+                    is_available = conflicts == 0
+                
+                available_slots.append({
+                    "time": current_time.strftime('%H:%M'),
+                    "datetime": slot_start.isoformat(),
+                    "available": is_available,
+                    "capacity": capacity,
+                    "booked": conflicts,
+                    "duration_minutes": 60
+                })
+                
+                current_time += slot_duration
+            
+            # Get business hours summary
+            business_hours = {}
+            for hour in provider.hours.all():
+                day_name = dict(BusinessHours.DAYS_OF_WEEK).get(hour.day, '').lower()
+                business_hours[day_name] = {
+                    "open": hour.open_time.strftime('%H:%M') if hour.open_time else None,
+                    "close": hour.close_time.strftime('%H:%M') if hour.close_time else None,
+                    "is_closed": hour.is_closed
+                }
+            
+            return Response({
+                "provider_id": provider_id,
+                "date": date_str,
+                "business_hours": business_hours,
+                "available_slots": available_slots,
+                "total_slots": len(available_slots),
+                "available_count": sum(1 for slot in available_slots if slot['available'])
+            })
+            
+        except ServiceProvider.DoesNotExist:
+            return Response({"error": "Provider not found"}, status=404)
+        except ValueError as e:
+            return Response({"error": f"Invalid date format: {str(e)}"}, status=400)
